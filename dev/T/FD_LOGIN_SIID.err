@@ -1,0 +1,14 @@
+Compiling WHEN-NEW-FORM-INSTANCE trigger on form...
+   No compilation errors.
+
+Compiling ON-LOGON trigger on form...
+   No compilation errors.
+
+Compiling WHEN-BUTTON-PRESSED trigger on LOGIN item in LOGIN data block...
+   No compilation errors.
+
+Compiling WHEN-BUTTON-PRESSED trigger on CANCELAR item in LOGIN data block...
+   No compilation errors.
+
+
+ Foi criado o ficheiro da ficha FD_LOGIN_SIID.fmx

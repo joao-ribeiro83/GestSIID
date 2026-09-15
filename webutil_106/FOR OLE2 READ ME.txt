@@ -1,0 +1,24 @@
+COPY jacob.dll TO FOLLOWING PATH
+D:\app\DevSuiteHome_1\forms\webutil\jacob.dll
+
+
+COPY jacob.jar TO FOLLOWING PATH
+D:\app\DevSuiteHome_1\forms\java\jacob.jar
+
+
+and then sign it with following command
+
+D:\app\DevSuiteHome_1\jdk\bin>d:\app\DevSuiteHome_1\forms\webutil\sign_webutil.bat d:\app\DevSuiteHome_1\forms\java\jacob.jar
+
+Generating a self signing certificate for key=webutil2...
+keytool error: java.lang.Exception: Key pair not generated, alias <webutil2> alr
+eady exists
+.
+There were warnings or errors while generating a self signing certificate. Pleas
+e review them.
+.
+Backing up d:\app\DevSuiteHome_1\forms\java\jacob.jar as d:\app\DevSuiteHome_1\f
+orms\java\jacob.jar.old...
+        1 file(s) copied.
+Signing d:\app\DevSuiteHome_1\forms\java\jacob.jar using key=webutil2...
+...successfully done.

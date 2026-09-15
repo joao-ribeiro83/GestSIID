@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+coverage/
+# compile scripts embed live DB credentials
+dev/**/*.bat
+# string dumps of the .fmb binaries contain hardcoded passwords from FD_LOGIN_SIID; keep local only
+analysis/forms-extracted/
+analysis/forms-summary/
+# Forms2XML output of the .fmb/.mmb files: same hardcoded passwords inside the ON-LOGON trigger text
+analysis/forms-xml/
+dev/**/*_fmb.xml
+dev/**/*_mmb.xml
+analysis/**/*.local.md

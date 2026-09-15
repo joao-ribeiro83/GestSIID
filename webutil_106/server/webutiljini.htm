@@ -1,0 +1,172 @@
+<HTML>
+<!-- FILE: webutiljini.htm (Oracle Forms)                           -->
+<!--                                                                -->
+<!-- This is the a HTML template file for running a form on the     -->
+<!-- web using JInitiator-style tags to include the Forms applet.   -->
+<!-- and a certificate regsitration applet for the WebUtil utility  -->
+<!--                                                                -->
+<!-- IMPORTANT NOTES:                                               -->
+<!-- Default values for all the variables which appear below        -->
+<!-- (enclosed in percent characters) are defined in the servlet    -->
+<!-- configuration file (formsweb.cfg). It is preferable to make    -->
+<!-- changes in that file where possible, rather than this one.     -->
+<!--                                                                -->
+<!-- This file uses several extra tags that are not present in the  -->
+<!-- default template files.  You should ensure that these are      -->
+<!-- present in the configuration that uses this template           -->
+<!-- The extra substitution Tags are:                               -->
+<!--  %webUtilArchive% = jar file containing the WebUtil code       -->
+<!--                     (by default this should be frmwebutil.jar) -->
+<!--  %WebUtilLogging% = Defines the current logging mode.          -->
+<!--                     Valid values: off|on|console|server|all    -->
+<!--                     (on == console)                            -->
+<!--  %WebUtilLoggingDetail% = Specifies the level of error logging.-->
+<!--                     Valid values: normal|detailed              -->
+<!--  %WebUtilErrorMode% = Should errors be displayed in an alert   -->
+<!--                     as well as the programmer defined          -->
+<!--                     locations                                  -->
+<!--                     Valid values: console|server|alert|all     -->
+<!--  %WebUtilDispatchMonitorInterval% = Counts in second to        -->
+<!--                     indicate how often the monitor thread      -->
+<!--                     checks to see if the Forms session is still-->
+<!--                     alive. Used with the WebUtil_Session       -->
+<!--                     package.                                   -->
+<!--  %WebUtilTrustInternal% = Should intranet without domain suffix-->
+<!--                     be trusted.                                -->
+<!--                     Valid values: true|yes|false|no            -->
+<!--  %WebUtilMaxTransferSize% = Size in bytes of file transfer     -->
+<!--                     segments. Default and maximum allowed is   -->
+<!--                     16384, i.e. 16K.                           -->
+
+
+<HEAD><TITLE>%pageTitle% - WebUtil</TITLE></HEAD>
+
+<BODY %HTMLbodyAttrs%>
+%HTMLbeforeForm%
+
+<!-- Registration applet definition (start) -->
+<OBJECT classid="%jinit_classid%"
+        codebase="/forms/jinitiator/%jinit_exename%"
+        WIDTH="0"
+        HEIGHT="0"
+        HSPACE="0"
+        VSPACE="0">
+<PARAM NAME="TYPE"       VALUE="%jinit_mimetype%">
+<PARAM NAME="CODEBASE"   VALUE="%codebase%">
+<PARAM NAME="CODE"       VALUE="oracle.forms.webutil.common.RegisterWebUtil" >
+<PARAM NAME="ARCHIVE"    VALUE="%webUtilArchive%" >
+<COMMENT>
+<EMBED SRC="" PLUGINSPAGE="%jinit_download_page%"
+        TYPE="%jinit_mimetype%"
+        java_codebase="%codebase%"
+        java_code="oracle.forms.webutil.common.RegisterWebUtil"
+        java_archive="%webUtilArchive%"
+        WIDTH="1"
+        HEIGHT="1"
+        HSPACE="0"
+        VSPACE="0"
+>
+<NOEMBED>
+</COMMENT>
+</NOEMBED></EMBED>
+</OBJECT>
+<!-- Registration applet definition (end) -->
+
+<!-- Forms applet definition (start) -->
+
+<COMMENT id="forms_plugin_info" 
+         plug_ver="%jinit_classid%" 
+         appheight="%Height%"
+         appwidth="%Width%"
+         appcodebase="/forms/jinitiator/%jinit_exename%">
+</COMMENT>
+
+
+<NOSCRIPT>
+<OBJECT classid="%jinit_classid%"
+        codebase="/forms/jinitiator/%jinit_exename%"
+        WIDTH="%Width%"
+        HEIGHT="%Height%"
+        HSPACE="0"
+        VSPACE="0">
+</NOSCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="java/forms_ie.js"></SCRIPT> 
+<PARAM NAME="TYPE"       VALUE="%jinit_mimetype%">
+<PARAM NAME="CODEBASE"   VALUE="%codebase%">
+<PARAM NAME="CODE"       VALUE="oracle.forms.engine.Main" >
+<PARAM NAME="ARCHIVE"    VALUE="%archive_jini%,%webUtilArchive%" >
+
+<PARAM NAME="serverURL" VALUE="%serverURL%">
+<PARAM NAME="networkRetries" VALUE="%networkRetries%">
+<PARAM NAME="serverArgs"
+       VALUE="%escapeParams% module=%form% userid=%userid% sso_userid=%sso_userid% sso_formsid=%sso_formsid% sso_subDN=%sso_subDN% sso_usrDN=%sso_usrDN% debug=%debug% host=%host% port=%port% %otherParams%">
+<PARAM NAME="separateFrame" VALUE="%separateFrame%">
+<PARAM NAME="splashScreen"  VALUE="%splashScreen%">
+<PARAM NAME="background"  VALUE="%background%">
+<PARAM NAME="lookAndFeel"  VALUE="%lookAndFeel%">
+<PARAM NAME="colorScheme"  VALUE="%colorScheme%">
+<PARAM NAME="serverApp" VALUE="%serverApp%">
+<PARAM NAME="logo" VALUE="%logo%">
+<PARAM NAME="imageBase" VALUE="%imageBase%">
+<PARAM NAME="formsMessageListener" VALUE="%formsMessageListener%">
+<PARAM NAME="recordFileName" VALUE="%recordFileName%">
+<PARAM NAME="EndUserMonitoringEnabled" VALUE="%EndUserMonitoringEnabled%">
+<PARAM NAME="EndUserMonitoringURL" VALUE="%EndUserMonitoringURL%">
+<PARAM NAME="heartbeat" VALUE="%heartbeat%">
+<PARAM NAME="WebUtilLogging" VALUE="%WebUtilLogging%">
+<PARAM NAME="WebUtilLoggingDetail" VALUE="%WebUtilLoggingDetail%">
+<PARAM NAME="WebUtilErrorMode" VALUE="%WebUtilErrorMode%">
+<PARAM NAME="WebUtilDispatchMonitorInterval" VALUE="%WebUtilDispatchMonitorInterval%">
+<PARAM NAME="WebUtilTrustInternal" VALUE="%WebUtilTrustInternal%">
+<PARAM NAME="WebUtilMaxTransferSize" VALUE="%WebUtilMaxTransferSize%">
+<COMMENT>
+<EMBED SRC="" PLUGINSPAGE="%jinit_download_page%"
+        TYPE="%jinit_mimetype%"
+        java_codebase="%codebase%"
+        java_code="oracle.forms.engine.Main"
+        java_archive="%archive_jini%,%webUtilArchive%"
+        WIDTH="%Width%"
+        HEIGHT="%Height%"
+        HSPACE="0"
+        VSPACE="0"
+
+        serverURL="%serverURL%"
+        networkRetries="%networkRetries%"
+        serverArgs="%escapeParams% module=%form% userid=%userid% sso_userid=%sso_userid% sso_formsid=%sso_formsid% sso_subDN=%sso_subDN% sso_usrDN=%sso_usrDN% debug=%debug% host=%host% port=%port% %otherparams%"
+        separateFrame="%separateFrame%"
+        splashScreen="%splashScreen%"
+        background="%background%"
+        lookAndFeel="%lookAndFeel%"
+        colorScheme="%colorScheme%"
+        serverApp="%serverApp%"
+        logo="%logo%"
+        imageBase="%imageBase%"
+        formsMessageListener="%formsMessageListener%"
+        recordFileName="%recordFileName%"
+        EndUserMonitoringEnabled="%EndUserMonitoringEnabled%"
+        EndUserMonitoringURL="%EndUserMonitoringURL%"
+        heartBeat="%heartBeat%"
+        WebUtilLogging="%WebUtilLogging%"
+        WebUtilLoggingDetail="%WebUtilLoggingDetail%"
+        WebUtilErrormode="%WebUtilErrorMode%"
+        WebUtilDispatchMonitorInterval="%WebUtilDispatchMonitorInterval%"
+        WebUtilTrustInternal="%WebUtilTrustInternal%"
+        WebUtilMaxTransferSize="%WebUtilMaxTransferSize%"
+>
+<NOEMBED>
+</COMMENT>
+</NOEMBED></EMBED>
+</OBJECT>
+<!-- Forms applet definition (end) -->
+
+%HTMLafterForm%
+
+</BODY>
+</HTML>
+
+
+
+
+
+
+

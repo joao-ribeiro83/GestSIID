@@ -1,0 +1,230 @@
+<link href="blafdoc.css" rel="stylesheet" type="text/css">
+<h1>WebUtil Version 1.0.6 - Production Release Notes</h1>
+  <h2>August 2005</h2>
+  <p>Welcome to Oracle Forms WebUtil. This document contains the following sections:</p>
+  <ul>
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#support">Support</a></li>
+    <li><a href="#bugs">Bug Fixes in This Release</a></li>
+    <li><a href="#security">Security Patch</a></li>
+    <li><a href="#install">Installing WebUtil</a></li>
+    <li><a href="#working">Working with Forms 9.0.2 or 9.0.4</a> </li>
+    <li><a href="#upgrade">Upgrading from WebUtil 1.0.5</a></li>
+    <li><a href="#issues">Known Issues </a></li>
+  </ul>
+  <h2><a name="intro"></a>Introduction</h2>
+  <p>WebUtil is a pre-packaged set of components which provide client-server type 
+  functionality in Web-deployed Oracle Forms applications. WebUtil allows Forms 
+  developers to selectively execute code on the client machine rather than on the 
+  application server. WebUtil uses Pluggable Java Components to extend the Forms 
+  client, and PL/SQL to provide a simple interface for using them. Therefore, no Java 
+  skill is required to use WebUtil.</p>
+  <p>This patch release of WebUtil is tested with Oracle Forms 10<em>g</em> (10.1.2). It can also 
+  be used with Oracle Forms 10<em>g</em> (9.0.4) or Oracle9<em>i</em> Forms (9.0.2)  with a few 
+  changes.</p>
+<h2>  <a name="support"></a>Support</h2>
+ <p>  WebUtil is a fully supported component of Oracle Forms.  Support 
+  issues can be raised through the usual support channels.<br>
+</p>
+<h2>  <a name="bugs"></a>Bug Fixes in This Release </h2>
+<p>  The following is a list of significant bug fixes since WebUtil 1.0.5. 
+  Some bugs for this release may not be relevant to prior releases. </p>
+  <table width="608" height="280" border="1">
+    <tr>
+      <th scope="col">Bug Number </th>
+      <th scope="col">Description</th>
+    </tr>
+    <tr>
+      <td>3830905</td>
+      <td>CLIENT_TEXT_IO was enhanced to enable read or write in different file encoding. Also reverted the fix of 3494430, which allowed both read and write in append mode.</td>
+    </tr>
+    <tr>
+      <td>3857823</td>
+      <td>Moved all the translatable strings from WebUtil configuration file to the Java resource bundle. </td>
+    </tr>
+    <tr>
+      <td>3311797</td>
+      <td>Crash in Client_To_AS_with_progress in asynchronous mode with null callback trigger fixed.</td>
+    </tr>
+    <tr>
+      <td>3799211</td>
+      <td>URL to client download will not create an empty client file if the URL content is empty. </td>
+    </tr>
+    <tr>
+      <td>3799217</td>
+      <td>URL to client download for system install libraries will fail if the size in the WebUtil configuration for that library is different from the actual file size on the Forms server.</td>
+    </tr>
+    <tr>
+      <td>3857304</td>
+      <td>webutil.pll updated so as to work with JVM pooling in Forms Services 10.1.2.</td>
+    </tr>
+    <tr>
+      <td>4005338</td>
+      <td>WebUtil HTML templates updated to work simultaneously with End User Monitoring of Forms applications. </td>
+    </tr>
+    <tr>
+      <td>4057272</td>
+      <td>WebUtil error alert window adjusted to show all the error messages, even if it is very long, by wrapping and increasing the height if necessary.</td>
+    </tr>
+    <tr>
+      <td>4080859</td>
+      <td>CLIENT_TOOL_ENV.GETVAR on Windows will first expect a variable in  Oracle registry key. If it is not defined there, it will then expect an environment variable with that name.</td>
+    </tr>
+    <tr>
+      <td>4111614</td>
+      <td>The directory defined by WorkAreaRoot in WebUtil configuration file is empty or null, then it will be assumed as the <HOME>/temp of the user, who owns the forms runtime process.</td>
+    </tr>
+    <tr>
+      <td>4136005</td>
+      <td>Application Server to Client download can download large files.</td>
+    </tr>
+  </table>
+  <h2><a name="security"></a>Security Patch</h2>
+<p>This release of WebUtil addresses certain security issues with the signed WebUtil Jar 
+file. The new frmwebutil.jar contains a text file named 
+oracle.forms.webutil.common.TrustedDomains.txt. Each line in this text file 
+represents a trusted domain name from where WebUtil can be downloaded 
+and deployed on the client browser. The domain name in the text file may contain * 
+(asterisk) as a wild card  to match a set of domains. If any one of the lines or names 
+matches the URL from where WebUtil is downloaded and deployed, then the 
+URL is considered as a trusted site. Otherwise, WebUtil  throws a 
+SecurityException (error WUC-27) and Forms execution terminates.</p>
+ 
+<p>For this security patch to work,  edit the 
+oracle.forms.webutil.common.TustedDomains.txt according to their needs and add 
+it to frmwebutil.jar before signing it. For backwards compatibility, this file  has *, which will match for everything. A URL is assumed to be trusted if 
+either of the following conditions is met.</p>
+<ol>
+  <li>	The URL used for deploying  WebUtil is localhost;</li>
+  <li>The hostname of the URL does not have the domain suffix, i.e. there is no dot 
+          appearing in the host name. If you do not want to entrust them, you need to 
+          set the new applet parameter, WebUtilTrustInternal to false or no. This 
+          parameter can be explicitly defined in formsweb.cfg,  under the 
+          [webutil] configuration section. Valid values of this parameter are true, yes, false or 
+          no.
+          You can also use IP addresses in the list of trusted domains, e.g. 10.20.30.40 or 
+          10.20.30.*. However, resolving the URL host name to IP address may not always return satisfactory 
+          results especially when  using a proxy server. Using IP addresses instead of host names is also not suitable if the IP addresses are 
+          dynamically assigned. Also note that IP addresses are also treated as strings, not as numbers or 
+        subnet masks.</li>
+</ol>
+<h2><a name="install"></a>Installing WebUtil</h2>
+<p>WebUtil works in the client, middle, and database tiers. The WebUtil User's Guide, 
+which is shipped in the /doc directory of this distribution, contains detailed 
+information for installing and configuring WebUtil. The base directory to which the 
+zip file must be extracted is <ORACLE_HOME>/forms or 
+<ORACLE_HOME>/forms90. Use the handy checklist in Appendix A to guide you. 
+Before installing WebUtil, make sure you have the following:</p>
+<ul>
+  <li>	An Internet connection    </li>
+  <li>	An installation of Java 2 SDK, Standard Edition 1.3.1 (available from 
+      <a href="http://java.sun.com/">http://java.sun.com/</a>) or above.      </li>
+  <li>	The JACOB libraries from<a href="http://prdownloads.sourceforge.net/jacob-project/jacob_18.zip"> http://prdownloads.sourceforge.net/jacob-project/jacob_18.zip</a>.</li>
+</ul>
+<h3>Additional WebUtil Installation Steps</h3>
+<p>In Forms DS 10.1.2.0.2, almost all the required configurations are done by the 
+Oracle Universal Installer itself, except for the part related to jacob. This section provides generic steps required for configuring Oracle Application Server Forms Services 10<em>g</em> (10.1.2) to deploy 
+WebUtil. Use this list along with the installation checklist in Appendix A of <em>WebUtil 
+User's Guide</em>.</p>
+<ol>
+  <li>	Download JACOB 1.8 archive from 
+      <a href="http://prdownloads.sourceforge.net/jacob-project/jacob_18.zip">http://prdownloads.sourceforge.net/jacob-project/jacob_18.zip</a>. This archive 
+      supplies the core OLE functionality provided by WebUtil. </li>
+  <li>	From the JACOB zip file, extract jacob.dll into forms/webutil and 
+        jacob.jar into the forms/java directories. </li>
+  <li>	You need to sign both the frmwebutil.jar and the jacob.jar with the 
+          same digital certificate. This is a one-time operation, which allows your end-users to trust that the JACOB routines can access client side resources. If 
+          you do not have an existing signing certificate or are not sure how to go 
+          about signing Jar files, scripts have been supplied in the 
+          forms/webutil directory for you.<br>
+    Sign the Jar files using sign_webutil.sh in Unix or sign_webutil.bat in Windows:
+<ol>
+      <li type="a"> Make sure that keytool and jarsigner are present in the path. 
+                                      They are usually available in the bin directory of your Java SDK 
+                                    installation. </li>
+        <li type="a"> Issue sign_webutil.sh in Unix, or sign_webutil.bat in Windows </li>
+    </ol>
+  </li>
+  <li>The following  Jar files must be added to FORMS_BUILDER_CLASSPATH:<br>
+  <code>/forms/java/frmall.jar;<ORACLE_HOME>/forms/java/frmwebutil.jar;</code><ORACLE_HOME><code>/forms/java/jacob.jar</code>. </li>
+</ol>
+<blockquote>
+  <p> Without these  jars, the layout editor will not be able to render the WebUtil 
+        JavaBeans correctly. <br>
+    Note: This step is 
+    required for installing WebUtil in 
+  Oracle Forms that is part of Oracle Developer Suite 10<em>g</em> (9.0.4).This step is not applicable to Oracle Application Server. Oracle Developer Suite 10<em>g</em> (10.1.2) 
+        does this configuration for you during a <span class="gui-object">Complete 
+      Installation</span> type. </p>
+</blockquote>
+<ol start="5">
+  <li>In this release of WebUtil, the JACOB libraries are in an external Jar file and are not 
+          incorporated into frmwebutil.jar; therefore JACOB needs to be downloaded. To do this 
+        change, the webUtilArchive setting to read: <code>WebUtilArchive=frmwebutil.jar,jacob.jar</code> </li>
+  <li>The following variable must be defined in forms/server/default.env:
+          <code><br>
+          WEBUTIL_CONFIG=/forms/server/webutil.cfg</code>. </li>
+  <li>	The following jar must be added to the CLASSPATH in 
+          forms/server/default.env:<br>
+      <code>/forms/java/frmall.jar</code></li>
+  <li>A few sample configuration sections are provided in the file 
+          sample_formsweb_cfg_entry.txt under forms/server. Add these sections to 
+  forms/server/formsweb.cfg after all the default section definitions. </li>
+  <li><span
+     style='font-family:Arial'>WebUtil needs a single virtual directory to be defined in order to operate. This virtual directory is used to locate various operating system-specific files that WebUtil may need to download. For an Oracle Developer Suite installation, add the following line to the file j2ee/DevSuite/application-deployments/forms/formsweb/orion-web.xml under the Oracle Developer Suite Oracle Home: <o:p></o:p><br>
+    <br>
+    </span><code>&lt;virtual-directory virtual-path=&quot;/webutil&quot; real-path=&quot;&lt;ORACLE_HOME&gt;/forms/webutil&quot; /&gt;<span
+style='font-family:Arial;color:black'><o:p></o:p><br>
+    <br>
+    </span></code>In Oracle Application Server, define the same virtual directory in the forms/server/forms.conf file:<o:p></o:p>
+  </li>
+</ol>
+<blockquote>
+  <p><code>AliasMatch ^/forms/webutil/(..*) &quot;&lt;ORACLE_HOME&gt;/forms/webutil/$1&quot;<code><span
+style='mso-ansi-font-size:12.0pt;font-family:"Courier New"'><o:p></o:p></span></code></code><br>
+    <br>
+    Note: Oracle Developer Suite 10<em>g</em> (10.1.2) already has this virtual path configured during 
+      installation itself. This step is given just as a guideline that can be referred 
+    for installing WebUtil in Oracle Forms that is part of Oracle Developer Suite 10<em>g</em> (9.0.4).    
+  </p>
+</blockquote>
+<h2><a name="working"></a>Working with Forms 9.0.2 or 9.0.4    </h2>
+<p> WebUtil 1.0.6 could work with Oracle Forms 9.0.4 without any change. However, 
+      many of the executable and directory names in Oracle Forms 10.1.2, such as "/forms90/", have been renamed to "/forms/". You'll need to 
+      replace every occurrence of "/forms/" in webutil*.htm files with "/forms90/"  for WebUtil to work with Forms 9.0.4. The naming conventions in Oracle Forms 9.0.4 and 10.1.2 also differ, such as   f90webutil.jar to frmwebutil.jar.
+      In Oracle Forms 9.0.2, you may need to make more changes. For instance, webutil.pll may not 
+      compile in Oracle Forms 9.0.2, particularly for the packages beginning with JAVA_. Such 
+      packages are imported from Java classes using the Oracle Forms Java Importer. You'll have to 
+    re-import them and rename the packages accordingly.</p>
+<h2><a name="upgrade"></a>Upgrading from WebUtil 1.0.5</h2>
+<p>For existing users of WebUtil 1.0.5 or earlier, notice  the change in 
+the directory structure. While WebUtil 1.0.5 was installed into a  new directory, WebUtil 1.0.6 directory structure duplicates the Oracle Forms installation 
+directory structure that is present in Oracle Developer Suite 10<em>g</em> (101.2), and is meant for installing over the WebUtil directory that exists in the Forms installation. However, you can always install WebUtil 1.0.6 into a new directory 
+provided that the changes in the path for some of the variables such as FORMS_PATH in 
+default.env and archive strings in formsweb.cfg are changed accordingly.</p>
+<h2><a name="issues"></a>Known Issues
+</h2>
+<ol>
+  <li>Certification with JACOB 1.7 along with Sun's JRE 1.4.1_07 failed because of 
+      a known issue in the JACOB 1.7 code. However, you can use  build 1.8 which 
+      will work with JRE 1.4.1_07, available from <a href="http://prdownloads.sourceforge.net/jacob-project/jacob_18.zip">http://prdownloads.sourceforge.net/jacob-project/jacob_18.zip</a>. </li>
+  <li>	WebUtil 1.0.6 currently does not work with JACOB 1.9 and may not work 
+        with later versions of JACOB. </li>
+  <li>	WebUtil does not work on certain versions of Linux due to known forms 
+          TEXT_IO issues. The workaround is to set the environment variable 
+          LD_ASSUME_KERNEL=2.4.19. </li>
+  <li>	WebUtil downloads install.syslib libraries mentioned in 
+            webutil.cfg into the bin directory of the JRE or JVM. The client needs 
+            write permission in that bin directory.</li>
+  <li>  WebUtil does not work with Internet Explorer Native VM, since cab files are not provided for WebUtil. 
+
+WebUtil is not supported with Internet Explorer Native VM with Forms 9.0.4 and later.</li>
+  <li>  CLIENT_IMAGE.READ_IMAGE_FILE and WRITE_IMAGE_FILE may not read or write 
+non-ASCII file names correctly.<br>
+   </li>
+</ol>
+<span class="zz-legal-notice">Copyright &copy; 2005, Oracle. All rights reserved.
+
+Oracle, JD Edwards, PeopleSoft, and Retek are registered trademarks 
+of Oracle Corporation and/or its affiliates. Other names may be 
+trademarks of their respective owners. </span>

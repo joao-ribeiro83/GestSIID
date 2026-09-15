@@ -1,0 +1,78 @@
+Copy doc & java & server & webutil folders in <ORACLE_HOME>\Forms\
+or
+Copy
+  File frmwebutil.jar
+  From folder: webutil_106\webutil_106\java  To: $ORACLE_HOME/forms/java
+
+  File: jacob.jar 
+  From folder: jacob_18  To: $ORACLE_HOME/forms/java
+
+  File: d2kwut60.dll, JNIsharedstubs.dll
+  From folder: webutil_106\webutil_106\webutil To: $ORACLE_HOME/forms/webutil
+
+  File: jacob.dll
+ From folder: jacob_18 To: $ORACLE_HOME/forms/webutil
+
+  File: forms_base_ie.js, forms_ie.js
+- From folder: webutil_106\webutil_106\java To: $ORACLE_HOME/forms/java
+
+ File: webutil.olb, webutil.pll and create_webutil_db.sql
+ From folder: webutil_106\webutil_106 To: $ORACLE_HOME/forms
+
+ File: webutilbase.htm, webutiljini.htm, webutiljpi.htm and webutil.cfg
+- From folder: webutil_106\webutil_106\server To: $ORACLE_HOME/forms/server
+
+File: sign_webutil.bat
+- From folder: webutil_106\webutil_106\webutil To: $ORACLE_HOME/forms/webutil
+
+
+4. In $ORACLE_HOME/forms/server/formsweb.cfg file
+Change the following entries
+# Forms applet archive setting for JInitiator
+archive_jini=frmall_jinit.jar,frmwebutil.jar,jacob.jar 
+if you use JRE plugin then this line also required
+archive=frmall_jinit.jar,frmwebutil.jar,jacob.jar 
+[webutil]
+WebUtilArchive=/forms/java/frmwebutil.jar,/forms/java/jacob.jar
+<if you use JRE plugin then this line also required>
+Replace baseHTMLjinitiator=webutiljini.htm with baseHTMLjinitiator=webutiljpi.htm 
+5. In $ORACLE_HOME/forms/server/default.env file change the following entries
+
+  FORMS_PATH=C:\YourOracle_Home\forms;C:\YourOracle_home\forms\webutil
+
+  # webutil config file path
+  WEBUTIL_CONFIG=C:\YourOracle_Home\forms\server\webutil.cfg
+Add frmwebutil.jar, jacob.jar into Classpath  
+CLASSPATH=C:\YourOracle_Home\forms\java\frmwebutil.jar;C:\YourOracle_Home\forms\java\jacob.jar
+
+6. Sign Webutil JAR files by running these following commands Make sure Form Builder is Closed
+For Example :
+
+{
+D:\>set PATH=D:\<ORACLE_HOME>\jdk\bin
+D:\>cd <ORACLE_HOME>\forms\webutil
+D:\<ORACLE_HOME>\forms\webutil>sign_webutil.bat D:\<ORACLE_HOME>\forms\java\frmwebutil.jar
+
+D:\<ORACLE_HOME>\forms\webutil>sign_webutil.bat D:\<ORACLE_HOME>\forms\java\jacob.jar
+
+}
+
+This will start a process and end with a message 1 file copied successfully 
+
+Configuring Database:
+
+1. Connect as Scott or your User 
+2. Run the script $ORACLE_HOME/forms/create_webutil_db.sql using SQLPLUS or any tool.
+
+Setting up Form Builder:
+
+1. Open Form builder Connect with SCOTT and in PL/SQL libraries open Webutil.pll file
+2. File > Save as and Rename the file to different name e.g WebUtil_lib
+(Trust me it works to avoid Webutil not found error) :)
+3. Compile the new PLL file and generate it
+4. Attached the new named Webutil_lib.pll to your form with Remove Path option YES.
+5. Open WebUtil.olb file Object group in builder and copy or subclass it into your form.
+6. Now compile your form and run it.
+
+Note: Browser will ask to certify these libraries first time Choose ALWAYS certify. Check Java Console icon on the task bar and see frmwebtul.jar and jacob.jar are loaded successfully.
+7. Press Browse button on form and choose Datafile.txt and Press Open...Text file will load into the Data Block.
