@@ -19,6 +19,8 @@ Everything the Node.js rewrite plan was built from (2026-09-14). Start with `MAS
 | `forms-summary/{T,P}/` | Per-module `.md` inventory, `.plsql.txt` code, `INDEX.json` | **no** (same reason) |
 | `db/` | Created by Step 0.2 of the plan: live schema dump (tables, packages, sequences, grants) | yes, once produced |
 | `DECISIONS.md` | Created by Step 0.3: answered open questions, binding for later steps | yes |
+| `ARCHITECTURE.md` | Created by Step 1.1: binding architecture (stack, topology, DB layer, QBE/commit contracts, auth, files, conventions, form → route mapping) | yes |
+| `architecture.mmd` → `architecture.svg` | C4 container/component diagram source and its render (gstack `diagram` skill) | yes |
 
 ## Regenerate the dumps
 

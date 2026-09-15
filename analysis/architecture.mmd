@@ -1,0 +1,37 @@
+C4Component
+  title GestSIID - container and components (one container per environment)
+  UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+
+  Boundary(users, "Users and network") {
+    Person(adm, "Administrador", "TIPO_UTILIZADOR_RF = ADM")
+    Person(usr, "Utilizador", "any other type")
+    System_Ext(nginx, "nginx (later, D-09)", "TLS termination")
+  }
+
+  Container_Boundary(c, "gestsiid container") {
+    Component(spa, "SPA", "React 19, Vite 8, TanStack", "Portuguese UI, menu per role, DataBlock grids")
+    Component(http, "HTTP layer", "Fastify 5", "session, CSRF, roles, errors, audit, static SPA")
+    Component(pdf, "PDF proxy", "fetch stream", "spoolid to FileServerSIID")
+    Component(feat, "Feature modules", "routes, service, repo", "documentos, backups, modelos, permissões, admin")
+    Component(generic, "Block engine", "listQuery, crudRoutes", "QBE lists, row writes with lock check")
+    Component(db, "DB layer", "node-oracledb 6 Thick", "pool, CURRENT_SCHEMA, binds, PL/SQL, ORA mapping")
+  }
+
+  Boundary(ext, "Existing systems (unchanged)") {
+    System_Ext(qp, "SVR_QUEUE processor", "executes queue rows (D-04)")
+    SystemDb(ora, "Oracle 12.2", "CFG_*, DOC_*, SVR_*, PL/SQL packages")
+    System_Ext(fs, "FileServerSIID", "REST over HTTP (D-03)")
+  }
+
+  Rel(adm, nginx, "HTTPS")
+  Rel(usr, nginx, "HTTPS")
+  Rel(nginx, http, "HTTP")
+  Rel(spa, http, "JSON /api/*")
+  Rel(http, feat, "calls")
+  Rel(feat, generic, "uses")
+  Rel(feat, db, "uses")
+  Rel(generic, db, "uses")
+  Rel(feat, pdf, "uses")
+  Rel(db, ora, "Oracle Net")
+  Rel(pdf, fs, "GET ?spoolid=")
+  Rel(qp, ora, "reads SVR_QUEUE")
