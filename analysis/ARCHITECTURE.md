@@ -242,7 +242,6 @@ A detail resource declares `parentKeys`. Its list route is nested: `GET /api/<ma
 - Every route has `config.roles`; the default is `['ADM']`. Routes open to USER say `['ADM','USER']`:
   - `auth/me`, `auth/logout`;
   - Documentos: list (sort allow-list for USER = `ID` only, per D-08, confirmed by the owner, §13), detail (reduced columns), tabs `parametros`, `comentarios` (GET), `anexos`, `fila`, `erros`, `pdf`, `conversoes/recibo`, `conversoes/pessoa`, `POST /:id/clonar`, `POST /:docId/fila/:queueId/cancelar`;
-  - Impressoras Associadas → Documento and Utilizador: lists and all their actions (the menu is enabled for USER in `MD_SIID_USER`, D-08);
   - lookups `modelos`, `modelos-validos`, `impressoras-validas`, `usuarios`, and `GET /api/dominios/:dominioId/valores`.
 - USER document detail SQL selects the reduced column list: no `ATRIBUTO5..8`, `ATRIBUTO10..25`, `ATRIB_ARQ_1..20`, `ARQ_ID`, `EDOC_ID`, `REGISTO_ARQUIVO`, `REGISTO_EDOC`, `DATA_ARQUIVO`.
 - A role failure → `403 SEM_PERMISSAO`. The SPA's `beforeLoad` guards and the `roles` field in `menu.ts` only hide things; the server decides.
@@ -463,9 +462,9 @@ C4Component
 | `FD_GESTAO_SIID_USER` | Gestão › Documentos (USER) | D-08, §13 | §10.1 documentos, USER subset (§5) | `/gestao/documentos` | Same screen; the toolbar shows only what the role may call. |
 | `FD_NOVO_BACKUP` | Gestão › Backups › Novo | D-25, A-02 | `GET /api/backups/meses`, `GET /api/backups/candidatos?mes=`, `POST /api/backups` | `/gestao/backups/novo` | Form SQL in one transaction; no printer picker (STRUCTURE §7). |
 | `FD_BACKUPS_ONLINE` | Gestão › Backups › Backups Online | D-25, A-02 | `GET /api/backups?f[MEDIA_ONLINE]=S\|N`, `POST /api/backups/online` | `/gestao/backups/online` | Two lists over one resource; `DRIVE_ONLINE` set as the form did. |
-| `FD_GESTAO_IMPRESSORAS_DOC` | Gestão › Impressoras Associadas › Documento | D-08, D-22 | §10.1 impressoras-associadas | `/gestao/impressoras-associadas/documento` | ADM and USER. Help text shows the D-22 printer order. |
-| `FD_GESTAO_IMPRESSORAS_USR` | Gestão › Impressoras Associadas › Utilizador | D-08, D-22 | §10.1 impressoras-associadas | `/gestao/impressoras-associadas/utilizador` | ADM and USER. |
-| `FD_ALTERAR_PASSWORD` | Gestão › Alterar password | D-07d, D-08 | `PUT /api/admin/password-regeracao` | `/gestao/alterar-password` | ADM only; shared document-regeneration password, not a login password. |
+| `FD_GESTAO_IMPRESSORAS_DOC` | Configuração › Impressoras Associadas › Documento | D-08, A-09, D-22 | §10.1 impressoras-associadas | `/configuracao/impressoras-associadas/documento` | ADM only (A-09). Help text shows the D-22 printer order. |
+| `FD_GESTAO_IMPRESSORAS_USR` | Configuração › Impressoras Associadas › Utilizador | D-08, A-09, D-22 | §10.1 impressoras-associadas | `/configuracao/impressoras-associadas/utilizador` | ADM only (A-09). |
+| `FD_ALTERAR_PASSWORD` | Configuração › Alterar password | D-07d, D-08, A-09 | `PUT /api/admin/password-regeracao` | `/configuracao/alterar-password` | ADM only; shared document-regeneration password, not a login password. |
 | `FD_GESTORES_SIID` | Gador › Gestores | D-11 | none | none | Dropped; DBA hand-over script from the XML. |
 | `FD_PERFIS_DEPARTAMENTO` | Gador › Equipa de Gestão (OD68) | D-01 | `GET /api/perfis-departamento`, `POST`, `PUT /:rid` (no DELETE: Forms deletes only unsaved rows), `GET /api/perfis-departamento/sugestao?cdemplea=`, `…/:id/assinatura` | `/gador/equipa-gestao` | One block. `ID = MAX+1` in `beforeInsert` (a collision gives `409 ORA_00001`; retry). `sugestao` returns `CODIGO`, `FUNCAODEP_ID`, `NOME` per BR-ADM-04. |
 | `FD_CONFIGURACAO_REPORTS` | Configuração › Reports | BR-ADM-05 | `GET /api/reports`, `GET /api/reports/:id/parametros`, `POST /api/reports/guardar` | `/configuracao/reports` | Rules in §10.1. |
@@ -520,7 +519,7 @@ Queue ids from `ID_QUEUE_SEQ`, audit ids from `ID_ERROS_SEQ`, `DATA_PEDIDO`/`DAT
 - `GET /api/permissoes/por-utilizador?username=&un=&tipo=` → `{ com, sem }`; `GET /api/permissoes/por-modelo?modeloId=&un=&tipo=` → `{ com, sem }`.
 - `POST /api/permissoes/acoes/<acao>`: `nova` (BR-PERM-04), `alterar` (BR-PERM-05), `anular` (BR-PERM-06, `DATA_FIM = 01/01/1980`), `adicionar` / `remover` with `modelos[]` or `utilizadores[]` or `todos: true` (BR-PERM-07..09; remove = `DATA_FIM = SYSDATE - 1`), `copiar-modelo` (BR-PERM-10), `copiar-utilizador` (BR-PERM-11). Rows are identified by the logical key `(USERNAME, MODELO_ID, UNIDADE_NEGOCIO_RF, TIPO_PERMISSAO_RF, DATA_INICIO)`; `lockRow` uses it. Sentinels stay as in Forms (`01/01/1980`, `31-12-2200`, `9999-12-31` in overlap checks).
 
-**impressoras-associadas** (ADM, USER)
+**impressoras-associadas** (ADM, A-09)
 - `GET /api/impressoras-associadas/documento`, `POST /api/impressoras-associadas/documento/acoes/{nova,alterar-validade,anular}` (BR-PRN-02: overlap check per model → `DATAS_INCOMPAT`; annul = both dates `01/01/1980`; `AMBIENTE_ID` = configured value).
 - `GET /api/impressoras-associadas/utilizador`, `POST /api/impressoras-associadas/utilizador/acoes/{nova,alterar-validade,anular,copiar-modelo,copiar-utilizador}` (BR-PRN-03: overlap per model + user).
 

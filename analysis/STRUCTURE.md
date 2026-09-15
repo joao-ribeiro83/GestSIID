@@ -32,8 +32,8 @@ The two menus are PL/SQL-identical (17 `OPEN_FORM` items, same targets) except t
 (`FD_GESTAO_SIID` vs `FD_GESTAO_SIID_USER`) and the commented `RUN_REPORT_OBJECT` line
 (`forms-summary/T/MD_SIID*.mmb.plsql.txt`). **Resolved with the Forms2XML dump (`analysis/forms-xml/T/MD_SIID*_mmb.xml`,
 2026-09-14):** in `MD_SIID_USER` the menu items `GADOR`, `CONFIGURAÇÃO`, `ADMINISTRAÇÃO`, `AUDITORIA` and the `BACKUPS`
-sub-menu are `Enabled="false"`, so a regular user only reaches Gestão → Documentos, Impressoras Associadas (Documento,
-Utilizador) and Alterar password. In `MD_SIID` only `AUDITORIA` is disabled. This is a menu property (client-side); the
+sub-menu are `Enabled="false"`, so a regular user only reaches Gestão → Documentos (Impressoras Associadas and Alterar password sit
+under Configuração, see the table below). In `MD_SIID` only `AUDITORIA` is disabled. This is a menu property (client-side); the
 child forms themselves still only check `P_USERNAME IS NOT NULL` (see SECURITY_FINDINGS SEC-004).
 
 ### Exactly what differs between FD_GESTAO_SIID and FD_GESTAO_SIID_USER (T)
@@ -125,15 +125,15 @@ Every item: destroy/create parameter list `tmp`, `Add_Parameter('P_USERNAME', :G
 | GESTÃO_MENU (Gestão) | GESTÃO_DE_DOCUMENTOS (Documentos) | FD_GESTAO_SIID / FD_GESTAO_SIID_USER |
 | ├ BACKUPS_MENU (Backups) | NOVO (Novo) | FD_NOVO_BACKUP |
 | │ | COLOCAR_ONLINE (Backups Online) | FD_BACKUPS_ONLINE |
-| ├ GESTÃO_DE_IMPRESSORAS_DE_DOCUM_MENU (Impressoras Associadas) | DOCUMENTO | FD_GESTAO_IMPRESSORAS_DOC |
-| │ | UTILIZADOR | FD_GESTAO_IMPRESSORAS_USR |
-| └ | ALTERAR_PASSWORD (Alterar password) | FD_ALTERAR_PASSWORD |
 | GADOR_MENU (Gador) | GESTORES | FD_GESTORES_SIID |
 | | EQUIPA_DE_GESTÃO (Equipa de Gestão (OD68)) | FD_PERFIS_DEPARTAMENTO |
 | CONFIGURAÇÃO_MENU | REPORTS | FD_CONFIGURACAO_REPORTS |
 | | MODELOS | FD_CONFIGURACAO_MODELOS |
 | | GESTÃO_DE_PERMISSÕES (Permissões) | FD_PERMISSOES_SIID |
 | | GESTAO_DE_IMPRESSORAS (Impressoras) | FD_IMPRESSORAS_SIID |
+| ├ GESTÃO_DE_IMPRESSORAS_DE_DOCUM_MENU (Impressoras Associadas) | DOCUMENTO | FD_GESTAO_IMPRESSORAS_DOC |
+| │ | UTILIZADOR | FD_GESTAO_IMPRESSORAS_USR |
+| └ | ALTERAR_PASSWORD (Alterar password) | FD_ALTERAR_PASSWORD |
 | ADMINISTRAÇÃO_MENU | DOMINIOS, UNIDADES_MEDIDA, TIPOS_MIDIA, UTILIZADORES, VARIAVEIS_SIID | FD_DOMINIOS_SIID, FD_UNIDADES_MEDIDA, FD_TIPOS_MIDIA, FD_UTILIZADORES_SIID, FD_VARIAVEIS_SIID |
 | AUDITORIA_MENU | MÉDIAS_… (Médias Execução) | body fully commented (`RUN_REPORT_OBJECT('MEDIAS_DOCUMENTOS')`) → does nothing |
 
@@ -369,7 +369,7 @@ Same pattern on `DOC_IMPRESSOES_MODELO_USR` (block `IMPRESSOES_MODELO_USR`: `MOD
 skipping existing (cdemplea, data_inicio)) and `COPIAR_UTILIZADOR` ("Copiar do utilizador…").
 `verificar_datas_*` include `cdemplea`.
 
-### 3.9 FD_ALTERAR_PASSWORD (Gestão › Alterar password) — "Alteração da Password de Regeração"
+### 3.9 FD_ALTERAR_PASSWORD (Configuração › Alterar password) — "Alteração da Password de Regeração"
 Block `ALTERAR_PASSWORD` (`PASSWORD`, `CONFIRMACAO`, `OK`, `CANCELAR`). `OK`: if equal, derive
 `AMBIENTE_ID`, `passwordEncript := crypt_pkg.encryptStringRaw(:PASSWORD)`, `FORMS_DDL('UPDATE
 SVR_VARIAVEIS_SIID SET VALOR=''<hash>'' WHERE TIPO_VARIAVEL_RF=''PASSWORD'' AND AMBIENTE_ID=…')`,

@@ -324,7 +324,7 @@ Everything must run with `pnpm i && pnpm -r test` without a database; the DB int
 Invoke `frontend-design:frontend-design`; use `context7-mcp` for Vite, TanStack Router and TanStack Query current APIs. Read analysis/UI_SPEC.md, app/design-tokens.json and analysis/ARCHITECTURE.md.
 In app/apps/web create the React 19 + Vite + TypeScript SPA:
 1. Tailwind + shadcn/ui initialised from the design tokens (light/dark).
-2. TanStack Router file-based routes: /login, / (shell), and a placeholder route per menu leaf using the exact Portuguese labels and tree from UI_SPEC (Gestão → Documentos, Backups → Novo / Backups Online, Impressoras Associadas → Documento / Utilizador, Alterar password; Gador → Gestores, Equipa de Gestão (OD68); Configuração → Reports, Modelos, Permissões, Impressoras; Administração → Domínios, Unidades Medida, Tipos Mídia, Utilizadores, Variáveis SIID; Auditoria → Médias Execução). Menu config is one typed array with a `roles` field.
+2. TanStack Router file-based routes: /login, / (shell), and a placeholder route per menu leaf using the exact Portuguese labels and tree from UI_SPEC (Gestão → Documentos, Backups → Novo / Backups Online; Gador → Gestores, Equipa de Gestão (OD68); Configuração → Reports, Modelos, Permissões, Impressoras, Impressoras Associadas → Documento / Utilizador, Alterar password; Administração → Domínios, Unidades Medida, Tipos Mídia, Utilizadores, Variáveis SIID; Auditoria → Médias Execução). Menu config is one typed array with a `roles` field.
 3. App shell per UI_SPEC: top bar (environment, user, role, logout), collapsible left nav, breadcrumb, content outlet, toast provider, confirm dialog provider (Portuguese buttons: Sim / Não / OK / Cancelar).
 4. src/api/client.ts — fetch wrapper with credentials, JSON errors mapped to toasts, typed with packages/shared; TanStack Query provider.
 5. Vitest + Testing Library smoke test for the shell and menu filtering by role.
@@ -407,7 +407,7 @@ Invoke `frontend-design:frontend-design`. Read analysis/UI_SPEC.md (Login and sh
 Build in apps/web:
 1. /login page: utilizador, password, environment shown as a read-only badge (AMBIENTE_ID from GET /api/health or /api/auth/config), submit on Enter, inline error with the exact alert text, loading state.
 2. Auth store (TanStack Query "me" + router beforeLoad guard); menu filtered by role using the menu config's `roles`; admin-only leaves hidden for USER (per DECISIONS D-08).
-3. "Alterar password" (Gestão menu leaf; window title "Alteração da Password de Regeração") as a modal with the two fields PASSWORD / CONFIRMACAO and the same messages — it changes the document-regeneration password (Step 3.1 endpoint), visible only to the roles allowed by DECISIONS D-07.
+3. "Alterar password" (Configuração menu leaf, ADM only per DECISIONS A-09; window title "Alteração da Password de Regeração") as a modal with the two fields PASSWORD / CONFIRMACAO and the same messages — it changes the document-regeneration password (Step 3.1 endpoint), visible only to the roles allowed by DECISIONS D-07.
 4. Logout in the top bar; session-expired handling (401 anywhere → toast + redirect to /login).
 5. Playwright tests for the scenarios in "Done when" (use the ZZTEST_ users the API tests create, or a seeded fixture per TEST_STRATEGY.md).
 ```
@@ -553,7 +553,7 @@ Build master + detail resources and the screen on the Domínios master-detail pa
 |---|---|---|---|
 | sonnet | medium | `superpowers:test-driven-development` | none |
 
-**Done when:** Gestão → Impressoras Associadas → Documento (`DOC_IMPRESSORAS_DOC` × `DOC_MODELOS_DOCUMENTO` × `SVR_IMPRESSORAS`) and → Utilizador (`DOC_IMPRESSOES_MODELO_USR` × `M_USUARIOS` × `SVR_IMPRESSORAS`) reproduce `FD_GESTAO_IMPRESSORAS_DOC` and `FD_GESTAO_IMPRESSORAS_USR`, including their LOVs and uniqueness rules.
+**Done when:** Configuração → Impressoras Associadas (ADM only, DECISIONS A-09) → Documento (`DOC_IMPRESSORAS_DOC` × `DOC_MODELOS_DOCUMENTO` × `SVR_IMPRESSORAS`) and → Utilizador (`DOC_IMPRESSOES_MODELO_USR` × `M_USUARIOS` × `SVR_IMPRESSORAS`) reproduce `FD_GESTAO_IMPRESSORAS_DOC` and `FD_GESTAO_IMPRESSORAS_USR`, including their LOVs and uniqueness rules.
 
 ```text
 Invoke `superpowers:test-driven-development`. Legacy sources: analysis/STRUCTURE.md §3 sheets FD_GESTAO_IMPRESSORAS_DOC and FD_GESTAO_IMPRESSORAS_USR; analysis/BUSINESS_RULES.md "Printers"; the two .plsql.txt dumps in analysis/forms-summary/T/; LOV queries in the corresponding analysis/forms-extracted/T/*.txt (grep for SELECT); tables DOC_IMPRESSORAS_DOC, DOC_IMPRESSOES_MODELO_USR, SVR_IMPRESSORAS, DOC_MODELOS_DOCUMENTO, M_USUARIOS in analysis/db/tables/.
