@@ -9,6 +9,11 @@ const block = (page: Page, name = 'Impressoras') => page.getByRole('region', { n
 const footer = (page: Page, name?: string) => block(page, name).locator('[aria-live="polite"]');
 const nameCells = (page: Page) => grid(page).locator('tbody tr td:nth-child(4)');
 
+// Step 3.2: the dev server no longer auto-logs-in every request, so writes here (Guardar,
+// ACTUALIZADO_POR = 'DEV') need a real session — global-setup.ts logs in once and every test
+// here starts from that saved state (repeating the login per test would trip login-throttle.ts).
+test.use({ storageState: 'e2e/.auth/adm.json' });
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/dev/datablock');
   await expect(footer(page)).toHaveText('137 registos');

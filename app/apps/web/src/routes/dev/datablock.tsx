@@ -9,6 +9,7 @@ import {
 } from '@/components/datablock/DataBlock';
 import type { GridRow } from '@/components/datablock/dirty';
 import { useDetailBlock } from '@/components/datablock/useDetailBlock';
+import { sessionQueryOptions } from '@/auth/session';
 import { cn } from '@/lib/utils';
 
 /**
@@ -16,8 +17,12 @@ import { cn } from '@/lib/utils';
  * (`apps/api/src/dev-server.ts`), master printers + detail trays. Playwright drives it.
  */
 export const Route = createFileRoute('/dev/datablock')({
-  beforeLoad: () => {
+  beforeLoad: async ({ context }) => {
     if (!import.meta.env.DEV) throw notFound();
+    // Unlike every route under `_app`, this one has no beforeLoad session fetch of its own —
+    // without it, a valid session cookie (Step 3.2) still leaves the client's CSRF token empty
+    // (session.ts sets it), so writes would 403. Anonymous visits still work: reads don't need it.
+    await context.queryClient.ensureQueryData(sessionQueryOptions).catch(() => undefined);
   },
   component: DataBlockDemo,
 });

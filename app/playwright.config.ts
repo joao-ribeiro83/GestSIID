@@ -10,6 +10,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1, // one shared in-memory store: specs that write must not race
   reporter: 'list',
+  globalSetup: './e2e/global-setup.ts',
   use: {
     baseURL: `http://127.0.0.1:${WEB_PORT}`,
   },

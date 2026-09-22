@@ -48,6 +48,7 @@ const app = await buildApp({
   ambiente: config.AMBIENTE_ID,
   distDir,
   authRepo: oracleAuthRepo(pool, config.DB_CALL_TIMEOUT_MS),
+  db: { pool, callTimeoutMs: config.DB_CALL_TIMEOUT_MS },
   logger: { level: config.LOG_LEVEL },
   async checkDb() {
     const start = Date.now();

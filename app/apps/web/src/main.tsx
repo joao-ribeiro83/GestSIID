@@ -8,6 +8,7 @@ import { createRoot } from 'react-dom/client';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/api/query-client';
+import { setSessionExpiredHandler } from '@/api/client';
 import { routeTree } from './routeTree.gen';
 
 const router = createRouter({
@@ -21,6 +22,8 @@ declare module '@tanstack/react-router' {
     router: typeof router;
   }
 }
+
+setSessionExpiredHandler(() => void router.navigate({ to: '/login' }));
 
 const rootEl = document.getElementById('root');
 if (rootEl) {

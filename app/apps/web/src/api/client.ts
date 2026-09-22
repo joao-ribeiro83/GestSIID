@@ -1,4 +1,6 @@
 import { toast } from 'sonner';
+import { pt } from '@gestsiid/shared';
+import { queryClient } from '@/api/query-client';
 
 /** ARCHITECTURE.md §8: every non-2xx response body has this shape. */
 export type ApiErrorBody = {
@@ -21,6 +23,15 @@ export class ApiError extends Error {
     this.fields = body?.fields;
     this.requestId = body?.requestId;
   }
+}
+
+// Set once by main.tsx after the router exists (this module must not import it — main.tsx →
+// router.ts → routeTree.gen.ts statically imports every route, which would cycle back here).
+let onSessionExpired: (() => void) | null = null;
+
+/** UI-27 (simplified, D-08 has no dirty-DataBlock reauth modal yet): wires the redirect to /login. */
+export function setSessionExpiredHandler(handler: () => void): void {
+  onSessionExpired = handler;
 }
 
 let csrfToken: string | null = null;
@@ -62,7 +73,16 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     const error = new ApiError(res.status, body as ApiErrorBody | null);
-    if (res.status !== 401 && !opts.quiet) toast.error(error.message);
+    // /auth/login's 401 is a login failure, shown inline by the login form; /auth/me's 401 is
+    // the normal "not logged in yet" case, handled quietly by the router's beforeLoad guard.
+    // Every other 401 is a session that expired mid-use (UI-27).
+    if (res.status === 401 && path !== '/auth/login' && path !== '/auth/me') {
+      toast.error(pt.sessaoExpirada);
+      queryClient.clear();
+      onSessionExpired?.();
+    } else if (res.status !== 401 && !opts.quiet) {
+      toast.error(error.message);
+    }
     throw error;
   }
 

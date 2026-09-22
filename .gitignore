@@ -19,3 +19,5 @@ dev/**/*_mmb.xml
 analysis/**/*.local.md
 # Playwright output
 app/test-results/
+# global-setup.ts's saved session cookie (dev-server-only, but still a session secret)
+app/e2e/.auth/

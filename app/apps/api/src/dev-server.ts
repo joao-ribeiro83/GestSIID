@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildApp } from './app.ts';
+import { devAuthRepo } from './features/auth/dev-repo.ts';
 
 /**
  * Dev-only server without Oracle: the `/dev/datablock` in-memory demo API, plus the built SPA
@@ -23,6 +24,7 @@ const app = await buildApp({
   checkDb: async () => 0,
   distDir: existsSync(join(distDir, 'index.html')) ? distDir : null,
   devMocks: true,
+  authRepo: devAuthRepo(),
 });
 
 await app.listen({ port, host: '127.0.0.1' });

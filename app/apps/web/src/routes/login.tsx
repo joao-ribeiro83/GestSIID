@@ -5,8 +5,8 @@ import { pt } from '@gestsiid/shared';
 import { apiFetch, ApiError, setCsrfToken } from '@/api/client';
 import { queryClient } from '@/api/query-client';
 import { sessionQueryOptions, type Session } from '@/auth/session';
-import { useHealth } from '@/api/health';
 import { Button } from '@/components/ui/button';
+import { EnvironmentBadge } from '@/components/shell/environment-badge';
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -14,7 +14,6 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { data: health } = useHealth();
   const [utilizador, setUtilizador] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -54,7 +53,7 @@ function LoginPage() {
       >
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold">GestSIID</h1>
-          {health?.ambiente && <span className="text-xs text-muted-foreground">{health.ambiente}</span>}
+          <EnvironmentBadge />
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="utilizador" className="text-sm">
@@ -84,7 +83,7 @@ function LoginPage() {
           {fieldErrors.password && <p className="text-xs text-field-error">{fieldErrors.password}</p>}
         </div>
         <Button type="submit" disabled={submitting}>
-          Entrar
+          {submitting ? 'A entrar…' : 'Entrar'}
         </Button>
       </form>
     </div>

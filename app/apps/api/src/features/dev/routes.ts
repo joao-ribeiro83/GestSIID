@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
-import { DEMO_DOMINIOS, demoImpressoras, demoTabuleiros } from '@gestsiid/shared';
-import { auditHooks, crudRoutes, type Row } from '../../lib/crud.ts';
+import { DEMO_DOMINIOS, demoImpressoras, demoTabuleiros, impressoras, IMPRESSORAS_DOMINIOS } from '@gestsiid/shared';
+import { auditHooks, crudRoutes, type CrudHooks, type Row } from '../../lib/crud.ts';
 import { memoryStore } from './memoryStore.ts';
 
 /**
@@ -21,6 +21,18 @@ const DOMINIOS: Record<string, { CHAVE: string; DESIGNACAO: string }[]> = {
     { CHAVE: 'A3', DESIGNACAO: 'A3' },
     { CHAVE: 'ETIQ', DESIGNACAO: 'Etiquetas' },
     { CHAVE: 'ENV', DESIGNACAO: 'Envelopes' },
+  ],
+  // Real CFG_VALORES_DOMINIO rows (analysis/db/tables/CFG_VALORES_DOMINIO.md), ordered by PRIORIDADE.
+  [IMPRESSORAS_DOMINIOS.gsdevice]: [
+    { CHAVE: 'PXLCOLOR', DESIGNACAO: 'HP color PCL XL printers' },
+    { CHAVE: 'PXLMONO', DESIGNACAO: 'HP black-and-white PCL XL printers' },
+    { CHAVE: 'PDF', DESIGNACAO: 'Sem device' },
+    { CHAVE: 'LJET4', DESIGNACAO: 'HP LaserJet 4' },
+    { CHAVE: 'LASERJET', DESIGNACAO: 'HP LaserJet' },
+  ],
+  [IMPRESSORAS_DOMINIOS.valido]: [
+    { CHAVE: 'N', DESIGNACAO: 'Não' },
+    { CHAVE: 'S', DESIGNACAO: 'Sim' },
   ],
 };
 
@@ -73,12 +85,51 @@ function seedTabuleiros(): Row[] {
   return rows;
 }
 
-export async function registerDevRoutes(app: FastifyInstance): Promise<void> {
-  app.addHook('onRequest', async (request) => {
-    const session = request.session as { user?: unknown } | undefined;
-    if (session && !session.user)
-      session.user = { username: 'DEV', nome: 'Utilizador de demonstração', role: 'ADM' };
+// Small, fixed seed for the real Impressoras screen's e2e coverage (distinct from the 137-row
+// demoImpressoras data above, which only backs /dev/datablock). ID is text (SVR_IMPRESSORAS.ID is
+// VARCHAR2, populated by ID_IMPRESSORA_SEQ in production) — unlike demoImpressoras.ID, which is a
+// fictional numeric column, so `memoryStore`'s numeric `autoId` cannot be reused here.
+function seedImpressorasReal(): Row[] {
+  const gsdevices = ['PXLCOLOR', 'PXLMONO', 'LJET4', 'LASERJET', 'PDF'];
+  return Array.from({ length: 12 }, (_, i) => {
+    const n = i + 1;
+    return {
+      ID: String(n),
+      DESCRICAO: `Impressora ${n}`,
+      ENDERECO: `10.0.0.${n}`,
+      SERVIDOR: `PRINT${String(n).padStart(2, '0')}`,
+      VALIDO: n % 5 === 0 ? 'N' : 'S',
+      GSDEVICE_RF: gsdevices[n % gsdevices.length],
+      CRIADO_POR: 'MIGRACAO',
+      DATA_CRIACAO: '2019-12-01T09:30:00',
+      ACTUALIZADO_POR: null,
+      DATA_ACTUALIZACAO: null,
+    };
   });
+}
+
+/** Dev stand-in for `impressorasHooks` (routes.ts): a plain string counter instead of
+ * `ID_IMPRESSORA_SEQ.NEXTVAL`, since `memoryStore` has no Oracle sequence to call. */
+function devImpressorasHooks(seedCount: number): CrudHooks {
+  let next = seedCount + 1;
+  return {
+    beforeInsert: (v, ctx) => ({ ...auditHooks.beforeInsert!(v, ctx), ID: String(next++) }),
+    beforeUpdate: auditHooks.beforeUpdate,
+  };
+}
+
+export async function registerDevRoutes(
+  app: FastifyInstance,
+  opts: { autoLogin?: boolean } = {},
+): Promise<void> {
+  // Step 3.2: once a real `authRepo` is wired in, login is real and must not be forged here.
+  if (opts.autoLogin ?? true) {
+    app.addHook('onRequest', async (request) => {
+      const session = request.session as { user?: unknown } | undefined;
+      if (session && !session.user)
+        session.user = { username: 'DEV', nome: 'Utilizador de demonstração', role: 'ADM' };
+    });
+  }
 
   app.get('/api/dominios/:dominioId/valores', async (request) => ({
     rows: DOMINIOS[(request.params as { dominioId: string }).dominioId] ?? [],
@@ -87,6 +138,13 @@ export async function registerDevRoutes(app: FastifyInstance): Promise<void> {
   crudRoutes(app, demoImpressoras, {
     store: memoryStore(demoImpressoras, seedImpressoras(), { autoId: 'ID' }),
     hooks: auditHooks,
+  });
+  // The real Impressoras resource (Step 4.1): in memory here too, so Playwright can drive
+  // /configuracao/impressoras without Oracle (CLAUDE.md HARD RULE — writes are never real here).
+  const seedReal = seedImpressorasReal();
+  crudRoutes(app, impressoras, {
+    store: memoryStore(impressoras, seedReal),
+    hooks: devImpressorasHooks(seedReal.length),
   });
   crudRoutes(app, demoTabuleiros, {
     store: memoryStore(demoTabuleiros, seedTabuleiros(), { autoId: 'ID' }),
