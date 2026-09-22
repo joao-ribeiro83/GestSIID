@@ -407,17 +407,25 @@ Then run the `security-review` skill on the diff and spawn `code-modernization:s
 |---|---|---|---|
 | sonnet | medium | `frontend-design:frontend-design` | none |
 
-**Inputs:** `analysis/UI_SPEC.md` (Login wireframe, shell), Step 3.1 endpoints, `analysis/forms-extracted/T/FD_LOGIN_SIID.fmb.txt` (labels).
-**Done when:** Playwright: login as ADM shows the full menu, login as USER hides admin-only entries, wrong password shows the Portuguese alert, "Alterar password" works, logout returns to /login, deep links redirect to /login when unauthenticated.
+**Inputs:** `analysis/UI_SPEC.md` (Login wireframe, shell), Step 3.1 endpoints in `app/apps/api/src/features/auth/routes.ts`, `analysis/forms-extracted/T/FD_LOGIN_SIID.fmb.txt` (labels).
+**Done when:** Playwright: login as ADM shows the full menu, login as USER hides admin-only entries, wrong password shows the Portuguese alert, "Alterar password" works (three fields; wrong current value and mismatch show their messages), logout returns to /login, deep links redirect to /login when unauthenticated.
 
 ```text
-Invoke `frontend-design:frontend-design`. Read analysis/UI_SPEC.md (Login and shell), the auth endpoints from apps/api/src/routes/auth*, and grep analysis/forms-extracted/T/FD_LOGIN_SIID.fmb.txt for the item prompts (Utilizador, Password, Ambiente) and alert texts.
+Invoke `frontend-design:frontend-design`. Read analysis/UI_SPEC.md (Login and shell), the auth endpoints in app/apps/api/src/features/auth/routes.ts, and grep analysis/forms-extracted/T/FD_LOGIN_SIID.fmb.txt for the item prompts (Utilizador, Password, Ambiente) and alert texts.
+HARD RULE: you are NOT permitted to change the Oracle database (see CLAUDE.md and analysis/TEST_STRATEGY.md). This step needs no Oracle at all.
+Step 3.1 API (already built, do not change its contract):
+- POST /api/auth/login { utilizador, password } → 200 { user: { username, nome, role, ambiente }, csrf }; 400 VALIDACAO with fields.utilizador / fields.password; 401 LOGIN_INVALIDO "Utilizador e/ou password inválidos." (also when throttled).
+- GET /api/auth/me → { user, csrf }; 401 SESSAO_EXPIRADA. POST /api/auth/logout → 204 (needs x-csrf-token).
+- POST /api/auth/regeneracao-password { actual, nova, confirmacao } (ADM only, needs x-csrf-token) → 204; 422 PASSWORDS_DIFERENTES with fields.confirmacao "As passwords não coincidem. Alteração não efectuada."; 403 PASSWORD_ERRADA "A password inserida está errada." (wrong current value, or locked after 5 wrong tries).
 Build in apps/web:
-1. /login page: utilizador, password, environment shown as a read-only badge (AMBIENTE_ID from GET /api/health or /api/auth/config), submit on Enter, inline error with the exact alert text, loading state.
+1. /login page: utilizador, password, environment shown as a read-only badge (ambiente from GET /api/health), submit on Enter, inline error with the exact alert text, loading state.
 2. Auth store (TanStack Query "me" + router beforeLoad guard); menu filtered by role using the menu config's `roles`; admin-only leaves hidden for USER (per DECISIONS D-08).
-3. "Alterar password" (Configuração menu leaf, ADM only per DECISIONS A-09; window title "Alteração da Password de Regeração") as a modal with the two fields PASSWORD / CONFIRMACAO and the same messages — it changes the document-regeneration password (Step 3.1 endpoint), visible only to the roles allowed by DECISIONS D-07.
+3. "Alterar password" (Configuração menu leaf, ADM only per DECISIONS A-09 and D-07; window title "Alteração da Password de Regeração") as a modal with THREE fields: "Password actual" (actual), "Password" (nova), "Confirmação" (confirmacao) — D-07 requires the current value. It calls POST /api/auth/regeneracao-password. Show 403 PASSWORD_ERRADA as a field error on "Password actual" (UI_SPEC catalogue #15) and 422 PASSWORDS_DIFERENTES as a field error on "Confirmação" (#6). It changes the shared document-regeneration password, not the user's login password.
 4. Logout in the top bar; session-expired handling (401 anywhere → toast + redirect to /login).
-5. Playwright tests for the scenarios in "Done when" against the Oracle-less dev server with an in-memory AuthRepo (HARD RULE: no Oracle changes; no ZZTEST_ users are created).
+5. Playwright tests for the scenarios in "Done when", against the Oracle-less dev server (app/apps/api/src/dev-server.ts):
+   - Give dev-server.ts an in-memory AuthRepo (the AuthRepo interface in features/auth/repo.ts) with one fake ADM user and one fake USER user and a fake regeneration password, passed to buildApp as `authRepo`. Plain-text compare is fine: dev only, never in the Docker image.
+   - Today the dev server logs every request in as a fake DEV admin (the onRequest hook in features/dev/routes.ts) and turns CSRF off (buildApp `devMocks`). Both would make the login tests pass for the wrong reason. When authRepo is present: remove that auto-login and keep CSRF on. Update e2e/datablock.spec.ts so it logs in first.
+   - No Oracle, no ZZTEST_ users.
 ```
 
 ---
