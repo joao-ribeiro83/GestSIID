@@ -1,0 +1,52 @@
+# DOC_IMPRESSORAS_DOC
+
+Owner: `SIID_TESTES` &nbsp; Type: `TABLE`
+
+Row count: **235**
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MODELO_ID | VARCHAR2 | 10 |  |  | N |  |  |
+| AMBIENTE_ID | VARCHAR2 | 30 |  |  | N |  |  |
+| IMPRESSORA_ID | VARCHAR2 | 30 |  |  | N |  |  |
+| DATA_INICIO | DATE | 7 |  |  | N |  |  |
+| DATA_FIM | DATE | 7 |  |  | Y |  |  |
+| CRIADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_CRIACAO | DATE | 7 |  |  | Y |  |  |
+| ACTUALIZADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_ACTUALIZACAO | DATE | 7 |  |  | Y |  |  |
+
+
+## Primary / unique keys
+
+| CONSTRAINT_NAME | CONSTRAINT_TYPE | COLUMN_NAME | POSITION |
+| --- | --- | --- | --- |
+| PK_CHAVE_DIMPD | P | AMBIENTE_ID | 1 |
+| PK_CHAVE_DIMPD | P | MODELO_ID | 2 |
+| PK_CHAVE_DIMPD | P | IMPRESSORA_ID | 3 |
+| PK_CHAVE_DIMPD | P | DATA_INICIO | 4 |
+
+
+## Foreign keys
+
+| CONSTRAINT_NAME | COLUMN_NAME | POSITION | R_OWNER | R_TABLE_NAME |
+| --- | --- | --- | --- | --- |
+| FK_AMBIENTE_DIMPD | AMBIENTE_ID | 1 | SIID_TESTES | SVR_AMBIENTES_IMPRESSAO |
+| FK_IMPRESSORA_DIMPD | IMPRESSORA_ID | 1 | SIID_TESTES | SVR_IMPRESSORAS |
+| FK_MODELO_DIMPD | MODELO_ID | 1 | SIID_TESTES | DOC_MODELOS_DOCUMENTO |
+
+
+## Indexes
+
+| INDEX_NAME | UNIQUENESS | COLUMN_NAME | COLUMN_POSITION |
+| --- | --- | --- | --- |
+| IDX_AMBIENTE_DIMPD | NONUNIQUE | AMBIENTE_ID | 1 |
+| IDX_IMPRESSORA_DIMPD | NONUNIQUE | IMPRESSORA_ID | 1 |
+| IDX_MODELO_DIMPD | NONUNIQUE | MODELO_ID | 1 |
+| PK_CHAVE_DIMPD | UNIQUE | AMBIENTE_ID | 1 |
+| PK_CHAVE_DIMPD | UNIQUE | MODELO_ID | 2 |
+| PK_CHAVE_DIMPD | UNIQUE | IMPRESSORA_ID | 3 |
+| PK_CHAVE_DIMPD | UNIQUE | DATA_INICIO | 4 |
+

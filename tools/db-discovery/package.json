@@ -1,0 +1,11 @@
+{
+  "name": "db-discovery",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "discover": "node --env-file=../../.env src/discover.js"
+  },
+  "dependencies": {
+    "oracledb": "^6"
+  }
+}

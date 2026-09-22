@@ -1,0 +1,1329 @@
+-- PKG_SINISTROS_UTIL (owner: SIID_TESTES)
+
+
+-- ===== SPEC (PACKAGE) =====
+
+PACKAGE             PKG_SINISTROS_UTIL AS
+--* CONSTANTES PROPRIAS QUESTIONAR INFORMACÕES SOBRE PACKAGE
+--*
+--* CRIADO POR  : BRIGIDA RAMOS
+--* DATA CRIACAO: 16-02-2007
+--* OBSERVACÃO  : A) ESTA SECCÃO DEVE ESTAR NO INICIO DO PACKAGE SEMPRE
+--*               B) SEMPRE QUE FOR EFECTUADA ALGUMA ALTERACÃO AO PACKAGE
+--*                  DEVEM SER ACTUALIZADAS AS CONSTANTES DO PACKAGE BODY
+--*                  "VERSAO", "DATA_VERSAO" & "AUTOR_VERSAO".
+--*
+INFO_VERSAO          CONSTANT VARCHAR2(100):='VERSAO';
+INFO_DATA_VERSAO     CONSTANT VARCHAR2(100):='DATA_VERSAO';
+INFO_AUTOR_PACKAGE   CONSTANT VARCHAR2(100):='AUTOR_PACKAGE';
+INFO_AUTOR_VERSAO    CONSTANT VARCHAR2(100):='AUTOR_VERSAO';
+INFO_DATA_PACKAGE    CONSTANT VARCHAR2(100):='DATA_PACKAGE';
+INFO_DATA_INSTALACAO CONSTANT VARCHAR2(100):='DATA_INSTALACAO';
+INFO_OWNER           CONSTANT VARCHAR2(100):='OWNER';
+
+/*
+-* NOME      : GET_DATA_PRESTACAO_PAGA
+-* OBJECTIVO : DEVOLVER A DATA DA ULTIMA PRESTACÃO PAGA
+-* UTILIZACAO:
+-* AUTOR     : Vitor Rodrigues
+-* DATA      :  11-12-2008
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+
+FUNCTION GET_DATA_MOVIMENTO_CAPITAL (P_CDNMPROC IN NUMBER
+		 		                    ,P_CDTIPMOV IN VARCHAR2
+				                    ,P_NMVALMOV IN NUMBER) RETURN DATE;
+
+/*
+-* NOME      : GET_DATA_PRESTACAO_PAGA
+-* OBJECTIVO : DEVOLVER A DATA DA ULTIMA PRESTACÃO PAGA
+-* UTILIZACAO:
+-* AUTOR     : Vitor Rodrigues
+-* DATA      :  11-12-2008
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+
+
+FUNCTION GET_DATA_PRESTACAO_PAGA   ( PI_CDPERSON IN VARCHAR2) RETURN DATE;
+/*
+-* NOME      : GET_DATA_PRESTACAO_PENDENTE
+-* OBJECTIVO : DEVOLVER A DATA DA PRESTACÃO PENDENTE
+-* UTILIZACAO:
+-* AUTOR     : Vitor Rodrigues
+-* DATA      :  11-12-2008
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+
+FUNCTION GET_DATA_PRESTACAO_PENDENTE   ( PI_CDPERSON IN VARCHAR2) RETURN DATE;
+
+
+
+/*
+-* NOME      : GET_PACKINFO
+-* OBJECTIVO : MANTER INFORMACÃO SOBRE VERSÃO DO PACKAGE
+-* UTILIZACAO: PKG_FORMULAS_COSEC.GET_PACKINFO('VERSAO');
+-* AUTOR     : Eng. Jose Viegas
+-* DATA      : 25-11-2004
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PACKINFO (P_TIPO_INFO VARCHAR2 DEFAULT 'COMPLETE') RETURN VARCHAR2;
+/*
+-* NOME      : GET_DADOS_CONTRATO
+-* OBJECTIVO : RETORNA A INFORMACAO DE CONTRATO
+-* UTILIZACAO:
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 16-02-2007
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DADOS_CONTRATO    ( PI_CDPERSON IN NUMBER
+		 		,PI_TIPO   IN VARCHAR2) RETURN VARCHAR2;
+/*
+-* NOME      : GET_DADOS_PRESTACAO
+-* OBJECTIVO : RETORNA A INFORMACAO DE PRESTACAO
+-* UTILIZACAO:
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 16-02-2007
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DADOS_PRESTACAO    ( PI_NMCONFIN IN NUMBER
+				 , PI_CDESTADO IN VARCHAR2
+		 		, PI_TIPO   IN VARCHAR2) RETURN VARCHAR2;
+/*
+-* NOME      : GET_VRP
+-* OBJECTIVO : RETORNA O VALOR DE RECUPERACAO TOTAL DOS PROCESSOS
+-* PARA UM INTERVALO DE DATAS E ADVOGADO
+-*
+-* UTILIZACAO:
+-* AUTOR     : Brigida Ramos
+-* DATA      : 16-11-2006
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_VRP (PI_CDPERSON IN VARCHAR2
+		 		,PI_INICIO IN DATE
+				,PI_FIM IN DATE) RETURN NUMBER;
+/*
+-* NOME      : GET_VCEP
+-* OBJECTIVO : RETORNA O VALOR EM CARTEIRA DOS PROCESSOS
+-* PARA UM INTERVALO DE DATAS E ADVOGADO
+-*
+-* UTILIZACAO:
+-* AUTOR     : Brigida Ramos
+-* DATA      : 16-11-2006
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_VCEP (PI_CDPERSON IN VARCHAR2
+		   ,PI_INI IN DATE
+		   ,PI_FIMM IN DATE) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_PAG_AUTORIZ_SIN_INDEMNIZ
+-* OBJECTIVO : RETORNA S OU N CONFORME EXISTAM PAGAMENTOS AUTORIZADOS OU NAO, RELATIVOS
+-*             AO CONCEITO DE INDEMNIZACÃO
+-* UTILIZACAO:
+-* AUTOR     : ARLINDO RODRIGUES
+-* DATA      : 18-02-2009
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PAG_AUTORIZ_SIN_INDEMNIZ( PI_CDUNIECO IN NUMBER
+                                      ,PI_CDRAMO   IN NUMBER
+                                      ,PI_AAAPERTU IN NUMBER
+                                      ,PI_NMSINIES IN NUMBER
+                                      ,PI_STATUS   IN VARCHAR ) RETURN VARCHAR2;
+
+/*
+-* NOME      : MUDOU_LITIGIO
+-* OBJECTIVO : RETORNA S OU N CONFORME SE O LITIGIO TENHA SIDO CRIADO OU ALTERADO
+-* UTILIZACAO:
+-* AUTOR     : ALDO TITA
+-* DATA      : 26-11-2010
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION MUDOU_LITIGIO( PI_NMPROAME IN NUMBER
+                       ,PI_NMCOMAME   IN NUMBER
+                       ,PI_DATA_MOVIMENTO IN DATE
+                       ,PI_LITIGIO IN VARCHAR2 ) RETURN VARCHAR2;
+
+/*
+-* NOME      : GET_EVENTS_M128
+-* OBJECTIVO : RETORNA O NUMERO DE OCURRENCIAS PARA UM TIPO DE EVENTO DA CO_DETAANR PARA UM PERÍODO DE TEMPO
+-* UTILIZACAO: P_CDEVENTO - tipo de evento
+			   P_COD -   1 STOCK_ini
+						,2 NOVO
+						,3 TRATADO
+						,4 STOCK_fim
+						,5 STOCK_ini_ocur
+						,6 NOVO_ocur
+						,7 TRATADO_ocur
+						,8 STOCK_fim_ocur
+				P_DATA_INIT e P_DATA_FIM define o período de tempo
+-* AUTOR     : JOÃO RIBEIRO
+-* DATA      : 05-09-2019
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_EVENTS_M128( P_CDEVENTO IN VARCHAR2 
+						, P_COD IN NUMBER 
+						, P_DATA_INIT IN DATE 
+						, P_DATA_FIM IN DATE  ) RETURN NUMBER;
+
+/*
+-* NOME      : GET_DATA_SITUACAO_GESTAO
+-* OBJECTIVO : RETORNA A DATA INICIAL DO ESTADO DE GESTÃO ACTUAL
+-* UTILIZACAO:
+-* AUTOR     : João Ribeiro
+-* DATA      : 22-10-2019
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DATA_SITUACAO_GESTAO ( PI_CDNMPROC IN NUMBER ) RETURN DATE;
+
+
+PRAGMA RESTRICT_REFERENCES (GET_PACKINFO,WNDS);
+PRAGMA RESTRICT_REFERENCES (GET_DADOS_CONTRATO,WNDS);
+PRAGMA RESTRICT_REFERENCES (GET_DADOS_PRESTACAO,WNDS);
+PRAGMA RESTRICT_REFERENCES (GET_VRP,WNDS);
+PRAGMA RESTRICT_REFERENCES (GET_VCEP,WNDS);
+PRAGMA RESTRICT_REFERENCES (GET_DATA_PRESTACAO_PENDENTE,WNDS);
+PRAGMA RESTRICT_REFERENCES (GET_DATA_PRESTACAO_PAGA,WNDS);
+PRAGMA RESTRICT_REFERENCES (GET_DATA_MOVIMENTO_CAPITAL,WNDS);
+PRAGMA RESTRICT_REFERENCES (MUDOU_LITIGIO,WNDS);
+PRAGMA RESTRICT_REFERENCES (GET_EVENTS_M128,WNDS);
+
+END PKG_SINISTROS_UTIL;
+
+-- ===== BODY (PACKAGE BODY) =====
+
+PACKAGE BODY             PKG_SINISTROS_UTIL AS
+/*
+-*
+-* ULTIMAS ALTERACÕES AO PACKAGE
+-*
+-*   DATA       AUTOR              DESCRICÃO
+-*   ========== ================== ===================================================
+-*   16-02-2007 JOSE VIEGAS        Acrescentado controlo de versões do package
+-*   18-02-2009 ARLINDO RODRIGUES  Acrescentada a funcão GET_PAG_AUTORIZ_SIN_INDEMNIZ
+*/
+  VERSAO         CONSTANT NUMBER:=002;
+  DATA_VERSAO    CONSTANT DATE:= TO_DATE('18-02-2009 13:30','DD-MM-YYYY HH24:MI');
+  AUTOR_PACKAGE  CONSTANT VARCHAR2(100):='Eng. Jose Viegas';
+  AUTOR_VERSAO   CONSTANT VARCHAR2(100):='ARLINDO RODRIGUES';
+
+
+/*
+-* NOME      : GET_DATA_PRESTACAO_PAGA
+-* OBJECTIVO : DEVOLVER A DATA DA ULTIMA PRESTACÃO PAGA
+-* UTILIZACAO:
+-* AUTOR     : Vitor Rodrigues
+-* DATA      :  11-12-2008
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+
+FUNCTION GET_DATA_MOVIMENTO_CAPITAL (P_CDNMPROC IN NUMBER
+		 		                    ,P_CDTIPMOV IN VARCHAR2
+				                    ,P_NMVALMOV IN NUMBER) RETURN DATE
+IS
+AUX_DATA_MOVIMENTO DATE;
+BEGIN
+
+     IF P_CDTIPMOV = 'AN' THEN
+
+	  -- DBMS_OUTPUT.PUT_LINE('E AN:');
+
+	   BEGIN
+
+		  SELECT MAX(MOVIMENTO.FEMOVIM)
+            INTO AUX_DATA_MOVIMENTO
+		    FROM CO_CONME   MOVIMENTO
+           WHERE MOVIMENTO.CDNMPROC =  P_CDNMPROC
+		     AND MOVIMENTO.NMVALMOV = (-1 * P_NMVALMOV)
+		     AND MOVIMENTO.CDTIPMOV IN('CN','CS','CO');
+
+	   EXCEPTION
+	     WHEN OTHERS THEN
+		    RETURN NULL;
+	   END;
+
+	 ELSE
+	 --  DBMS_OUTPUT.PUT_LINE('NÃO E AN:');
+
+	   BEGIN
+
+	     SELECT MAX(MOVIMENTO.FEMOVIM)
+           INTO AUX_DATA_MOVIMENTO
+           FROM CO_CONME   MOVIMENTO
+          WHERE DECODE(SUBSTR(MOVIMENTO.CDTIPMOV,1,1),'C',DECODE(MOVIMENTO.CDTIPMOV,'CG','N','CD','N','S'),'N')='S'
+            AND MOVIMENTO.CDNMPROC = P_CDNMPROC;
+	   EXCEPTION
+	     WHEN OTHERS THEN
+		  RETURN NULL ;
+	   END;
+	 END IF;
+
+	--DBMS_OUTPUT.PUT_LINE('AUX_DATA_MOVIMENTO'||AUX_DATA_MOVIMENTO);
+	RETURN AUX_DATA_MOVIMENTO;
+
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN SYSDATE+1;
+END GET_DATA_MOVIMENTO_CAPITAL;
+
+
+/*
+-* NOME      : GET_DATA_PRESTACAO_PAGA
+-* OBJECTIVO : DEVOLVER A DATA DA ULTIMA PRESTACÃO PAGA
+-* UTILIZACAO:
+-* AUTOR     : Vitor Rodrigues
+-* DATA      :  11-12-2008
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+
+FUNCTION GET_DATA_PRESTACAO_PAGA   ( PI_CDPERSON IN VARCHAR2) RETURN DATE IS
+
+AUX_CDUNIECO M_CONTRATO.CDUNIECO%TYPE;
+AUX_CDPROFIN M_CONTRATO.CDPROFIN%TYPE;
+AUX_NMCONFIN M_CONTRATO.NMCONFIN%TYPE;
+AUX_CDESTADO M_CONTRATO.CDESTADO%TYPE;
+AUX_DATA_PRESTACAO_PAGA M_CUOTRECB.FEVENCIM%TYPE;
+
+BEGIN
+
+
+	SELECT CONTRATO.CDUNIECO, CONTRATO.CDPROFIN,CONTRATO.NMCONFIN, CONTRATO.CDESTADO
+	INTO AUX_CDUNIECO,AUX_CDPROFIN,AUX_NMCONFIN,AUX_CDESTADO
+	FROM M_CONTRATO CONTRATO
+	WHERE
+	1=1
+	AND CONTRATO.NMCONFIN=(SELECT MAX(X.NMCONFIN)
+					   FROM M_CONTRATO X
+					   WHERE
+					   2=2
+					   AND X.CDESTADO=CONTRATO.CDESTADO
+					   AND X.CDPERSON=CONTRATO.CDPERSON
+					   )
+	AND CONTRATO.CDESTADO='M'
+	AND CONTRATO.CDPERSON=PI_CDPERSON;
+	--AND CONTRATO.CDTIPLAN = 'PP';
+
+
+	SELECT MAX(M.FEVENCIM)
+	  INTO AUX_DATA_PRESTACAO_PAGA
+	  FROM M_CUOTRECB M
+	 WHERE 1 = 1
+	   AND M.CDUNIECO = AUX_CDUNIECO
+	   AND M.CDESTADO = AUX_CDESTADO
+	   AND M.CDPROFIN = AUX_CDPROFIN
+	   AND M.NMCONFIN = AUX_NMCONFIN
+	   AND M.CDEDOREC = 'CO'
+	   AND M.NMRECIBO = ( SELECT MAX(X.NMRECIBO)
+	                        FROM M_CUOTRECB X
+						   WHERE 1 = 1
+						     AND X.CDUNIECO = AUX_CDUNIECO
+	   						 AND X.CDESTADO = AUX_CDESTADO
+	   						 AND X.CDPROFIN = AUX_CDPROFIN
+	   						 AND X.NMCONFIN = AUX_NMCONFIN
+	   						 AND X.CDEDOREC = 'CO') ;
+
+		RETURN AUX_DATA_PRESTACAO_PAGA;
+
+
+EXCEPTION
+	WHEN OTHERS THEN
+	RETURN NULL;
+END GET_DATA_PRESTACAO_PAGA ;
+
+/*
+-* NOME      : GET_DATA_PRESTACAO_PENDENTE
+-* OBJECTIVO : DEVOLVER A DATA DA PRESTACÃO PENDENTE
+-* UTILIZACAO:
+-* AUTOR     : Vitor Rodrigues
+-* DATA      :  11-12-2008
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+
+FUNCTION GET_DATA_PRESTACAO_PENDENTE   ( PI_CDPERSON IN VARCHAR2) RETURN DATE IS
+
+AUX_CDUNIECO M_CONTRATO.CDUNIECO%TYPE;
+AUX_CDPROFIN M_CONTRATO.CDPROFIN%TYPE;
+AUX_NMCONFIN M_CONTRATO.NMCONFIN%TYPE;
+AUX_CDESTADO M_CONTRATO.CDESTADO%TYPE;
+AUX_DATA_PRESTACAO_PENDENTE M_CUOTRECB.FEVENCIM%TYPE;
+
+BEGIN
+
+
+	SELECT CONTRATO.CDUNIECO, CONTRATO.CDPROFIN,CONTRATO.NMCONFIN, CONTRATO.CDESTADO
+	INTO AUX_CDUNIECO,AUX_CDPROFIN,AUX_NMCONFIN,AUX_CDESTADO
+	FROM M_CONTRATO CONTRATO
+	WHERE
+	1=1
+	AND CONTRATO.NMCONFIN=(SELECT MAX(X.NMCONFIN)
+					   FROM M_CONTRATO X
+					   WHERE
+					   2=2
+					   AND X.CDESTADO=CONTRATO.CDESTADO
+					   AND X.CDPERSON=CONTRATO.CDPERSON
+					   )
+	AND CONTRATO.CDESTADO='M'
+	AND CONTRATO.CDPERSON=PI_CDPERSON;
+	--AND CONTRATO.CDTIPLAN = 'PP';
+
+
+	SELECT MIN(M.FEVENCIM)
+	  INTO AUX_DATA_PRESTACAO_PENDENTE
+	  FROM M_CUOTRECB M
+	 WHERE 1 = 1
+	   AND M.CDUNIECO = AUX_CDUNIECO
+	   AND M.CDESTADO = AUX_CDESTADO
+	   AND M.CDPROFIN = AUX_CDPROFIN
+	   AND M.NMCONFIN = AUX_NMCONFIN
+	   AND M.CDEDOREC <> 'CO'
+	   AND M.NMRECIBO = ( SELECT MIN(X.NMRECIBO)
+	                        FROM M_CUOTRECB X
+						   WHERE 1 = 1
+						     AND X.CDUNIECO = AUX_CDUNIECO
+	   						 AND X.CDESTADO = AUX_CDESTADO
+	   						 AND X.CDPROFIN = AUX_CDPROFIN
+	   						 AND X.NMCONFIN = AUX_NMCONFIN
+	   						 AND X.CDEDOREC <> 'CO') ;
+
+		RETURN AUX_DATA_PRESTACAO_PENDENTE;
+
+
+EXCEPTION
+	WHEN OTHERS THEN
+	RETURN NULL;
+END GET_DATA_PRESTACAO_PENDENTE ;
+
+
+
+
+
+
+
+
+/*
+-* NOME      : GET_PACKINFO
+-* OBJECTIVO : MANTER INFORMACÃO SOBRE VERSÃO DO PACKAGE
+-* UTILIZACAO: PKG_FORMULAS_COSEC.GET_PACKINFO('VERSAO');
+-* AUTOR     : Eng. Jose Viegas
+-* DATA      : 08-02-2006
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+  FUNCTION GET_PACKINFO (P_TIPO_INFO VARCHAR2 DEFAULT 'COMPLETE') RETURN VARCHAR2 IS
+    AUX VARCHAR2(200);
+  BEGIN
+    IF P_TIPO_INFO = INFO_VERSAO THEN  /* DEVOLVE VERSÃO DO PACKAGE */
+      RETURN 'v'||TO_CHAR(VERSAO);
+    ELSIF P_TIPO_INFO = INFO_DATA_VERSAO THEN
+      RETURN TO_CHAR(DATA_VERSAO,'YYYY-MM-DD HH24:MI');
+    ELSIF P_TIPO_INFO = INFO_AUTOR_PACKAGE THEN
+      RETURN AUTOR_PACKAGE;
+    ELSIF P_TIPO_INFO = INFO_AUTOR_VERSAO THEN
+      RETURN AUTOR_VERSAO;
+    ELSIF P_TIPO_INFO = INFO_DATA_PACKAGE THEN
+      BEGIN
+        SELECT
+          TO_CHAR(CREATED,'YYYY-MM-DD HH24:MI')
+        INTO
+          AUX
+        FROM
+          ALL_OBJECTS
+        WHERE
+            OBJECT_NAME='PKG_FORMULAS_COSEC'
+        AND OBJECT_TYPE='PACKAGE BODY'
+        AND OWNER = (SELECT USERNAME FROM USER_USERS);
+        RETURN AUX;
+      EXCEPTION
+        WHEN OTHERS THEN
+         RETURN 'PKG_FORMULAS_COSEC v'||VERSAO||'('||TO_CHAR(DATA_VERSAO,'YYMMDDHH24MI')||')';
+      END;
+    ELSIF P_TIPO_INFO = INFO_DATA_INSTALACAO THEN
+      BEGIN
+        SELECT
+          TO_CHAR(LAST_DDL_TIME,'YYYY-MM-DD HH24:MI')
+        INTO
+          AUX
+        FROM
+          ALL_OBJECTS
+        WHERE
+            OBJECT_NAME='PKG_FORMULAS_COSEC'
+        AND OBJECT_TYPE='PACKAGE BODY'
+        AND OWNER = (SELECT USERNAME FROM USER_USERS);
+        RETURN AUX;
+      EXCEPTION
+        WHEN OTHERS THEN
+         RETURN 'PKG_FORMULAS_COSEC v'||VERSAO||'('||TO_CHAR(DATA_VERSAO,'YYMMDDHH24MI')||')';
+      END;
+    ELSIF P_TIPO_INFO = INFO_OWNER THEN
+      SELECT USERNAME INTO AUX FROM USER_USERS;
+      RETURN AUX;
+    ELSE
+      RETURN 'PKG_FORMULAS_COSEC v'||VERSAO||'('||TO_CHAR(DATA_VERSAO,'YYMMDDHH24MI')||')';
+    END IF;
+  END GET_PACKINFO;
+/*
+-* NOME      : GET_VCEP
+-* OBJECTIVO : RETORNA O VALOR EM CARTEIRA DOS PROCESSOS
+-* PARA UM INTERVALO DE DATAS E ADVOGADO
+-*
+-* UTILIZACAO:
+-* AUTOR     : Brigida Ramos
+-* DATA      : 16-11-2006
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_VCEP ( PI_CDPERSON IN VARCHAR2
+		      , PI_INI IN DATE
+			, PI_FIMM IN DATE) RETURN NUMBER
+IS
+aux_VALOR NUMBER;
+BEGIN
+SELECT ABS(SUM(P.NMVALINI)) INTO aux_VALOR FROM CO_PRCON P WHERE P.CDNMPROC IN (
+  SELECT DISTINCT PROCESSO.CDNMPROC
+		 FROM CO_PRCON PROCESSO,CO_DILIG DILIGENCIA
+		 WHERE DECODE(PROCESSO.CDTIPCON,'RS',DILIGENCIA.CDENTAVO,PROCESSO.CDENTAVO)=PI_CDPERSON
+		 AND DECODE(DILIGENCIA.FEFIN,NULL,'S','N')='S'
+  	 	AND DILIGENCIA.FEAPERMV BETWEEN PI_INI AND PI_FIMM
+		 AND DILIGENCIA.CDTIPDIL='TF'
+		 AND DILIGENCIA.CDNMPROC=PROCESSO.CDNMPROC);
+	RETURN NVL(aux_VALOR,0);
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN -1;
+END GET_VCEP;
+/*
+-* NOME      : GET_VRP
+-* OBJECTIVO : RETORNA O VALOR DE RECUPERACAO TOTAL DOS PROCESSOS
+-* PARA UM INTERVALO DE DATAS E ADVOGADO
+-*
+-* UTILIZACAO:
+-* AUTOR     : Brigida Ramos
+-* DATA      : 16-11-2006
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_VRP (PI_CDPERSON IN VARCHAR2
+		 		,PI_INICIO IN DATE
+				,PI_FIM IN DATE) RETURN NUMBER
+IS
+aux_VALOR NUMBER;
+BEGIN
+		SELECT SUM(nvl(MOVIMENTO.NMVALMOV,0)) INTO aux_VALOR
+		 FROM CO_CONME MOVIMENTO
+		, CO_PRCON PROCESSO
+		, CO_DILIG ADV
+		 WHERE
+		 1=1
+		 AND ADV.CDNMPROC=PROCESSO.CDNMPROC
+		 AND ADV.FEFIN IS  NULL
+		 AND ADV.CDTIPDIL='TF'
+		 AND MOVIMENTO.NMVALMOV <0
+		 AND MOVIMENTO.CDTIPMOV IN ('CI','CP','CR','CV','CT')
+		 AND MOVIMENTO.FEMOVIM BETWEEN PI_INICIO AND PI_FIM
+		 AND DECODE(PROCESSO.CDTIPCON,'RS',ADV.CDENTAVO,PROCESSO.CDENTAVO) =PI_CDPERSON
+		 AND MOVIMENTO.CDNMPROC=PROCESSO.CDNMPROC;
+	RETURN NVL(aux_VALOR,0);
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN -1;
+END GET_VRP;
+/*
+-* NOME      : GET_DADOS_CONTRATO
+-* OBJECTIVO : RETORNA A INFORMACAO DE CONTRATO
+-* UTILIZACAO:
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 16-02-2007
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DADOS_CONTRATO    ( PI_CDPERSON IN NUMBER
+		 		,PI_TIPO   IN VARCHAR2) RETURN VARCHAR2 IS
+AUX_NUM    VARCHAR2(10);
+AUX_ESTADO VARCHAR2(1);
+AUX_DT_ANUL VARCHAR2(10);
+AUX_VAL VARCHAR2(200);
+AUX_DT_EFEITO VARCHAR2(10);
+BEGIN
+	SELECT TO_CHAR(CONTRATO.NMCONFIN),CONTRATO.CDESTADO,TO_CHAR(CONTRATO.FEANULAC,'DD-MM-RRRR'),
+	TO_CHAR(CONTRATO.IMCONTRA), TO_CHAR(CONTRATO.FEEFECTO)
+	INTO AUX_NUM,AUX_ESTADO,AUX_DT_ANUL,AUX_VAL,AUX_DT_EFEITO
+	FROM M_CONTRATO CONTRATO
+	WHERE
+	1=1
+	AND CONTRATO.NMCONFIN=(SELECT MAX(X.NMCONFIN)
+					   FROM M_CONTRATO X
+					   WHERE
+					   2=2
+					   AND X.CDESTADO=CONTRATO.CDESTADO
+					   AND X.CDPERSON=CONTRATO.CDPERSON
+					   )
+	AND CONTRATO.CDESTADO='M'
+	AND CONTRATO.CDPERSON=PI_CDPERSON;
+	IF PI_TIPO='NUM' THEN
+	    RETURN AUX_NUM;
+	ELSE
+	    IF PI_TIPO='EST' THEN
+		RETURN AUX_ESTADO;
+	    ELSE
+		IF PI_TIPO='DTANUL' THEN
+		   RETURN AUX_DT_ANUL;
+		ELSE
+		   IF PI_TIPO ='VAL' THEN
+			RETURN AUX_VAL;
+		   ELSE
+			IF PI_TIPO = 'DTEFEITO' THEN
+		          RETURN AUX_DT_EFEITO;
+			ELSE
+			  RETURN NULL;
+			END IF;
+		   END IF;
+		END IF;
+	    END IF;
+  	END IF;
+	EXCEPTION
+	WHEN OTHERS THEN
+		BEGIN
+			SELECT TO_CHAR(CONTRATO.NMCONFIN),CONTRATO.CDESTADO,TO_CHAR(CONTRATO.FEANULAC,'DD-MM-RRRR'),
+			TO_CHAR(CONTRATO.IMCONTRA), TO_CHAR(CONTRATO.FEEFECTO)
+			INTO AUX_NUM,AUX_ESTADO,AUX_DT_ANUL,AUX_VAL,AUX_DT_EFEITO
+			FROM M_CONTRATO CONTRATO
+			WHERE
+			1=1
+			AND CONTRATO.NMCONFIN=(SELECT MAX(X.NMCONFIN)
+					   FROM M_CONTRATO X
+					   WHERE
+					   2=2
+					   AND X.CDESTADO=CONTRATO.CDESTADO
+					   AND X.CDPERSON=CONTRATO.CDPERSON
+					   )
+			AND CONTRATO.CDESTADO='W'
+			AND CONTRATO.CDPERSON=PI_CDPERSON;
+			IF PI_TIPO='NUM' THEN
+			    RETURN AUX_NUM;
+			ELSE
+			    IF PI_TIPO='EST' THEN
+				RETURN AUX_ESTADO;
+			    ELSE
+				IF PI_TIPO='DTANUL' THEN
+				   RETURN AUX_DT_ANUL;
+				ELSE
+				  IF PI_TIPO= 'VAL' THEN
+					RETURN AUX_VAL;
+				   ELSE
+					IF PI_TIPO= 'DTEFEITO' THEN
+					   RETURN AUX_DT_EFEITO;
+					ELSE
+					  RETURN NULL;
+					END IF;
+				   END IF;
+				END IF;
+			    END IF;
+		  	END IF;
+		 EXCEPTION
+		 WHEN OTHERS THEN
+			RETURN NULL;
+                 END;
+END GET_DADOS_CONTRATO;
+/*
+-* NOME      : GET_DADOS_PRESTACAO
+-* OBJECTIVO : RETORNA A INFORMACAO DE PRESTACAO
+-* UTILIZACAO:
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 16-02-2007
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DADOS_PRESTACAO    ( PI_NMCONFIN IN NUMBER
+				,  PI_CDESTADO IN VARCHAR2
+		 		, PI_TIPO   IN VARCHAR2) RETURN VARCHAR2 IS
+AUX_NUM VARCHAR2(100);
+AUX_VAL VARCHAR2(100);
+BEGIN
+	SELECT
+	 SUM (1) ,SUM(IMCUOTA) INTO AUX_NUM, AUX_VAL
+	FROM M_CUOTRECB
+	WHERE
+	1=1
+        AND CDEDOREC='PC'
+	AND CDESTADO=PI_CDESTADO
+	AND NMCONFIN=PI_NMCONFIN;
+	IF PI_TIPO='NUM' THEN
+		RETURN AUX_NUM;
+	ELSE
+	    IF PI_TIPO='VAL' THEN
+		RETURN AUX_VAL;
+	    ELSE
+		RETURN NULL;
+	    END IF;
+	END IF;
+EXCEPTION
+	WHEN OTHERS THEN
+	RETURN NULL;
+END GET_DADOS_PRESTACAO;
+
+
+/*
+-* NOME      : GET_PAG_AUTORIZ_SIN_INDEMNIZ
+-* OBJECTIVO : RETORNA S OU N CONFORME EXISTAM PAGAMENTOS AUTORIZADOS OU NAO, RELATIVOS
+-*             AO CONCEITO DE INDEMNIZACÃO
+-* UTILIZACAO:
+-* AUTOR     : ARLINDO RODRIGUES
+-* DATA      : 18-02-2009
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PAG_AUTORIZ_SIN_INDEMNIZ( PI_CDUNIECO IN NUMBER
+                                      ,PI_CDRAMO   IN NUMBER
+                                      ,PI_AAAPERTU IN NUMBER
+                                      ,PI_NMSINIES IN NUMBER
+                                      ,PI_STATUS   IN VARCHAR ) RETURN VARCHAR2
+IS
+AUX VARCHAR2(1);
+
+BEGIN
+
+     IF PI_STATUS IS NULL THEN
+       SELECT 'S' INTO AUX
+       FROM DUAL
+       WHERE
+       EXISTS ( SELECT 'S'
+                FROM MPAGOSIN
+                WHERE
+                2=2
+                AND  SWESTADO IN (3,2)
+                AND  NMSINIES=PI_NMSINIES
+                AND  AAAPERTU=PI_AAAPERTU
+                AND  CDRAMO=PI_CDRAMO
+                AND  CDUNIECO=PI_CDUNIECO
+                AND  STATUS='M'
+                AND  CDCONVAL LIKE '_1%'
+              );
+     ELSE
+       SELECT 'S' INTO AUX
+       FROM DUAL
+       WHERE
+       EXISTS ( SELECT 'S'
+                FROM MPAGOSIN
+                WHERE
+                2=2
+                AND  SWESTADO IN (3,2)
+                AND  NMSINIES=PI_NMSINIES
+                AND  AAAPERTU=PI_AAAPERTU
+                AND  CDRAMO=PI_CDRAMO
+                AND  CDUNIECO=PI_CDUNIECO
+                AND  STATUS=PI_STATUS
+                AND  CDCONVAL LIKE '_1%'
+              );
+     END IF;
+
+  RETURN AUX;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 'N';
+
+END GET_PAG_AUTORIZ_SIN_INDEMNIZ;
+
+/*
+-* NOME      : MUDOU_LITIGIO
+-* OBJECTIVO : RETORNA S OU N CONFORME SE O LITIGIO TENHA SIDO CRIADO OU ALTERADO
+-* UTILIZACAO:
+-* AUTOR     : ALDO TITA
+-* DATA      : 26-11-2010
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION MUDOU_LITIGIO( PI_NMPROAME IN NUMBER
+                       ,PI_NMCOMAME   IN NUMBER
+                       ,PI_DATA_MOVIMENTO IN DATE
+                       ,PI_LITIGIO IN VARCHAR2 ) RETURN VARCHAR2
+IS
+
+ AUX VARCHAR2(1); /* NÃO preciso inicializar pois vAIS carregar com
+valores da bd */
+
+BEGIN
+
+  SELECT
+    MOVS.swsitlig
+  INTO
+    AUX
+  FROM
+    CO_HCOAME MOVS
+  WHERE 1=1
+  AND MOVS.NMPROAME = PI_NMPROAME
+  AND MOVS.NMCOMAME = PI_NMCOMAME
+  AND MOVS.FEMODIF  = (
+                        SELECT
+                          MAX(x.femodif)
+                        FROM
+                          CO_HCOAME  x
+                        where 1=1
+                        AND x.NMPROAME = MOVS.NMPROAME
+                        AND x.NMCOMAME = MOVS.NMCOMAME
+                        AND x.FEMODIF  < PI_data_movimento
+                       );
+
+
+  /* valida se o litigio actual e identico ao anterior ...
+     utiliza a funcão NVL para o caso de  serem ambos nulos */
+  IF NVL(AUX,'F') = NVL(PI_LITIGIO,'F') THEN
+    RETURN 'N';
+  END IF;
+
+  /* se NÃO entrou atras...então são diferentes logo retorna SIM */
+  RETURN 'S';
+
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 'N'; /* E O PRIMEIRO REGISTO E NÃO TEM MOVIMENTOS ANTERIORES */
+  WHEN OTHERS THEN
+    RETURN 'F'; /* PARA SABERES QUE HOUVE UM ERRO */
+END MUDOU_LITIGIO;
+
+/*
+-* NOME      : GET_EVENTS_M128
+-* OBJECTIVO : RETORNA O NUMERO DE OCURRENCIAS PARA UM TIPO DE EVENTO DA CO_DETAANR PARA UM PERÍODO DE TEMPO
+-* UTILIZACAO: P_CDEVENTO - tipo de evento
+			   P_COD -   1 STOCK_ini
+						,2 NOVO
+						,3 TRATADO
+						,4 STOCK_fim
+						,5 STOCK_ini_ocur
+						,6 NOVO_ocur
+						,7 TRATADO_ocur
+						,8 STOCK_fim_ocur
+				P_DATA_INIT e P_DATA_FIM define o período de tempo
+-* AUTOR     : JOÃO RIBEIRO
+-* DATA      : 05-09-2019
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+	FUNCTION GET_EVENTS_M128( P_CDEVENTO IN VARCHAR2 
+							, P_COD IN NUMBER 
+							, P_DATA_INIT IN DATE 
+							, P_DATA_FIM IN DATE  ) RETURN NUMBER AS 
+	V_AUX_EVENT VARCHAR2(10);
+	V_AUX_NUMBER NUMBER;
+	BEGIN
+		if P_COD = 1 then
+
+			begin
+
+				SELECT a.cdevento
+					,count(*)
+				INTO V_AUX_EVENT
+					,V_AUX_NUMBER
+				FROM co_detaanr a
+				WHERE 1 = 1
+					AND a.cdevento = P_CDEVENTO
+					AND (
+						(
+							a.cdestado NOT IN (
+								'AN'
+								,'DE'
+								)
+							AND trunc(a.feevento) < TRUNC(P_DATA_INIT)
+							)
+						OR (
+							a.cdestado IN (
+								'AN'
+								,'DE'
+								)
+							AND trunc(a.feultest) >= TRUNC(P_DATA_INIT)
+							AND trunc(a.feevento) < TRUNC(P_DATA_INIT)
+							)
+						)
+				group by a.cdevento
+				;
+
+				return V_AUX_NUMBER;
+
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN null;
+			END;
+
+
+		ELSIF P_COD = 2 then
+
+			begin
+
+				SELECT a.cdevento
+					,count(*)
+				INTO V_AUX_EVENT
+					,V_AUX_NUMBER
+				FROM co_detaanr a
+				WHERE 1 = 1
+					AND a.cdevento = P_CDEVENTO
+					AND trunc(a.feevento) >= TRUNC(P_DATA_INIT)
+					AND trunc(a.feevento) <= TRUNC(P_DATA_FIM)
+				group by a.cdevento
+				;
+
+				return V_AUX_NUMBER;
+
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN null;
+			END;
+
+
+		ELSIF P_COD = 3 then
+
+			begin
+
+				SELECT a.cdevento
+					,count(*)
+				INTO V_AUX_EVENT
+					,V_AUX_NUMBER
+				FROM co_detaanr a
+				WHERE 1 = 1
+					AND a.cdevento = P_CDEVENTO
+					AND a.cdestado IN (
+						'AN'
+						,'DE'
+						)
+					AND trunc(a.FEULTEST) >= TRUNC(P_DATA_INIT)
+					AND trunc(a.FEULTEST) <= TRUNC(P_DATA_FIM)
+				group by a.cdevento
+				;
+
+				return V_AUX_NUMBER;
+
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN null;
+			END;
+
+
+		ELSIF P_COD = 4 then
+
+			begin
+
+				SELECT a.cdevento
+					,count(*)
+				INTO V_AUX_EVENT
+					,V_AUX_NUMBER
+				FROM co_detaanr a
+				WHERE 1 = 1
+					AND a.cdevento = P_CDEVENTO
+					AND (
+						(
+							a.cdestado NOT IN (
+								'AN'
+								,'DE'
+								)
+							AND trunc(a.feevento) <= TRUNC(P_DATA_FIM)
+							)
+						OR (
+							a.cdestado IN (
+								'AN'
+								,'DE'
+								)
+							AND trunc(a.feultest) > TRUNC(P_DATA_FIM)
+							AND trunc(a.feevento) <= TRUNC(P_DATA_FIM)
+							)
+						)
+				group by a.cdevento
+				;
+
+				return V_AUX_NUMBER;
+
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN null;
+			END;
+
+
+		ELSIF P_COD = 5 then
+
+			begin
+
+				SELECT a.cdevento
+					,SUM(decode(b.CDCOCUR, NULL, 0, 1))
+				INTO V_AUX_EVENT
+					,V_AUX_NUMBER
+				FROM co_detaanr a
+					,co_ocuranr b
+				WHERE 1 = 1
+					AND a.cdevento = P_CDEVENTO
+					AND (
+						(
+							a.cdestado NOT IN (
+								'AN'
+								,'DE'
+								)
+							AND trunc(a.feevento) < TRUNC(P_DATA_INIT)
+							)
+						OR (
+							a.cdestado IN (
+								'AN'
+								,'DE'
+								)
+							AND trunc(a.feultest) >= TRUNC(P_DATA_INIT)
+							AND trunc(a.feevento) < TRUNC(P_DATA_INIT)
+							)
+						)
+					AND b.nmpedido = a.nmpedido
+					AND b.nmevento = a.nmevento
+				GROUP BY a.cdevento;
+
+
+				return V_AUX_NUMBER;
+
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN null;
+			END;
+
+
+		ELSIF P_COD = 6 then
+
+			begin
+
+				SELECT a.cdevento
+					,SUM(decode(b.CDCOCUR, NULL, 0, 1))
+				INTO V_AUX_EVENT
+					,V_AUX_NUMBER
+				FROM co_detaanr a
+					,co_ocuranr b
+				WHERE 1 = 1
+					AND a.cdevento = P_CDEVENTO
+					AND trunc(a.feevento) >= TRUNC(P_DATA_INIT)
+					AND trunc(a.feevento) <= TRUNC(P_DATA_FIM)
+					AND b.nmpedido = a.nmpedido
+					AND b.nmevento = a.nmevento
+				GROUP BY a.cdevento;
+
+
+				return V_AUX_NUMBER;
+
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN null;
+			END;
+
+
+		ELSIF P_COD = 7 then
+
+			begin
+
+				SELECT a.cdevento
+					,SUM(decode(b.CDCOCUR, NULL, 0, 1))
+				INTO V_AUX_EVENT
+					,V_AUX_NUMBER
+				FROM co_detaanr a
+					,co_ocuranr b
+				WHERE 1 = 1
+					AND a.cdevento = P_CDEVENTO
+					AND a.cdestado IN (
+						'AN'
+						,'DE'
+						)
+					AND trunc(a.FEULTEST) >= TRUNC(P_DATA_INIT)
+					AND trunc(a.FEULTEST) <= TRUNC(P_DATA_FIM)
+					AND b.nmpedido = a.nmpedido
+					AND b.nmevento = a.nmevento
+				GROUP BY a.cdevento;
+
+
+				return V_AUX_NUMBER;
+
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN null;
+			END;
+
+
+		ELSIF P_COD = 8 then
+
+			begin
+
+				SELECT a.cdevento
+					,SUM(decode(b.CDCOCUR, NULL, 0, 1))
+				INTO V_AUX_EVENT
+					,V_AUX_NUMBER
+				FROM co_detaanr a
+					,co_ocuranr b
+				WHERE 1 = 1
+					AND a.cdevento = P_CDEVENTO
+					AND (
+						(
+							a.cdestado NOT IN (
+								'AN'
+								,'DE'
+								)
+							AND trunc(a.feevento) <= TRUNC(P_DATA_FIM)
+							)
+						OR (
+							a.cdestado IN (
+								'AN'
+								,'DE'
+								)
+							AND trunc(a.feultest) > TRUNC(P_DATA_FIM)
+							AND trunc(a.feevento) <= TRUNC(P_DATA_FIM)
+							)
+						)
+					AND b.nmpedido = a.nmpedido
+					AND b.nmevento = a.nmevento
+				GROUP BY a.cdevento;
+
+
+				return V_AUX_NUMBER;
+
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN null;
+			END;
+
+
+		ELSE return null;
+
+		END if;
+	END GET_EVENTS_M128;
+
+/*
+-* NOME      : GET_DATA_SITUACAO_GESTAO_TEMP
+-* OBJECTIVO : RETORNA A DATA INICIAL DO ESTADO DE GESTÃO ACTUAL
+-* UTILIZACAO:
+-* AUTOR     : João Ribeiro
+-* DATA      : 22-10-2019
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DATA_SITUACAO_GESTAO_TMP ( PI_CDNMPROC IN CO_HPRCON.CDNMPROC%type, PI_NMHISTOR CO_HPRCON.NMHISTOR%type, PI_CDSITGES CO_HPRCON.CDSITGES%type, PI_DATA_ALTERACAO CO_HPRCON.FEALTERA%type) RETURN DATE
+IS
+
+ vNMHISTOR CO_HPRCON.NMHISTOR%type;
+ vDATA_ALTERACAO CO_HPRCON.FEALTERA%type;
+ vDATA_ALTERACAO_TEMP CO_HPRCON.FEALTERA%type;
+ vCDSITGES CO_HPRCON.CDSITGES%type;
+
+BEGIN
+
+	SELECT HPROCESSO.FEALTERA
+		,HPROCESSO.NMHISTOR
+		,HPROCESSO.CDSITGES
+	into vDATA_ALTERACAO
+		,vNMHISTOR
+		,vCDSITGES
+	FROM CO_HPRCON HPROCESSO
+	WHERE 1 = 1
+		AND HPROCESSO.NMHISTOR = PI_NMHISTOR
+		AND HPROCESSO.CDNMPROC = PI_CDNMPROC
+	;
+
+	IF (PI_NMHISTOR = 1 AND  PI_CDSITGES = vCDSITGES) THEN
+		RETURN vDATA_ALTERACAO;
+	ELSIF ( PI_NMHISTOR > 1 AND  PI_CDSITGES = vCDSITGES)	THEN
+		vDATA_ALTERACAO_TEMP := GET_DATA_SITUACAO_GESTAO_TMP(PI_CDNMPROC,vNMHISTOR-1,vCDSITGES, vDATA_ALTERACAO);
+		RETURN vDATA_ALTERACAO_TEMP;
+	ELSE
+		RETURN PI_DATA_ALTERACAO;
+	END IF;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN null;
+
+END GET_DATA_SITUACAO_GESTAO_TMP;
+
+/*
+-* NOME      : GET_DATA_SITUACAO_GESTAO
+-* OBJECTIVO : RETORNA A DATA INICIAL DO ESTADO DE GESTÃO ACTUAL
+-* UTILIZACAO:
+-* AUTOR     : João Ribeiro
+-* DATA      : 22-10-2019
+-* VERSÃO    : 1.0
+-*
+-* ULTIMAS ALTERACÕES
+-*
+-*   DATA       AUTOR           DESCRICÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DATA_SITUACAO_GESTAO ( PI_CDNMPROC IN NUMBER ) RETURN DATE
+IS
+
+ vNMHISTOR CO_HPRCON.NMHISTOR%type;
+ vDATA_ALTERACAO CO_HPRCON.FEALTERA%type;
+ vDATA_ALTERACAO_TEMP CO_HPRCON.FEALTERA%type;
+ vCDSITGES CO_HPRCON.CDSITGES%type;
+ vCDSITGES2 CO_PRCON.CDSITGES%type;
+
+BEGIN
+
+	SELECT HPROCESSO.FEALTERA
+		,HPROCESSO.NMHISTOR
+		,HPROCESSO.CDSITGES
+		,PROCESSO.CDSITGES
+	into vDATA_ALTERACAO
+		,vNMHISTOR
+		,vCDSITGES
+		,vCDSITGES2
+	FROM CO_HPRCON HPROCESSO
+		,CO_PRCON PROCESSO
+	WHERE 1 = 1
+		AND HPROCESSO.NMHISTOR = (
+			SELECT MAX(X.NMHISTOR)
+			FROM CO_HPRCON X
+			WHERE 1 = 1
+				AND X.CDNMPROC = HPROCESSO.CDNMPROC
+			)
+		AND HPROCESSO.CDNMPROC = PI_CDNMPROC
+		and HPROCESSO.CDNMPROC = PROCESSO.CDNMPROC
+	;
+
+	IF vCDSITGES is null or (vCDSITGES2 is not null and vCDSITGES2 != vCDSITGES) then
+        return null;
+    end if;
+
+	vDATA_ALTERACAO_TEMP := GET_DATA_SITUACAO_GESTAO_TMP(PI_CDNMPROC,vNMHISTOR-1,vCDSITGES,vDATA_ALTERACAO);
+
+	RETURN vDATA_ALTERACAO_TEMP;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN null;
+
+END GET_DATA_SITUACAO_GESTAO;
+
+
+
+END; 

@@ -1,0 +1,48 @@
+-- GET_REFDOC_VALUE (owner: SIID_TESTES)
+
+
+-- ===== FUNCTION =====
+
+FUNCTION GET_REFDOC_VALUE( P_DEP IN VARCHAR2, P_DOC_ID IN NUMBER DEFAULT -1, P_EXTRA IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2
+IS
+  cResult VARCHAR2(60);
+  cSQL    VARCHAR2(2000);
+  cDepSeq VARCHAR2(10):=P_DEP;
+BEGIN
+  IF NVL(P_DOC_ID,-1) >= 0 THEN
+    SELECT
+      N_REFERENCIA
+    INTO
+      cResult
+    FROM
+      SVR_DOCUMENTOS
+    WHERE
+      ID = P_DOC_ID;
+
+    IF cResult IS NOT NULL THEN
+      RETURN cResult;
+    END IF;
+  END IF;
+  IF cDepSeq = 'DFI' THEN
+    cDepSeq:= 'DFR';
+  END IF;
+  cSQL:= 'SELECT '''
+           ||UPPER(P_DEP)||'/''||trim(TO_CHAR("'||cDepSeq||'_DOCSEQ".NEXTVAL,''000000'')) FROM DUAL';
+  DBMS_OUTPUT.PUT_LINE(cSQL);
+  EXECUTE IMMEDIATE cSQL INTO cResult;
+  cResult:=cResult||P_EXTRA;
+  IF NVL(P_DOC_ID,-1) >= 0 THEN
+    UPDATE
+     SVR_DOCUMENTOS
+    SET
+     N_REFERENCIA = cResult
+    WHERE
+     ID = P_DOC_ID;
+    COMMIT;
+  END IF;
+  RETURN cRESULT;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN UPPER(P_DEP)||'/XXXXXX';
+END Get_Refdoc_VALUE;
+

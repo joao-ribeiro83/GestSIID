@@ -1,0 +1,53 @@
+# DOC_ASSOCIACOES_DOCUMENTO
+
+Owner: `SIID_TESTES` &nbsp; Type: `TABLE`
+
+Row count: **16**
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| TIPOASSOC_RF | VARCHAR2 | 10 |  |  | N |  |  |
+| DOCMESTRE_ID | VARCHAR2 | 10 |  |  | N |  |  |
+| DOCDETALHE_ID | VARCHAR2 | 10 |  |  | N |  |  |
+| DATA_INICIO | DATE | 7 |  |  | N |  |  |
+| DATA_FIM | DATE | 7 |  |  | Y |  |  |
+| SQL_VALIDACAO | VARCHAR2 | 4000 |  |  | Y |  |  |
+| CRIADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_CRIACAO | DATE | 7 |  |  | Y |  |  |
+| ACTUALIZADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_ACTUALIZACAO | DATE | 7 |  |  | Y |  |  |
+
+
+## Primary / unique keys
+
+| CONSTRAINT_NAME | CONSTRAINT_TYPE | COLUMN_NAME | POSITION |
+| --- | --- | --- | --- |
+| PK_CHAVE_DAD | P | TIPOASSOC_RF | 1 |
+| PK_CHAVE_DAD | P | DOCMESTRE_ID | 2 |
+| PK_CHAVE_DAD | P | DOCDETALHE_ID | 3 |
+| PK_CHAVE_DAD | P | DATA_INICIO | 4 |
+
+
+## Foreign keys
+
+| CONSTRAINT_NAME | COLUMN_NAME | POSITION | R_OWNER | R_TABLE_NAME |
+| --- | --- | --- | --- | --- |
+| FK_DOCDETALHE_DAD | DOCDETALHE_ID | 1 | SIID_TESTES | DOC_MODELOS_DOCUMENTO |
+| FK_DOCMESTRE_DAD | DOCMESTRE_ID | 1 | SIID_TESTES | DOC_MODELOS_DOCUMENTO |
+| FK_TIPOASSOC_DAD | TIPOASSOC_RF | 1 | SIID_TESTES | DOC_TIPOS_ASSOCIACAO |
+
+
+## Indexes
+
+| INDEX_NAME | UNIQUENESS | COLUMN_NAME | COLUMN_POSITION |
+| --- | --- | --- | --- |
+| IDX_DOCDETALHE_DAD | NONUNIQUE | DOCDETALHE_ID | 1 |
+| IDX_DOCMESTRE_DAD | NONUNIQUE | DOCMESTRE_ID | 1 |
+| IDX_TIPOASSOC_DAD | NONUNIQUE | TIPOASSOC_RF | 1 |
+| PK_CHAVE_DAD | UNIQUE | TIPOASSOC_RF | 1 |
+| PK_CHAVE_DAD | UNIQUE | DOCMESTRE_ID | 2 |
+| PK_CHAVE_DAD | UNIQUE | DOCDETALHE_ID | 3 |
+| PK_CHAVE_DAD | UNIQUE | DATA_INICIO | 4 |
+

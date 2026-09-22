@@ -1,0 +1,69 @@
+# CFG_PERMISSOES_SIID_VW
+
+Owner: `SIID_TESTES` &nbsp; Type: `VIEW`
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MODELO_ID | VARCHAR2 | 10 |  |  | N |  |  |
+| UNIDADE_NEGOCIO_RF | VARCHAR2 | 20 |  |  | N |  |  |
+| UNIDADE_NEGOCIO | VARCHAR2 | 60 |  |  | Y |  |  |
+| USERNAME | VARCHAR2 | 30 |  |  | N |  |  |
+| AMBIENTE_ID | VARCHAR2 | 9 |  |  | Y |  |  |
+| NOME | VARCHAR2 | 40 |  |  | Y |  |  |
+| TIPO_PERMISSAO_RF | NUMBER | 22 |  |  | N |  |  |
+| TIPO_PERMISSAO | VARCHAR2 | 60 |  |  | Y |  |  |
+| DATA_INICIO | DATE | 7 |  |  | N |  |  |
+| DATA_FIM | DATE | 7 |  |  | Y |  |  |
+| CRIADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_CRIACAO | DATE | 7 |  |  | Y |  |  |
+| ACTUALIZADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_ACTUALIZACAO | DATE | 7 |  |  | Y |  |  |
+
+
+## Primary / unique keys
+
+_(none)_
+
+
+## Foreign keys
+
+_(none)_
+
+
+## Indexes
+
+_(none)_
+
+
+## View SQL text
+
+```sql
+SELECT
+  PERM.MODELO_ID
+, PERM.UNIDADE_NEGOCIO_RF
+, UN.DESIGNACAO           UNIDADE_NEGOCIO
+, PERM.USERNAME
+, UTIL.AMBIENTE_ID
+, UTIL.NOME
+, PERM.TIPO_PERMISSAO_RF
+, TPERM.DESIGNACAO        TIPO_PERMISSAO
+, PERM.DATA_INICIO
+, PERM.DATA_FIM
+, PERM.CRIADO_POR
+, PERM.DATA_CRIACAO
+, PERM.ACTUALIZADO_POR
+, PERM.DATA_ACTUALIZACAO
+FROM
+  CFG_PERMISSOES_SIID PERM
+, CFG_UTILIZADORES_VW UTIL
+, CFG_VALORES_DOMINIO TPERM
+, CFG_VALORES_DOMINIO UN
+WHERE
+    PERM.USERNAME = UTIL.USERNAME
+AND UN.DOMINIO_ID = 'UNIDADE_NEGOCIO'
+AND PERM.UNIDADE_NEGOCIO_RF = UN.CHAVE
+AND TPERM.DOMINIO_ID = 'TIPO_PERMISSAO'
+AND PERM.TIPO_PERMISSAO_RF = TPERM.CHAVE 
+```
