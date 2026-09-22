@@ -97,7 +97,7 @@ Rule count: 101 rules (AUTH 10, DOC 37, PERM 11, MOD 15, BKP 9, PRN 4, ADM 7, XC
 - Then if `COUNT(*) FROM CFG_UTILIZADORES WHERE USERNAME=U AND AMBIENTE_ID=E` is 0 -> alert LOGIN_INVALIDO; else if `USER_SECURITY.ENCRYPT(P) != PASSWORD` -> alert LOGIN_INVALIDO; else GLOBAL.USERNAME=U, GLOBAL.PASS=USER_SECURITY.ENCRYPT(P), GLOBAL.AMBIENTE_ID=E. Any exception shows `Erro` and re-raises.
 - Source: FD_LOGIN_SIID :: WHEN-BUTTON-PRESSED.
 - Message: `Utilizador e/ou password inválidos.`
-- Confidence: clear for the flow; **unknown** for the USER_SECURITY.ENCRYPT algorithm (DB package) - the rewrite must reuse it or migrate stored hashes.
+- Confidence: clear for the flow and the algorithm — **RESOLVED** (DB source read, 2026-09-15): `USER_SECURITY.ENCRYPT(p_text VARCHAR2) RETURN RAW` is plain DES (`DBMS_OBFUSCATION_TOOLKIT.DESEncrypt`) with a hardcoded key (`'12345678'`), reversible via the package's own `DECRYPT` function — not a one-way hash. See `analysis/db/packages/USER_SECURITY.sql` and SEC-005. The rewrite must not import `CFG_UTILIZADORES.PASSWORD` as-is; force a reset flow instead of reusing the algorithm.
 
 **BR-AUTH-05 - Administrator vs. regular-user container**
 - Given a successfully authenticated user
@@ -132,6 +132,7 @@ Rule count: 101 rules (AUTH 10, DOC 37, PERM 11, MOD 15, BKP 9, PRN 4, ADM 7, XC
 - Given FD_ALTERAR_PASSWORD (window title "Alteração da Password de Regeração")
 - When PASSWORD = CONFIRMACAO
 - Then `SVR_VARIAVEIS_SIID.VALOR := crypt_pkg.encryptStringRaw(PASSWORD)` for TIPO_VARIAVEL_RF='PASSWORD' AND AMBIENTE_ID=:GLOBAL.AMBIENTE_ID (executed through FORMS_DDL, then COMMIT) and the form closes; otherwise alert PASSWORD_ERRADA and the form stays open. This is **not** the login password (BR-AUTH-04 uses USER_SECURITY.ENCRYPT on CFG_UTILIZADORES); it is the shared password that gates *Regerar* (BR-DOC-14). Commented code shows it once ran `ALTER USER ... IDENTIFIED BY`.
+- Algorithm — **RESOLVED** (DB source read, 2026-09-15): `crypt_pkg.encryptStringRaw` called with no explicit key defaults to plain DES with a hardcoded key, the literal `'Onsite@Cosec'` (`CRYPT_PKG` package global `g_charkey`); reversible via `CRYPT_PKG.decryptString`/`decryptRaw` using the same default key. See `analysis/db/packages/CRYPT_PKG.sql` and SEC-005.
 - Source: FD_ALTERAR_PASSWORD :: WHEN-BUTTON-PRESSED.
 - Message: `As passwords não coincidem. Alteração não efectuada.`
 - Confidence: clear; **unknown** for crypt_pkg.encryptStringRaw (DB package; must produce the value compared in BR-DOC-14).
@@ -214,7 +215,7 @@ All rules in this section are from FD_GESTAO_SIID (admin). Where FD_GESTAO_SIID_
 - When no row is selected
 - Then Regerar, Reenviar, Reenviar Email and Re-Arquivar show NAO_TEM_REGISTOS and stop; Reimprimir / 2ª Via / Cópia / Anular / Cancelar / Suspender / Retomar do not check and simply loop over an empty set.
 - Source: FD_GESTAO_SIID :: WHEN-BUTTON-PRESSED (ORDENACAO_DOCUMENTOS.REGERAR, REENVIAR, REENVIAR_EMAIL, REARQUIVAR).
-- Message: alert NAO_TEM_REGISTOS (text not present in the string dump - OQ-13).
+- Message: alert NAO_TEM_REGISTOS has no `AlertMessage` set — it shows blank (confirmed, source: forms-xml, OQ-13); pick real text for the rewrite.
 - Confidence: clear.
 
 **BR-DOC-10 - Reimprimir (print again)**
@@ -339,7 +340,7 @@ All rules in this section are from FD_GESTAO_SIID (admin). Where FD_GESTAO_SIID_
 - When "Clonar" is pressed
 - Then for every parameter with a non-null VALOR: `PKG_DOCUMENTOS_SVR.SET_PARAMETRO_STRING(NOME, VALOR)`; then SET_PARAMETRO_STRING('P_USUARIO', <user>), SET_PARAMETRO_STRING('_USER', :GLOBAL.AMBIENTE_ID); `PKG_DOCUMENTOS_SVR.EXECUTA(:SVR_DOCUMENTOS.MODELO_ID)`; `v_id := pkg_documentos_svr.get_id_execucao`; `UPDATE SVR_DOCUMENTOS SET LOTE_ID = :GLOBAL.LOTE_CLONE_ID WHERE ID = v_id` (FORMS_DDL); COMMIT; window hidden; list re-queried.
 - Source: FD_GESTAO_SIID :: WHEN-BUTTON-PRESSED (CLONAR.CLONAR), WHEN-NEW-BLOCK-INSTANCE (CLONAR_DOCUMENTO). Also in FD_GESTAO_SIID_USER.
-- Confidence: clear for the calls; **unknown**: where GLOBAL.LOTE_CLONE_ID is assigned (never set in any visible trigger - presumably the current document's LOTE_ID, OQ-7), the value of v_utilizador passed as P_USUARIO (declared, assignment not visible), and what EXECUTA does (OQ-4).
+- Confidence: clear for the calls; resolved (source: forms-xml, OQ-7): GLOBAL.LOTE_CLONE_ID is set by the CLONAR opener from the source document's LOTE_ID, and v_utilizador (passed as P_USUARIO) is assigned `:PARAMETER.P_USERNAME` — the logged-in user at clone time, not the original document's creator. **unknown**: what EXECUTA does (OQ-4).
 
 **BR-DOC-26 - Parameter value conversion helper (CONVERTE_PARAM)**
 - Given a parameter named P_NMRECIBO or P_CDPERSON in the clone window or the search window
@@ -818,13 +819,13 @@ Developer-only texts not shown to end users: `UPS<n>` (FD_PERMISSOES_SIID record
 
 ## 4. Open questions for the rewrite team (confirm against the database)
 
-1. **OQ-1 - USER_SECURITY.ENCRYPT and CRYPT_PKG.ENCRYPTSTRINGRAW**: algorithms, salting, reversibility. Needed to keep existing CFG_UTILIZADORES.PASSWORD and SVR_VARIAVEIS_SIID PASSWORD rows valid (BR-AUTH-04, BR-AUTH-09, BR-DOC-14).
+1. **OQ-1 - USER_SECURITY.ENCRYPT and CRYPT_PKG.ENCRYPTSTRINGRAW** — RESOLVED (DB source read, 2026-09-15): both are reversible DES with hardcoded keys, not one-way hashes. `USER_SECURITY.ENCRYPT` → key `'12345678'`; `CRYPT_PKG.ENCRYPTSTRINGRAW` (default key) → `'Onsite@Cosec'`. No salting. See BR-AUTH-04, BR-AUTH-09, SEC-005, `analysis/db/packages/{USER_SECURITY,CRYPT_PKG}.sql`.
 2. **OQ-2 - Menu role gating** — RESOLVED (Forms2XML, 2026-09-14): MD_SIID_USER disables GADOR, CONFIGURAÇÃO, ADMINISTRAÇÃO, AUDITORIA and BACKUPS (`Enabled="false"`); MD_SIID disables only AUDITORIA. See BR-AUTH-05.
 3. **OQ-3 - SVR_DOCUMENTOS_VW**: how ESTADO (NULL / A EXECUTAR / EXECUCAO / IMPRESSO?), DISPONIBILIDADE and other derived columns are computed from SVR_DOCUMENTOS + SVR_QUEUE.
 4. **OQ-4 - PKG_DOCUMENTOS_SVR**: ANULAR (what it sets - ATRIBUTO9='A'? DISPONIBILIDADE='ANU'? queue cancellation?), SET_PARAMETRO_STRING / EXECUTA / GET_ID_EXECUCAO (does EXECUTA insert the document and the EXECUCAO queue row? session-scoped parameter state?).
 5. **OQ-5 - PKG_SIID_UTIL.CAN_BE_UPLOADED_EDOC**: criteria that make a 'W' model document eligible for EDoc resend.
 6. **OQ-6 - FATURAELECTRONICA button** — RESOLVED (Forms2XML): it is a sort button, `Ordenar_Por('FATURA_ELECTRONICA','ASC')`. RECRIAR (TOXML) is dead code. See BR-DOC-20.
-7. **OQ-7 - GLOBAL.LOTE_CLONE_ID** — RESOLVED (Forms2XML): the CLONAR window opener runs `Default_value(:svr_documentos.lote_id, 'GLOBAL.LOTE_CLONE_ID')`, i.e. the clone inherits the source document's LOTE_ID (only set if the global was still undefined). Still open: the value passed as P_USUARIO in the clone (check the full CLONAR trigger text in `analysis/forms-xml/T/FD_GESTAO_SIID_fmb.xml`).
+7. **OQ-7 - GLOBAL.LOTE_CLONE_ID** — RESOLVED (Forms2XML): the CLONAR window opener runs `Default_value(:svr_documentos.lote_id, 'GLOBAL.LOTE_CLONE_ID')`, i.e. the clone inherits the source document's LOTE_ID (only set if the global was still undefined). Also resolved: P_USUARIO in the clone is `:PARAMETER.P_USERNAME` (the user cloning, not the original creator).
 8. **OQ-8 - Views DOC_PERMISSOES_IMPRESSAO and CFG_UTILIZADORES_VW**: column mapping (CDEMPLEA/CDDEPARTA/TIPO_PERMISSAO designation) and whether they filter anything (e.g. only active users).
 9. **OQ-9 - Printer resolution by the server**: precedence between the printer on the queue row, DOC_IMPRESSOES_MODELO_USR (user+model), DOC_IMPRESSORAS_DOC (model) and SVR_DOCUMENTOS.IMPRESSORA_ID.
 10. **OQ-10 - Unused attributes**: CFG_UTILIZADORES.NIVEL_ACESSO_RF, DOC_MODELOS_DOCUMENTO.MAX_IMPRESSOES / N_ANEXOS / FORMA_CONTROLO_RF / MODO_CERTIFICADO_RF / MODO_PROTECAO_RF / STAMP, DOC_CONDICOES_APR.ATRIBUTO1..8 - are they enforced by the server? Meaning of MODO_EXPEDICAO_RF values G, W, I.

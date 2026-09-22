@@ -118,7 +118,7 @@ and the recommended option was recorded.
 **Date:** 2026-09-15
 **Consequences:**
 - The compose file has no proxy service and no certificates. The web app and API are published on one HTTP port.
-- `.env` settings needed so the later nginx needs no code change: `PUBLIC_BASE_URL` (open), `TRUST_PROXY` (default `false`; `true` only when nginx is in front), `COOKIE_SECURE` (default `false` on plain HTTP; must be `true` behind nginx, otherwise D-07c's `Secure` cookie cannot work on HTTP), optional `BASE_PATH` so the app can live under a sub-path.
+- `.env` settings needed so the later nginx needs no code change: `PUBLIC_BASE_URL` (open), `TRUST_PROXY` (default `false`; the nginx IP / CIDR list when nginx is in front — `true` is refused since Step 3.1, because it trusts a client-written `X-Forwarded-For`), `COOKIE_SECURE` (default `false` on plain HTTP; must be `true` behind nginx, otherwise D-07c's `Secure` cookie cannot work on HTTP), optional `BASE_PATH` so the app can live under a sub-path.
 - **Open item before go-live (Step 10.6):** nginx in front with TLS, `COOKIE_SECURE=true`, HSTS, domain chosen. Running production on plain HTTP is not allowed (logins and PDFs would cross the network in clear text).
 - No Kubernetes manifests. The API stays stateless apart from the session store, so a later move stays possible.
 

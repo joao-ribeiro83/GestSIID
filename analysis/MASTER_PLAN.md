@@ -5,6 +5,14 @@ Inputs: `analysis/STRUCTURE.md`, `analysis/BUSINESS_RULES.md`, `analysis/SECURIT
 `analysis/forms-summary/**` (per-form inventories and PL/SQL text), `analysis/forms-xml/**` (Forms2XML dump of every module: the
 authoritative source for item properties, LOVs, alerts, menus, canvases), `dev/P/*.err` (trigger inventories), `CLAUDE.md`.
 
+## ⛔ HARD RULE — NO CHANGES TO THE ORACLE DATABASE
+
+Claude, tests and scripts are **NOT permitted to change the Oracle database** (owner's order, 2026-09-22).
+- No INSERT, UPDATE, DELETE, MERGE, DDL, PL/SQL block, write-package call, `SELECT ... FOR UPDATE`, or COMMIT — not even on `ZZTEST_` rows, not in a rolled-back transaction, not "restored afterwards", not to repair an earlier mistake.
+- Contract tests reach Oracle only through `app/apps/api/src/test/read-only-db.ts` (`readOnlyPool`). Write paths are tested with fakes only.
+- Reading (plain SELECT) is allowed. If a task seems to need a DB change: stop and ask the owner. Give them the SQL; do not run it.
+- Full rule: `analysis/TEST_STRATEGY.md` (top).
+
 ## 0. How to use this plan
 
 - Run the steps in order. Each step is one Claude Code session started in `I:\GestSIID12c`. Use `/clear` between steps.
@@ -389,7 +397,7 @@ Implement in apps/api:
 3. POST /api/auth/regeneracao-password — FD_ALTERAR_PASSWORD does NOT change the user's password: it sets the shared document-regeneration password, i.e. UPDATE SVR_VARIAVEIS_SIID SET VALOR = CRYPT_PKG.ENCRYPTSTRINGRAW(:password) WHERE TIPO_VARIAVEL_RF='PASSWORD' AND AMBIENTE_ID=:ambiente, after checking password = confirmation (alert PASSWORD_ERRADA). Implement it with bind variables, restricted per DECISIONS D-07 (ADM only recommended), audited. Also POST /api/auth/reauth-regeneracao { password } that compares CRYPT_PKG.ENCRYPTSTRINGRAW(:password) with that row and sets a short-lived flag in the session (used by Step 7.2 for the CONFIRMAR_PASSWORD flow).
 4. Login must also enforce CFG_UTILIZADORES.DATA_INICIO / DATA_FIM when D-07 says so (SEC-006). requireRole('ADM'|'USER') preHandler + a `currentUser` decorator that services use to fill CRIADO_POR / ACTUALIZADO_POR columns.
 5. Audit log: login success/failure, logout, password change → table or pino audit stream per ARCHITECTURE.md.
-6. Contract tests (fastify.inject) against the test schema with a ZZTEST_ user created and removed by the test; unit tests with a fake db for the branches.
+6. Contract tests (fastify.inject) against the test schema, READ-ONLY through readOnlyPool (HARD RULE: no Oracle changes — no ZZTEST_ rows); a successful login uses an owner-given account (GESTSIID_TEST_USER / GESTSIID_TEST_PASSWORD); unit tests with a fake db for the branches and every write path.
 Then run the `security-review` skill on the diff and spawn `code-modernization:security-auditor` to review the auth code; fix findings before finishing.
 ```
 
@@ -409,7 +417,7 @@ Build in apps/web:
 2. Auth store (TanStack Query "me" + router beforeLoad guard); menu filtered by role using the menu config's `roles`; admin-only leaves hidden for USER (per DECISIONS D-08).
 3. "Alterar password" (Configuração menu leaf, ADM only per DECISIONS A-09; window title "Alteração da Password de Regeração") as a modal with the two fields PASSWORD / CONFIRMACAO and the same messages — it changes the document-regeneration password (Step 3.1 endpoint), visible only to the roles allowed by DECISIONS D-07.
 4. Logout in the top bar; session-expired handling (401 anywhere → toast + redirect to /login).
-5. Playwright tests for the scenarios in "Done when" (use the ZZTEST_ users the API tests create, or a seeded fixture per TEST_STRATEGY.md).
+5. Playwright tests for the scenarios in "Done when" against the Oracle-less dev server with an in-memory AuthRepo (HARD RULE: no Oracle changes; no ZZTEST_ users are created).
 ```
 
 ---

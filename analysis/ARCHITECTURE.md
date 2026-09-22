@@ -87,7 +87,7 @@ Request path: browser → container (plain HTTP now; nginx with TLS later, D-09)
 | `ORACLE_CLIENT_LIB_DIR` | no | empty | Empty in the image (`ldconfig`); Windows dev: `I:\Middleware\Oracle_Home\bin`. |
 | `SESSION_SECRET` | yes | | ≥32 characters; signs the session cookie. |
 | `COOKIE_SECURE` | no | `false` | `true` behind TLS (D-09). |
-| `TRUST_PROXY` | no | `false` | `true` behind nginx (D-09). |
+| `TRUST_PROXY` | no | `false` | The nginx IP / CIDR list behind nginx (D-09). `true` is refused: it trusts a client-written `X-Forwarded-For` and defeats the login throttle. |
 | `FILESERVER_BASE_URL` | yes | | Full URL ending in `/pdf/T` or `/pdf/P` (D-03). |
 | `FILESERVER_TIMEOUT_MS` | no | `15000` | |
 | `UPLOAD_MAX_MB` | no | `10` | Image upload limit (§6). |
@@ -251,7 +251,8 @@ A detail resource declares `parentKeys`. Its list route is nested: `GET /api/<ma
 - Only Regerar asks for it. Reimprimir, 2ª via and Cópia never do (BR-DOC-14).
 - `POST /api/documentos/acoes/regerar { ids | consulta, password? }`: the service checks every selected document, annulled ones included. If any has a `SVR_QUEUE` row with `TIPO_QUEUE_RF='IMPRESSAO' AND ESTADO='TERMINADO'`, or its model has `MODO_EXPEDICAO_RF='G'`, and `password` is missing → `428 PASSWORD_REGERACAO_NECESSARIA` with catalogue #14; the SPA opens the dialog and repeats the request with `password`.
 - Compare `RAWTOHEX(CRYPT_PKG.ENCRYPTSTRINGRAW(:pwd)) = VALOR` in SQL. Wrong → `403 PASSWORD_ERRADA` `A password inserida está errada.` One correct password covers the whole batch; annulled documents are then skipped and listed (#13).
-- Change: `PUT /api/admin/password-regeracao { actual, nova, confirmacao }`, ADM only. `actual` wrong → `403 PASSWORD_ERRADA`; `nova !== confirmacao` → `422` `As passwords não coincidem. Alteração não efectuada.`; then `lockRow` + bound `UPDATE SVR_VARIAVEIS_SIID SET VALOR = RAWTOHEX(CRYPT_PKG.ENCRYPTSTRINGRAW(:nova)) WHERE TIPO_VARIAVEL_RF = 'PASSWORD' AND AMBIENTE_ID = :ambiente`; audit.
+- Change (built in Step 3.1): `POST /api/auth/regeneracao-password { actual, nova, confirmacao }`, ADM only. `nova !== confirmacao` → `422 PASSWORDS_DIFERENTES` `As passwords não coincidem. Alteração não efectuada.`; then one bound `UPDATE SVR_VARIAVEIS_SIID SET VALOR = RAWTOHEX(CRYPT_PKG.ENCRYPTSTRINGRAW(:nova)) WHERE TIPO_VARIAVEL_RF = 'PASSWORD' AND AMBIENTE_ID = :ambiente AND VALOR = RAWTOHEX(CRYPT_PKG.ENCRYPTSTRINGRAW(:actual))` (check and write in one statement, no `lockRow`); 0 rows → `403 PASSWORD_ERRADA`; audit `regeneracao.alterada`.
+- Reauth (built in Step 3.1): `POST /api/auth/reauth-regeneracao { password }`, ADM only: a correct value sets `regeneracaoAte` in the session for 5 min (`hasRegeneracaoReauth(request)` in `features/auth/routes.ts`). Step 7.2 may use this flag or the `password` field of the `regerar` request above.
 
 **Audit** (SECURITY_FINDINGS §3 item 16, within "no DB change", D-07/D-10).
 - One global `onResponse` hook writes a pino line `{ audit: true, event, user, role, ip, method, route, status, reqId, details }` for every non-GET `/api/*` request. Handlers put ids ok/skipped, the Cancelar `force` flag (D-12) and similar facts into `request.auditDetails`.
@@ -296,7 +297,7 @@ The app has no file system access: no `DOCS_ROOT`, no share mounts, no path buil
 
 **API feature folder** `apps/api/src/features/<feature>/`: `routes.ts` (routes, zod schemas, `config.roles`), `service.ts` (rules as plain functions where possible), `repo.ts` (SQL), `*.test.ts` next to the code.
 - Unit tests use a fake connection.
-- Contract tests use `fastify.inject` against the test schema; they skip unless `DB_CONNECT_STRING` is set; write tests roll back, except package calls, which commit (§3) and therefore run only on `ZZTEST_` fixtures per `TEST_STRATEGY.md`.
+- Contract tests use `fastify.inject` against the test schema; they skip unless `DB_CONNECT_STRING` is set. **HARD RULE: they are read-only** — Oracle only through `apps/api/src/test/read-only-db.ts`; no test, script or Claude session changes the Oracle database (no ZZTEST_ rows, no rollback tricks). Write paths are tested with a fake connection. See `TEST_STRATEGY.md` (top).
 - Plain maintenance screens need only `packages/shared/src/resources/<name>.ts` + `apps/api/src/resources-server/<name>.ts`; `app.ts` calls `crudRoutes` for them. Add `service.ts` / `repo.ts` only when a rule needs one.
 
 **SPA.** `apps/web/src/routes/<menu>/<screen>.tsx` (file-based). Shared UI in `components/` (`ui/` = shadcn copies, `datablock/`, `dialogs/`). `api/client.ts`: `fetch` with `credentials: 'same-origin'`, `x-csrf-token`, error body → toast or field errors, `401` → `/login`. `menu.ts`: one typed array with `roles`.
@@ -388,7 +389,7 @@ app/
 │  │  │  ├─ permissoes/
 │  │  │  ├─ impressoras-associadas/
 │  │  │  ├─ perfis-departamento/   # sugestao, assinatura
-│  │  │  └─ admin/           # password-regeracao
+│  │  │  └─ admin/
 │  │  └─ resources-server/   # one file per resource: presets, staticWhere, hooks, SQL expressions
 │  └─ web/src/
 │     ├─ main.tsx
@@ -464,7 +465,7 @@ C4Component
 | `FD_BACKUPS_ONLINE` | Gestão › Backups › Backups Online | D-25, A-02 | `GET /api/backups?f[MEDIA_ONLINE]=S\|N`, `POST /api/backups/online` | `/gestao/backups/online` | Two lists over one resource; `DRIVE_ONLINE` set as the form did. |
 | `FD_GESTAO_IMPRESSORAS_DOC` | Configuração › Impressoras Associadas › Documento | D-08, A-09, D-22 | §10.1 impressoras-associadas | `/configuracao/impressoras-associadas/documento` | ADM only (A-09). Help text shows the D-22 printer order. |
 | `FD_GESTAO_IMPRESSORAS_USR` | Configuração › Impressoras Associadas › Utilizador | D-08, A-09, D-22 | §10.1 impressoras-associadas | `/configuracao/impressoras-associadas/utilizador` | ADM only (A-09). |
-| `FD_ALTERAR_PASSWORD` | Configuração › Alterar password | D-07d, D-08, A-09 | `PUT /api/admin/password-regeracao` | `/configuracao/alterar-password` | ADM only; shared document-regeneration password, not a login password. |
+| `FD_ALTERAR_PASSWORD` | Configuração › Alterar password | D-07d, D-08, A-09 | `POST /api/auth/regeneracao-password` | `/configuracao/alterar-password` | ADM only; shared document-regeneration password, not a login password. |
 | `FD_GESTORES_SIID` | Gador › Gestores | D-11 | none | none | Dropped; DBA hand-over script from the XML. |
 | `FD_PERFIS_DEPARTAMENTO` | Gador › Equipa de Gestão (OD68) | D-01 | `GET /api/perfis-departamento`, `POST`, `PUT /:rid` (no DELETE: Forms deletes only unsaved rows), `GET /api/perfis-departamento/sugestao?cdemplea=`, `…/:id/assinatura` | `/gador/equipa-gestao` | One block. `ID = MAX+1` in `beforeInsert` (a collision gives `409 ORA_00001`; retry). `sugestao` returns `CODIGO`, `FUNCAODEP_ID`, `NOME` per BR-ADM-04. |
 | `FD_CONFIGURACAO_REPORTS` | Configuração › Reports | BR-ADM-05 | `GET /api/reports`, `GET /api/reports/:id/parametros`, `POST /api/reports/guardar` | `/configuracao/reports` | Rules in §10.1. |
@@ -572,7 +573,7 @@ Plus `GET /api/dominios/:dominioId/valores` (`ORDER BY PRIORIDADE, CHAVE`; ADM, 
 | Instant Client 19 Basic authenticates the legacy-verifier account and returns `WE8ISO8859P15` text (`ã`, `ç`, `€`) correctly. If `ORA-28040`: `sqlnet.ora` `SQLNET.ALLOWED_LOGON_VERSION_CLIENT=8` in the image. | Step 2.3 smoke test |
 | `sessionCallback` NLS values give the same `SVR_QUEUE`, `ERR_ERROS_SIID`, `SVR_DOCUMENTOS` (incl. `PARAMETRO01..20`), `SVR_BACKUPS` rows as Forms for clone, anular, regerar and novo backup (ignoring ids, timestamps and the `record_error` rows). | D-10 parity run, Step 10.6 |
 | Pre-go-live list of active users with `DATA_FIM` in the past or `DATA_INICIO` null (D-07b would lock them out). | Step 10.6 |
-| nginx with TLS in front, `COOKIE_SECURE=true`, `TRUST_PROXY=true`, domain chosen (D-09). | Step 10.6 |
+| nginx with TLS in front, `COOKIE_SECURE=true`, `TRUST_PROXY=<nginx IP/CIDR>`, domain chosen (D-09). | Step 10.6 |
 
 **Intended differences beyond the five in D-28** (Step 1.3 lists them next to D-28's)
 
@@ -597,7 +598,7 @@ Plus `GET /api/dominios/:dominioId/valores` (`ORDER BY PRIORIDADE, CHAVE`; ADM, 
 | 2.2 | Menu tree with Gestores, Médias Execução, Alterar password for everyone | Both dropped (D-06, D-11); Alterar password ADM only (D-07d). |
 | 2.3 | `node:22-alpine`; volume for `DOCS_ROOT`; `env_file: .env` in `app/` | `node:22-bookworm-slim` + Instant Client 19 Basic; no volume; `env_file: ../.env`; `HEALTHCHECK` with `PORT` and `BASE_PATH`. |
 | 2.4 | `crudRoutes` with GET one, POST, PUT, DELETE; "IN for multi"; list envelope without cap | `crudRoutes` = POST, `PUT /:rid`, `DELETE /:rid` with `orig` + `lockRow`; no GET one unless needed; no `IN`, no `OR`; envelope `{ rows, total, totalCapped, page, size }`. |
-| 3.1 | `/api/auth/reauth-regeneracao` session flag; `regeneracao-password` without current value; exact username | Password inside the `regerar` request (`428` flow); `PUT /api/admin/password-regeracao` ADM only with `actual`; `UPPER(:u)`; `RAWTOHEX` compares. |
+| 3.1 | `/api/auth/reauth-regeneracao` session flag; `regeneracao-password` without current value; exact username | Built as the prompt said, with the owner's routes: `POST /api/auth/regeneracao-password` ADM only **with** `actual` (D-07d), plus `/api/auth/reauth-regeneracao`; `UPPER(:u)`; `RAWTOHEX` compares. Contract tests are read-only (HARD RULE, `TEST_STRATEGY.md`). |
 | 3.2 | "Alterar password" for the roles D-07 allows | ADM only. |
 | 4.1 | `/api/dominios/:dominioId/valores` cached 60 s | No cache. |
 | 4.3 | Detail block for `SVR_AMBIENTES_IMPRESSAO` | None; `AMBIENTE_ID` fixed; `destroyUserSessions` (§5). |

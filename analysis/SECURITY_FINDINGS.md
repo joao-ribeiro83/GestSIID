@@ -49,9 +49,14 @@ Produced 2026-09-14 by the `code-modernization:security-auditor` agent from the 
 **Exploit:** a `tipo_utilizador_rf <> 'ADM'` user opens *Utilizadores* from their own menu (or `…/frmservlet?form=FD_UTILIZADORES_SIID&otherparams=P_USERNAME=anything`) and inserts an ADM row; or opens `FD_GESTORES_SIID` and triggers SEC-007.
 **Fix (Forms, interim):** in every admin form's WHEN-NEW-FORM-INSTANCE, re-query `CFG_UTILIZADORES.TIPO_UTILIZADOR_RF` for `:GLOBAL.USERNAME` and `EXIT_FORM` unless `'ADM'`; remove admin `OPEN_FORM`s from `MD_SIID_USER.mmb`; set `formsweb.cfg` `form=` fixed and disallow URL override. **Rewrite:** §3 RBAC.
 
-### SEC-005 — Reversible, unsalted password "encryption" (High, CWE-916/327/257)
+### SEC-005 — Reversible, unsalted password "encryption" (High, CWE-916/327/257) — **CONFIRMED** from live DB source, 2026-09-15
 **Location:** `FD_LOGIN_SIID.fmb.plsql.txt:27-35` (compare), `:41` (`:GLOBAL.PASS` retained, never read elsewhere), `analysis/forms-extracted/T/FD_UTILIZADORES_SIID.fmb.txt:798` (store). Regeneration secret uses a second scheme, `crypt_pkg.encryptStringRaw` (`FD_ALTERAR_PASSWORD.fmb.plsql.txt:11`); an older `pck_sg.F_INS_ENCRIPT` is commented. All three are named *encrypt*, deterministic (equality compare), with no per-user salt.
-**Exploit:** anyone with `EXECUTE` on `USER_SECURITY` (all users share the schema-owner session) calls the inverse or builds a rainbow table once; identical ciphertexts reveal shared passwords across users.
+
+Confirmed by reading the actual package bodies from the DB (`analysis/db/packages/USER_SECURITY.sql`, `analysis/db/packages/CRYPT_PKG.sql`):
+- **`USER_SECURITY.ENCRYPT(p_text VARCHAR2) RETURN RAW`** — not `VARCHAR2` as earlier inferred. It's plain DES (`DBMS_OBFUSCATION_TOOLKIT.DESEncrypt`) with a **hardcoded 8-byte key, the literal `'12345678'`**, same for every user and every environment. A matching `USER_SECURITY.DECRYPT(p_raw RAW) RETURN VARCHAR2` function exists in the same package — any session with `EXECUTE` on `USER_SECURITY` can decrypt every password in `CFG_UTILIZADORES.PASSWORD` directly, no rainbow table needed.
+- **`CRYPT_PKG.ENCRYPTSTRINGRAW`** (used for the regeneration password, BR-AUTH-09/BR-DOC-14) is the same DES scheme, defaulting to a **hardcoded key, the literal `'Onsite@Cosec'`**, when called with no explicit key (which is how both `FD_ALTERAR_PASSWORD` and the `CONFIRMAR_PASSWORD` check call it). `CRYPT_PKG.DECRYPTSTRING`/`DECRYPTRAW` reverse it with the same default key.
+
+**Exploit:** anyone with `EXECUTE` on `USER_SECURITY` or `CRYPT_PKG` (all users share the schema-owner session) calls `DECRYPT`/`DECRYPTSTRING` directly — no cracking or rainbow table required, the keys are hardcoded constants in the package body. Identical ciphertexts also reveal shared passwords across users even without the key.
 **Fix:** on migration, do not import the column; force a reset flow. Store only Argon2id/bcrypt hashes (§3).
 
 ### SEC-006 — No lockout, throttling, policy or expiry enforcement (Medium, CWE-307/613)
