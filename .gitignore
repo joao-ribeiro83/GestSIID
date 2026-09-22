@@ -4,6 +4,9 @@
 node_modules/
 dist/
 coverage/
+*.tsbuildinfo
+# TanStack Router file-based route tree, regenerated on every dev/build run
+*.gen.ts
 # compile scripts embed live DB credentials
 dev/**/*.bat
 # string dumps of the .fmb binaries contain hardcoded passwords from FD_LOGIN_SIID; keep local only
@@ -14,3 +17,5 @@ analysis/forms-xml/
 dev/**/*_fmb.xml
 dev/**/*_mmb.xml
 analysis/**/*.local.md
+# Playwright output
+app/test-results/

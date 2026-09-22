@@ -1,0 +1,32 @@
+{
+  "name": "@gestsiid/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=../../../.env --conditions=development src/server.ts",
+    "dev:mock": "node --watch --conditions=development src/dev-server.ts",
+    "build": "tsc -b",
+    "start": "node dist/server.js",
+    "test": "vitest run --project api --config ../../vitest.config.ts --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint . -c ../../eslint.config.js"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.0",
+    "@fastify/multipart": "^10.1.0",
+    "@fastify/session": "^11.1.0",
+    "@fastify/static": "^10.1.0",
+    "fastify-type-provider-zod": "^7.0.0",
+    "@gestsiid/shared": "workspace:*",
+    "fastify": "^5.12.0",
+    "oracledb": "~6.10.0",
+    "zod": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/oracledb": "~6.10.0",
+    "typescript": "~6.0.0",
+    "vitest": "^5.0.0"
+  }
+}
