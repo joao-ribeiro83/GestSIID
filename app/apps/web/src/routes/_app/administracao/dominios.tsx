@@ -1,6 +1,112 @@
+import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderScreen } from '@/components/shell/placeholder-screen';
+import { dominios, dominiosValores, DOMINIOS_DOMINIOS } from '@gestsiid/shared';
+import { DataBlock, type ColumnView } from '@/components/datablock/DataBlock';
+import type { GridRow } from '@/components/datablock/dirty';
+import { useDetailBlock } from '@/components/datablock/useDetailBlock';
 
+/**
+ * Administração › Domínios (Step 4.6): FD_DOMINIOS_SIID, master `CFG_DOMINIOS` + detail
+ * `CFG_VALORES_DOMINIO` — the first master-detail production screen. `TIPO_STRING_RF` /
+ * `FORMATACAO_STRING_RF` only show for a `STRING` domain; `VALOR_MINIMO`/`VALOR_MAXIMO` only for
+ * an interval (`TIPO_DOMINIO_RF='I'`) domain (`ENABLE_STRINGS`/`ENABLE_VALORES`).
+ */
 export const Route = createFileRoute('/_app/administracao/dominios')({
-  component: PlaceholderScreen,
+  component: DominiosScreen,
 });
+
+const tipoInformacao = { source: 'dominio', dominioId: DOMINIOS_DOMINIOS.tipoInformacao } as const;
+const tipoDominio = { source: 'dominio', dominioId: DOMINIOS_DOMINIOS.tipoDominio } as const;
+const tipoString = { source: 'dominio', dominioId: DOMINIOS_DOMINIOS.tipoString } as const;
+const formatacaoString = {
+  source: 'dominio',
+  dominioId: DOMINIOS_DOMINIOS.formatacaoString,
+} as const;
+const binario = { source: 'dominio', dominioId: DOMINIOS_DOMINIOS.binario } as const;
+
+const isString = (v: Record<string, string>) => v['TIPO_INFORMACAO_RF'] === 'STRING';
+const isIntervalo = (v: Record<string, string>) => v['TIPO_DOMINIO_RF'] === 'I';
+
+// Form's field order (STRUCTURE.md §3.16): Id, Descrição, Tipo Domínio, Sistema?, Tipo
+// informação, Tipo/Formatação string (só STRING), Tamanho, Precisão, Mínimo/Máximo (só
+// intervalo), Default, Observação.
+const masterColumns: ColumnView<GridRow>[] = [
+  { col: 'ID', width: 140, mono: true },
+  { col: 'DESCRICAO', width: 260 },
+  { col: 'TIPO_INFORMACAO_RF', options: tipoInformacao, width: 132 },
+  { col: 'TIPO_DOMINIO_RF', options: tipoDominio, width: 140 },
+  { col: 'TIPO_STRING_RF', options: tipoString, width: 132, visibleWhen: isString },
+  { col: 'FORMATACAO_STRING_RF', options: formatacaoString, width: 152, visibleWhen: isString },
+  { col: 'VALOR_MINIMO', width: 112, visibleWhen: isIntervalo },
+  { col: 'VALOR_MAXIMO', width: 112, visibleWhen: isIntervalo },
+  { col: 'TAMANHO_MAXIMO', width: 96 },
+  { col: 'PRECISAO', width: 88 },
+  { col: 'VALOR_COMUM', width: 120 },
+  { col: 'DOMINIO_SISTEMA_BN', options: binario, width: 96 },
+  { col: 'OBSERVACAO', width: 320 },
+  { col: 'ESTADO_REGISTO_RF', hidden: true },
+  { col: 'DATA_ESTADO', hidden: true },
+  { col: 'REGISTADO_POR', hidden: true },
+  { col: 'DATA_REGISTO', hidden: true },
+  { col: 'ACTUALIZADO_POR', hidden: true },
+  { col: 'DATA_ACTUALIZACAO', hidden: true },
+];
+
+// Tab "Lista" (STRUCTURE.md §3.16): Chave, Designação, Descrição, Data Início/Fim, Ordem.
+const detailColumns: ColumnView<GridRow>[] = [
+  { col: 'CHAVE', width: 120, mono: true },
+  { col: 'DESIGNACAO', width: 200 },
+  { col: 'DESCRICAO', width: 260 },
+  { col: 'DATA_INICIO', width: 112 },
+  { col: 'DATA_FIM', width: 112 },
+  { col: 'PRIORIDADE', width: 88 },
+  { col: 'DOMINIO_ID', hidden: true },
+  { col: 'REGISTADO_POR', hidden: true },
+  { col: 'DATA_REGISTO', hidden: true },
+  { col: 'ACTUALIZADO_POR', hidden: true },
+  { col: 'DATA_ACTUALIZACAO', hidden: true },
+];
+
+const today = () => `${new Date().toISOString().slice(0, 10)}T00:00:00`;
+
+function DominiosScreen() {
+  const { session } = Route.useRouteContext();
+  const [current, setCurrent] = useState<GridRow | null>(null);
+  const detail = useDetailBlock(current, { DOMINIO_ID: 'ID' });
+
+  return (
+    <main id="conteudo" className="flex h-dvh flex-col gap-3 bg-background p-4 text-foreground">
+      <header>
+        <h1 className="text-lg font-semibold">Domínios</h1>
+      </header>
+      <DataBlock
+        className="min-h-0 flex-[55]"
+        heading="Domínios"
+        resource={dominios}
+        columns={masterColumns}
+        role={session.role}
+        edit="panel" // 19 fields with conditional ones: a form, not a grid row
+        defaults={() => ({
+          TIPO_INFORMACAO_RF: 'STRING',
+          TIPO_DOMINIO_RF: 'L',
+          TIPO_STRING_RF: 'A',
+          FORMATACAO_STRING_RF: 'M',
+          DOMINIO_SISTEMA_BN: 'N',
+        })}
+        onCurrentRowChange={setCurrent}
+        beforeCurrentRowChange={detail.beforeMasterRowChange}
+      />
+      <DataBlock
+        className="min-h-0 flex-[45]"
+        heading="Valores do domínio"
+        resource={dominiosValores}
+        columns={detailColumns}
+        role={session.role}
+        edit="inline"
+        endpoint={`/dominios/${detail.keys?.['DOMINIO_ID'] ?? ''}/lista`}
+        defaults={() => ({ DATA_INICIO: today(), PRIORIDADE: 0 })}
+        {...detail.detailProps}
+      />
+    </main>
+  );
+}

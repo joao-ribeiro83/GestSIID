@@ -81,3 +81,86 @@ not just `STRUCTURE.md`'s prose summary of it.
   no checkbox-style cell editor in `CellEditor.tsx` yet, and the existing select-editor pattern
   already fits an S/N domain exactly. Build a checkbox editor only when a screen needs a boolean
   that isn't backed by a domain.
+
+## Pilot notes — Step 4.6 (Domínios): the first master-detail screen
+
+Written after building `packages/shared/src/resources/dominios.ts`,
+`apps/api/src/features/dominios/routes.ts` and
+`apps/web/src/routes/_app/administracao/dominios.tsx` — master `CFG_DOMINIOS` + detail
+`CFG_VALORES_DOMINIO`.
+
+### The mechanical part worked as designed, again
+
+`useDetailBlock` + `DataBlock`'s `master` prop (built in Step 2, demoed at `/dev/datablock` with
+Impressoras → Tabuleiros) needed **zero changes** to carry a second, real master-detail screen.
+The whole wiring is the two lines from its own doc comment: `useDetailBlock(current, {
+DOMINIO_ID: 'ID' })` on the master's `onCurrentRowChange`, `{...detail.detailProps}` plus an
+explicit `endpoint` on the detail `DataBlock`. This is the strongest validation yet that Step 2's
+design was right the first time.
+
+### What was missing / had to be worked around
+
+- **Panel-mode conditional field visibility didn't exist.** `ENABLE_STRINGS`/`ENABLE_VALORES`
+  (show `TIPO_STRING_RF`/`FORMATACAO_STRING_RF` only for a STRING domain, `VALOR_MINIMO`/
+  `VALOR_MAXIMO` only for an interval domain) has no Forms equivalent in `PanelForm.tsx`. Added
+  one field to `ColumnView`: `visibleWhen?: (values) => boolean`, read against `form.watch()` (all
+  current, possibly-unsaved text values) so toggling the trigger field shows/hides the dependent
+  ones live, before saving — proven by an e2e test that flips `Tipo` on a brand new row and checks
+  `Tipo String` appears/disappears with no round trip. react-hook-form's default
+  `shouldUnregister: false` means a hidden field's value is not lost when it's conditionally
+  unmounted, so no extra plumbing was needed to preserve it. **Next screen: reach for
+  `visibleWhen` for any other Oracle Forms `ENABLE_*`/`SET_ITEM_PROPERTY(...,VISIBLE,...)` pattern
+  before inventing something new.**
+- **Two masters can't share one route path.** The detail table (`CFG_VALORES_DOMINIO`) already had
+  a *read-only* lookup feed at `/api/dominios/:dominioId/valores` (Step 4.1, used by every other
+  screen's domain-backed select). The new CRUD screen needed full GET/POST/PUT/DELETE over the
+  same table without colliding with that route or its 60s cache. Mounted the CRUD detail at a
+  sibling path, `/api/dominios/:DOMINIO_ID/lista` (the form's own tab name), and had the CRUD
+  store's `insert`/`update`/`remove` invalidate the lookup's cache entry for the written
+  `DOMINIO_ID` (`withCacheInvalidation` in `features/dominios/routes.ts`) so a value added in the
+  admin screen shows up immediately in every other screen's select, not after 60s. **Next screen:
+  if a table already has a read-only lookup route, give its CRUD screen a distinct sibling path,
+  never the same one.**
+- **The delete-guard (`ON-CHECK-DELETE-MASTER`) doesn't need a manual FK model.** `CFG_VALORES_DOMINIO`
+  has a real FK to `CFG_DOMINIOS`, so Oracle's own `ORA-02292` (already mapped to the exact legacy
+  message in `db/errors.ts`) would eventually catch an unguarded delete — but relying on that alone
+  means `memoryStore` (dev/e2e/unit tests) silently allows the delete instead, since it enforces no
+  FK. Wrote a small `withDeleteGuard(store, valoresStore)` store decorator (same shape as
+  `tipos-midia`'s `withBytes` and `utilizadores`'s `withDateOrder`) that pre-checks the detail
+  store and throws the same `ORA_02292` `AppError` either store gets. **Next screen: a legacy
+  ON-CHECK-DELETE-MASTER is a decorator over `remove`, not a schema feature — `Resource` was not
+  changed.**
+- **Domains-of-domains are still just domains.** `TIPO_INFORMACAO`, `TIPO_DOMINIO`, `TIPO_STRING`,
+  `FORMATACAO_STRING` (the four selects the Domínios screen itself uses) are ordinary rows in
+  `CFG_VALORES_DOMINIO`, fed through the same `GET /api/dominios/:id/valores` every other screen
+  uses — no special case needed anywhere. The dev server's static lookup stub
+  (`features/dev/routes.ts`'s `DOMINIOS` map) is a *separate* hand-seeded fixture from the new
+  in-memory `dominios`/`dominios-valores` CRUD stores, though, so a first e2e run failed with
+  "option not found" on the `Tipo` select until these four ids were added to that static map too.
+  **Next screen: a select's dev-server data and a screen's own CRUD seed data are two different
+  fixtures that must be kept in sync by hand — there's no single source of truth for dev/e2e.**
+- **Column-count reality vs. the prose docs, again.** `STRUCTURE.md`/`BUSINESS_RULES.md` describe
+  9 fields; the form XML (`analysis/forms-xml/summary/FD_DOMINIOS_SIID.md`) shows 19, all visible:
+  `TAMANHO_MAXIMO`, `PRECISAO`, `VALOR_COMUM`, `OBSERVACAO`, `DOMINIO_SISTEMA_BN`,
+  `ESTADO_REGISTO_RF`, `DATA_ESTADO` are on the form but not in the prose. Confirms the Step 4.1
+  lesson: read the XML/extracted-labels file for the field list, never the prose summary alone.
+
+## Left out on purpose (Step 4.6)
+
+- **`TAMANHO_MAXIMO`/`PRECISAO` form `Required=true` not enforced.** Both are DB-nullable with no
+  default, and BR-ADM-01 never lists them as mandatory — the `Required=true` on the form looks like
+  boilerplate never actually exercised (no seed row in `CFG_DOMINIOS.md` populates them). Modelled
+  as optional; make them `required: true` only if a real Oracle row turns up needing it.
+- **Conditional requiredness is not modelled.** `TIPO_STRING_RF`/`FORMATACAO_STRING_RF` are
+  `Required=true` on the form only while visible (`ENABLE_STRINGS` toggles `ENABLED` too, so Forms
+  never validates a disabled item); `resource.ts`'s `required` flag has no per-field "required only
+  when X" mode. Left both optional at the API layer — `visibleWhen` covers the UI, nothing enforces
+  the value server-side. Add a cross-field required check only if a real gap shows up.
+- **`DOMINIO_SISTEMA_BN` ("Sistema?") carries no special behavior.** The legacy column flags
+  built-in domains, but no trigger in the extracted PL/SQL does anything with it beyond storing the
+  value — modelled as a plain `BINARIO`-backed select (`VALIDO`'s precedent), editable like any
+  other field. Add protection (e.g. blocking delete of a system domain) only if a real workflow
+  needs it.
+- **`VERSAO`** (both tables, DB default `0.0`) is not modelled, matching every prior resource in
+  this app — optimistic locking already goes through the `orig` check in `crud.ts`, not this
+  column.

@@ -1,6 +1,16 @@
 import type { FastifyInstance } from 'fastify';
-import { DEMO_DOMINIOS, demoImpressoras, demoTabuleiros, impressoras, IMPRESSORAS_DOMINIOS } from '@gestsiid/shared';
+import {
+  DEMO_DOMINIOS,
+  demoImpressoras,
+  demoTabuleiros,
+  dominios,
+  DOMINIOS_DOMINIOS,
+  dominiosValores,
+  impressoras,
+  IMPRESSORAS_DOMINIOS,
+} from '@gestsiid/shared';
 import { auditHooks, crudRoutes, type CrudHooks, type Row } from '../../lib/crud.ts';
+import { registerDominiosCrudRoutes } from '../dominios/routes.ts';
 import { memoryStore } from './memoryStore.ts';
 
 /**
@@ -33,6 +43,26 @@ const DOMINIOS: Record<string, { CHAVE: string; DESIGNACAO: string }[]> = {
   [IMPRESSORAS_DOMINIOS.valido]: [
     { CHAVE: 'N', DESIGNACAO: 'Não' },
     { CHAVE: 'S', DESIGNACAO: 'Sim' },
+  ],
+  // Domains-of-domains (CFG_VALORES_DOMINIO.md): the selects FD_DOMINIOS_SIID itself feeds.
+  [DOMINIOS_DOMINIOS.tipoInformacao]: [
+    { CHAVE: 'DATA', DESIGNACAO: 'Data' },
+    { CHAVE: 'NUMBER', DESIGNACAO: 'Numérico' },
+    { CHAVE: 'STRING', DESIGNACAO: 'String' },
+  ],
+  [DOMINIOS_DOMINIOS.tipoDominio]: [
+    { CHAVE: 'I', DESIGNACAO: 'Intervalo Valores' },
+    { CHAVE: 'L', DESIGNACAO: 'Lista Valores' },
+  ],
+  [DOMINIOS_DOMINIOS.tipoString]: [
+    { CHAVE: 'A', DESIGNACAO: 'Alfanumérica' },
+    { CHAVE: 'C', DESIGNACAO: 'Caracteres' },
+    { CHAVE: 'N', DESIGNACAO: 'Numérica' },
+  ],
+  [DOMINIOS_DOMINIOS.formatacaoString]: [
+    { CHAVE: 'M', DESIGNACAO: 'Maiúsculo' },
+    { CHAVE: 'N', DESIGNACAO: 'Minúsculo' },
+    { CHAVE: 'X', DESIGNACAO: 'Misto' },
   ],
 };
 
@@ -108,6 +138,79 @@ function seedImpressorasReal(): Row[] {
   });
 }
 
+const audit = {
+  CRIADO_POR: 'DISCOSECFOR',
+  DATA_CRIACAO: '2010-02-15T12:52:27',
+  ACTUALIZADO_POR: null,
+  DATA_ACTUALIZACAO: null,
+};
+
+// Step 4.6: the real CFG_DOMINIOS / CFG_VALORES_DOMINIO rows the app itself relies on
+// (analysis/db/tables/*.md), for the /administracao/dominios master-detail e2e specs.
+function seedDominios(): Row[] {
+  const d = (ID: string, DESCRICAO: string, over: Record<string, unknown> = {}) => ({
+    ID,
+    DESCRICAO,
+    TIPO_INFORMACAO_RF: 'STRING',
+    TIPO_DOMINIO_RF: 'L',
+    TIPO_STRING_RF: 'A',
+    FORMATACAO_STRING_RF: 'M',
+    TAMANHO_MAXIMO: null,
+    PRECISAO: null,
+    VALOR_MINIMO: null,
+    VALOR_MAXIMO: null,
+    DOMINIO_SISTEMA_BN: 'S',
+    VALOR_COMUM: null,
+    OBSERVACAO: null,
+    ESTADO_REGISTO_RF: 'N',
+    DATA_ESTADO: '2010-02-15T00:00:00',
+    REGISTADO_POR: audit.CRIADO_POR,
+    DATA_REGISTO: audit.DATA_CRIACAO,
+    ACTUALIZADO_POR: audit.ACTUALIZADO_POR,
+    DATA_ACTUALIZACAO: audit.DATA_ACTUALIZACAO,
+    ...over,
+  });
+  return [
+    d('BINARIO', 'Valores binários (Sim/Não)'),
+    d('TIPO_INFORMACAO', 'Tipo de informação de um domínio'),
+    d('TIPO_DOMINIO', 'Tipo de domínio (lista ou intervalo)'),
+    d('TIPO_STRING', 'Tipo de string de um domínio', { TIPO_DOMINIO_RF: 'I', VALOR_MINIMO: 'A', VALOR_MAXIMO: 'N' }),
+    d('FORMATACAO_STRING', 'Formatação de uma string'),
+    d('NIVEL_ACESSO', 'Nível de acesso (numérico, sem valores)', { TIPO_INFORMACAO_RF: 'NUMBER' }),
+  ];
+}
+
+function seedDominiosValores(): Row[] {
+  const v = (DOMINIO_ID: string, CHAVE: string, DESIGNACAO: string, PRIORIDADE: number) => ({
+    DOMINIO_ID,
+    CHAVE,
+    DESIGNACAO,
+    DESCRICAO: DESIGNACAO,
+    DATA_INICIO: '2010-02-15T00:00:00',
+    DATA_FIM: null,
+    PRIORIDADE,
+    REGISTADO_POR: audit.CRIADO_POR,
+    DATA_REGISTO: audit.DATA_CRIACAO,
+    ACTUALIZADO_POR: audit.ACTUALIZADO_POR,
+    DATA_ACTUALIZACAO: audit.DATA_ACTUALIZACAO,
+  });
+  return [
+    v('BINARIO', 'N', 'Não', 0),
+    v('BINARIO', 'S', 'Sim', 1),
+    v('TIPO_INFORMACAO', 'DATA', 'Data', 0),
+    v('TIPO_INFORMACAO', 'NUMBER', 'Numérico', 1),
+    v('TIPO_INFORMACAO', 'STRING', 'String', 2),
+    v('TIPO_DOMINIO', 'I', 'Intervalo Valores', 0),
+    v('TIPO_DOMINIO', 'L', 'Lista Valores', 1),
+    v('TIPO_STRING', 'A', 'Alfanumérica', 0),
+    v('TIPO_STRING', 'C', 'Caracteres', 1),
+    v('TIPO_STRING', 'N', 'Numérica', 2),
+    v('FORMATACAO_STRING', 'M', 'Maiúsculo', 0),
+    v('FORMATACAO_STRING', 'N', 'Minúsculo', 1),
+    v('FORMATACAO_STRING', 'X', 'Misto', 2),
+  ];
+}
+
 /** Dev stand-in for `impressorasHooks` (routes.ts): a plain string counter instead of
  * `ID_IMPRESSORA_SEQ.NEXTVAL`, since `memoryStore` has no Oracle sequence to call. */
 function devImpressorasHooks(seedCount: number): CrudHooks {
@@ -149,5 +252,10 @@ export async function registerDevRoutes(
   crudRoutes(app, demoTabuleiros, {
     store: memoryStore(demoTabuleiros, seedTabuleiros(), { autoId: 'ID' }),
     path: '/api/demo-impressoras/:IMPRESSORA_ID/tabuleiros',
+  });
+  // Step 4.6: Domínios, the first master-detail screen (same route code as production).
+  registerDominiosCrudRoutes(app, {
+    store: memoryStore(dominios, seedDominios()),
+    valoresStore: memoryStore(dominiosValores, seedDominiosValores()),
   });
 }

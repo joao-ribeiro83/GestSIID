@@ -22,12 +22,14 @@ interface Props {
   endpoint: string;
   /** null = new row. */
   row: GridRow | null;
+  /** Initial values of a new row (the form's item initial values). */
+  defaults?: Record<string, unknown>;
   title: string;
   onClose: () => void;
 }
 
 /** Panel editing (§3.9): one request on Guardar, toast `Guardado.`, #46 when closing a dirty form. */
-export function PanelForm({ resource, columns, endpoint, row, title, onClose }: Props) {
+export function PanelForm({ resource, columns, endpoint, row, defaults, title, onClose }: Props) {
   const isNew = row === null;
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -47,10 +49,16 @@ export function PanelForm({ resource, columns, endpoint, row, title, onClose }: 
     defaultValues: Object.fromEntries(
       fields
         .filter((c) => editable(c.col))
-        .map((c) => [c.col, toInput(resource.columns[c.col]!, row?.[c.col])]),
+        .map((c) => [
+          c.col,
+          toInput(resource.columns[c.col]!, row ? row[c.col] : defaults?.[c.col]),
+        ]),
     ),
   });
   const { errors, isSubmitting, dirtyFields } = form.formState;
+  // Reactive to every keystroke, so ENABLE_STRINGS-style conditional fields show/hide live.
+  const watched = form.watch();
+  const shown = fields.filter((c) => !c.visibleWhen || c.visibleWhen(watched));
 
   const submit = form.handleSubmit(async (parsed) => {
     const values = isNew
@@ -121,7 +129,7 @@ export function PanelForm({ resource, columns, endpoint, row, title, onClose }: 
                 {errors.root.message}
               </p>
             )}
-            {fields.map((c) => {
+            {shown.map((c) => {
               const def = resource.columns[c.col]!;
               const id = `pf-${c.col}`;
               const error = errors[c.col]?.message;

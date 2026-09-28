@@ -1,11 +1,12 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastify';
-import { impressoras } from '@gestsiid/shared';
+import { dominios, dominiosValores, impressoras } from '@gestsiid/shared';
 import { oracleStore } from './lib/crud.ts';
 import type { DbPool } from './db/oracle.ts';
 import type { AuthRepo } from './features/auth/repo.ts';
 import { registerAuthRoutes } from './features/auth/routes.ts';
 import { registerDevRoutes } from './features/dev/routes.ts';
-import { registerDominiosRoutes } from './features/dominios/valores.ts';
+import { registerDominiosCrudRoutes } from './features/dominios/routes.ts';
+import { createDominiosCache, registerDominiosRoutes } from './features/dominios/valores.ts';
 import { registerHealthRoute } from './features/health/routes.ts';
 import { registerImpressorasRoutes } from './features/impressoras/routes.ts';
 import { registerAuthGuard } from './http/auth-guard.ts';
@@ -84,7 +85,13 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     await app.register(
       async (sub) => {
         registerImpressorasRoutes(sub, { store: oracleStore(pool, impressoras, callTimeoutMs) });
-        registerDominiosRoutes(sub, { pool, callTimeoutMs });
+        const dominiosCache = createDominiosCache();
+        registerDominiosRoutes(sub, { pool, callTimeoutMs, cache: dominiosCache });
+        registerDominiosCrudRoutes(sub, {
+          store: oracleStore(pool, dominios, callTimeoutMs),
+          valoresStore: oracleStore(pool, dominiosValores, callTimeoutMs),
+          cache: dominiosCache,
+        });
       },
       { prefix: deps.config.BASE_PATH },
     );

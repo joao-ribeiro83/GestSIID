@@ -99,6 +99,9 @@ export interface ColumnView<Row> {
   render?: (row: Row) => ReactNode;
   /** Select filter (`in`), select editor and label lookup from a domain. */
   options?: { source: 'dominio'; dominioId: string };
+  /** Panel editing only (`PanelForm`): the field only shows while this holds, over the form's
+   * current (possibly unsaved) text values — e.g. `ENABLE_STRINGS`-style conditional fields. */
+  visibleWhen?: (values: Record<string, string>) => boolean;
 }
 
 export interface DataBlockHandle {
@@ -860,16 +863,14 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
             >
               <Plus /> {pt.db.novo}
             </Button>
-            {edit === 'inline' && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleDelete}
-                disabled={!canDelete || (!currentRow && selection.mode !== 'ids')}
-              >
-                <Trash2 /> {pt.db.apagar}
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleDelete}
+              disabled={!canDelete || (!currentRow && selection.mode !== 'ids')}
+            >
+              <Trash2 /> {pt.db.apagar}
+            </Button>
           </>
         )}
       </div>
@@ -969,6 +970,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
           columns={props.columns as ColumnView<never>[]}
           endpoint={endpoint}
           row={panel.row}
+          defaults={props.defaults?.()}
           title={panel.row ? `${heading} ${String(idOf(panel.row))}` : `${heading} · ${pt.db.novo}`}
           onClose={() => setPanel(null)}
         />
