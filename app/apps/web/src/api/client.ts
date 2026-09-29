@@ -43,6 +43,9 @@ export function setCsrfToken(token: string | null): void {
 
 const apiBase = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/api`;
 
+/** Absolute-path URL of an API path, for `<img src>` and the like (fetch calls use `apiFetch`). */
+export const apiUrl = (path: string): string => `${apiBase}${path}`;
+
 /**
  * `credentials: 'same-origin'` sends the session cookie; every non-GET request carries the CSRF
  * token. Error bodies are toasted here except 401 (handled by route guards / re-login, UI-27) and

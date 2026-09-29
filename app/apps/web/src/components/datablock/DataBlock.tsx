@@ -66,7 +66,7 @@ import {
 import { Footer } from './Footer';
 import { formatCell, formatNumber } from './format';
 import { align, HeaderRow, type FilterValue } from './HeaderRow';
-import { PanelForm } from './PanelForm';
+import { PanelForm, type PanelFieldCtx } from './PanelForm';
 import { formatFilterText, nextSort, parseFilterText } from './qbe';
 
 /**
@@ -102,6 +102,9 @@ export interface ColumnView<Row> {
   /** Panel editing only (`PanelForm`): the field only shows while this holds, over the form's
    * current (possibly unsaved) text values — e.g. `ENABLE_STRINGS`-style conditional fields. */
   visibleWhen?: (values: Record<string, string>) => boolean;
+  /** Panel editing only: replaces the field's default input (an LOV button, a read-only field…).
+   * Register the input with `ctx.form.register(col)` and set other fields with `ctx.form.setValue`. */
+  renderField?: (ctx: PanelFieldCtx) => ReactNode;
   /** Inline editing only: the cell is editable only while this holds, over the row's current
    * (possibly unsaved) values — e.g. a fixed/locked row whose name cannot be renamed. */
   editableWhen?: (row: Row) => boolean;
@@ -138,11 +141,13 @@ export interface DataBlockProps<Row extends GridRow = GridRow> {
   beforeCurrentRowChange?: () => Promise<boolean>;
   onSelectionChange?: (s: Selection) => void;
   handleRef?: Ref<DataBlockHandle>;
+  /** Panel editing only: extra content under the fields (`null` row = a new, unsaved one). */
+  panelExtra?: (row: Row | null) => ReactNode;
+  /** Named server-side filter (`resource.presets`); a change goes back to page 1. */
+  preset?: string;
   emptyText?: string;
   pageSize?: number;
   className?: string;
-  /** Named server-side filter (`resource.presets`); a change goes back to page 1. */
-  preset?: string;
 }
 
 const MAX_IDS = 1000;
@@ -206,12 +211,12 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
   // ── data ─────────────────────────────────────────────────────────────────────────────────
   const masterKeys = props.master?.keys;
   const enabled = props.master === undefined || masterKeys !== null;
+  const fetched: ListQuery = props.preset === undefined ? query : { ...query, preset: props.preset };
   const list = useQuery({
     queryKey: [endpoint, masterKeys ?? null, fetched],
     queryFn: () => apiFetch<PagedResult<Row>>(`${endpoint}?${toQueryString(fetched)}`),
     placeholderData: keepPreviousData,
     enabled,
-  const fetched: ListQuery = props.preset === undefined ? query : { ...query, preset: props.preset };
     refetchOnWindowFocus: !isDirty,
   });
   const total = list.data?.total ?? 0;
@@ -341,11 +346,6 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     setSelection({ mode: 'none' });
   }
 
-  const currentSig = JSON.stringify(currentRow);
-  const onCurrent = props.onCurrentRowChange;
-  useEffect(() => {
-    onCurrent?.(currentRow);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- by value, not by object identity
   const [seenPreset, setSeenPreset] = useState(props.preset);
   if (seenPreset !== props.preset) {
     setSeenPreset(props.preset);
@@ -353,6 +353,11 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     setSelection({ mode: 'none' });
   }
 
+  const currentSig = JSON.stringify(currentRow);
+  const onCurrent = props.onCurrentRowChange;
+  useEffect(() => {
+    onCurrent?.(currentRow);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- by value, not by object identity
   }, [currentSig]);
 
   const moveTo = async (rid: string | null, col = current.col) => {
@@ -986,6 +991,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
           endpoint={endpoint}
           row={panel.row}
           defaults={props.defaults?.()}
+          extra={props.panelExtra?.(panel.row) as ReactNode}
           title={panel.row ? `${heading} ${String(idOf(panel.row))}` : `${heading} · ${pt.db.novo}`}
           onClose={() => setPanel(null)}
         />

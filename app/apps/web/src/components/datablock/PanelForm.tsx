@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useForm, type Resolver } from 'react-hook-form';
+import { useMemo, type ReactNode } from 'react';
+import { useForm, type Resolver, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -16,6 +16,17 @@ import { formatCell, fromInput, toInput } from './format';
 
 type FormValues = Record<string, string>;
 
+/** What `ColumnView.renderField` gets: the panel's form and the look of a default input. */
+export interface PanelFieldCtx {
+  form: UseFormReturn<FormValues>;
+  /** The input's id (`pf-<COL>`); the `<label>` points at it. */
+  id: string;
+  /** The default input's classes. */
+  className: string;
+  invalid: boolean;
+  isNew: boolean;
+}
+
 interface Props {
   resource: Resource;
   columns: ColumnView<never>[];
@@ -24,12 +35,14 @@ interface Props {
   row: GridRow | null;
   /** Initial values of a new row (the form's item initial values). */
   defaults?: Record<string, unknown>;
+  /** Rendered under the fields. */
+  extra?: ReactNode;
   title: string;
   onClose: () => void;
 }
 
 /** Panel editing (§3.9): one request on Guardar, toast `Guardado.`, #46 when closing a dirty form. */
-export function PanelForm({ resource, columns, endpoint, row, defaults, title, onClose }: Props) {
+export function PanelForm({ resource, columns, endpoint, row, defaults, extra, title, onClose }: Props) {
   const isNew = row === null;
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -163,7 +176,9 @@ export function PanelForm({ resource, columns, endpoint, row, defaults, title, o
                     {def.label}
                     {def.required && !(def.writeOnly && !isNew) && <span aria-hidden> *</span>}
                   </label>
-                  {c.options ? (
+                  {c.renderField ? (
+                    c.renderField({ form, id, className: inputCls, invalid: !!error, isNew })
+                  ) : c.options ? (
                     // Controlled: the options load after the form mounts, so the DOM value must follow state.
                     <DominioSelect
                       id={id}
@@ -201,6 +216,7 @@ export function PanelForm({ resource, columns, endpoint, row, defaults, title, o
                 </div>
               );
             })}
+            {extra}
           </div>
           <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
             <Button type="button" variant="outline" onClick={() => void requestClose()}>

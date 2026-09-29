@@ -6,16 +6,19 @@ import {
   dominios,
   DOMINIOS_DOMINIOS,
   dominiosValores,
+  empregadosLov,
+  funcoesDepartamento,
   impressoras,
   impressorasAssociadasDoc,
   impressorasAssociadasUsr,
   IMPRESSORAS_DOMINIOS,
   modelosLov,
+  perfisDepartamento,
   permissoes,
+  PERMISSOES_DOMINIOS,
   reportParametros,
   reports,
   REPORTS_DOMINIOS,
-  PERMISSOES_DOMINIOS,
   tiposMidia,
   unidadesMedida,
   utilizadores,
@@ -27,6 +30,8 @@ import {
 import { auditHooks, crudRoutes, type CrudHooks, type CrudStore, type Row } from '../../lib/crud.ts';
 import { registerDominiosCrudRoutes } from '../dominios/routes.ts';
 import { registerImpressorasAssociadasRoutes } from '../impressoras-associadas/routes.ts';
+import { memoryPerfisRepo } from '../perfis-departamento/repo.ts';
+import { registerPerfisDepartamentoRoutes } from '../perfis-departamento/routes.ts';
 import { localNow, memoryPermissoesRepo } from '../permissoes/repo.ts';
 import { registerPermissoesRoutes } from '../permissoes/routes.ts';
 import { FIM_BULK, validaHoje, type Modelo, type Perm, type Utilizador } from '../permissoes/rules.ts';
@@ -35,6 +40,7 @@ import { registerTiposMidiaRoutes } from '../tipos-midia/routes.ts';
 import { registerUnidadesMedidaRoutes } from '../unidades-medida/routes.ts';
 import { registerUtilizadoresRoutes } from '../utilizadores/routes.ts';
 import { registerVariaveisRoutes } from '../variaveis/routes.ts';
+import { memoryImageStore } from './memoryImageStore.ts';
 import { memoryStore } from './memoryStore.ts';
 
 /**
@@ -535,6 +541,79 @@ export async function registerDevRoutes(
   // Step 5.3: Permissões. The grid is rebuilt from the repo on every call, so actions show up.
   const permRepo = memoryPermissoesRepo(seedPermissoes());
   registerPermissoesRoutes(app, { store: permissoesVista(permRepo), repo: permRepo });
+  // Step 5.5: Perfis de departamento (Gador › Equipa de Gestão), signature in memory.
+  const perfisStore = memoryStore(perfisDepartamento, seedPerfis(), { autoId: 'ID' });
+  const admCtx = { user: { username: 'DEV', role: 'ADM' as const } };
+  registerPerfisDepartamentoRoutes(app, {
+    store: perfisStore,
+    empregadosStore: memoryStore(empregadosLov, DEV_EMPREGADOS),
+    funcoesStore: memoryStore(funcoesDepartamento, DEV_FUNCOES),
+    repo: memoryPerfisRepo({
+      ttapvaat: DEV_TTAPVAAT,
+      funcoes: DEV_FUNCOES,
+      usados: async () =>
+        new Set(
+          (await perfisStore.list({ filters: {}, sort: [], page: 1, size: 1000 }, {}, admCtx)).rows.map(
+            (r) => String(r['CODIGO'] ?? ''),
+          ),
+        ),
+    }),
+    imageStore: memoryImageStore({
+      exists: async (k) =>
+        (
+          await perfisStore.list(
+            { filters: { ID: [{ op: 'eq', value: String(k['id']) }] }, sort: [], page: 1, size: 1 },
+            {},
+            admCtx,
+          )
+        ).total > 0,
+    }),
+    maxBytes: 1024 * 1024,
+  });
+}
+
+// ── Perfis de departamento (Step 5.5) ────────────────────────────────────────────────────────
+const DEV_EMPREGADOS = [
+  { CDEMPLEA: 'AB1001X', CDDEPARTA: 'OD68', SWACTIVO: 'S' },
+  { CDEMPLEA: 'CD2002Y', CDDEPARTA: 'OD68', SWACTIVO: 'S' },
+  { CDEMPLEA: 'EF3003Z', CDDEPARTA: 'OD01', SWACTIVO: 'S' },
+  { CDEMPLEA: 'GH4004W', CDDEPARTA: 'OD01', SWACTIVO: 'N' },
+];
+const DEV_FUNCOES = [
+  { ID: 'GCOM', NOME: 'Gestor Comercial', REGISTO_VALIDO: 'S' },
+  { ID: 'GCON', NOME: 'Gestor de Conta', REGISTO_VALIDO: 'S' },
+  { ID: 'ANTIGA', NOME: 'Função antiga', REGISTO_VALIDO: 'N' },
+];
+// TTAPVAAT tables 6 (→ GCOM) and 7 (→ GCON). GC1001 is already used by the seeded perfil.
+const DEV_TTAPVAAT = [
+  { NMTABLA: 6, OTCLAVE1: 'GC1001' },
+  { NMTABLA: 6, OTCLAVE1: 'GC2002' },
+  { NMTABLA: 7, OTCLAVE1: 'GC3003' },
+];
+function seedPerfis(): Row[] {
+  const perfil = (ID: number, CDEMPLEA: string, CDDEPARTA: string, CODIGO: string, F: string, DESCRICAO: string) => ({
+    ID,
+    CDEMPLEA,
+    CDDEPARTA,
+    DATA_INICIO: '2024-01-01T00:00:00',
+    DATA_FIM: null,
+    CODIGO,
+    FUNCAODEP_ID: F,
+    NOME: DEV_FUNCOES.find((f) => f.ID === F)?.NOME ?? null,
+    DESCRICAO,
+    EMAIL: null,
+    TELEFONE: null,
+    FAX: null,
+    TELEMOVEL: null,
+    CRIADO_POR: 'MIGRACAO',
+    DATA_CRIACAO: '2024-01-01T10:00:00',
+    ACTUALIZADO_POR: null,
+    DATA_ACTUALIZACAO: null,
+  });
+  return [
+    perfil(1, 'AB1001X', 'OD68', 'GC1001', 'GCOM', 'Ana Ribeiro'),
+    perfil(2, 'EF3003Z', 'OD01', 'GC9009', 'GCON', 'Eva Fonseca'),
+  ];
 }
 
 // ── Permissões (Step 5.3) ────────────────────────────────────────────────────────────────────

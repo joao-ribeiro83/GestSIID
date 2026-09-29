@@ -1,11 +1,15 @@
+import multipart from '@fastify/multipart';
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastify';
 import {
   dominios,
   dominiosValores,
+  empregadosLov,
+  funcoesDepartamento,
   impressoras,
   impressorasAssociadasDoc,
   impressorasAssociadasUsr,
   modelosLov,
+  perfisDepartamento,
   permissoes,
   tiposMidia,
   unidadesMedida,
@@ -14,6 +18,7 @@ import {
   variaveis,
 } from '@gestsiid/shared';
 import { oracleStore } from './lib/crud.ts';
+import { oracleImageStore } from './lib/imageRoutes.ts';
 import type { DbPool } from './db/oracle.ts';
 import type { AuthRepo } from './features/auth/repo.ts';
 import { registerAuthRoutes } from './features/auth/routes.ts';
@@ -23,6 +28,8 @@ import { createDominiosCache, registerDominiosRoutes } from './features/dominios
 import { registerHealthRoute } from './features/health/routes.ts';
 import { registerImpressorasAssociadasRoutes } from './features/impressoras-associadas/routes.ts';
 import { registerImpressorasRoutes } from './features/impressoras/routes.ts';
+import { oraclePerfisRepo } from './features/perfis-departamento/repo.ts';
+import { registerPerfisDepartamentoRoutes } from './features/perfis-departamento/routes.ts';
 import { oraclePermissoesRepo } from './features/permissoes/repo.ts';
 import { registerPermissoesRoutes } from './features/permissoes/routes.ts';
 import { registerTiposMidiaRoutes } from './features/tipos-midia/routes.ts';
@@ -42,6 +49,8 @@ export interface AppConfig {
   TRUST_PROXY: string | false;
   BASE_PATH: string;
   SESSION_SECRET: string;
+  /** Upload size limit in MiB (image routes, §6); default 10. */
+  UPLOAD_MAX_MB?: number;
 }
 
 export interface AppDeps {
@@ -74,6 +83,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   await registerSession(app, deps.config);
   // CSRF stays on whenever real login is possible, even in the Oracle-less dev server
   // (Step 3.2): only the auto-login dev demo (no authRepo) can skip it.
+  await app.register(multipart); // limits are set per route (lib/imageRoutes.ts)
   registerAuthGuard(app, { csrf: deps.authRepo ? true : !deps.devMocks });
 
   registerHealthRoute(app, {
@@ -133,6 +143,18 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
         registerPermissoesRoutes(sub, {
           store: oracleStore(pool, permissoes, callTimeoutMs),
           repo: oraclePermissoesRepo(pool, callTimeoutMs),
+        });
+        registerPerfisDepartamentoRoutes(sub, {
+          store: oracleStore(pool, perfisDepartamento, callTimeoutMs),
+          empregadosStore: oracleStore(pool, empregadosLov, callTimeoutMs),
+          funcoesStore: oracleStore(pool, funcoesDepartamento, callTimeoutMs),
+          repo: oraclePerfisRepo(pool, callTimeoutMs),
+          imageStore: oracleImageStore(
+            pool,
+            { table: 'DOC_PERFIS_DEPARTAMENTO', column: 'ASSINATURA', keyWhere: 'ID = :id' },
+            callTimeoutMs,
+          ),
+          maxBytes: (deps.config.UPLOAD_MAX_MB ?? 10) * 1024 * 1024,
         });
       },
       { prefix: deps.config.BASE_PATH },

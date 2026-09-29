@@ -41,6 +41,28 @@ describe('buildApp', () => {
     await app.close();
   });
 
+  it('accepts a multipart signature upload on the dev app (multipart plugin is registered)', async () => {
+    distDir = await makeFixtureDist();
+    const app = await buildApp(deps({ devMocks: true }));
+    const png = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');
+    const b = 'b0undary';
+    const payload = Buffer.concat([
+      Buffer.from(`--${b}\r\nContent-Disposition: form-data; name="ficheiro"; filename="a.png"\r\nContent-Type: image/png\r\n\r\n`),
+      png,
+      Buffer.from(`\r\n--${b}--\r\n`),
+    ]);
+    const put = await app.inject({
+      method: 'PUT',
+      url: '/api/perfis-departamento/1/assinatura',
+      payload,
+      headers: { 'content-type': `multipart/form-data; boundary=${b}` },
+    });
+    expect(put.statusCode).toBe(204);
+    const get = await app.inject({ url: '/api/perfis-departamento/1/assinatura' });
+    expect(get.headers['content-type']).toBe('image/png');
+    await app.close();
+  });
+
   it('sets the fixed security headers on every response', async () => {
     distDir = await makeFixtureDist();
     const app = await buildApp(deps());
