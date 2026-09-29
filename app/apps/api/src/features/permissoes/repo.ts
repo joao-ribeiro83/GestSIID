@@ -8,7 +8,7 @@ import {
   type SessionUser,
 } from '../../db/oracle.ts';
 import { dateSelect } from '../../lib/listQuery.ts';
-import { semPermissao, sobrepoe, type Modelo, type Perm, type PermKey, type Scope, type SemRow, type Utilizador } from './rules.ts';
+import { semPermissao, sobrepoe, validaHoje, type Modelo, type Perm, type PermKey, type Scope, type SemRow, type Utilizador } from './rules.ts';
 
 /**
  * Data access for FD_PERMISSOES_SIID. The routes run every action inside `read` (one pooled
@@ -24,6 +24,10 @@ export interface PermissoesTx {
   now(): Promise<string>;
   find(f: PermFiltro): Promise<Perm[]>;
   sem(scope: Scope): Promise<SemRow[]>;
+  /** LOV_UTILIZADORES (CFG_UTILIZADORES_VW), one unit or all, by USERNAME. */
+  utilizadores(un?: string): Promise<Utilizador[]>;
+  /** LOV_MODELOS: models valid today, by ID. */
+  modelos(): Promise<{ ID: string }[]>;
   /** Row gone, or DATA_FIM no longer `orig.DATA_FIM` → 409 REGISTO_ALTERADO. */
   lock(key: PermKey, orig?: { DATA_FIM: string | null }): Promise<void>;
   insert(p: Perm, criadoPor: string): Promise<void>;
@@ -86,6 +90,16 @@ function oracleTx(conn: DbConnection): PermissoesTx {
         binds,
       );
     },
+    utilizadores: (un) =>
+      rows<Utilizador>(
+        `SELECT USERNAME, NOME, UNIDADE_NEGOCIO_RF FROM CFG_UTILIZADORES_VW${un === undefined ? '' : ' WHERE UNIDADE_NEGOCIO_RF = :un'} ORDER BY USERNAME`,
+        un === undefined ? {} : { un },
+      ),
+    modelos: () =>
+      rows<{ ID: string }>(
+        'SELECT ID FROM DOC_MODELOS_DOCUMENTO WHERE SYSDATE BETWEEN DATA_INICIO AND NVL(DATA_FIM, SYSDATE + 1) ORDER BY ID',
+        {},
+      ),
     lock: (key, orig) =>
       lockRow(conn, TABLE, KEY_WHERE, keyBinds(key), orig ? { [dateSelect('DATA_FIM')]: orig.DATA_FIM } : {}),
     async insert(p, criadoPor) {
@@ -187,6 +201,15 @@ export function memoryPermissoesRepo(
     find: async (f) =>
       rows.filter((p) => FILTER_COLS.every((c) => f[c] === undefined || p[c] === f[c])).map(plain),
     sem: async (scope) => semPermissao(seed.modelos, seed.utilizadores, rows, scope, clock()),
+    utilizadores: async (un) =>
+      seed.utilizadores
+        .filter((u) => un === undefined || u.UNIDADE_NEGOCIO_RF === un)
+        .sort((a, b) => (a.USERNAME < b.USERNAME ? -1 : 1)),
+    modelos: async () =>
+      seed.modelos
+        .filter((m) => validaHoje(m, clock()))
+        .map(({ ID }) => ({ ID }))
+        .sort((a, b) => (a.ID < b.ID ? -1 : 1)),
     async lock(key, orig) {
       const row = rows.find((p) => sameKey(p, key));
       if (!row || (orig && row.DATA_FIM !== orig.DATA_FIM)) throw REGISTO_ALTERADO();

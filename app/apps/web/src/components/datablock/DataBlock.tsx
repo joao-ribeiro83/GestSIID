@@ -141,6 +141,8 @@ export interface DataBlockProps<Row extends GridRow = GridRow> {
   emptyText?: string;
   pageSize?: number;
   className?: string;
+  /** Named server-side filter (`resource.presets`); a change goes back to page 1. */
+  preset?: string;
 }
 
 const MAX_IDS = 1000;
@@ -205,10 +207,11 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
   const masterKeys = props.master?.keys;
   const enabled = props.master === undefined || masterKeys !== null;
   const list = useQuery({
-    queryKey: [endpoint, masterKeys ?? null, query],
-    queryFn: () => apiFetch<PagedResult<Row>>(`${endpoint}?${toQueryString(query)}`),
+    queryKey: [endpoint, masterKeys ?? null, fetched],
+    queryFn: () => apiFetch<PagedResult<Row>>(`${endpoint}?${toQueryString(fetched)}`),
     placeholderData: keepPreviousData,
     enabled,
+  const fetched: ListQuery = props.preset === undefined ? query : { ...query, preset: props.preset };
     refetchOnWindowFocus: !isDirty,
   });
   const total = list.data?.total ?? 0;
@@ -343,6 +346,13 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
   useEffect(() => {
     onCurrent?.(currentRow);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- by value, not by object identity
+  const [seenPreset, setSeenPreset] = useState(props.preset);
+  if (seenPreset !== props.preset) {
+    setSeenPreset(props.preset);
+    setQuery((q) => (q.page === 1 ? q : { ...q, page: 1 }));
+    setSelection({ mode: 'none' });
+  }
+
   }, [currentSig]);
 
   const moveTo = async (rid: string | null, col = current.col) => {
@@ -461,7 +471,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
         ? { mode: 'none' }
         : {
             mode: 'consulta',
-            consulta: { filters: query.filters, preset: query.preset },
+            consulta: { filters: query.filters, preset: fetched.preset },
             total,
             capped,
           },

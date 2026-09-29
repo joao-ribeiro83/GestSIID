@@ -47,3 +47,9 @@ export const permissoes = defineResource({
   tiebreak: 'DATA_INICIO',
   roles: { read: ['ADM'], write: [] },
 });
+
+/** Domain ids of the panels' selects (`GET /api/dominios/:id/valores`, CFG_VALORES_DOMINIO). */
+export const PERMISSOES_DOMINIOS = {
+  tipo: 'TIPO_PERMISSAO',
+  unidadeNegocio: 'UNIDADE_NEGOCIO',
+} as const;

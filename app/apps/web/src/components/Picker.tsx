@@ -54,7 +54,8 @@ export function Picker<Row>({
   const [search, setSearch] = useState('');
   const list = useQuery({
     queryKey: [endpoint, 'picker', query],
-    queryFn: () => apiFetch<PagedResult<Row>>(`${endpoint}?${toQueryString(query)}`),
+    queryFn: () =>
+      apiFetch<PagedResult<Row>>(`${endpoint}${endpoint.includes('?') ? '&' : '?'}${toQueryString(query)}`),
     enabled: open,
   });
 

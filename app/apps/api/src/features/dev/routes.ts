@@ -15,6 +15,7 @@ import {
   reportParametros,
   reports,
   REPORTS_DOMINIOS,
+  PERMISSOES_DOMINIOS,
   tiposMidia,
   unidadesMedida,
   utilizadores,
@@ -69,7 +70,22 @@ const DOMINIOS: Record<string, { CHAVE: string; DESIGNACAO: string }[]> = {
   ],
   // Real domain rows (CFG_VALORES_DOMINIO.md); UNIDADE_NEGOCIO shows only the form's own default.
   [UTILIZADORES_DOMINIOS.tipo]: [{ CHAVE: 'ADM', DESIGNACAO: 'ADMINISTRADOR' }],
-  [UTILIZADORES_DOMINIOS.unidadeNegocio]: [{ CHAVE: 'DSI', DESIGNACAO: 'DSI' }],
+  [UTILIZADORES_DOMINIOS.unidadeNegocio]: [
+    { CHAVE: 'DFI', DESIGNACAO: 'DFI' },
+    { CHAVE: 'DSI', DESIGNACAO: 'DSI' },
+  ],
+  // Real TIPO_PERMISSAO rows (CFG_VALORES_DOMINIO.md), for the Permissões panels.
+  [PERMISSOES_DOMINIOS.tipo]: [
+    { CHAVE: '0', DESIGNACAO: 'GERAR DOCUMENTO' },
+    { CHAVE: '1', DESIGNACAO: 'IMPRIMIR DOCUMENTO' },
+    { CHAVE: '2', DESIGNACAO: 'IMPRIMIR CÓPIA' },
+    { CHAVE: '3', DESIGNACAO: 'IMPRIMIR 2ª VIA' },
+    { CHAVE: '4', DESIGNACAO: 'VISUALIZAR' },
+    { CHAVE: '5', DESIGNACAO: 'ENVIAR POR MAIL' },
+    { CHAVE: '6', DESIGNACAO: 'IMPRIMIR PDF' },
+    { CHAVE: '7', DESIGNACAO: 'GUARDAR PDF' },
+    { CHAVE: '8', DESIGNACAO: 'GUARDAR 2ªs Vias' },
+  ],
   // Domains-of-domains (CFG_VALORES_DOMINIO.md): the selects FD_DOMINIOS_SIID itself feeds.
   [DOMINIOS_DOMINIOS.tipoInformacao]: [
     { CHAVE: 'DATA', DESIGNACAO: 'Data' },
@@ -524,13 +540,9 @@ export async function registerDevRoutes(
 // ── Permissões (Step 5.3) ────────────────────────────────────────────────────────────────────
 
 // Real TIPO_PERMISSAO rows (CFG_VALORES_DOMINIO.md); units and users are made up.
-const TIPOS_PERMISSAO: Record<number, string> = {
-  0: 'GERAR DOCUMENTO',
-  1: 'IMPRIMIR DOCUMENTO',
-  2: 'IMPRIMIR CÓPIA',
-  3: 'IMPRIMIR 2ª VIA',
-  4: 'VISUALIZAR',
-};
+const TIPOS_PERMISSAO: Record<number, string> = Object.fromEntries(
+  DOMINIOS[PERMISSOES_DOMINIOS.tipo]!.map((v) => [Number(v.CHAVE), v.DESIGNACAO]),
+);
 const UNIDADES: Record<string, string> = { DSI: 'DSI', DFI: 'DFI' };
 const PERM_UTILIZADORES: Utilizador[] = [
   { USERNAME: 'USER1', NOME: 'Ana Silva', UNIDADE_NEGOCIO_RF: 'DSI' },

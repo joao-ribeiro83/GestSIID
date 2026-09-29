@@ -208,3 +208,28 @@ describe('sem()', () => {
     expect(bound(call?.binds)).toEqual(expect.arrayContaining(['ZUNX', '987654', 'ZMODX']));
   });
 });
+
+describe('LOV reads', () => {
+  it('utilizadores(): CFG_UTILIZADORES_VW, unit bound when given', async () => {
+    const db = fakeDb();
+    await db.repo.read(USER, 'permissoes.test', (tx) => tx.utilizadores('ZUNX'));
+    const call = db.calls.find((c) => /CFG_UTILIZADORES_VW/i.test(c.sql));
+    expect(call?.sql).toMatch(/UNIDADE_NEGOCIO_RF = :un/);
+    noLiterals(call?.sql ?? '');
+    expect(bound(call?.binds)).toEqual(['ZUNX']);
+  });
+
+  it('utilizadores() without a unit has no WHERE on it', async () => {
+    const db = fakeDb();
+    await db.repo.read(USER, 'permissoes.test', (tx) => tx.utilizadores());
+    const call = db.calls.find((c) => /CFG_UTILIZADORES_VW/i.test(c.sql));
+    expect(call?.sql).not.toMatch(/:un/);
+  });
+
+  it('modelos(): DOC_MODELOS_DOCUMENTO valid today (LOV_MODELOS)', async () => {
+    const db = fakeDb();
+    await db.repo.read(USER, 'permissoes.test', (tx) => tx.modelos());
+    const call = db.calls.find((c) => /DOC_MODELOS_DOCUMENTO/i.test(c.sql));
+    expect(call?.sql).toMatch(/SYSDATE BETWEEN DATA_INICIO AND NVL\s*\(DATA_FIM, SYSDATE \+ 1\)/i);
+  });
+});

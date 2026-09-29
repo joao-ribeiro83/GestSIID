@@ -32,6 +32,7 @@ import {
  *   GET  /api/permissoes                                 list (?preset=validas = valid today)
  *   GET  /api/permissoes/por-utilizador/:username?un&tipo  { com, sem }   (CTR_USERS_SIID)
  *   GET  /api/permissoes/por-modelo/:modeloId?un&tipo      { com, sem }   (CTR_MODELOS_SIID)
+ *   GET  /api/permissoes/utilizadores?un | /modelos        { rows }       (the form's LOVs)
  *   POST …/{add,add-all,remove,remove-all}              panel buttons > >> < <<
  *   POST /api/permissoes                                 NOVA_PERMISSAO
  *   PUT  /api/permissoes {orig, values}                  ALTERAR_PERMISSAO
@@ -195,6 +196,17 @@ export function registerPermissoesRoutes(
 ): void {
   const { repo } = deps;
   crudRoutes(app, permissoes, { store: deps.store });
+
+  const lovQuery = z.object({ un: texto.optional() });
+  app.get('/api/permissoes/utilizadores', async (request) => {
+    const { user } = sessionCtx(request, ROLES);
+    const { un } = lovQuery.parse(request.query);
+    return { rows: await repo.read(user, 'permissoes.lov', (tx) => tx.utilizadores(un)) };
+  });
+  app.get('/api/permissoes/modelos', async (request) => {
+    const { user } = sessionCtx(request, ROLES);
+    return { rows: await repo.read(user, 'permissoes.lov', (tx) => tx.modelos()) };
+  });
   registerPainel(app, repo, '/api/permissoes/por-utilizador/:username', 'username', 'USERNAME', 'modelos');
   registerPainel(app, repo, '/api/permissoes/por-modelo/:modeloId', 'modeloId', 'MODELO_ID', 'utilizadores');
 

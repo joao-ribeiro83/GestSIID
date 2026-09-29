@@ -140,4 +140,16 @@ describe.skipIf(!env['DB_CONNECT_STRING'])('permissoes — TEST schema (read-onl
     const comUsers = new Set(com.map((c) => c.USERNAME));
     for (const s of sem) expect(comUsers.has(s.USERNAME)).toBe(false);
   });
+
+  it('GET utilizadores / modelos read the LOV sources; a valid row user and model are listed', async () => {
+    const p = await primeiraValida();
+    const us = await app.inject({ url: `/api/permissoes/utilizadores?un=${encodeURIComponent(p.UNIDADE_NEGOCIO_RF)}` });
+    expect(us.statusCode).toBe(200);
+    const rows = us.json().rows as { USERNAME: string; UNIDADE_NEGOCIO_RF: string }[];
+    for (const u of rows) expect(u.UNIDADE_NEGOCIO_RF).toBe(p.UNIDADE_NEGOCIO_RF);
+    expect(rows.map((u) => u.USERNAME)).toContain(p.USERNAME);
+    const ms = await app.inject({ url: '/api/permissoes/modelos' });
+    expect(ms.statusCode).toBe(200);
+    expect((ms.json().rows as { ID: string }[]).length).toBeGreaterThan(0);
+  });
 });

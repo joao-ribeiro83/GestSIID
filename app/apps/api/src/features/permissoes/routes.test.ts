@@ -672,3 +672,29 @@ describe('POST /api/permissoes/copiar-utilizador (BR-PERM-11)', () => {
     expect((await post(app, '/api/permissoes/copiar-utilizador', rest)).statusCode).toBe(400);
   });
 });
+
+describe('LOV feeds (LOV_UTILIZADORES / LOV_MODELOS)', () => {
+  it('GET /api/permissoes/utilizadores lists every user with its unit', async () => {
+    const { app } = appWith();
+    const r = await app.inject({ method: 'GET', url: '/api/permissoes/utilizadores' });
+    expect(r.statusCode).toBe(200);
+    expect(r.json().rows.map((u: Utilizador) => u.USERNAME)).toEqual(['ANA', 'BIA', 'CARLOS', 'DAVI']);
+  });
+
+  it('?un= keeps only that unit (LOV_UTILIZADOR_USERPERM)', async () => {
+    const { app } = appWith();
+    const r = await app.inject({ method: 'GET', url: '/api/permissoes/utilizadores?un=DFI' });
+    expect(r.json().rows).toEqual([{ USERNAME: 'CARLOS', NOME: 'Carlos', UNIDADE_NEGOCIO_RF: 'DFI' }]);
+  });
+
+  it('GET /api/permissoes/modelos lists only the models valid today, by id', async () => {
+    const { app } = appWith();
+    const r = await app.inject({ method: 'GET', url: '/api/permissoes/modelos' });
+    expect(r.json().rows).toEqual([{ ID: 'M1' }, { ID: 'M2' }, { ID: 'M3' }, { ID: 'M46' }]);
+  });
+
+  it.each(['/api/permissoes/utilizadores', '/api/permissoes/modelos'])('USER gets 403 on %s', async (url) => {
+    const { app } = appWith({ role: 'USER' });
+    expect((await app.inject({ method: 'GET', url })).statusCode).toBe(403);
+  });
+});
