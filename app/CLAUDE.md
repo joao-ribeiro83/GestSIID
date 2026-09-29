@@ -99,6 +99,7 @@ rules and exact messages. Real columns: `../analysis/db/tables/<TABLE>.md`.
 | `ENABLE_*` / `SET_ITEM_PROPERTY(VISIBLE)` | `ColumnView.visibleWhen: (values) => boolean` (panel edit only). Not enforced server-side. | `administracao/dominios.tsx` |
 | Item initial value | `<DataBlock defaults={() => ({ COL: 'X' })}>`. | `tipos-midia.tsx` |
 | S/N flag | `code` column + `BINARIO` domain select. There is no checkbox editor. | `VALIDO` in Impressoras |
+| Computed read-only column (POST-QUERY decode) | `ColumnDef.expr`: selected as `(expr) AS COL`, never in `orig`, no edit/filter/sort. | `TIPO_IMAGEM` in `resources/modelos.ts` |
 | Form alert texts | Exact Portuguese text in the feature (`const JA_ASSOCIADO = '…'`) or `db/errors.ts` for ORA mappings. | `features/variaveis/routes.ts` |
 
 No engine file needs a change for a plain screen. Each Phase 4 screen still needed one small
@@ -122,6 +123,9 @@ engine extension (`SqlCall` + `writeOnly`, `exclude`, `visibleWhen`, `defaults`)
   app DML in one transaction.
 - Table and column names are pasted into SQL; `defineResource` allows only plain Oracle
   identifiers. Values are always binds.
+- `DOC_MODELOS_DOCUMENTO`, `DOC_CONDICOES_APR`, `DOC_PARAMETROS_OMISSAO` are index-organized: their
+  ROWID is logical (`*BAn…`). The engine selects `CAST(ROWID AS VARCHAR2(4000))` and binds
+  `ROWID = :rid`; `ROWIDTOCHAR`/`CHARTOROWID` fail there with ORA-01410.
 - Text ids sort as text (`'10' < '2'`); sort numerically in SQL (`TO_NUMBER(ID)`) or client-side.
 
 **Test schema and fixtures**

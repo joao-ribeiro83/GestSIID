@@ -6,6 +6,7 @@ export * from './resources/demo.ts';
 export * from './resources/dominios.ts';
 export * from './resources/impressoras.ts';
 export * from './resources/impressorasAssociadas.ts';
+export * from './resources/modelos.ts';
 export * from './resources/perfisDepartamento.ts';
 export * from './resources/permissoes.ts';
 export * from './resources/reports.ts';

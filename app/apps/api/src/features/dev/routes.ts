@@ -12,7 +12,14 @@ import {
   impressorasAssociadasDoc,
   impressorasAssociadasUsr,
   IMPRESSORAS_DOMINIOS,
+  modelos,
+  modelosAtributosArquivo,
+  modelosAtributosEdoc,
+  modelosCondicoes,
+  MODELOS_DOMINIOS,
   modelosLov,
+  modelosParametrosOmissao,
+  modelosSeccoes,
   perfisDepartamento,
   permissoes,
   PERMISSOES_DOMINIOS,
@@ -30,6 +37,8 @@ import {
 import { auditHooks, crudRoutes, type CrudHooks, type CrudStore, type Row } from '../../lib/crud.ts';
 import { registerDominiosCrudRoutes } from '../dominios/routes.ts';
 import { registerImpressorasAssociadasRoutes } from '../impressoras-associadas/routes.ts';
+import { memoryModelosRepo, type ModelosStores } from '../modelos/repo.ts';
+import { registerModelosRoutes } from '../modelos/routes.ts';
 import { memoryPerfisRepo } from '../perfis-departamento/repo.ts';
 import { registerPerfisDepartamentoRoutes } from '../perfis-departamento/routes.ts';
 import { localNow, memoryPermissoesRepo } from '../permissoes/repo.ts';
@@ -118,6 +127,32 @@ const DOMINIOS: Record<string, { CHAVE: string; DESIGNACAO: string }[]> = {
     { CHAVE: '1', DESIGNACAO: 'PARAMETROS DESTINADOS AO REPORT' },
     { CHAVE: '2', DESIGNACAO: 'PARAMETROS DESTINADOS AO SIID' },
     { CHAVE: '3', DESIGNACAO: 'PARAMETROS PASSADOS POR BD' },
+  ],
+  // Modelos selects: CODIGOS BARRAS rows are real (CFG_VALORES_DOMINIO.md); the MODO_* rows are
+  // the meanings DECISIONS D-23 lists (the domain rows are not in the analysis dump).
+  [MODELOS_DOMINIOS.modoExpedicao]: [
+    { CHAVE: 'I', DESIGNACAO: 'Impresso' },
+    { CHAVE: 'E', DESIGNACAO: 'Email' },
+    { CHAVE: 'M', DESIGNACAO: 'Impresso e email' },
+    { CHAVE: 'A', DESIGNACAO: 'eDocLink alteração' },
+    { CHAVE: 'G', DESIGNACAO: 'eDocLink garantia' },
+    { CHAVE: 'W', DESIGNACAO: 'eDoc API' },
+  ],
+  [MODELOS_DOMINIOS.modoCertificado]: [
+    { CHAVE: '0', DESIGNACAO: 'Isento' },
+    { CHAVE: '1', DESIGNACAO: 'Assinado' },
+    { CHAVE: '2', DESIGNACAO: 'Selado' },
+  ],
+  [MODELOS_DOMINIOS.modoProtecao]: [
+    { CHAVE: '0', DESIGNACAO: 'Sem proteção' },
+    { CHAVE: '1', DESIGNACAO: 'Marca de água' },
+  ],
+  [MODELOS_DOMINIOS.codigosBarras]: [
+    { CHAVE: 'AZTEC', DESIGNACAO: 'AZTEC' },
+    { CHAVE: 'CODE_128', DESIGNACAO: 'CODE_128' },
+    { CHAVE: 'CODE_39', DESIGNACAO: 'CODE_39' },
+    { CHAVE: 'DATA_MATRIX', DESIGNACAO: 'DATA_MATRIX' },
+    { CHAVE: 'QRCODE_H', DESIGNACAO: 'QRCODE EC=H' },
   ],
   // The variable names seen in SVR_VARIAVEIS_SIID (the domain's own rows are not in the analysis).
   [VARIAVEIS_DOMINIOS.tipo]: [
@@ -570,6 +605,26 @@ export async function registerDevRoutes(
     }),
     maxBytes: 1024 * 1024,
   });
+  // Step 6.1: Modelos (Configuração › Modelos). Clonar and the omissão versioning write through
+  // the same stores the grid reads.
+  const m = seedModelos();
+  const modelosStores: ModelosStores = {
+    modelos: memoryStore(modelos, m.modelos),
+    seccoes: memoryStore(modelosSeccoes, m.seccoes, { dedupeKeys: ['TIPOSEC_ID'] }),
+    condicoes: memoryStore(modelosCondicoes, m.condicoes, { dedupeKeys: ['CDUNIECO', 'CDRAMO', 'CONTEXTO_ID'] }),
+    omissao: memoryStore(modelosParametrosOmissao, m.omissao),
+    atributosEdoc: memoryStore(modelosAtributosEdoc, m.edoc, { dedupeKeys: ['EDOC_ID'] }),
+    atributosArquivo: memoryStore(modelosAtributosArquivo, m.arquivo, { dedupeKeys: ['ARQ_ID'] }),
+  };
+  registerModelosRoutes(app, {
+    stores: modelosStores,
+    repo: memoryModelosRepo({
+      stores: modelosStores,
+      parametros: m.parametros,
+      tiposConteudo: m.tiposConteudo,
+      contextos: m.contextos,
+    }),
+  });
 }
 
 // ── Perfis de departamento (Step 5.5) ────────────────────────────────────────────────────────
@@ -687,5 +742,116 @@ function permissoesVista(repo: ReturnType<typeof memoryPermissoesRepo>): CrudSto
     insert: (v, parent, ctx) => view().insert(v, parent, ctx),
     update: (rid, orig, v, ctx) => view().update(rid, orig, v, ctx),
     remove: (rid, orig, ctx) => view().remove(rid, orig, ctx),
+  };
+}
+
+// ── Modelos (Step 6.1) ───────────────────────────────────────────────────────────────────────
+
+function seedModelos() {
+  const modelo = (ID: string, DESCRICAO: string, over: Row = {}): Row => ({
+    ID,
+    DESCRICAO,
+    N_COPIAS: 1,
+    FORMA_CONTROLO_RF: 'C',
+    DATA_INICIO: '2020-01-01T00:00:00',
+    DATA_FIM: null,
+    MODO_EXPEDICAO_RF: 'I',
+    STAMP: 'N',
+    MODO_CERTIFICADO_RF: '0',
+    GENERICO_ID: null,
+    MODO_PROTECAO_RF: '0',
+    TIPO_DOCUMENTO_RF: 'DOC',
+    REPORT_ID: 1,
+    N_ANEXOS: 0,
+    MAX_IMPRESSOES: 0,
+    BARCODE_TYPE: null,
+    BARCODE_FORMAT: null,
+    BARCODE_WEIGHT: null,
+    BARCODE_HEIGHT: null,
+    BARCODE_X_POSITION: null,
+    BARCODE_Y_POSITION: null,
+    ...audit,
+    ...over,
+  });
+  const seccao = (MODELO_ID: string, TIPOSEC_ID: string, ALINEA: number, TITULO: string): Row => ({
+    MODELO_ID,
+    TIPOSEC_ID,
+    ALINEA,
+    TITULO,
+    TEXTO: `Texto de ${TITULO}`,
+    TIPOCNTD_ID: 1,
+    FORMULA_ID: null,
+    TIPO_IMAGEM: null,
+    ...audit,
+  });
+  const condicao = (MODELO_ID: string, TIPOSEC_ID: string, ALINEA: number, CDRAMO: string): Row => ({
+    MODELO_ID,
+    TIPOSEC_ID,
+    ALINEA,
+    DATA_INICIO: '2020-01-01T00:00:00',
+    DATA_FIM: null,
+    CDUNIECO: 1,
+    CDRAMO,
+    CONTEXTO_ID: 1,
+    ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8].map((n) => [`ATRIBUTO${n}`, null])),
+    ...audit,
+  });
+  const atributo = (MODELO_ID: string, N_ATRIBUTO: number, NOME_PARAMETRO: string): Row => ({
+    MODELO_ID,
+    CDUNIECO: 1,
+    CDRAMO: 'AUTO',
+    N_ATRIBUTO,
+    DESCRICAO: NOME_PARAMETRO,
+    NOME_PARAMETRO,
+    ORDEM_PARAMETRO: N_ATRIBUTO,
+    VALOR_OMISSAO: null,
+    TIPO_PARAMETRO: 'D',
+    DATA_INICIO: '2020-01-01T00:00:00',
+    DATA_FIM: null,
+    ...audit,
+  });
+  const parametro = (N_PARAMETRO: number, NOME: string) => ({
+    REPORT_ID: 1,
+    N_PARAMETRO,
+    NOME,
+    TIPO_PARAMETRO_RF: N_PARAMETRO === 1 ? '2' : '1',
+    OBRIGATORIO: 'S',
+    CHECK_UNIQUE: 'N',
+    VALIDO: 'S',
+    DESCRICAO: NOME,
+  });
+  return {
+    modelos: [
+      modelo('MOD1', 'Carta ao cliente', { GENERICO_ID: 'GEN1', BARCODE_TYPE: 'CODE_128', BARCODE_WEIGHT: 4, BARCODE_HEIGHT: 1 }),
+      modelo('MOD2', 'Aviso de pagamento', { MODO_EXPEDICAO_RF: 'M', STAMP: 'S' }),
+      modelo('GEN1', 'Genérico cartas', { TIPO_DOCUMENTO_RF: 'GNR', REPORT_ID: null }),
+    ],
+    seccoes: [
+      seccao('MOD1', 'CAB', 1, 'Cabeçalho'),
+      seccao('MOD1', 'CORPO', 1, 'Corpo'),
+      seccao('MOD1', 'CORPO', 2, 'Corpo (continuação)'),
+      seccao('MOD2', 'CAB', 1, 'Cabeçalho'),
+    ],
+    condicoes: [condicao('MOD1', 'CAB', 1, 'AUTO'), condicao('MOD1', 'CAB', 1, 'VIDA'), condicao('MOD2', 'CAB', 1, 'AUTO')],
+    omissao: [
+      {
+        MODELO_ID: 'MOD1',
+        N_PARAMETRO: 2,
+        VALOR: 'PT',
+        DATA_INICIO: '2024-01-01T00:00:00',
+        DATA_FIM: null,
+        NOME_CONSULTA: null,
+        CONSULTA_ONLINE: 'N',
+        ...audit,
+      },
+    ],
+    edoc: [{ EDOC_ID: 1, ...atributo('MOD1', 1, 'NIF') }, { EDOC_ID: 1, ...atributo('MOD1', 2, 'APOLICE') }],
+    arquivo: [{ ARQ_ID: 1, ...atributo('MOD1', 1, 'NIF') }],
+    parametros: [parametro(1, '_USER'), parametro(2, 'P_PAIS'), parametro(3, 'P_DATAACTUAL')],
+    tiposConteudo: [
+      { ID: 1, DESCRICAO: 'Texto' },
+      { ID: 2, DESCRICAO: 'Imagem' },
+    ],
+    contextos: [{ ID: 1, DESCRICAO: 'Contexto geral' }],
   };
 }

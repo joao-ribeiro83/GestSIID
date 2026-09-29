@@ -24,6 +24,9 @@ export interface ColumnDef {
   maxLength?: number;
   /** A secret: accepted in `values`, never selected, never in `orig`, no filter or sort. */
   writeOnly?: true;
+  /** Read-only, computed in SQL: selected as `(expr) AS <column>`, never in `orig`; give it no
+   * `edit`, `filter` or `sort`. Fixed server text, never from a request. */
+  expr?: string;
 }
 
 export interface Resource<C extends string = string> {
@@ -118,7 +121,7 @@ export function valuesSchema(
 export function origSchema(resource: Resource) {
   const shape: Record<string, z.ZodType> = {};
   for (const [column, def] of Object.entries(resource.columns)) {
-    if (def.writeOnly) continue;
+    if (def.writeOnly || def.expr) continue;
     const base = def.type === 'number' ? z.number() : z.string();
     shape[column] = base.nullable().optional();
   }

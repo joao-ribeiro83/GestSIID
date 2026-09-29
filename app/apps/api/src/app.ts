@@ -8,7 +8,13 @@ import {
   impressoras,
   impressorasAssociadasDoc,
   impressorasAssociadasUsr,
+  modelos,
+  modelosAtributosArquivo,
+  modelosAtributosEdoc,
+  modelosCondicoes,
   modelosLov,
+  modelosParametrosOmissao,
+  modelosSeccoes,
   perfisDepartamento,
   permissoes,
   tiposMidia,
@@ -28,6 +34,8 @@ import { createDominiosCache, registerDominiosRoutes } from './features/dominios
 import { registerHealthRoute } from './features/health/routes.ts';
 import { registerImpressorasAssociadasRoutes } from './features/impressoras-associadas/routes.ts';
 import { registerImpressorasRoutes } from './features/impressoras/routes.ts';
+import { oracleModelosRepo } from './features/modelos/repo.ts';
+import { registerModelosRoutes } from './features/modelos/routes.ts';
 import { oraclePerfisRepo } from './features/perfis-departamento/repo.ts';
 import { registerPerfisDepartamentoRoutes } from './features/perfis-departamento/routes.ts';
 import { oraclePermissoesRepo } from './features/permissoes/repo.ts';
@@ -156,6 +164,17 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
             callTimeoutMs,
           ),
           maxBytes: (deps.config.UPLOAD_MAX_MB ?? 10) * 1024 * 1024,
+        });
+        registerModelosRoutes(sub, {
+          stores: {
+            modelos: oracleStore(pool, modelos, callTimeoutMs),
+            seccoes: oracleStore(pool, modelosSeccoes, callTimeoutMs),
+            condicoes: oracleStore(pool, modelosCondicoes, callTimeoutMs),
+            omissao: oracleStore(pool, modelosParametrosOmissao, callTimeoutMs),
+            atributosEdoc: oracleStore(pool, modelosAtributosEdoc, callTimeoutMs),
+            atributosArquivo: oracleStore(pool, modelosAtributosArquivo, callTimeoutMs),
+          },
+          repo: oracleModelosRepo(pool, callTimeoutMs),
         });
       },
       { prefix: deps.config.BASE_PATH },

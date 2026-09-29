@@ -185,8 +185,8 @@ const DATE_MASK = `'YYYY-MM-DD"T"HH24:MI:SS'`;
 export function oracleStore(pool: DbPool, resource: Resource, callTimeoutMs: number): CrudStore {
   const src = resource.source;
   const cols = resource.columns;
-  const byRowid = `SELECT ${selectList(resource)} FROM ${src} WHERE ROWID = CHARTOROWID(:rid)`;
-  const ridWhere = 'ROWID = CHARTOROWID(:rid)';
+  const byRowid = `SELECT ${selectList(resource)} FROM ${src} WHERE ROWID = :rid`;
+  const ridWhere = 'ROWID = :rid';
   const withRid = (row: Row) =>
     typeof row['_rid'] === 'string' ? { ...row, _rid: encodeRid(row['_rid']) } : row;
 
@@ -253,7 +253,7 @@ export function oracleStore(pool: DbPool, resource: Resource, callTimeoutMs: num
           const sql = `INSERT INTO ${src} (${columns.join(', ')}) VALUES (${sqlValues.join(', ')}) RETURNING ROWID INTO :rid`;
           const result = await conn.execute(sql, {
             ...binds,
-            rid: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 64 },
+            rid: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 4000 },
           } as oracledb.BindParameters);
           const rowid = (result.outBinds as { rid: string[] }).rid[0] ?? '';
           const row = (await conn.execute<Row>(byRowid, { rid: rowid })).rows?.[0] ?? {};
@@ -269,13 +269,20 @@ export function oracleStore(pool: DbPool, resource: Resource, callTimeoutMs: num
           const binds: Record<string, unknown> = {};
           const bind = binder(binds);
           const sets = Object.entries(values).map(([c, v]) => `${c} = ${valueSql(c, v, bind)}`);
+          let now = rowid;
           if (sets.length > 0) {
-            await conn.execute(`UPDATE ${src} SET ${sets.join(', ')} WHERE ${ridWhere}`, {
-              ...binds,
-              rid: rowid,
-            } as oracledb.BindParameters);
+            // A key change moves a row of an index-organized table: its logical ROWID changes.
+            const result = await conn.execute(
+              `UPDATE ${src} SET ${sets.join(', ')} WHERE ${ridWhere} RETURNING ROWID INTO :nrid`,
+              {
+                ...binds,
+                rid: rowid,
+                nrid: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 4000 },
+              } as oracledb.BindParameters,
+            );
+            now = (result.outBinds as { nrid?: string[] } | undefined)?.nrid?.[0] ?? rowid;
           }
-          const row = (await conn.execute<Row>(byRowid, { rid: rowid })).rows?.[0] ?? {};
+          const row = (await conn.execute<Row>(byRowid, { rid: now })).rows?.[0] ?? {};
           return withRid(row);
         }),
       ),

@@ -142,8 +142,11 @@ function orderBy(resource: Resource, q: ListQuery): string {
 export function selectList(resource: Resource): string {
   const cols = Object.entries(resource.columns)
     .filter(([, def]) => !def.writeOnly)
-    .map(([c, def]) => (def.type === 'date' ? `${dateSelect(c)} AS ${c}` : c));
-  if (resource.roles.write.length > 0) cols.push('ROWIDTOCHAR(ROWID) AS "_rid"');
+    .map(([c, def]) =>
+      def.expr ? `(${def.expr}) AS ${c}` : def.type === 'date' ? `${dateSelect(c)} AS ${c}` : c,
+    );
+  // CAST, not ROWIDTOCHAR: index-organized tables (DOC_MODELOS_DOCUMENTO) have a logical UROWID.
+  if (resource.roles.write.length > 0) cols.push('CAST(ROWID AS VARCHAR2(4000)) AS "_rid"');
   return cols.join(', ');
 }
 
@@ -169,7 +172,8 @@ export function buildListQuery(
 }
 
 // ROWID is base64-ish ([A-Za-z0-9+/]); `+` → `-` and `/` → `_` makes it safe in a URL segment (§4.1).
-const RID_RE = /^[A-Za-z0-9_-]{10,}$/;
+// A logical ROWID (index-organized table) starts with `*`, also URL-safe.
+const RID_RE = /^\*?[A-Za-z0-9_-]{10,}$/;
 
 export const encodeRid = (rowid: string) => rowid.replace(/\+/g, '-').replace(/\//g, '_');
 

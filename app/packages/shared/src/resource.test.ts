@@ -110,3 +110,22 @@ describe('writeOnly columns (a secret the client may send but never read back)',
     expect(origSchema(users).safeParse({ PASSWORD: 'x' }).success).toBe(false);
   });
 });
+
+describe('expr columns (read-only, computed in SQL)', () => {
+  const seccoes = defineResource({
+    name: 'seccoes',
+    source: 'DOC_SECCOES_DOCUMENTO',
+    columns: {
+      ALINEA: { type: 'number', label: 'Alínea', insertOnly: true },
+      TIPO_IMAGEM: { type: 'code', label: 'Tipo', expr: "DECODE(1, 1, 'PNG')" },
+    },
+    defaultSort: [{ column: 'ALINEA', direction: 'asc' }],
+    tiebreak: 'ALINEA',
+    roles: { read: ['ADM'], write: ['ADM'] },
+  });
+
+  it('origSchema rejects it: the lock check would name a column the table does not have', () => {
+    expect(origSchema(seccoes).safeParse({ ALINEA: 1 }).success).toBe(true);
+    expect(origSchema(seccoes).safeParse({ TIPO_IMAGEM: 'PNG' }).success).toBe(false);
+  });
+});
