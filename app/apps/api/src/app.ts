@@ -1,5 +1,18 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastify';
-import { dominios, dominiosValores, impressoras } from '@gestsiid/shared';
+import {
+  dominios,
+  dominiosValores,
+  impressoras,
+  impressorasAssociadasDoc,
+  impressorasAssociadasUsr,
+  modelosLov,
+  permissoes,
+  tiposMidia,
+  unidadesMedida,
+  utilizadores,
+  utilizadoresLov,
+  variaveis,
+} from '@gestsiid/shared';
 import { oracleStore } from './lib/crud.ts';
 import type { DbPool } from './db/oracle.ts';
 import type { AuthRepo } from './features/auth/repo.ts';
@@ -8,7 +21,14 @@ import { registerDevRoutes } from './features/dev/routes.ts';
 import { registerDominiosCrudRoutes } from './features/dominios/routes.ts';
 import { createDominiosCache, registerDominiosRoutes } from './features/dominios/valores.ts';
 import { registerHealthRoute } from './features/health/routes.ts';
+import { registerImpressorasAssociadasRoutes } from './features/impressoras-associadas/routes.ts';
 import { registerImpressorasRoutes } from './features/impressoras/routes.ts';
+import { oraclePermissoesRepo } from './features/permissoes/repo.ts';
+import { registerPermissoesRoutes } from './features/permissoes/routes.ts';
+import { registerTiposMidiaRoutes } from './features/tipos-midia/routes.ts';
+import { registerUnidadesMedidaRoutes } from './features/unidades-medida/routes.ts';
+import { registerUtilizadoresRoutes } from './features/utilizadores/routes.ts';
+import { registerVariaveisRoutes } from './features/variaveis/routes.ts';
 import { registerAuthGuard } from './http/auth-guard.ts';
 import { registerErrorHandler } from './http/errors.ts';
 import { LoginThrottle } from './http/login-throttle.ts';
@@ -85,12 +105,34 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     await app.register(
       async (sub) => {
         registerImpressorasRoutes(sub, { store: oracleStore(pool, impressoras, callTimeoutMs) });
+        const unidades = oracleStore(pool, unidadesMedida, callTimeoutMs);
+        registerUnidadesMedidaRoutes(sub, { store: unidades });
+        registerTiposMidiaRoutes(sub, { store: oracleStore(pool, tiposMidia, callTimeoutMs), unidades });
+        registerUtilizadoresRoutes(sub, {
+          store: oracleStore(pool, utilizadores, callTimeoutMs),
+          ambiente: deps.ambiente,
+        });
+        registerVariaveisRoutes(sub, {
+          store: oracleStore(pool, variaveis, callTimeoutMs),
+          ambiente: deps.ambiente,
+        });
         const dominiosCache = createDominiosCache();
         registerDominiosRoutes(sub, { pool, callTimeoutMs, cache: dominiosCache });
         registerDominiosCrudRoutes(sub, {
           store: oracleStore(pool, dominios, callTimeoutMs),
           valoresStore: oracleStore(pool, dominiosValores, callTimeoutMs),
           cache: dominiosCache,
+        });
+        registerImpressorasAssociadasRoutes(sub, {
+          docStore: oracleStore(pool, impressorasAssociadasDoc, callTimeoutMs),
+          usrStore: oracleStore(pool, impressorasAssociadasUsr, callTimeoutMs),
+          modelosStore: oracleStore(pool, modelosLov, callTimeoutMs),
+          utilizadoresStore: oracleStore(pool, utilizadoresLov, callTimeoutMs),
+          ambiente: deps.ambiente,
+        });
+        registerPermissoesRoutes(sub, {
+          store: oracleStore(pool, permissoes, callTimeoutMs),
+          repo: oraclePermissoesRepo(pool, callTimeoutMs),
         });
       },
       { prefix: deps.config.BASE_PATH },

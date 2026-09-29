@@ -7,10 +7,33 @@ import {
   DOMINIOS_DOMINIOS,
   dominiosValores,
   impressoras,
+  impressorasAssociadasDoc,
+  impressorasAssociadasUsr,
   IMPRESSORAS_DOMINIOS,
+  modelosLov,
+  permissoes,
+  reportParametros,
+  reports,
+  REPORTS_DOMINIOS,
+  tiposMidia,
+  unidadesMedida,
+  utilizadores,
+  utilizadoresLov,
+  UTILIZADORES_DOMINIOS,
+  variaveis,
+  VARIAVEIS_DOMINIOS,
 } from '@gestsiid/shared';
-import { auditHooks, crudRoutes, type CrudHooks, type Row } from '../../lib/crud.ts';
+import { auditHooks, crudRoutes, type CrudHooks, type CrudStore, type Row } from '../../lib/crud.ts';
 import { registerDominiosCrudRoutes } from '../dominios/routes.ts';
+import { registerImpressorasAssociadasRoutes } from '../impressoras-associadas/routes.ts';
+import { localNow, memoryPermissoesRepo } from '../permissoes/repo.ts';
+import { registerPermissoesRoutes } from '../permissoes/routes.ts';
+import { FIM_BULK, validaHoje, type Modelo, type Perm, type Utilizador } from '../permissoes/rules.ts';
+import { registerReportsCrudRoutes } from '../reports/routes.ts';
+import { registerTiposMidiaRoutes } from '../tipos-midia/routes.ts';
+import { registerUnidadesMedidaRoutes } from '../unidades-medida/routes.ts';
+import { registerUtilizadoresRoutes } from '../utilizadores/routes.ts';
+import { registerVariaveisRoutes } from '../variaveis/routes.ts';
 import { memoryStore } from './memoryStore.ts';
 
 /**
@@ -44,6 +67,9 @@ const DOMINIOS: Record<string, { CHAVE: string; DESIGNACAO: string }[]> = {
     { CHAVE: 'N', DESIGNACAO: 'Não' },
     { CHAVE: 'S', DESIGNACAO: 'Sim' },
   ],
+  // Real domain rows (CFG_VALORES_DOMINIO.md); UNIDADE_NEGOCIO shows only the form's own default.
+  [UTILIZADORES_DOMINIOS.tipo]: [{ CHAVE: 'ADM', DESIGNACAO: 'ADMINISTRADOR' }],
+  [UTILIZADORES_DOMINIOS.unidadeNegocio]: [{ CHAVE: 'DSI', DESIGNACAO: 'DSI' }],
   // Domains-of-domains (CFG_VALORES_DOMINIO.md): the selects FD_DOMINIOS_SIID itself feeds.
   [DOMINIOS_DOMINIOS.tipoInformacao]: [
     { CHAVE: 'DATA', DESIGNACAO: 'Data' },
@@ -63,6 +89,22 @@ const DOMINIOS: Record<string, { CHAVE: string; DESIGNACAO: string }[]> = {
     { CHAVE: 'M', DESIGNACAO: 'Maiúsculo' },
     { CHAVE: 'N', DESIGNACAO: 'Minúsculo' },
     { CHAVE: 'X', DESIGNACAO: 'Misto' },
+  ],
+  // Real CFG_VALORES_DOMINIO rows (analysis/db/tables/CFG_VALORES_DOMINIO.md), for the Reports
+  // screen's Tipo de Parâmetro select.
+  [REPORTS_DOMINIOS.tipoParametro]: [
+    { CHAVE: '1', DESIGNACAO: 'PARAMETROS DESTINADOS AO REPORT' },
+    { CHAVE: '2', DESIGNACAO: 'PARAMETROS DESTINADOS AO SIID' },
+    { CHAVE: '3', DESIGNACAO: 'PARAMETROS PASSADOS POR BD' },
+  ],
+  // The variable names seen in SVR_VARIAVEIS_SIID (the domain's own rows are not in the analysis).
+  [VARIAVEIS_DOMINIOS.tipo]: [
+    { CHAVE: 'BACKUP', DESIGNACAO: 'Destino dos backups' },
+    { CHAVE: 'GS', DESIGNACAO: 'Ghostscript' },
+    { CHAVE: 'LIMITE_NOTIF', DESIGNACAO: 'Limite de notificações' },
+    { CHAVE: 'ONLINE', DESIGNACAO: 'Unidade online' },
+    { CHAVE: 'PDF', DESIGNACAO: 'Pasta dos PDF' },
+    { CHAVE: 'PERIODO_GRACA', DESIGNACAO: 'Período de graça' },
   ],
 };
 
@@ -138,13 +180,6 @@ function seedImpressorasReal(): Row[] {
   });
 }
 
-const audit = {
-  CRIADO_POR: 'DISCOSECFOR',
-  DATA_CRIACAO: '2010-02-15T12:52:27',
-  ACTUALIZADO_POR: null,
-  DATA_ACTUALIZACAO: null,
-};
-
 // Step 4.6: the real CFG_DOMINIOS / CFG_VALORES_DOMINIO rows the app itself relies on
 // (analysis/db/tables/*.md), for the /administracao/dominios master-detail e2e specs.
 function seedDominios(): Row[] {
@@ -211,6 +246,196 @@ function seedDominiosValores(): Row[] {
   ];
 }
 
+// Step 4.8: the real SVR_REPORT_SIID / SVR_PARAMETROS_REPORT rows (analysis/db/tables/*.md), for
+// the /configuracao/reports master-detail e2e specs. Every report always carries its 3 fixed
+// parameters (BR-ADM-05); REPORT_2 also has a 4th so N_PARAMETROS-mismatch can be exercised.
+function seedReports(): Row[] {
+  const r = (ID: number, NOME: string, N_PARAMETROS: number) => ({
+    ID,
+    NOME,
+    N_PARAMETROS,
+    VALIDO: 'S',
+    NOME_FICHEIRO: null,
+    DIRECTORIA_BASE: null,
+    DIRECTORIA_DESTINO: null,
+    OBSERVACAO: null,
+    ...audit,
+  });
+  return [r(1, 'Relatório de Impressões', 3), r(2, 'Relatório de Backups', 3)];
+}
+
+function seedReportParametros(): Row[] {
+  const p = (
+    REPORT_ID: number,
+    N_PARAMETRO: number,
+    NOME: string,
+    over: Record<string, unknown> = {},
+  ) => ({
+    REPORT_ID,
+    N_PARAMETRO,
+    NOME,
+    TIPO_PARAMETRO_RF: '1',
+    OBRIGATORIO: 'N',
+    CHECK_UNIQUE: 'N',
+    VALIDO: 'S',
+    DESCRICAO: null,
+    ...audit,
+    ...over,
+  });
+  const fixedTrio = (reportId: number) => [
+    p(reportId, 1, '_USER', { TIPO_PARAMETRO_RF: '2', OBRIGATORIO: 'S' }),
+    p(reportId, 2, 'P_USUARIO', { OBRIGATORIO: 'S' }),
+    p(reportId, 3, 'P_DATAACTUAL'),
+  ];
+  return [
+    ...fixedTrio(1),
+    ...fixedTrio(2),
+    p(2, 4, 'P_TIPO_BACKUP', { DESCRICAO: 'Tipo de backup a listar' }),
+  ];
+}
+
+// Step 5.0: FD_GESTAO_IMPRESSORAS_DOC / FD_GESTAO_IMPRESSORAS_USR, over the same 12 printers as
+// seedImpressorasReal (analysis/db/tables/DOC_IMPRESSORAS_DOC.md, DOC_IMPRESSOES_MODELO_USR.md).
+// MOD3 / USER3 start empty, for the e2e "Nova"/"Copiar" flows to have somewhere to land.
+function seedModelosLov(): Row[] {
+  return [{ ID: 'MOD1' }, { ID: 'MOD2' }, { ID: 'MOD3' }, { ID: 'MOD4' }];
+}
+
+function seedUtilizadoresLov(): Row[] {
+  return [{ CDIDUSR: 'USER1' }, { CDIDUSR: 'USER2' }, { CDIDUSR: 'USER3' }, { CDIDUSR: 'USER4' }];
+}
+
+function seedImpressorasAssociadasDoc(): Row[] {
+  const r = (over: Record<string, unknown>) => ({
+    MODELO_ID: 'MOD1',
+    AMBIENTE_ID: DEV_AMBIENTE,
+    IMPRESSORA_ID: '1',
+    DATA_INICIO: '2020-01-01T00:00:00',
+    DATA_FIM: '2020-06-30T00:00:00',
+    ...audit,
+    ...over,
+  });
+  return [
+    r({}),
+    r({ IMPRESSORA_ID: '2', DATA_INICIO: '2020-07-01T00:00:00', DATA_FIM: null }),
+    r({ MODELO_ID: 'MOD2', IMPRESSORA_ID: '3', DATA_INICIO: '2019-01-01T00:00:00', DATA_FIM: '2019-12-31T00:00:00' }),
+  ];
+}
+
+function seedImpressorasAssociadasUsr(): Row[] {
+  const r = (over: Record<string, unknown>) => ({
+    MODELO_ID: 'MOD1',
+    CDEMPLEA: 'USER1',
+    IMPRESSORA_ID: '1',
+    DATA_INICIO: '2020-01-01T00:00:00',
+    DATA_FIM: '2020-06-30T00:00:00',
+    ...audit,
+    ...over,
+  });
+  return [
+    r({}),
+    r({ IMPRESSORA_ID: '2', DATA_INICIO: '2020-07-01T00:00:00', DATA_FIM: null }),
+    // Unexpired, open-ended: the source row for the "Copiar do modelo"/"Copiar do utilizador" specs.
+    r({ MODELO_ID: 'MOD2', CDEMPLEA: 'USER2', IMPRESSORA_ID: '4', DATA_INICIO: '2021-01-01T00:00:00', DATA_FIM: null }),
+  ];
+}
+
+const DEV_AMBIENTE = 'DEV';
+
+// The real CFG_UNIDADES_MEDIDA / CFG_TIPOS_MIDIA rows (analysis/db/tables/*.md), for the Step 4.2
+// e2e specs. Same route code as production; only the store is in memory.
+const audit = {
+  CRIADO_POR: 'DISCOSECFOR',
+  DATA_CRIACAO: '2010-02-15T12:52:27',
+  ACTUALIZADO_POR: null,
+  DATA_ACTUALIZACAO: null,
+};
+
+function seedUnidades(): Row[] {
+  const u = (ID: string, NOME: string, FACTOR: number, UNIDADE_BASE_ID: string | null) => ({
+    ID,
+    NOME,
+    FACTOR,
+    UNIDADE_BASE_ID,
+    GEN_MEDIDA_RF: 'DIGITAL',
+    ...audit,
+  });
+  return [
+    u('BYTES', 'Bytes', 1, null),
+    u('KB', 'Kilobytes', 1e3, 'BYTES'),
+    u('KIB', 'Kibibytes', 1024, 'BYTES'),
+    u('MB', 'Megabytes', 1e6, 'BYTES'),
+    u('MIB', 'Mebibytes', 1048576, 'BYTES'),
+    u('GB', 'Gigabytes', 1e9, 'BYTES'),
+    u('GIB', 'Gibibytes', 1073741824, 'BYTES'),
+    u('TB', 'Terabytes', 1e12, 'BYTES'),
+    u('TIB', 'Tebibytes', 1099511627776, 'BYTES'),
+    u('PB', 'Petabytes', 1e15, 'BYTES'),
+    u('PIB', 'Pebibytes', 1125899906842624, 'BYTES'),
+  ];
+}
+
+function seedUtilizadores(): Row[] {
+  const u = (USERNAME: string, NOME: string, DATA_FIM: string | null) => ({
+    USERNAME,
+    NOME,
+    AMBIENTE_ID: DEV_AMBIENTE,
+    UNIDADE_NEGOCIO_RF: 'DSI',
+    TIPO_UTILIZADOR_RF: 'ADM',
+    DATA_INICIO: '2010-10-07T00:00:00',
+    DATA_FIM,
+    NIVEL_ACESSO_RF: 0,
+    ...audit,
+  });
+  return [
+    u('DEV', 'UTILIZADOR DE DEMONSTRAÇÃO', null),
+    u('ANA.SILVA', 'ANA SILVA', '2200-01-01T00:00:00'),
+    u('RUI.COSTA', 'RUI COSTA', '2020-12-31T00:00:00'),
+  ];
+}
+
+// Fake values. The PASSWORD rows and the other environment's row are there to prove the screen
+// never shows them.
+function seedVariaveis(): Row[] {
+  const v = (TIPO_VARIAVEL_RF: string, VALOR: string | null, AMBIENTE_ID = DEV_AMBIENTE) => ({
+    AMBIENTE_ID,
+    TIPO_VARIAVEL_RF,
+    VALOR,
+  });
+  return [
+    v('BACKUP', '\\\\servidor\\documentos\\backup'),
+    v('LIMITE_NOTIF', '14'),
+    v('ONLINE', 'D:\\'),
+    v('PDF', '\\\\servidor\\documentos\\pdf\\'),
+    v('PERIODO_GRACA', '15'),
+    v('PASSWORD', 'HASH-SECRETO'),
+    v('PASSWORD_OLD', 'HASH-ANTIGO'),
+    v('SLB', 'de outro ambiente', 'OUTRO'),
+  ];
+}
+
+function seedTiposMidia(): Row[] {
+  const t = (ID: string, DESIGNACAO: string, TAMANHO_MIDIA: number) => ({
+    ID,
+    DESIGNACAO,
+    DESCRICAO: null,
+    GEN_MEDIDA_RF: 'DIGITAL',
+    UNIDADE_MEDIDA_ID: 'GB',
+    TAMANHO_MIDIA,
+    TAMANHO_BYTES: Math.round(TAMANHO_MIDIA * 1e9),
+    ...audit,
+  });
+  return [
+    t('DVD+R47G', 'DVD+R 4,7 Gb', 4.7),
+    t('DVD+R85G', 'DVD+R DL 8,54 Gb', 8.54),
+    t('DVD-R47G', 'DVD-R 4,7 Gb', 4.7),
+    t('DVD-R85G', 'DVD-R DL 8,54 Gb', 8.54),
+    t('DVDRAM2G', 'DVD-RAM 2,6 Gb', 2.6),
+    t('DVDRAM5G', 'DVD-RAM 5,2 Gb', 5.2),
+    t('DVDRAM9G', 'DVD-RAM 9,4 Gb', 9.4),
+  ];
+}
+
 /** Dev stand-in for `impressorasHooks` (routes.ts): a plain string counter instead of
  * `ID_IMPRESSORA_SEQ.NEXTVAL`, since `memoryStore` has no Oracle sequence to call. */
 function devImpressorasHooks(seedCount: number): CrudHooks {
@@ -249,6 +474,20 @@ export async function registerDevRoutes(
     store: memoryStore(impressoras, seedReal),
     hooks: devImpressorasHooks(seedReal.length),
   });
+  // Step 4.2: the same route code as production over in-memory stores.
+  const unidades = memoryStore(unidadesMedida, seedUnidades());
+  registerUnidadesMedidaRoutes(app, { store: unidades });
+  registerTiposMidiaRoutes(app, { store: memoryStore(tiposMidia, seedTiposMidia()), unidades });
+  // Step 4.3: no PASSWORD is seeded or kept (memoryStore drops write-only columns).
+  registerUtilizadoresRoutes(app, {
+    store: memoryStore(utilizadores, seedUtilizadores()),
+    ambiente: DEV_AMBIENTE,
+  });
+  // Step 4.4: Variáveis SIID, the environment's settings.
+  registerVariaveisRoutes(app, {
+    store: memoryStore(variaveis, seedVariaveis()),
+    ambiente: DEV_AMBIENTE,
+  });
   crudRoutes(app, demoTabuleiros, {
     store: memoryStore(demoTabuleiros, seedTabuleiros(), { autoId: 'ID' }),
     path: '/api/demo-impressoras/:IMPRESSORA_ID/tabuleiros',
@@ -258,4 +497,104 @@ export async function registerDevRoutes(
     store: memoryStore(dominios, seedDominios()),
     valoresStore: memoryStore(dominiosValores, seedDominiosValores()),
   });
+  // Step 4.8: Reports, the fixed-parameter / N_PARAMETROS master-detail screen.
+  registerReportsCrudRoutes(app, {
+    store: memoryStore(reports, seedReports(), { autoId: 'ID' }),
+    parametrosStore: memoryStore(reportParametros, seedReportParametros()),
+  });
+  // Step 5.0: Impressoras Associadas › Documento/Utilizador (dedupeKeys: memoryStore's global
+  // tiebreak dedup, gotcha #9 — a copy preserves the source row's DATA_INICIO exactly, which
+  // would otherwise falsely 409 against the source row itself).
+  registerImpressorasAssociadasRoutes(app, {
+    docStore: memoryStore(impressorasAssociadasDoc, seedImpressorasAssociadasDoc(), {
+      dedupeKeys: ['MODELO_ID', 'IMPRESSORA_ID'],
+    }),
+    usrStore: memoryStore(impressorasAssociadasUsr, seedImpressorasAssociadasUsr(), {
+      dedupeKeys: ['MODELO_ID', 'CDEMPLEA', 'IMPRESSORA_ID'],
+    }),
+    modelosStore: memoryStore(modelosLov, seedModelosLov()),
+    utilizadoresStore: memoryStore(utilizadoresLov, seedUtilizadoresLov()),
+    ambiente: DEV_AMBIENTE,
+  });
+  // Step 5.3: Permissões. The grid is rebuilt from the repo on every call, so actions show up.
+  const permRepo = memoryPermissoesRepo(seedPermissoes());
+  registerPermissoesRoutes(app, { store: permissoesVista(permRepo), repo: permRepo });
+}
+
+// ── Permissões (Step 5.3) ────────────────────────────────────────────────────────────────────
+
+// Real TIPO_PERMISSAO rows (CFG_VALORES_DOMINIO.md); units and users are made up.
+const TIPOS_PERMISSAO: Record<number, string> = {
+  0: 'GERAR DOCUMENTO',
+  1: 'IMPRIMIR DOCUMENTO',
+  2: 'IMPRIMIR CÓPIA',
+  3: 'IMPRIMIR 2ª VIA',
+  4: 'VISUALIZAR',
+};
+const UNIDADES: Record<string, string> = { DSI: 'DSI', DFI: 'DFI' };
+const PERM_UTILIZADORES: Utilizador[] = [
+  { USERNAME: 'USER1', NOME: 'Ana Silva', UNIDADE_NEGOCIO_RF: 'DSI' },
+  { USERNAME: 'USER2', NOME: 'Bruno Costa', UNIDADE_NEGOCIO_RF: 'DSI' },
+  { USERNAME: 'USER3', NOME: 'Carla Sousa', UNIDADE_NEGOCIO_RF: 'DFI' },
+  { USERNAME: 'USER4', NOME: 'Duarte Lopes', UNIDADE_NEGOCIO_RF: 'DFI' },
+];
+
+function seedPermissoes() {
+  const modelo = (ID: string, REPORT_ID = 1): Modelo => ({
+    ID,
+    REPORT_ID,
+    DATA_INICIO: '2020-01-01T00:00:00',
+    DATA_FIM: null,
+  });
+  const p = (MODELO_ID: string, USERNAME: string, over: Partial<Perm> = {}) => ({
+    MODELO_ID,
+    USERNAME,
+    UNIDADE_NEGOCIO_RF: PERM_UTILIZADORES.find((u) => u.USERNAME === USERNAME)?.UNIDADE_NEGOCIO_RF ?? 'DSI',
+    TIPO_PERMISSAO_RF: 1,
+    DATA_INICIO: '2024-01-01T00:00:00',
+    DATA_FIM: FIM_BULK,
+    ...audit,
+    ...over,
+  });
+  return {
+    modelos: [modelo('MOD1'), modelo('MOD2'), modelo('MOD3'), modelo('MOD4'), modelo('MOD46', 46)],
+    utilizadores: PERM_UTILIZADORES,
+    perms: [
+      p('MOD1', 'USER1'),
+      p('MOD2', 'USER1'),
+      p('MOD1', 'USER1', { TIPO_PERMISSAO_RF: 4 }),
+      p('MOD1', 'USER2'),
+      p('MOD3', 'USER3'),
+      p('MOD2', 'USER2', { DATA_INICIO: '2020-01-01T00:00:00', DATA_FIM: '2020-12-31T00:00:00' }),
+    ],
+  };
+}
+
+/** CFG_PERMISSOES_SIID_VW over the repo's current rows (inner join on users, as the view). */
+function permissoesVista(repo: ReturnType<typeof memoryPermissoesRepo>): CrudStore {
+  const view = () =>
+    memoryStore(
+      permissoes,
+      repo.snapshot().flatMap((row) => {
+        const u = PERM_UTILIZADORES.find((x) => x.USERNAME === row.USERNAME);
+        if (!u) return [];
+        return [
+          {
+            ...row,
+            NOME: u.NOME,
+            AMBIENTE_ID: DEV_AMBIENTE,
+            UNIDADE_NEGOCIO: UNIDADES[row.UNIDADE_NEGOCIO_RF] ?? null,
+            TIPO_PERMISSAO: TIPOS_PERMISSAO[row.TIPO_PERMISSAO_RF] ?? null,
+          },
+        ];
+      }),
+      { presets: { validas: (r) => validaHoje(r as unknown as Perm, localNow()) } },
+    );
+  return {
+    list: (q, parent, ctx) => view().list(q, parent, ctx),
+    get: (rid, ctx) => view().get(rid, ctx),
+    insert: (v, parent, ctx) => view().insert(v, parent, ctx),
+    update: (rid, orig, v, ctx) => view().update(rid, orig, v, ctx),
+    remove: (rid, orig, ctx) => view().remove(rid, orig, ctx),
+  };
 }
