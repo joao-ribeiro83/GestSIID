@@ -81,3 +81,32 @@ describe('origSchema', () => {
     expect(() => s.parse({ 'ID) OR (1': 1 })).toThrow();
   });
 });
+
+describe('writeOnly columns (a secret the client may send but never read back)', () => {
+  const users = defineResource({
+    name: 'utilizadores',
+    source: 'CFG_UTILIZADORES',
+    columns: {
+      USERNAME: { type: 'code', label: 'Utilizador', insertOnly: true, required: true },
+      PASSWORD: { type: 'text', label: 'Password', edit: true, required: true, writeOnly: true },
+    },
+    defaultSort: [{ column: 'USERNAME', direction: 'asc' }],
+    tiebreak: 'USERNAME',
+    roles: { read: ['ADM'], write: ['ADM'] },
+  });
+
+  it('valuesSchema accepts it: required on insert, optional on update', () => {
+    expect(valuesSchema(users, 'insert').parse({ USERNAME: 'A', PASSWORD: 'x' })).toEqual({
+      USERNAME: 'A',
+      PASSWORD: 'x',
+    });
+    expect(() => valuesSchema(users, 'insert').parse({ USERNAME: 'A' })).toThrow();
+    expect(valuesSchema(users, 'update').parse({})).toEqual({});
+    expect(valuesSchema(users, 'update').parse({ PASSWORD: 'y' })).toEqual({ PASSWORD: 'y' });
+  });
+
+  it('origSchema rejects it, so a client cannot probe the stored value through the lock check', () => {
+    expect(origSchema(users).safeParse({ USERNAME: 'A' }).success).toBe(true);
+    expect(origSchema(users).safeParse({ PASSWORD: 'x' }).success).toBe(false);
+  });
+});

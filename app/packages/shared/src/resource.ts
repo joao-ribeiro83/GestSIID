@@ -22,6 +22,8 @@ export interface ColumnDef {
   insertOnly?: true;
   required?: true;
   maxLength?: number;
+  /** A secret: accepted in `values`, never selected, never in `orig`, no filter or sort. */
+  writeOnly?: true;
 }
 
 export interface Resource<C extends string = string> {
@@ -31,6 +33,10 @@ export interface Resource<C extends string = string> {
   /** Detail resources: columns bound from the master's current row (§4.4). */
   parentKeys?: readonly C[];
   columns: Record<C, ColumnDef>;
+  /** Rows the screen never shows (a form's DEFAULT_WHERE `col != 'X'`): `column NOT IN (values)`. */
+  exclude?: { column: C; values: readonly string[] };
+  /** Named server-side WHERE fragments picked with `?preset=<name>` (§4.1); no preset = none. */
+  presets?: Record<string, string>;
   defaultSort: readonly ListQuerySort[];
   /** Unique column appended to every ORDER BY so paging is stable. */
   tiebreak: C;
@@ -39,9 +45,11 @@ export interface Resource<C extends string = string> {
 
 type ValueOf<T extends ColumnType> = T extends 'number' ? number : string;
 
-/** The row a list route returns for a resource: every column (nullable) plus `_rid`. */
+/** The row a list route returns for a resource: every column but the write-only ones (nullable) plus `_rid`. */
 export type RowOf<R extends Resource> = {
-  [K in keyof R['columns']]: ValueOf<R['columns'][K]['type']> | null;
+  [K in keyof R['columns'] as R['columns'][K] extends { writeOnly: true } ? never : K]: ValueOf<
+    R['columns'][K]['type']
+  > | null;
 } & { _rid: string };
 
 // Oracle identifiers: these strings are pasted into SQL, so only plain names are allowed.
@@ -56,6 +64,7 @@ export function defineResource<const R extends Resource>(resource: R): R {
   assertIdentifier(resource.source);
   for (const column of Object.keys(resource.columns)) assertIdentifier(column);
   assertIdentifier(resource.tiebreak);
+  if (resource.exclude) assertIdentifier(resource.exclude.column);
   return resource;
 }
 
@@ -109,6 +118,7 @@ export function valuesSchema(
 export function origSchema(resource: Resource) {
   const shape: Record<string, z.ZodType> = {};
   for (const [column, def] of Object.entries(resource.columns)) {
+    if (def.writeOnly) continue;
     const base = def.type === 'number' ? z.number() : z.string();
     shape[column] = base.nullable().optional();
   }

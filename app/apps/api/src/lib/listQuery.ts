@@ -83,11 +83,18 @@ function conditions(
 /** WHERE clause (without the keyword) + binds; also used to resolve a `consulta` selection. */
 export function buildWhere(
   resource: Resource,
-  q: Pick<ListQuery, 'filters'>,
+  q: Pick<ListQuery, 'filters' | 'preset'>,
   parent: Record<string, string | number> = {},
 ): BuiltSql {
   const binds: Record<string, unknown> = {};
   const parts: string[] = [];
+
+  // Server-side text from the resource, picked by name only; ignored on resources without presets.
+  if (resource.presets && q.preset !== undefined) {
+    const sql = Object.hasOwn(resource.presets, q.preset) ? resource.presets[q.preset] : undefined;
+    if (!sql) throw invalid('preset', 'Filtro predefinido desconhecido.');
+    parts.push(`(${sql})`);
+  }
 
   // Parent keys first; names come from the resource, values are binds.
   (resource.parentKeys ?? []).forEach((column, i) => {
@@ -96,6 +103,12 @@ export function buildWhere(
     binds[`p${i}`] = parent[column];
     parts.push(`${column} = :p${i}`);
   });
+
+  const { exclude } = resource;
+  if (exclude && exclude.values.length > 0) {
+    const names = exclude.values.map((value, i) => ((binds[`x${i}`] = value), `:x${i}`));
+    parts.push(`${exclude.column} NOT IN (${names.join(', ')})`);
+  }
 
   for (const key of Object.keys(q.filters)) {
     if (!Object.hasOwn(resource.columns, key)) throw invalid(`f[${key}]`, 'Coluna desconhecida.');
@@ -127,9 +140,9 @@ function orderBy(resource: Resource, q: ListQuery): string {
 }
 
 export function selectList(resource: Resource): string {
-  const cols = Object.entries(resource.columns).map(([c, def]) =>
-    def.type === 'date' ? `${dateSelect(c)} AS ${c}` : c,
-  );
+  const cols = Object.entries(resource.columns)
+    .filter(([, def]) => !def.writeOnly)
+    .map(([c, def]) => (def.type === 'date' ? `${dateSelect(c)} AS ${c}` : c));
   if (resource.roles.write.length > 0) cols.push('ROWIDTOCHAR(ROWID) AS "_rid"');
   return cols.join(', ');
 }
@@ -145,8 +158,8 @@ export function buildListQuery(
     list: {
       sql:
         `SELECT ${selectList(resource)} FROM ${resource.source}${whereSql} ORDER BY ${orderBy(resource, q)} ` +
-        'OFFSET :offset ROWS FETCH NEXT :size ROWS ONLY',
-      binds: { ...where.binds, offset: (q.page - 1) * q.size, size: q.size },
+        'OFFSET :skip ROWS FETCH NEXT :take ROWS ONLY',
+      binds: { ...where.binds, skip: (q.page - 1) * q.size, take: q.size },
     },
     count: {
       sql: `SELECT COUNT(*) AS N FROM (SELECT 1 FROM ${resource.source}${whereSql} FETCH FIRST ${COUNT_LIMIT} ROWS ONLY)`,

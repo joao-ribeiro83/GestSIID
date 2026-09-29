@@ -102,6 +102,9 @@ export interface ColumnView<Row> {
   /** Panel editing only (`PanelForm`): the field only shows while this holds, over the form's
    * current (possibly unsaved) text values — e.g. `ENABLE_STRINGS`-style conditional fields. */
   visibleWhen?: (values: Record<string, string>) => boolean;
+  /** Inline editing only: the cell is editable only while this holds, over the row's current
+   * (possibly unsaved) values — e.g. a fixed/locked row whose name cannot be renamed. */
+  editableWhen?: (row: Row) => boolean;
 }
 
 export interface DataBlockHandle {
@@ -503,6 +506,8 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     const def = resource.columns[col];
     const e = entryOf(row);
     if (edit !== 'inline' || !def || e?.state === 'deleted' || e?.status === 'saving') return false;
+    const c = cols.find((c) => c.col === col);
+    if (c?.editableWhen && !c.editableWhen(row)) return false;
     return e?.state === 'new'
       ? canInsert && !!(def.edit || def.insertOnly)
       : canUpdate && !!def.edit && !def.insertOnly;

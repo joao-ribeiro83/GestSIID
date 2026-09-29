@@ -1,7 +1,7 @@
 import { defineResource, parseListQuery } from '@gestsiid/shared';
 import { describe, expect, it } from 'vitest';
 import { AppError } from '../db/errors.ts';
-import { buildListQuery, decodeRid, encodeRid } from './listQuery.ts';
+import { buildListQuery, decodeRid, encodeRid, selectList } from './listQuery.ts';
 
 const res = defineResource({
   name: 'impressoras',
@@ -50,9 +50,11 @@ describe('buildListQuery — SELECT', () => {
     expect(list.sql).toBe(
       'SELECT ID, DOMINIO_ID, NOME, TIPO, TO_CHAR(DATA_INICIO,\'YYYY-MM-DD"T"HH24:MI:SS\') AS DATA_INICIO, OBS, ' +
         'ROWIDTOCHAR(ROWID) AS "_rid" FROM CFG_IMPRESSORAS ORDER BY NOME ASC, ID ASC ' +
-        'OFFSET :offset ROWS FETCH NEXT :size ROWS ONLY',
+        'OFFSET :skip ROWS FETCH NEXT :take ROWS ONLY',
     );
-    expect(list.binds).toEqual({ offset: 50, size: 25 });
+    expect(list.binds).toEqual({ skip: 50, take: 25 });
+    // SIZE is an Oracle reserved word: `:size` fails with ORA-01745 on a real database.
+    expect(Object.keys(list.binds)).not.toContain('size');
   });
 
   it('count query caps at 10001 rows and shares the WHERE binds, without paging', () => {
@@ -66,6 +68,33 @@ describe('buildListQuery — SELECT', () => {
   it('read-only resources select no ROWID (views may not have one)', () => {
     const view = defineResource({ ...res, roles: { read: ['ADM'], write: [] } });
     expect(buildListQuery(view, parseListQuery({})).list.sql).not.toContain('ROWID');
+  });
+});
+
+describe('buildListQuery — write-only columns', () => {
+  const users = defineResource({
+    name: 'utilizadores',
+    source: 'CFG_UTILIZADORES',
+    columns: {
+      USERNAME: { type: 'code', label: 'Utilizador', filter: ['eq'], sort: true },
+      PASSWORD: { type: 'text', label: 'Password', edit: true, writeOnly: true },
+    },
+    defaultSort: [{ column: 'USERNAME', direction: 'asc' }],
+    tiebreak: 'USERNAME',
+    roles: { read: ['ADM'], write: ['ADM'] },
+  });
+
+  it('never selects them, so no list or get can return the value', () => {
+    const sql = buildListQuery(users, parseListQuery({})).list.sql;
+    expect(sql).not.toContain('PASSWORD');
+    expect(selectList(users)).toBe('USERNAME, ROWIDTOCHAR(ROWID) AS "_rid"');
+  });
+
+  it('a filter or a sort on them is a 400, not an oracle for the stored value', () => {
+    expect(
+      validationError(() => buildListQuery(users, parseListQuery({ 'f[PASSWORD]': 'x' }))).fields,
+    ).toBeDefined();
+    validationError(() => buildListQuery(users, parseListQuery({ sort: 'PASSWORD:asc' })));
   });
 });
 
@@ -159,8 +188,49 @@ describe('buildListQuery — allow-list (no injection)', () => {
 
   it('page and size are binds', () => {
     const q = build({ page: '2', size: '10' }).list;
-    expect(q.sql).toContain('OFFSET :offset ROWS FETCH NEXT :size ROWS ONLY');
-    expect(q.binds).toMatchObject({ offset: 10, size: 10 });
+    expect(q.sql).toContain('OFFSET :skip ROWS FETCH NEXT :take ROWS ONLY');
+    expect(q.binds).toMatchObject({ skip: 10, take: 10 });
+  });
+});
+
+describe('buildListQuery — exclude (rows the screen never shows)', () => {
+  const hidden = defineResource({ ...res, exclude: { column: 'TIPO', values: ['A', 'B'] } });
+
+  it('adds `col NOT IN (binds)` to the list and the count, before the request filters', () => {
+    const { list, count } = buildListQuery(hidden, parseListQuery({ 'f[NOME]': 'HP' }));
+    expect(list.sql).toContain('WHERE TIPO NOT IN (:x0, :x1) AND NOME = :w0 ORDER BY');
+    expect(list.binds).toMatchObject({ x0: 'A', x1: 'B', w0: 'HP' });
+    expect(count.sql).toContain('WHERE TIPO NOT IN (:x0, :x1) AND NOME = :w0 FETCH FIRST');
+  });
+
+  it('a client filter on the same column cannot lift it', () => {
+    const { list } = buildListQuery(hidden, parseListQuery({ 'f[TIPO]': 'A' }));
+    expect(list.sql).toContain('TIPO NOT IN (:x0, :x1) AND TIPO = :w0');
+  });
+
+  it('defineResource refuses an exclude column that is not a plain identifier', () => {
+    expect(() => defineResource({ ...res, exclude: { column: 'X; DROP', values: ['A'] } })).toThrow(
+      /Identificador inválido/,
+    );
+  });
+});
+
+describe('buildListQuery — presets (a named server-side WHERE)', () => {
+  const withPreset = defineResource({ ...res, presets: { validas: 'SYSDATE >= DATA_INICIO' } });
+
+  it('adds the named preset to the list and the count', () => {
+    const { list, count } = buildListQuery(withPreset, parseListQuery({ preset: 'validas', 'f[NOME]': 'HP' }));
+    expect(list.sql).toContain('WHERE (SYSDATE >= DATA_INICIO) AND NOME = :w0 ORDER BY');
+    expect(count.sql).toContain('WHERE (SYSDATE >= DATA_INICIO) AND NOME = :w0 FETCH FIRST');
+  });
+
+  it('no preset = no extra WHERE', () => {
+    expect(buildListQuery(withPreset, parseListQuery({})).list.sql).not.toContain('WHERE');
+  });
+
+  it('an unknown preset is 400 VALIDACAO on a resource that has presets', () => {
+    const err = validationError(() => buildListQuery(withPreset, parseListQuery({ preset: 'x' })));
+    expect(err.fields).toHaveProperty('preset');
   });
 });
 

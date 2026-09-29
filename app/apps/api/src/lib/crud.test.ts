@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type { DbConnection, DbPool } from '../db/oracle.ts';
 import { registerErrorHandler } from '../http/errors.ts';
 import { memoryStore } from '../features/dev/memoryStore.ts';
-import { auditHooks, crudRoutes, oracleStore, SYSDATE, type CrudStore } from './crud.ts';
+import { auditHooks, crudRoutes, oracleStore, SqlCall, SYSDATE, type CrudStore } from './crud.ts';
 
 const res = defineResource({
   name: 'impressoras',
@@ -294,5 +294,49 @@ describe('oracleStore — SQL', () => {
       oracleStore(pool, res, 1000).remove('AAAR3sAAEAAAACXAA-_', { NOME: 'x' }, ctx),
     ).rejects.toMatchObject({ statusCode: 409, code: 'REGISTO_ALTERADO' });
     expect(calls.map((c) => c.sql)).toContain('ROLLBACK');
+  });
+
+  const secret = defineResource({
+    name: 'utilizadores',
+    source: 'CFG_UTILIZADORES',
+    columns: {
+      USERNAME: { type: 'code', label: 'Utilizador', insertOnly: true, required: true },
+      PASSWORD: { type: 'text', label: 'Password', edit: true, writeOnly: true },
+    },
+    defaultSort: [{ column: 'USERNAME', direction: 'asc' }],
+    tiebreak: 'USERNAME',
+    roles: { read: ['ADM'], write: ['ADM'] },
+  });
+  const hash = (v: string) => new SqlCall('RAWTOHEX(USER_SECURITY.ENCRYPT(?))', v);
+
+  it('insert puts a SqlCall in the same statement with its argument as a bind (no secret in the SQL text)', async () => {
+    const { pool, calls } = fakePool([{ outBinds: { rid: ['AAAR3sAAEAAAACXAAA'] } }, { rows: [] }]);
+    await oracleStore(pool, secret, 1000).insert(
+      { USERNAME: 'ANA', PASSWORD: hash('s3gredo') },
+      {},
+      ctx,
+    );
+    expect(calls[0]?.sql).toBe(
+      'INSERT INTO CFG_UTILIZADORES (USERNAME, PASSWORD) VALUES ' +
+        '(:v0, RAWTOHEX(USER_SECURITY.ENCRYPT(:v1))) RETURNING ROWID INTO :rid',
+    );
+    expect(calls[0]?.sql).not.toContain('s3gredo');
+    expect(calls[0]?.binds).toMatchObject({ v0: 'ANA', v1: 's3gredo' });
+    // The read-back after the INSERT must not select the column either.
+    expect(calls[1]?.sql).not.toContain('PASSWORD');
+  });
+
+  it('update sets it through the same SqlCall', async () => {
+    const { pool, calls } = fakePool([{ rows: [{ 1: 1 }] }, { rowsAffected: 1 }, { rows: [] }]);
+    await oracleStore(pool, secret, 1000).update(
+      'AAAR3sAAEAAAACXAA-_',
+      { USERNAME: 'ANA' },
+      { PASSWORD: hash('nova') },
+      ctx,
+    );
+    expect(calls[1]?.sql).toBe(
+      'UPDATE CFG_UTILIZADORES SET PASSWORD = RAWTOHEX(USER_SECURITY.ENCRYPT(:v0)) WHERE ROWID = CHARTOROWID(:rid)',
+    );
+    expect(calls[1]?.binds).toMatchObject({ v0: 'nova' });
   });
 });

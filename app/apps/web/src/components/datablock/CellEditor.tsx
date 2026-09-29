@@ -89,6 +89,8 @@ export function CellEditor({ def, value, initial, dominioId, label, onCommit, on
     <input
       {...common}
       value={text}
+      type={def.writeOnly ? 'password' : undefined}
+      autoComplete={def.writeOnly ? 'new-password' : undefined}
       inputMode={def.type === 'number' ? 'decimal' : undefined}
       placeholder={def.type === 'date' ? 'DD-MM-AAAA' : undefined}
       maxLength={def.maxLength}

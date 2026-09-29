@@ -68,6 +68,18 @@ export class SqlExpr {
 }
 export const SYSDATE = new SqlExpr('SYSDATE');
 
+/** A SQL function of one request value: `template` is server code with one `?`, the value is a
+ * bind (e.g. `RAWTOHEX(USER_SECURITY.ENCRYPT(?))`), so a secret is hashed by the database in the
+ * same statement and never appears in the SQL text. */
+export class SqlCall {
+  readonly template: string;
+  readonly arg: unknown;
+  constructor(template: string, arg: unknown) {
+    this.template = template;
+    this.arg = arg;
+  }
+}
+
 /** Audit columns from the session user (D-08), never from the request. */
 export const auditHooks: CrudHooks = {
   beforeInsert: (v, { user }) => ({ ...v, CRIADO_POR: user.username, DATA_CRIACAO: SYSDATE }),
@@ -78,7 +90,7 @@ export const auditHooks: CrudHooks = {
   }),
 };
 
-function sessionCtx(request: FastifyRequest, allowed: readonly Role[]): CrudCtx {
+export function sessionCtx(request: FastifyRequest, allowed: readonly Role[]): CrudCtx {
   const user = (request.session as { user?: CrudCtx['user'] } | null)?.user;
   if (!user) throw new AppError(401, 'SESSAO_EXPIRADA', 'A sessão expirou. Entre novamente.');
   if (!allowed.includes(user.role))
@@ -182,6 +194,7 @@ export function oracleStore(pool: DbPool, resource: Resource, callTimeoutMs: num
   const valueSql = (column: string, value: unknown, bind: (v: unknown) => string) => {
     if (!Object.hasOwn(cols, column)) throw new Error(`Coluna desconhecida: ${column}`);
     if (value instanceof SqlExpr) return value.sql;
+    if (value instanceof SqlCall) return value.template.replace('?', bind(value.arg));
     const b = bind(value);
     return cols[column]?.type === 'date' ? `TO_DATE(${b},${DATE_MASK})` : b;
   };

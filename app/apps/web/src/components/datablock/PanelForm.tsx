@@ -44,8 +44,19 @@ export function PanelForm({ resource, columns, endpoint, row, defaults, title, o
     () => valuesSchema(resource, isNew ? 'insert' : 'update', fromInput),
     [resource, isNew],
   );
+  // A blank write-only field is "not sent": required on a new row, kept as is on an existing one.
+  const resolver: Resolver<FormValues> = (values, context, options) =>
+    (zodResolver(schema) as unknown as Resolver<FormValues>)(
+      Object.fromEntries(
+        Object.entries(values).filter(
+          ([col, v]) => !(resource.columns[col]?.writeOnly && v === ''),
+        ),
+      ),
+      context,
+      options,
+    );
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as unknown as Resolver<FormValues>,
+    resolver,
     defaultValues: Object.fromEntries(
       fields
         .filter((c) => editable(c.col))
@@ -150,7 +161,7 @@ export function PanelForm({ resource, columns, endpoint, row, defaults, title, o
                 <div key={c.col} className="grid gap-1">
                   <label htmlFor={id} className="text-xs font-semibold">
                     {def.label}
-                    {def.required && <span aria-hidden> *</span>}
+                    {def.required && !(def.writeOnly && !isNew) && <span aria-hidden> *</span>}
                   </label>
                   {c.options ? (
                     // Controlled: the options load after the form mounts, so the DOM value must follow state.
@@ -167,7 +178,16 @@ export function PanelForm({ resource, columns, endpoint, row, defaults, title, o
                       id={id}
                       aria-invalid={error ? true : undefined}
                       aria-describedby={error ? `${id}-err` : undefined}
-                      placeholder={def.type === 'date' ? 'DD-MM-AAAA' : undefined}
+                      // Write-only secret: masked, never autofilled; on an existing row blank = keep.
+                      type={def.writeOnly ? 'password' : undefined}
+                      autoComplete={def.writeOnly ? 'new-password' : undefined}
+                      placeholder={
+                        def.type === 'date'
+                          ? 'DD-MM-AAAA'
+                          : def.writeOnly && !isNew
+                            ? 'Em branco: manter a actual'
+                            : undefined
+                      }
                       maxLength={def.maxLength}
                       className={inputCls}
                       {...form.register(c.col)}
