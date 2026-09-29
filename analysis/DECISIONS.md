@@ -101,7 +101,7 @@ and the recommended option was recorded.
 **Decision:** (a) keep them. Role = `CFG_UTILIZADORES.TIPO_UTILIZADOR_RF`: `'ADM'` → ADM, anything else → USER.
 **Date:** 2026-09-15
 **Consequences:**
-- USER menu: Documentos, Impressoras Associadas (Documento, Utilizador). No Gador, Configuração, Administração, Backups, Auditoria, and no Alterar password (D-07d).
+- USER menu: Documentos only. No Gador, Configuração (which holds Impressoras Associadas and Alterar password, A-09), Administração, Backups, Auditoria.
 - USER in Documentos: filters, sort by spool, select all, parameter search, comments (read-only), parameters, queue, logs, reduced details (no `ATRIBUTO5..8`, `ATRIBUTO10..25`, `ATRIB_ARQ_1..20`, `ARQ_ID`, `EDOC_ID`, `REGISTO_ARQUIVO`, `REGISTO_EDOC`, `DATA_ARQUIVO`), PDF view, clone. No toolbar actions (regerar, reimprimir, 2ª via, cópia, anular, cancelar, suspender, retomar, reenviar EDoc, reenviar e-mail, rearquivar, lote) and no comment insert.
 - Clone and single-request cancel exist in the USER form's code, but their buttons are not named in the USER dump. Step 7.5 checks this in running Forms; if USER cannot reach them there, they are ADM only.
 - Every ADM-only route has `requireRole('ADM')` in the API and returns 403 for USER; the USER API response for document details omits the extended columns (not just hidden in the UI). Closes SEC-004.
@@ -118,7 +118,7 @@ and the recommended option was recorded.
 **Date:** 2026-09-15
 **Consequences:**
 - The compose file has no proxy service and no certificates. The web app and API are published on one HTTP port.
-- `.env` settings needed so the later nginx needs no code change: `PUBLIC_BASE_URL` (open), `TRUST_PROXY` (default `false`; `true` only when nginx is in front), `COOKIE_SECURE` (default `false` on plain HTTP; must be `true` behind nginx, otherwise D-07c's `Secure` cookie cannot work on HTTP), optional `BASE_PATH` so the app can live under a sub-path.
+- `.env` settings needed so the later nginx needs no code change: `PUBLIC_BASE_URL` (open), `TRUST_PROXY` (default `false`; the nginx IP / CIDR list when nginx is in front — `true` is refused since Step 3.1, because it trusts a client-written `X-Forwarded-For`), `COOKIE_SECURE` (default `false` on plain HTTP; must be `true` behind nginx, otherwise D-07c's `Secure` cookie cannot work on HTTP), optional `BASE_PATH` so the app can live under a sub-path.
 - **Open item before go-live (Step 10.6):** nginx in front with TLS, `COOKIE_SECURE=true`, HSTS, domain chosen. Running production on plain HTTP is not allowed (logins and PDFs would cross the network in clear text).
 - No Kubernetes manifests. The API stays stateless apart from the session store, so a later move stays possible.
 
@@ -389,6 +389,7 @@ Factual corrections found while writing `analysis/ARCHITECTURE.md` (critic revie
 - **A-06 (D-28, BR-DOC-10):** Forms skips annulled documents by `ATRIBUTO9 = 'A'` only, and `ANULAR` never sets `ATRIBUTO9`. The app's skip test for Regerar, Reimprimir, 2ª via and Cópia is `ATRIBUTO9 = 'A' OR DISPONIVEL_RF = 'ANU'` (intended difference).
 - **A-07 (D-03):** the PDF route is `GET /api/documentos/:id/pdf` (Portuguese resource names).
 - **A-08 (D-08):** Forms facts behind D-08 were incomplete. `FD_GESTAO_SIID_USER` has the `GENERICO` and `ESTADO_PEDIDO` popups attached (so clone and single queue cancel are reachable: USER gets them, per D-08's condition), and also has non-Spool sort buttons, Suspender / Retomar buttons and comment insert. Asked again with these facts (`ARCHITECTURE.md` §13 O-1), the owner confirmed D-08 as written on 2026-09-15: USER gets Spool-only sorting, no Suspender / Retomar, no comment insert (intended differences from the USER form).
+- **A-09 (D-08):** D-08 gave USER Impressoras Associadas because STRUCTURE §2 placed it under Gestão. `forms-xml/T/MD_SIID_mmb.xml` nests **Impressoras Associadas** (Documento, Utilizador) and **Alterar password** in `CONFIGURAÇÃO_MENU`, and `MD_SIID_USER` has `CONFIGURAÇÃO` `Enabled="false"`, so a Forms USER never reached them (found in Step 1.2, UI_SPEC OP-1). Asked with these facts, the owner chose Forms parity on 2026-09-15: both sit under Configuração (`/configuracao/impressoras-associadas/*`, `/configuracao/alterar-password`), ADM only. USER menu = Gestão › Documentos. The `impressoras-associadas` API routes are ADM only.
 
 ---
 
@@ -403,7 +404,7 @@ Factual corrections found while writing `analysis/ARCHITECTURE.md` (critic revie
 | D-05 no SMTP | 2.1, 7.2 | No `SMTP_*` env; server-side address validation on EMAIL queue insert. |
 | D-06 drop Médias Execução | 3.2, 9.1 (removed), 10.6 | No Auditoria menu; Phase 9 deleted. |
 | D-07 auth / session / regen password | 1.1, 2.1, 3.1, 3.2, 4.3, 4.4, 7.2, 10.1 | Login = `CFG_UTILIZADORES` + `USER_SECURITY.ENCRYPT`, no new table; date check; 8 h / 30 min; regen password ADM only with current value; Utilizadores writes `USER_SECURITY.ENCRYPT`; Variáveis must not expose `PASSWORD`/`PASSWORD_OLD` rows; SEC-005 accepted risk. |
-| D-08 USER limits (+D-15) | 3.1, 3.2, 7.1, 7.3, 7.5, 10.1 | `requireRole('ADM')` on admin routes; USER detail payload reduced; verify clone / single-cancel reachability in 7.5. |
+| D-08 USER limits (+D-15) | 3.1, 3.2, 7.1, 7.3, 7.5, 10.1 | `requireRole('ADM')` on admin routes; USER detail payload reduced; verify clone / single-cancel reachability in 7.5. A-09: Impressoras Associadas and Alterar password under Configuração, ADM only (also 1.2, 5.2). |
 | D-09 Compose, no proxy yet | 2.3, 10.1, 10.6 | No proxy service; `TRUST_PROXY`, `COOKIE_SECURE`, `PUBLIC_BASE_URL`, `BASE_PATH`; nginx + TLS + domain required before go-live. |
 | D-10 parallel run | 1.3, 10.6 | Row-level parity on shared test schema; no changes to existing tables. |
 | D-11 drop Gestores | 3.2, 4.5 (removed), 10.5 | No DDL; DBA hand-over note with the 23 grants. |

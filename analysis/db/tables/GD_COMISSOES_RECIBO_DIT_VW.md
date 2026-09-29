@@ -1,0 +1,51 @@
+# GD_COMISSOES_RECIBO_DIT_VW
+
+Owner: `SIID_TESTES` &nbsp; Type: `VIEW`
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| CDUNIECO | NUMBER | 22 | 3 | 0 | N |  |  |
+| NMRECIBO | NUMBER | 22 | 10 | 0 | N |  |  |
+| CDAGENTE | VARCHAR2 | 15 |  |  | Y |  |  |
+| CDTIPCOM | VARCHAR2 | 1 |  |  | Y |  |  |
+| PTIMPORT | NUMBER | 22 |  |  | Y |  |  |
+
+
+## Primary / unique keys
+
+_(none)_
+
+
+## Foreign keys
+
+_(none)_
+
+
+## Indexes
+
+_(none)_
+
+
+## View SQL text
+
+```sql
+SELECT  /*+ INDEX_ASC(COMISSAO TRECCOM1) */
+      RECIBO.CDUNIECO
+    , RECIBO.NMRECIBO
+    , COMISSAO.CDAGENTE
+    , COMISSAO.CDTIPCOM
+    , SUM(COMISSAO.PTIMPORT)     PTIMPORT
+  FROM
+      CO_DIT_TRECCOM COMISSAO
+    , CO_DIT_MRECIBO  RECIBO
+  WHERE 1=1
+    AND COMISSAO.CDUNIECO (+) = RECIBO.CDUNIECO
+    AND COMISSAO.NMRECIBO (+) = RECIBO.NMRECIBO
+  GROUP BY
+      RECIBO.CDUNIECO
+    , RECIBO.NMRECIBO
+    , COMISSAO.CDAGENTE
+    , COMISSAO.CDTIPCOM
+```

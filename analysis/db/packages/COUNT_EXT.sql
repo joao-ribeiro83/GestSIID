@@ -1,0 +1,22 @@
+-- COUNT_EXT (owner: SIID_TESTES)
+
+
+-- ===== FUNCTION =====
+
+FUNCTION COUNT_ext(p_TOTAL IN NUMBER, p_iniTial IN NUMBER, p_increase IN NUMBER) RETURN NUMBER
+IS
+  valor NUMBER := p_initial;
+  blocos number;
+BEGIN
+  IF P_TOTAL = P_iniTial THEN
+    RETURN 1;
+  ELSE
+     VALOR:=P_TOTAL/(1+P_INCREASE/100);
+     BLOCOS:= VALOR/8192;
+     IF BLOCOS!=TRUNC(BLOCOS) THEN
+       VALOR:= TRUNC(BLOCOS)*8192;
+     END IF;
+     RETURN 1+ COUNT_EXT(VALOR,P_INITIAL, P_INCREASE);
+  END IF;
+END;
+

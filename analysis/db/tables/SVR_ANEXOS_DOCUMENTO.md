@@ -1,0 +1,42 @@
+# SVR_ANEXOS_DOCUMENTO
+
+Owner: `SIID_TESTES` &nbsp; Type: `TABLE`
+
+Row count: **16845**
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| TIPO_ANEXO_RF | NUMBER | 22 |  |  | N |  |  |
+| DOCUMENTO_ID | NUMBER | 22 |  |  | N |  |  |
+| ANEXODOC_ID | NUMBER | 22 | 10 | 0 | N |  |  |
+
+
+## Primary / unique keys
+
+| CONSTRAINT_NAME | CONSTRAINT_TYPE | COLUMN_NAME | POSITION |
+| --- | --- | --- | --- |
+| PK_CHAVE_SAD | P | TIPO_ANEXO_RF | 1 |
+| PK_CHAVE_SAD | P | DOCUMENTO_ID | 2 |
+| PK_CHAVE_SAD | P | ANEXODOC_ID | 3 |
+
+
+## Foreign keys
+
+| CONSTRAINT_NAME | COLUMN_NAME | POSITION | R_OWNER | R_TABLE_NAME |
+| --- | --- | --- | --- | --- |
+| FK_DOCUMENTO_SAD | DOCUMENTO_ID | 1 | SIID_TESTES | SVR_DOCUMENTOS |
+| SVR_ANEXOS_DOCUMENTO_SVR__FK1 | ANEXODOC_ID | 1 | SIID_TESTES | SVR_DOCUMENTOS |
+
+
+## Indexes
+
+| INDEX_NAME | UNIQUENESS | COLUMN_NAME | COLUMN_POSITION |
+| --- | --- | --- | --- |
+| IDX_DOCUMENTO_SAD | NONUNIQUE | DOCUMENTO_ID | 1 |
+| IDX_TIPOANEXO_SAD | NONUNIQUE | TIPO_ANEXO_RF | 1 |
+| PK_CHAVE_SAD | UNIQUE | TIPO_ANEXO_RF | 1 |
+| PK_CHAVE_SAD | UNIQUE | DOCUMENTO_ID | 2 |
+| PK_CHAVE_SAD | UNIQUE | ANEXODOC_ID | 3 |
+

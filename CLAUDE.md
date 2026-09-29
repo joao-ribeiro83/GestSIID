@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⛔ HARD RULE — NO CHANGES TO THE ORACLE DATABASE
+
+Claude, tests and scripts are **NOT permitted to change the Oracle database** (owner's order, 2026-09-22).
+- No INSERT, UPDATE, DELETE, MERGE, DDL, PL/SQL block, write-package call, `SELECT ... FOR UPDATE`, or COMMIT — not even on `ZZTEST_` rows, not in a rolled-back transaction, not "restored afterwards", not to repair an earlier mistake.
+- Contract tests reach Oracle only through `app/apps/api/src/test/read-only-db.ts` (`readOnlyPool`). Write paths are tested with fakes only.
+- Reading (plain SELECT) is allowed. If a task seems to need a DB change: stop and ask the owner. Give them the SQL; do not run it.
+- Full rule: `analysis/TEST_STRATEGY.md` (top).
+
 ## What this is
 
 **GestSIID** — an Oracle Forms 12c application (Portuguese-language) for printer fleet and document management. Forms cover: printers (`IMPRESSORAS`), print domains (`DOMINIOS`), users/managers (`UTILIZADORES`, `GESTORES`), permissions (`PERMISSOES`), document templates (`CONFIGURACAO_MODELOS`), report config (`CONFIGURACAO_REPORTS`), media types (`TIPOS_MIDIA`), measurement units (`UNIDADES_MEDIDA`), department profiles (`PERFIS_DEPARTAMENTO`), online backups (`BACKUPS_ONLINE`), and login (`FD_LOGIN_SIID`).

@@ -32,8 +32,8 @@ The two menus are PL/SQL-identical (17 `OPEN_FORM` items, same targets) except t
 (`FD_GESTAO_SIID` vs `FD_GESTAO_SIID_USER`) and the commented `RUN_REPORT_OBJECT` line
 (`forms-summary/T/MD_SIID*.mmb.plsql.txt`). **Resolved with the Forms2XML dump (`analysis/forms-xml/T/MD_SIID*_mmb.xml`,
 2026-09-14):** in `MD_SIID_USER` the menu items `GADOR`, `CONFIGURAÇÃO`, `ADMINISTRAÇÃO`, `AUDITORIA` and the `BACKUPS`
-sub-menu are `Enabled="false"`, so a regular user only reaches Gestão → Documentos, Impressoras Associadas (Documento,
-Utilizador) and Alterar password. In `MD_SIID` only `AUDITORIA` is disabled. This is a menu property (client-side); the
+sub-menu are `Enabled="false"`, so a regular user only reaches Gestão → Documentos (Impressoras Associadas and Alterar password sit
+under Configuração, see the table below). In `MD_SIID` only `AUDITORIA` is disabled. This is a menu property (client-side); the
 child forms themselves still only check `P_USERNAME IS NOT NULL` (see SECURITY_FINDINGS SEC-004).
 
 ### Exactly what differs between FD_GESTAO_SIID and FD_GESTAO_SIID_USER (T)
@@ -88,7 +88,9 @@ flowchart LR
    `GLOBAL.AMBIENTE_ID` to `*` then to `:LOGIN.AMBIENTE`. Population of the environment list
    (`RG_TIPO_AMBIENTE` = `SELECT DESIGNACAO, CHAVE FROM CFG_VALORES_DOMINIO WHERE DOMINIO_ID='TIPO_AMBIENTE'`)
    and of `RG_UTILIZADOR` (`SELECT NOME, USERNAME FROM CFG_UTILIZADORES WHERE AMBIENTE_ID=:LOGIN.AMBIENTE`)
-   is **commented out**; how `LOGIN.AMBIENTE` gets its values is not visible (static list items?).
+   is **commented out**; `LOGIN.AMBIENTE` is a static List Item with hardcoded elements (T:
+   `TESTES`=`GADOR_TESTES`, two blank entries, one blank-labelled entry valued `LISTA14`) — confirmed
+   from `analysis/forms-xml/T/FD_LOGIN_SIID_fmb.xml` `<ListItemElement>` (source: forms-xml).
 2. Items: `LOGIN.AMBIENTE` (list), `LOGIN.UTILIZADOR`, `LOGIN.PASSWORD`, buttons `LOGIN`, `CANCELAR`.
    Alerts `SEM_UTILIZADOR`, `SEM_PASSWORD`, `LOGIN_INVALIDO`.
 3. WHEN-BUTTON-PRESSED LOGIN: `:GLOBAL.DO_LOGON := 'YES'; execute_trigger('ON-LOGON')`, then
@@ -113,8 +115,8 @@ connected user (`USER_TAB_PRIVS`), else `USER`; if the connected user is not the
 (24 × `FORMS_DDL('create synonym … for owner.…')`); if the user *is* the owner and synonyms exist,
 `DROP_SYNONYMS`. Window title and prompt `AMBIENTE` show `v_ambiente`. `FD_GESTAO` (T) also defaults
 `GLOBAL.IS_BEAN1_REGISTER/IS_BEAN2_REGISTER := 'false'`. WHEN-WINDOW-ACTIVATED: same body (re-run).
-The menu module attached to each container is a property (not visible); inferred `FD_GESTAO→MD_SIID`,
-`FD_GESTAO_USER→MD_SIID_USER` from `formCalls` of the menus.
+Confirmed from `FormModule MenuModule=` in the XML (source: forms-xml): `FD_GESTAO→MD_SIID`,
+`FD_GESTAO_USER→MD_SIID_USER`.
 
 ### Menu → form (`forms-summary/T/MD_SIID.mmb.plsql.txt`; labels from `forms-extracted/T/MD_SIID.mmb.txt`)
 Every item: destroy/create parameter list `tmp`, `Add_Parameter('P_USERNAME', :GLOBAL.USERNAME)`,
@@ -125,15 +127,15 @@ Every item: destroy/create parameter list `tmp`, `Add_Parameter('P_USERNAME', :G
 | GESTÃO_MENU (Gestão) | GESTÃO_DE_DOCUMENTOS (Documentos) | FD_GESTAO_SIID / FD_GESTAO_SIID_USER |
 | ├ BACKUPS_MENU (Backups) | NOVO (Novo) | FD_NOVO_BACKUP |
 | │ | COLOCAR_ONLINE (Backups Online) | FD_BACKUPS_ONLINE |
-| ├ GESTÃO_DE_IMPRESSORAS_DE_DOCUM_MENU (Impressoras Associadas) | DOCUMENTO | FD_GESTAO_IMPRESSORAS_DOC |
-| │ | UTILIZADOR | FD_GESTAO_IMPRESSORAS_USR |
-| └ | ALTERAR_PASSWORD (Alterar password) | FD_ALTERAR_PASSWORD |
 | GADOR_MENU (Gador) | GESTORES | FD_GESTORES_SIID |
 | | EQUIPA_DE_GESTÃO (Equipa de Gestão (OD68)) | FD_PERFIS_DEPARTAMENTO |
 | CONFIGURAÇÃO_MENU | REPORTS | FD_CONFIGURACAO_REPORTS |
 | | MODELOS | FD_CONFIGURACAO_MODELOS |
 | | GESTÃO_DE_PERMISSÕES (Permissões) | FD_PERMISSOES_SIID |
 | | GESTAO_DE_IMPRESSORAS (Impressoras) | FD_IMPRESSORAS_SIID |
+| ├ GESTÃO_DE_IMPRESSORAS_DE_DOCUM_MENU (Impressoras Associadas) | DOCUMENTO | FD_GESTAO_IMPRESSORAS_DOC |
+| │ | UTILIZADOR | FD_GESTAO_IMPRESSORAS_USR |
+| └ | ALTERAR_PASSWORD (Alterar password) | FD_ALTERAR_PASSWORD |
 | ADMINISTRAÇÃO_MENU | DOMINIOS, UNIDADES_MEDIDA, TIPOS_MIDIA, UTILIZADORES, VARIAVEIS_SIID | FD_DOMINIOS_SIID, FD_UNIDADES_MEDIDA, FD_TIPOS_MIDIA, FD_UTILIZADORES_SIID, FD_VARIAVEIS_SIID |
 | AUDITORIA_MENU | MÉDIAS_… (Médias Execução) | body fully commented (`RUN_REPORT_OBJECT('MEDIAS_DOCUMENTOS')`) → does nothing |
 
@@ -148,11 +150,11 @@ minimize MDI; SHOW_ALERT('OUT'); EXIT_FORM(NO_VALIDATE) else :GLOBAL.USERNAME :=
 | `GLOBAL.USERNAME` | FD_LOGIN_SIID (login), every child (from P_USERNAME), FD_GESTAO_SIID/PERMISSOES/… also overwrite it with `Get_Application_Property(USERNAME)` (DB user!) | menus (into P_USERNAME), `CRIADO_POR/ACTUALIZADO_POR` inserts everywhere |
 | `PARAMETER.P_USERNAME` | menus | every child form; FD_GESTAO_SIID uses it (not GLOBAL) for `CRIADO_POR` in queue inserts and for the `AFREITAS` check |
 | `GLOBAL.PASS` | FD_LOGIN_SIID (hash) | nobody found |
-| `GLOBAL.DO_LOGON` | FD_LOGIN_SIID | ON-LOGON (not visible in captured text) |
+| `GLOBAL.DO_LOGON` | FD_LOGIN_SIID | nobody — ON-LOGON's full text (source: forms-xml) never reads it; dead global |
 | `GLOBAL.AMBIENTE_ID` | FD_LOGIN_SIID; each form defaults `*` then derives it (§ below) | SVR_VARIAVEIS_SIID lookups (PASSWORD/BACKUP/ONLINE/PDF), CFG_UTILIZADORES/VARIAVEIS inserts, `PKG_DOCUMENTOS_SVR.SET_PARAMETRO_STRING('_USER', ambiente)`, file-server URL choice |
 | `GLOBAL.IS_BEAN1_REGISTER`, `IS_BEAN2_REGISTER` | FD_GESTAO (T) | FD_PERFIS_DEPARTAMENTO (T) FBean registration |
 | `GLOBAL.SELEC_TABLE_ID`, `SEARCH_TABLE_ID` | FD_GESTAO_SIID*, FD_NOVO_BACKUP (`SEQ_SVR_GS_TMP.NEXTVAL`) | selection/search rows in `SVR_GESTAO_SIID_TMP` |
-| `GLOBAL.KEEP_QUERY` | FD_GESTAO_SIID* (`'0'` at start; `QUERY.GUARDAR/LIMPAR` bodies not captured) | filter buttons, KEY-EXEQRY |
+| `GLOBAL.KEEP_QUERY` | FD_GESTAO_SIID* (`'0'` at start) | filter buttons, KEY-EXEQRY. **Correction (source: forms-xml):** the `QUERY` ctrl block and its `GUARDAR`/`LIMPAR` buttons documented below do not exist in the current `FD_GESTAO_SIID_fmb.xml` (no `Block Name="QUERY"`) — they were removed (or renamed) since the string-dump snapshot; no live setter of `KEEP_QUERY` other than the `'0'` reset was found. |
 | `GLOBAL.ORDENAR_POR`, `TIPO_SELECCAO` | FD_GESTAO_SIID*, FD_NOVO_BACKUP, FD_PERMISSOES_SIID, FD_GESTAO_IMPRESSORAS_*, FD_CONFIGURACAO_MODELOS | bold-highlight of active sort/filter button |
 | `GLOBAL.LOTE_CLONE_ID` | CLONAR window opener: `Default_value(:svr_documentos.lote_id,'GLOBAL.LOTE_CLONE_ID')` (source: forms-xml) | CLONAR: `UPDATE SVR_DOCUMENTOS SET LOTE_ID=…` |
 | `GLOBAL.CALLBACK_ITEM` | CONVERTE_PARAM opener | CONVERTE_PARAM.OK (`copy(v_valor, Name_In('GLOBAL.CALLBACK_ITEM'))`) |
@@ -207,7 +209,7 @@ CLONAR, SUSPENDER, RETOMAR); closing DOCUMENTOS → `ROLLBACK`, delete scratch r
 |---|---|---|
 | `SVR_DOCUMENTOS` (base, query source switched at runtime between `svr_documentos_vw` and `svr_documentos_vw,svr_gestao_siid_tmp`) | `SVR_DOCUMENTOS_VW` | `SELECCIONAR` (checkbox 1/0), `ID` ("Spool Id"), `DATA_PEDIDO` (date), `MODELO_ID`, `ESTADO`, `CRIADO_POR`, `N_REFERENCIA` ("Referência"), `DESTINATARIO`, `LOTE_ID`, `LOTE_ORDEM`, `COMENTARIO` (non-base, shows `***` when comments exist), `DISPONIBILIDADE` (`OFF`/`ANU`), `ATRIBUTO9` (`'A'` = annulled), `NOME_OUTPUT`, `TIPO_OUTPUT`, `TAMANHO_BYTES`, `DATA_EXECUCAO/IMPRESSAO/ARQUIVO`, `EXECUTADO_POR`, `IMPRESSO_POR`, `ULTIMA_VIA_POR`, `N_IMPRESSOES/N_VIAS/N_CAPAS/N_COPIAS/N_ANEXOS`, `IMPRESSORA_ID`, `REPORT_ID`, `AMBIENTE_ID`, `VERSAO`, `MORADA`, `CODIGO_POSTAL`, `PAIS`, `ARQ_ID`, `EDOC_ID`, `REGISTO_ARQUIVO`, `REGISTO_EDOC`, `ATRIBUTO1..25`, `ATRIB_ARQ_1..20` (last group shown on canvas TELA_DETALHES_DOCUMENTO) |
 | `ORDENACAO_DOCUMENTOS` (ctrl) | — | sort buttons `SPOOL, DATA_PEDIDO, MODELO, CRIADO_POR, REFERENCIA, DESTINATARIO, LOTE, ESTADO`; filter buttons `TODOS, EM_BRANCO ("Em branco"), NAO_EXECUTADOS, EM_ERRO, A_EXECUTAR, EXECUCAO ("Em Execução")`; action buttons `REGERAR, REIMPRIMIR, VIA ("2ª Via"), COPIA ("Cópia"), ANULAR, CANCELAR, SUSPENDER, RETOMAR, REENVIAR, REENVIAR_EMAIL, REARQUIVAR ("Re-Arquivar"), FATURAELECTRONICA`; `SELECCIONAR_TODOS` (checkbox); gauge items `TS_DISCOSEC_DATA_OCUPADO/DISPONIVEL/_MB`, `TS_DISCOSEC_INDX_*`, `TS_DATA_ACTUALIZACAO` |
-| `QUERY` (ctrl) | — | `GUARDAR` ("Guardar Querys"), `LIMPAR` ("Limpar Querys") — bodies not captured; presumably set/clear `GLOBAL.KEEP_QUERY` |
+| `QUERY` (ctrl) — **not present in the current form** (source: forms-xml, see §4 correction under `GLOBAL.KEEP_QUERY`) | — | documented by the old string-dump summarizer as `GUARDAR`/`LIMPAR`; no such block or items exist in `analysis/forms-xml/T/FD_GESTAO_SIID_fmb.xml` |
 | `SVR_DOCUMENTO_COMENTARIOS` (base) | `SVR_DOCUMENTO_COMENTARIOS` | `COMENTARIO_ID`, `USER_ID`, comment text, `SAVE` button |
 | `SVR_PARAMETROS_DOCUMENTO` (base) | `SVR_PARAMETROS_DOCUMENTO` | parameter name/value of current document (query only) |
 | `PROCURAR` (ctrl) / `PROCURAR_PARAMETROS` | ? (parameter names) | `MODELO_PROCURAR` ("Procurar apenas no modelo:", LOV), `NOME`, `VALOR`, button `PROCURAR` |
@@ -231,8 +233,11 @@ CLONAR, SUSPENDER, RETOMAR); closing DOCUMENTOS → `ROLLBACK`, delete scratch r
 - KEY-COMMIT: `COMMIT_FORM` if form changed else `FORMS_DDL('COMMIT')`. WHEN-WINDOW-CLOSED: see above.
 - SVR_DOCUMENTOS POST-QUERY: colour row `OFFLINE` (DISPONIBILIDADE=OFF) / `ANULADO` (ANU or ATRIBUTO9='A');
   count comments → `COMENTARIO := '***'`. POST-RECORD/POST-CHANGE/POST-SELECT: current-record highlight.
-  PRE-QUERY: ? (not captured). KEY-ENTQRY: typing `IS NULL` in a field appends `<col> IS NULL` to
-  DEFAULT_WHERE. KEY-EXEQRY: if `KEEP_QUERY=0` reset filter to TODOS / query source to view; sort by ID;
+  **Correction (source: forms-xml):** the "typing `IS NULL` in a field appends `<col> IS NULL` to
+  DEFAULT_WHERE" logic is the **PRE-QUERY** trigger body (full text captured), not KEY-ENTQRY — it reads
+  `:SYSTEM.CURSOR_ITEM`, checks `UPPER(...)='IS NULL'`, and appends to `Get/Set_Block_Property(...,
+  DEFAULT_WHERE)`, clearing the item afterwards. KEY-ENTQRY itself was not found as a separate trigger on
+  this block. KEY-EXEQRY: if `KEEP_QUERY=0` reset filter to TODOS / query source to view; sort by ID;
   execute; then persist the WHERE of `:SYSTEM.LAST_QUERY` into DEFAULT_WHERE (so the query sticks).
   `SELECCIONAR` WHEN-CHECKBOX-CHANGED: insert/delete `(SELEC_TABLE_ID, ID)` in `SVR_GESTAO_SIID_TMP`.
   `COMENTARIO` WHEN-MOUSE-CLICK: open COMENTARIOS window; ENTER/LEAVE/NEW-ITEM: cosmetic.
@@ -269,7 +274,11 @@ CLONAR, SUSPENDER, RETOMAR); closing DOCUMENTOS → `ROLLBACK`, delete scratch r
   'EXECUCAO' AND DOCUMENTO_ID=… [AND ESTADO IN ('TERMINADO','ESPERA','ENQUEUED','EM EXECUCAO','ERRO')]`
   — the state restriction is skipped when `P_USERNAME='AFREITAS'`.
 - `SUSPENDER`/`RETOMAR`: open dialog; `OK` sets queue rows `ESPERA`→`SUSPENSO` (or back) for selected docs
-  or for all; commit; requery.
+  or for all; commit; requery. **`RETOMAR.OK` body confirmed (source: forms-xml):** two cursors over
+  `SVR_QUEUE WHERE ESTADO='SUSPENSO'`, one scoped to `SVR_GESTAO_SIID_TMP` rows for `GLOBAL.SELEC_TABLE_ID`
+  and one unscoped; `UPDATE SVR_QUEUE SET ESTADO='ESPERA'` per row; which cursor runs is chosen by
+  `:SUSPENDER.OPC_SUSPENDER` (reads the *other* dialog's radio item — cross-block coupling, likely a bug:
+  Retomar's own choice is never consulted).
 - `REENVIAR` (EDoc): confirm `DESEJA_REENVIAR`; for each selected doc compute
   `DECODE(MODELO.MODO_EXPEDICAO_RF,'W',DECODE(PKG_SIID_UTIL.CAN_BE_UPLOADED_EDOC(id),0,'I',…),…)`; if `W` →
   `REENVIAR(id)` (queue `REENVIAR` + log 'DOCUMENTO REGERADO POR'), else list as not EDoc.
@@ -296,7 +305,10 @@ CLONAR, SUSPENDER, RETOMAR); closing DOCUMENTOS → `ROLLBACK`, delete scratch r
   CANCELAR` (visible for ESPERA/TERMINADO) and hides `RETOMAR` outside NORMAL mode; WHEN-MOUSE-CLICK
   refuses button 3; `RESULTADO` WHEN-NEW-ITEM-INSTANCE opens the editor. Popup `ESTADO_PEDIDO.CANCELAR`:
   confirm "Deseja cancelar este pedido?" → `UPDATE SVR_QUEUE SET ESTADO='CANCELLED' WHERE ID=… AND ESTADO
-  IN ('ESPERA','TERMINADO')`; `RETOMAR` body not captured.
+  IN ('ESPERA','TERMINADO')`. **Correction (source: forms-xml):** the `ESTADO_PEDIDO` popup menu in the
+  current `FD_GESTAO_SIID_fmb.xml` has only the `CANCELAR` item — no `RETOMAR` item exists on this popup
+  (the toggle logic that "hides RETOMAR outside NORMAL mode" therefore has nothing left to show/hide, or
+  refers to the unrelated `SUSPENDER`/`RETOMAR` dialog's own `RETOMAR` opener button, not a popup item).
 - `SVR_DOCUMENTO_COMENTARIOS`: WHEN-NEW-BLOCK-INSTANCE query and go to new record; PRE-INSERT
   `ID_COMENTARIO_DOCUMENTO_SEQ` (USER_ID default 'EQUIPDOC' commented); POST-INSERT; `SAVE`: `COMMIT_FORM;
   HIDE_WINDOW; GO_BLOCK('SVR_DOCUMENTOS')`.
@@ -341,8 +353,9 @@ selection accumulates `TOTAL_BACKUP` and scratch rows; validation button: `TIPO_
 `TAMANHO_BYTES` ≥ total (`TAMANHO_MIDIA` alert), then `EXIT_FORM(DO_COMMIT)`; POST-INSERT/commit loop:
 `UPDATE SVR_DOCUMENTOS SET BACKUP_ID=:BACKUPS.ID` and `INSERT SVR_QUEUE (ID_QUEUE_SEQ,'BACKUP',doc,
 SYSDATE,'ESPERA',user)` per selected doc; scratch cleanup. Units `ORDENAR_POR`, `OnS_Rollback` (T).
-The physical copy is done by the queue processor, not the form. Summary lists a stale `FD_IMPRESSORAS_SIID`
-reference (unresolved).
+The physical copy is done by the queue processor, not the form. **Resolved (source: forms-xml):** the
+`FD_IMPRESSORAS_SIID` reference is noise from the old string-dump summarizer — `FD_NOVO_BACKUP_fmb.xml`
+has no `OPEN_FORM`/`NEW_FORM` call to it at all (see §6 and §7).
 
 ### 3.6 FD_BACKUPS_ONLINE (Gestão › Backups › Backups Online)
 Blocks `OFFLINE` and `ONLINE` (both base `SVR_BACKUPS`, split by `MEDIA_ONLINE`; items `ID`, `NOME`,
@@ -369,7 +382,7 @@ Same pattern on `DOC_IMPRESSOES_MODELO_USR` (block `IMPRESSOES_MODELO_USR`: `MOD
 skipping existing (cdemplea, data_inicio)) and `COPIAR_UTILIZADOR` ("Copiar do utilizador…").
 `verificar_datas_*` include `cdemplea`.
 
-### 3.9 FD_ALTERAR_PASSWORD (Gestão › Alterar password) — "Alteração da Password de Regeração"
+### 3.9 FD_ALTERAR_PASSWORD (Configuração › Alterar password) — "Alteração da Password de Regeração"
 Block `ALTERAR_PASSWORD` (`PASSWORD`, `CONFIRMACAO`, `OK`, `CANCELAR`). `OK`: if equal, derive
 `AMBIENTE_ID`, `passwordEncript := crypt_pkg.encryptStringRaw(:PASSWORD)`, `FORMS_DDL('UPDATE
 SVR_VARIAVEIS_SIID SET VALOR=''<hash>'' WHERE TIPO_VARIAVEL_RF=''PASSWORD'' AND AMBIENTE_ID=…')`,
@@ -544,11 +557,13 @@ CFG_UNIDADES_MEDIDA WHERE UNIDADE_BASE_ID IS NULL`). Debug leftover `MESSAGE('FU
 ### 3.18 FD_TIPOS_MiDIA — block `TIPOS_MIDIA` (base `CFG_TIPOS_MIDIA`: `ID`, `DESIGNACAO`,
 `GEN_MEDIDA_RF` (default `DIGITAL`), `UNIDADE_MEDIDA_ID` (list `RG_UNIDADES_MEDIDA` filtered by
 GEN_MEDIDA_RF ordered by FACTOR), `FACTOR` (copied from the unit), `TAMANHO_MIDIA`, `TAMANHO_BYTES`,
-`CRIADO_POR := USER`). Summary lists a `FD_TIPOS_MEDIA` form reference — unresolved name.
+`CRIADO_POR := USER`). **Resolved (source: forms-xml):** the `FD_TIPOS_MEDIA` reference is the same
+string-dump noise as above — the real form/module name is `FD_TIPOS_MiDIA`; no separate module exists.
 
 ### 3.19 FD_UTILIZADORES_SIID — "Gestão de Utilizadores"
-Block `CFG_UTILIZADORES` (base: `USERNAME`, `NOME`, `PASSWORD` (cleared on new record; how it is hashed
-on insert is not visible — a DB trigger or `USER_SECURITY.ENCRYPT` is expected), `AMBIENTE_ID` (list
+Block `CFG_UTILIZADORES` (base: `USERNAME`, `NOME`, `PASSWORD` (cleared on new record; **confirmed
+(source: forms-xml):** `PASSWORD := user_security.ENCRYPT(:PASSWORD)` runs in form code before the
+insert — the guessed `USER_SECURITY.ENCRYPT` path, not a DB trigger), `AMBIENTE_ID` (list
 `RG_TIPO_AMBIENTE` = `select DESCRICAO, id from svr_ambientes_impressao`, default `GLOBAL.AMBIENTE_ID`),
 `TIPO_UTILIZADOR_RF` (domain `TIPO_UTILIZADOR`, e.g. `ADM`), `UNIDADE_NEGOCIO_RF` (domain
 `UNIDADE_NEGOCIO`), `NIVEL_ACESSO_RF`, `DATA_INICIO/FIM` (validated), audit columns).
@@ -717,15 +732,20 @@ fmb` (2023-05-16) — older backup. `dev/FD_LOGIN_SIID.err` is a stale `FRM-1004
 - `FD_PERFIS_DEPARTAMENTO.IMAGEPICKER` reads the picked image into `DOC_SECCOES_DOCUMENTO.IMAGEM`, an
   item of another form — dead/broken.
 - Summariser `formCalls` `FD_TIPOS_MEDIA` (from FD_TIPOS_MiDIA) and `FD_IMPRESSORAS_SIID` (from
-  FD_NOVO_BACKUP) do not correspond to any `OPEN_FORM` text — unresolved names.
+  FD_NOVO_BACKUP) do not correspond to any `OPEN_FORM` text. **Resolved (source: forms-xml):** both are
+  noise from the old string-dump `formCalls` heuristic (see §6) — neither `FD_TIPOS_MiDIA_fmb.xml` nor
+  `FD_NOVO_BACKUP_fmb.xml` contains a matching `OPEN_FORM`/`NEW_FORM` call.
 - `'AFREITAS'` hardcoded super-cancel in FD_GESTAO_SIID CANCELAR.
 - `ERR_ERROS_SIID` used as an audit trail with `TIPO_ERROSIID='ERRO_DOC'`.
 - `n_impressoes` preconditions for REENVIAR/RECRIAR/REARQUIVAR commented out.
 - `DOC_CONDICOES_APR` PRE-INSERT `CONTEXTO_ID := NVL(MAX,0)` without `+1`.
-- Not captured in the string dumps (check `analysis/forms-xml/T/*_fmb.xml`, which has every trigger's full text): bodies of `QUERY.GUARDAR/LIMPAR`, `ESTADO_PEDIDO.RETOMAR`,
-  most sort buttons, `CONFIRMAR_PASSWORD`/`CLONAR_DOCUMENTO` WHEN-NEW-BLOCK-INSTANCE (setter of
-  `GLOBAL.LOTE_CLONE_ID`), `PRE-QUERY` of `SVR_DOCUMENTOS`/`PERMISSOES_*`, how `CFG_UTILIZADORES.PASSWORD`
-  is hashed on insert, how `LOGIN.AMBIENTE` is populated.
+- Filled in from `analysis/forms-xml/T/*_fmb.xml` (source: forms-xml, 2026-09-15): `QUERY.GUARDAR/LIMPAR`
+  turned out not to exist in the current form (see §2 `GLOBAL.KEEP_QUERY` correction); the RETOMAR dialog's
+  `OK` body (§3.3); `PRE-QUERY` of `SVR_DOCUMENTOS` (§3.3, was misattributed to KEY-ENTQRY); how
+  `CFG_UTILIZADORES.PASSWORD` is hashed on insert (§3.19); how `LOGIN.AMBIENTE` is populated (§2, static
+  list); `ESTADO_PEDIDO.RETOMAR` (turned out not to exist — see §3.3 correction). Still not captured:
+  most sort buttons besides `ID`/`LOTE`, and the exact assignment site of `CONFIRMAR_PASSWORD`
+  WHEN-NEW-BLOCK-INSTANCE.
 - `SVR_GESTAO_SIID_DIRECTORIAS`, `ID_DOCUMENTO_SEQ` get synonyms/grants but are never used by forms.
 - Three different crypto entry points across time: `USER_SECURITY.ENCRYPT` (login), `CRYPT_PKG.
   ENCRYPTSTRINGRAW` (regeneration password), `PCK_SG.F_INS_ENCRIPT` (commented).
@@ -737,8 +757,35 @@ fmb` (2023-05-16) — older backup. `dev/FD_LOGIN_SIID.err` is a stale `FRM-1004
 High confidence on control flow, SQL, block/item names and package calls (all quoted from the extracted
 PL/SQL). Medium confidence on trigger-to-chunk attribution where names were not adjacent (marked
 "inferred"), on `SVR_DOCUMENTOS_VW`/`DOC_PERMISSOES_IMPRESSAO` being views, and on popup-menu
-structure. Not determinable: item datatypes/lengths, LOV-to-item bindings beyond names, canvas layout,
-menu item enabled/visible properties, DB package bodies. Questions for the SME: who runs the SVR_QUEUE
+structure. **Now available (source: forms-xml, see §8):** item datatypes/lengths/format masks, LOV-to-item
+column bindings, canvas + tab-page assignment, list/radio element values, alert texts and buttons, and
+menu item `Enabled`/`Visible` — all in `analysis/forms-xml/summary/<module>.md`, regenerated by
+`node analysis/tools/xml-inventory.js`. Still not determinable from any dump: DB package bodies (need
+`analysis/db/packages/*.sql`). Questions for the SME: who runs the SVR_QUEUE
 processor and where it writes files; the full `SVR_DOCUMENTOS_VW.ESTADO` derivation; the domain values
-of `TIPO_QUEUE_RF`/`ESTADO`; whether `MD_SIID_USER` items are disabled by property; whether the T
+of `TIPO_QUEUE_RF`/`ESTADO`; whether the T
 login (all environments → test DB) is intentional.
+
+---
+
+## 8. What the XML changed (2026-09-15)
+
+`analysis/tools/xml-inventory.js` reads every `analysis/forms-xml/T/*_fmb.xml` and `*_mmb.xml` (Forms2XML's
+full property dump — every item, LOV, alert, trigger, program unit, visual attribute, menu tree) and writes
+one `analysis/forms-xml/summary/<module>.md` per module: block/item property tables (datatype, length,
+format mask, required/enabled/visible, canvas/tab, LOV, default, hint, list/radio values), alerts, LOVs and
+record groups with full query text, a trigger table (owner, name, first lines — full text stays in the XML),
+program units (parameters, globals used), visual attributes and their referrers, and — for the two menu
+modules — the rendered menu tree with each item's `OPEN_FORM` target and `visible`/`enabled` flags. These
+per-module files are the authoritative source for exact item-level detail; this document keeps the narrative
+and cross-module facts, pointing at the summary files rather than duplicating their tables.
+
+Corrections this pass made to the earlier string-dump-based analysis (all cross-referenced above): the
+`QUERY` ctrl block (`GUARDAR`/`LIMPAR`) does not exist in the current `FD_GESTAO_SIID` form; the "append
+`IS NULL`" filter logic is `SVR_DOCUMENTOS.PRE-QUERY`, not `KEY-ENTQRY`; `FD_TIPOS_MEDIA` and the
+`FD_NOVO_BACKUP→FD_IMPRESSORAS_SIID` reference were both string-dump-summarizer noise, not real
+`OPEN_FORM` calls. Newly confirmed rather than inferred: `LOGIN.AMBIENTE`'s static list values,
+`FD_GESTAO`/`FD_GESTAO_USER`'s attached menu modules, `RETOMAR.OK`'s body (including its
+cross-block read of `SUSPENDER.OPC_SUSPENDER`), `CFG_UTILIZADORES.PASSWORD` hashing on insert, and
+`GLOBAL.DO_LOGON` being set but never read (dead global). OQ-2, OQ-6, OQ-7 (partially), OQ-13 in
+`BUSINESS_RULES.md` were resolved the same way.

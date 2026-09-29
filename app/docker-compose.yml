@@ -1,0 +1,42 @@
+# One service, one container per environment (ARCHITECTURE.md §2, D-02).
+# No file-storage volume: the app has no DOCS_ROOT (ARCHITECTURE.md §2/§6, D-04/D-29) —
+# PDFs come from FileServerSIID over HTTP and images live in Oracle BLOB columns.
+services:
+  api:
+    build: .
+    image: gestsiid-api:local
+    env_file: ../.env
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    read_only: true
+    tmpfs:
+      - /tmp
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "20"
+
+# Second environment, same image, different .env (one container per environment, D-02).
+# Point env_file at that environment's file — it differs at minimum in DB_SCHEMA and
+# AMBIENTE_ID (ARCHITECTURE.md D-27), plus its own PORT to avoid a host port clash.
+#  training:
+#    build: .
+#    image: gestsiid-api:local
+#    env_file: ../.env.training
+#    ports:
+#      - "${TRAINING_PORT:-3001}:${TRAINING_PORT:-3001}"
+#    read_only: true
+#    tmpfs:
+#      - /tmp
+#    init: true
+#    restart: unless-stopped
+#    stop_grace_period: 30s
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: "10m"
+#        max-file: "20"

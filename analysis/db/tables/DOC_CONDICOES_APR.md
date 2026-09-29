@@ -1,0 +1,71 @@
+# DOC_CONDICOES_APR
+
+Owner: `SIID_TESTES` &nbsp; Type: `TABLE`
+
+Row count: **10000**
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MODELO_ID | VARCHAR2 | 10 |  |  | N |  |  |
+| TIPOSEC_ID | VARCHAR2 | 10 |  |  | N |  |  |
+| ALINEA | NUMBER | 22 |  |  | N |  |  |
+| CDUNIECO | NUMBER | 22 | 3 | 0 | N |  |  |
+| CDRAMO | VARCHAR2 | 10 |  |  | N |  |  |
+| CONTEXTO_ID | NUMBER | 22 |  |  | N |  |  |
+| ATRIBUTO1 | VARCHAR2 | 100 |  |  | Y |  |  |
+| ATRIBUTO2 | VARCHAR2 | 100 |  |  | Y |  |  |
+| ATRIBUTO3 | VARCHAR2 | 100 |  |  | Y |  |  |
+| ATRIBUTO4 | VARCHAR2 | 100 |  |  | Y |  |  |
+| ATRIBUTO5 | VARCHAR2 | 100 |  |  | Y |  |  |
+| ATRIBUTO6 | VARCHAR2 | 100 |  |  | Y |  |  |
+| ATRIBUTO7 | VARCHAR2 | 100 |  |  | Y |  |  |
+| ATRIBUTO8 | VARCHAR2 | 100 |  |  | Y |  |  |
+| DATA_INICIO | DATE | 7 |  |  | N |  |  |
+| DATA_FIM | DATE | 7 |  |  | Y |  |  |
+| CRIADO_POR | VARCHAR2 | 30 |  |  | Y | USER |  |
+| DATA_CRIACAO | DATE | 7 |  |  | Y | SYSDATE |  |
+| ACTUALIZADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_ACTUALIZACAO | DATE | 7 |  |  | Y |  |  |
+
+
+## Primary / unique keys
+
+| CONSTRAINT_NAME | CONSTRAINT_TYPE | COLUMN_NAME | POSITION |
+| --- | --- | --- | --- |
+| PK_CHAVE_DCA | P | CDUNIECO | 1 |
+| PK_CHAVE_DCA | P | CDRAMO | 2 |
+| PK_CHAVE_DCA | P | MODELO_ID | 3 |
+| PK_CHAVE_DCA | P | ALINEA | 4 |
+| PK_CHAVE_DCA | P | TIPOSEC_ID | 5 |
+| PK_CHAVE_DCA | P | CONTEXTO_ID | 6 |
+| PK_CHAVE_DCA | P | DATA_INICIO | 7 |
+
+
+## Foreign keys
+
+| CONSTRAINT_NAME | COLUMN_NAME | POSITION | R_OWNER | R_TABLE_NAME |
+| --- | --- | --- | --- | --- |
+| FK_CONTEXTO_DCA | CONTEXTO_ID | 1 | SIID_TESTES | DOC_CONTEXTOS_APR |
+| FK_SECCAODOC_DCA | ALINEA | 1 | SIID_TESTES | DOC_SECCOES_DOCUMENTO |
+| FK_SECCAODOC_DCA | MODELO_ID | 2 | SIID_TESTES | DOC_SECCOES_DOCUMENTO |
+| FK_SECCAODOC_DCA | TIPOSEC_ID | 3 | SIID_TESTES | DOC_SECCOES_DOCUMENTO |
+
+
+## Indexes
+
+| INDEX_NAME | UNIQUENESS | COLUMN_NAME | COLUMN_POSITION |
+| --- | --- | --- | --- |
+| IDX_CONTEXTO_DCA | NONUNIQUE | CONTEXTO_ID | 1 |
+| IDX_SECCAO_DCA | NONUNIQUE | ALINEA | 1 |
+| IDX_SECCAO_DCA | NONUNIQUE | MODELO_ID | 2 |
+| IDX_SECCAO_DCA | NONUNIQUE | TIPOSEC_ID | 3 |
+| PK_CHAVE_DCA | UNIQUE | CDUNIECO | 1 |
+| PK_CHAVE_DCA | UNIQUE | CDRAMO | 2 |
+| PK_CHAVE_DCA | UNIQUE | MODELO_ID | 3 |
+| PK_CHAVE_DCA | UNIQUE | ALINEA | 4 |
+| PK_CHAVE_DCA | UNIQUE | TIPOSEC_ID | 5 |
+| PK_CHAVE_DCA | UNIQUE | CONTEXTO_ID | 6 |
+| PK_CHAVE_DCA | UNIQUE | DATA_INICIO | 7 |
+

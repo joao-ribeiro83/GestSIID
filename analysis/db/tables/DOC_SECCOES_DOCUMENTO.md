@@ -1,0 +1,55 @@
+# DOC_SECCOES_DOCUMENTO
+
+Owner: `SIID_TESTES` &nbsp; Type: `TABLE`
+
+Row count: **4483**
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MODELO_ID | VARCHAR2 | 10 |  |  | N |  |  |
+| TIPOSEC_ID | VARCHAR2 | 10 |  |  | N |  |  |
+| ALINEA | NUMBER | 22 |  |  | N |  |  |
+| TITULO | VARCHAR2 | 60 |  |  | Y |  |  |
+| TIPOCNTD_ID | NUMBER | 22 |  |  | Y | 5 |  |
+| TEXTO | VARCHAR2 | 2000 |  |  | Y |  |  |
+| IMAGEM | BLOB | 4000 |  |  | Y |  |  |
+| CRIADO_POR | VARCHAR2 | 30 |  |  | Y | USER |  |
+| DATA_CRIACAO | DATE | 7 |  |  | Y | SYSDATE |  |
+| ACTUALIZADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_ACTUALIZACAO | DATE | 7 |  |  | Y |  |  |
+| FORMULA_ID | NUMBER | 22 |  |  | Y |  |  |
+| ORDEM | NUMBER | 22 |  |  | N | 0  |  |
+
+
+## Primary / unique keys
+
+| CONSTRAINT_NAME | CONSTRAINT_TYPE | COLUMN_NAME | POSITION |
+| --- | --- | --- | --- |
+| SECCAODOC_PK | P | ALINEA | 1 |
+| SECCAODOC_PK | P | MODELO_ID | 2 |
+| SECCAODOC_PK | P | TIPOSEC_ID | 3 |
+
+
+## Foreign keys
+
+| CONSTRAINT_NAME | COLUMN_NAME | POSITION | R_OWNER | R_TABLE_NAME |
+| --- | --- | --- | --- | --- |
+| FK_FORMULA_DSD | FORMULA_ID | 1 | SIID_TESTES | DOC_FORMULAS_DOCUMENTO |
+| FK_MODELO_DSD | MODELO_ID | 1 | SIID_TESTES | DOC_MODELOS_DOCUMENTO |
+| SECCAODOC_TIPOCNTD_FK | TIPOCNTD_ID | 1 | SIID_TESTES | DOC_TIPOS_CONTEUDO |
+| SECCAODOC_TIPOSEC_FK | TIPOSEC_ID | 1 | SIID_TESTES | DOC_TIPOS_SECCAO |
+
+
+## Indexes
+
+| INDEX_NAME | UNIQUENESS | COLUMN_NAME | COLUMN_POSITION |
+| --- | --- | --- | --- |
+| SECCAODOC_MODELO_FK_I | NONUNIQUE | MODELO_ID | 1 |
+| SECCAODOC_PK | UNIQUE | ALINEA | 1 |
+| SECCAODOC_PK | UNIQUE | MODELO_ID | 2 |
+| SECCAODOC_PK | UNIQUE | TIPOSEC_ID | 3 |
+| SECCAODOC_TIPOCNTD_FK_I | NONUNIQUE | TIPOCNTD_ID | 1 |
+| SECCAODOC_TIPOSEC_FK_I | NONUNIQUE | TIPOSEC_ID | 1 |
+

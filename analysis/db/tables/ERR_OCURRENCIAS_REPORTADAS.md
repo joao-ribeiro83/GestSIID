@@ -1,0 +1,61 @@
+# ERR_OCURRENCIAS_REPORTADAS
+
+Owner: `SIID_TESTES` &nbsp; Type: `TABLE`
+
+Row count: **0**
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ID | NUMBER | 22 |  |  | N |  |  |
+| MODELO_ID | VARCHAR2 | 10 |  |  | Y |  |  |
+| CDEMPLEA | VARCHAR2 | 30 |  |  | Y |  |  |
+| OCORRENCIA | VARCHAR2 | 2000 |  |  | Y |  |  |
+| CATEGORIA_ID | NUMBER | 22 |  |  | Y |  |  |
+| PRIORIDADE_ID | NUMBER | 22 |  |  | Y |  |  |
+| DATA_OCORRENCIA | DATE | 7 |  |  | Y |  |  |
+| TIPOERRO_ID | NUMBER | 22 |  |  | Y |  |  |
+| BREVE_DESCRICAO | VARCHAR2 | 240 |  |  | Y |  |  |
+| PROGRAMADOR_ID | NUMBER | 22 |  |  | Y |  |  |
+| DATA_ATRIBUICAO | DATE | 7 |  |  | Y |  |  |
+| RESOLUCAO | VARCHAR2 | 2000 |  |  | Y |  |  |
+| DATA_RESOLUCAO | DATE | 7 |  |  | Y |  |  |
+| ESTADOOC_ID | NUMBER | 22 |  |  | Y |  |  |
+| CRIADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_CRIACAO | DATE | 7 |  |  | Y |  |  |
+| ACTUALIZADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| DATA_ACTUALIZACAO | DATE | 7 |  |  | Y |  |  |
+
+
+## Primary / unique keys
+
+| CONSTRAINT_NAME | CONSTRAINT_TYPE | COLUMN_NAME | POSITION |
+| --- | --- | --- | --- |
+| EOCREP_PK | P | ID | 1 |
+
+
+## Foreign keys
+
+| CONSTRAINT_NAME | COLUMN_NAME | POSITION | R_OWNER | R_TABLE_NAME |
+| --- | --- | --- | --- | --- |
+| EOCREP_DPRGRM_FK | PROGRAMADOR_ID | 1 | SIID_TESTES | DOC_PROGRAMADORES |
+| EOCREP_ECATEG_FK | CATEGORIA_ID | 1 | SIID_TESTES | ERR_GATEGORIAS |
+| EOCREP_EESTOC_FK | ESTADOOC_ID | 1 | SIID_TESTES | ERR_ESTADOS_OCURRENCIA |
+| EOCREP_EPRIO_FK | PRIORIDADE_ID | 1 | SIID_TESTES | ERR_PRIORIDADES |
+| EOCREP_TIPOERR_FK | TIPOERRO_ID | 1 | SIID_TESTES | ERR_TIPOS_ERRO |
+
+
+## Indexes
+
+| INDEX_NAME | UNIQUENESS | COLUMN_NAME | COLUMN_POSITION |
+| --- | --- | --- | --- |
+| EOCREP_CE_FK_I | NONUNIQUE | CDEMPLEA | 1 |
+| EOCREP_DPRGRM_FK_I | NONUNIQUE | PROGRAMADOR_ID | 1 |
+| EOCREP_ECATEG_FK_I | NONUNIQUE | CATEGORIA_ID | 1 |
+| EOCREP_EESTOC_FK_I | NONUNIQUE | ESTADOOC_ID | 1 |
+| EOCREP_EPRIO_FK_I | NONUNIQUE | PRIORIDADE_ID | 1 |
+| EOCREP_MODELO_FK_I | NONUNIQUE | MODELO_ID | 1 |
+| EOCREP_PK | UNIQUE | ID | 1 |
+| EOCREP_TIPOERR_FK_I | NONUNIQUE | TIPOERRO_ID | 1 |
+

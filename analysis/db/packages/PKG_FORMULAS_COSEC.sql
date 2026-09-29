@@ -1,0 +1,18728 @@
+-- PKG_FORMULAS_COSEC (owner: SIID_TESTES)
+
+
+-- ===== SPEC (PACKAGE) =====
+
+PACKAGE               "PKG_FORMULAS_COSEC" AS
+--* CONSTANTES PROPRIAS QUESTIONAR INFORMACOES SOBRE PACKAGE
+--*
+--* CRIADO POR  : JOSE VIEGAS
+--* DATA CRIACAO: 25-11-2004
+--* OBSERVACAO  : A) ESTA SECCAO DEVE ESTAR NO INICIO DO PACKAGE SEMPRE
+--*               B) SEMPRE QUE FOR EFECTUADA ALGUMA ALTERACAO AO PACKAGE
+--*                  DEVEM SER ACTUALIZADAS AS CONSTANTES DO PACKAGE BODY
+--*                  "VERSAO", "DATA_VERSAO" E "AUTOR_VERSAO".
+--*
+INFO_VERSAO          CONSTANT VARCHAR2(100):='VERSAO';
+INFO_DATA_VERSAO     CONSTANT VARCHAR2(100):='DATA_VERSAO';
+INFO_AUTOR_PACKAGE   CONSTANT VARCHAR2(100):='AUTOR_PACKAGE';
+INFO_AUTOR_VERSAO    CONSTANT VARCHAR2(100):='AUTOR_VERSAO';
+INFO_DATA_PACKAGE    CONSTANT VARCHAR2(100):='DATA_PACKAGE';
+INFO_DATA_INSTALACAO CONSTANT VARCHAR2(100):='DATA_INSTALACAO';
+INFO_OWNER           CONSTANT VARCHAR2(100):='OWNER';
+/*
+-* NOME      : GET_PACKINFO
+-* OBJECTIVO : MANTER INFORMACAO SOBRE VERSAO DO PACKAGE
+-* UTILIZACAO: PKG_FORMULAS_COSEC.GET_PACKINFO('VERSAO');
+-* AUTOR     : Eng. Jose Viegas
+-* DATA      : 25-11-2004
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+
+/*
+   NOME : GET_RESSEGURO_PERCENT
+   *  OBJECTIVO : RETORNA A SOMA DOS VALORES DE RESSEGURO ASSOCIADOS A UM PAGAMENTO DE SINISTRO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_RESSEGURO_PERCENTAGEM( PI_CDUNIECO IN NUMBER
+                                ,PI_CDRAMO   IN NUMBER
+                                ,PI_AAAPERTU IN NUMBER
+                                ,PI_STATUS   IN VARCHAR2
+                                ,PI_NMSINIES IN NUMBER
+                                ,PI_CDCONVAL IN VARCHAR2) RETURN NUMBER;
+
+  /*
+-*  NOME      : GFUN_TIPO_IDE
+-*  OBJECTIVO : RETORNA A DESCRICAO CONSOANTE O IDE DO TOMADOR
+-*  UTILIZACAO:
+-*  VERSAO    : 1.0
+-*  AUTOR     : VITOR RODRIGUES
+-*  DATA      : 12-01-2009
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*   12-01-2009 VITOR RODRIGUES    DEVOLVER A DESCRICAO DO TIPO DE IDE*/
+
+
+FUNCTION FUN_TIPO_IDE (P_CDTIPIDE IN VARCHAR2 ) RETURN VARCHAR2;
+
+
+FUNCTION Tipo_rol (wcdramo NUMBER,wcdrol VARCHAR2)RETURN VARCHAR2;
+
+
+FUNCTION GET_PACKINFO (P_TIPO_INFO VARCHAR2 DEFAULT 'COMPLETE') RETURN VARCHAR2;
+
+
+/*
+-*  NOME      : GET_PREMIO_CEDIDO_REC
+-*  OBJECTIVO : RETORNA O VALOR DO PREMIO CEDIDO DUM RECIBO A UMA DADA DATA
+-*  UTILIZACAO: UTILIZADO NO MAPA M156
+-*  VERSAO    : 1.0
+-*  AUTOR     : JOSE VIEGAS
+-*  DATA      : 20-JUN-2006
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+*/
+FUNCTION GET_PREMIO_CEDIDO_REC(P_CDUNIECO IN VARCHAR2, P_NMRECIBO IN NUMBER, P_DATA IN DATE DEFAULT SYSDATE) RETURN NUMBER;
+
+
+/*
+-*  NOME      : GET_TIPO_CEDENCIA_REC
+-*  OBJECTIVO : RETORNA TIPO DE RESSEGURO DO RECIBO
+-*  UTILIZACAO: UTILIZADO NO MAPA M156
+-*  VERSAO    : 1.0
+-*  AUTOR     : JOSE VIEGAS
+-*  DATA      : 20-JUN-2006
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+*/
+FUNCTION GET_TIPO_CEDENCIA_REC(P_CDUNIECO IN VARCHAR2, P_NMRECIBO IN NUMBER, P_DATA IN DATE DEFAULT SYSDATE) RETURN VARCHAR2;
+
+
+
+/*
+-*  NOME      : GET_ATRIBUTO_APOLICE_MES
+-*  OBJECTIVO : RETORNA O ATRIBUTO DE UMA APOLICE RELATIVO A UM DADO MES
+-*  UTILIZACAO: UTILIZADO NO MAPA M4
+-*  VERSAO    : 1.0
+-*  AUTOR     : JOSE VIEGAS
+-*  DATA      : 03-MAI-2006
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+*/
+FUNCTION GET_ATRIBUTO_APOLICE_MES ( PI_CDUNIECO IN NUMBER
+                                  , PI_CDRAMO   IN VARCHAR2
+                                  , PI_ESTADO   IN VARCHAR2
+                                  , PI_NMPOLIZA IN NUMBER
+                                  , PI_CDATRIBU IN NUMBER
+                                  , PI_MES      IN DATE DEFAULT SYSDATE
+                                  , PI_DEFAULT  IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2;
+
+
+
+/*
+-*  NOME      : GET_ATRIBUTO_APOLICE_DATA
+-*  OBJECTIVO : RETORNA O ATRIBUTO DE UMA APOLICE RELATIVO A UMA DADA DATA
+-*  UTILIZACAO:
+-*  VERSAO    : 1.0
+-*  AUTOR     : ARLINDO RODRIGUES
+-*  DATA      : 17-FEV-2009
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+*/
+FUNCTION GET_ATRIBUTO_APOLICE_DATA ( PI_CDUNIECO IN NUMBER
+                                   , PI_CDRAMO   IN VARCHAR2
+                                   , PI_ESTADO   IN VARCHAR2
+                                   , PI_NMPOLIZA IN NUMBER
+                                   , PI_CDATRIBU IN NUMBER
+                                   , PI_DATA     IN DATE DEFAULT SYSDATE
+                                   , PI_DEFAULT  IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2;
+
+
+
+FUNCTION GET_ATRIB_APOLICE_DATA ( PI_CDUNIECO IN NUMBER
+                                   , PI_CDRAMO   IN VARCHAR2
+                                   , PI_ESTADO   IN VARCHAR2
+                                   , PI_NMPOLIZA IN NUMBER
+                                   , PI_CDATRIBU IN NUMBER
+                                   , PI_DATA     IN DATE DEFAULT SYSDATE
+                                   , PI_DEFAULT  IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2;
+
+
+
+/*
+-* NOME      : FUN_VARIACAO_CAP
+-* OBJECTIVO : RETORNA A VARIACAO DE CAPITAL SEGURO DA APOLICE PARA EFEITOS DE ESTORNO
+-*             VERIFICANDO A INFORMACAO NOS ATRIBUTOS VARIAVEIS DO RECIBO DE ESTORNO.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.FUN_VARIACAO_CAP(1,2240080646);
+-* AUTOR     : Eng. Jose Viegas
+-* DATA      : 03-02-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_VARIACAO_CAP (P_CDUNIECO IN NUMBER, P_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_CLASSEFACTURA
+-* OBJECTIVO : RETORNA A CLASSE DE UMA FACTURA PARA DIFERENCIAR EM TERMOS DE SECCCOES
+-* UTILIZACAO: PKG_FORMULAS_COSEC.GET_CLASSE_FACTURA(82);
+-* AUTOR     : Eng. Jose Viegas
+-* DATA      : 14-03-2006
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_CLASSE_FACTURA (P_TIPORECI IN NUMBER) RETURN VARCHAR2;
+
+/*
+-* NOME      : IS_RECIBO_PPD
+-* OBJECTIVO : VALIDAR SE UM RECIBO TEM O CONCEITO PPD NA MRECIDET.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.IS_RECIBO_PPD(1,2240080646);
+-* AUTOR     : JoÃ£o Ribeiro
+-* DATA      : 06-01-2023
+-* VERSÃ¿O    : 1.0
+-*
+-* ÃšLTIMAS ALTERAÃ¿Ã¿ES
+-*
+-*   DATA       AUTOR           DESCRIÃ¿Ã¿O
+-*   ========== =============== =================================================
+-*   06-01-2023 JoÃ£o Ribeiro    ENTRADA EM PRODUÃ¿Ã¿O DO ISSUE 1320
+-*
+-*/
+FUNCTION IS_RECIBO_PPD (P_CDUNIECO NUMBER, P_NMRECIBO NUMBER) RETURN VARCHAR2;
+
+/*
+-* NOME      : IS_ANULACAO_APOLICE
+-* OBJECTIVO : VALIDAR SE UM RECIBO DE ESTORNO E DERIVADO DE UM SUPLEMENTO DE ANULACAO
+-*             VERIFICANDO A INFORMACAO NOS ATRIBUTOS VARIAVEIS DO MESMO.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.IS_ANULACAO_APOLICE(1,2240080646);
+-* AUTOR     : Eng. Jose Viegas
+-* DATA      : 18-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION IS_ANULACAO_APOLICE (P_CDUNIECO NUMBER, P_NMRECIBO NUMBER) RETURN VARCHAR2;
+
+
+/*
+-* NOME      : IS_SUP_TOTAL
+-* OBJECTIVO : VALIDAR SE UM RECIBO DE ESTORNO E DERIVADO DE UM SUPLEMENTO TOTAL
+-*             VERIFICANDO A INFORMACAO NOS ATRIBUTOS VARIAVEIS DO MESMO.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.IS_SUP_TOTAL(1,2240080646);
+-* AUTOR     : Eng. Jose Viegas
+-* DATA      : 18-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION IS_SUP_TOTAL (P_CDUNIECO NUMBER, P_NMRECIBO NUMBER) RETURN VARCHAR2;
+
+
+/*
+-* NOME      : IS_CAP_DIFERENTE
+-* OBJECTIVO : VALIDAR SE UM RECIBO DE ESTORNO E DERIVADO DE UM SUPLEMENTO QUE ORIGINOU
+-*             ALTERACAO DE CAPITAL SEGURADO VERIFICANDO A INFORMACAO NOS ATRIBUTOS VARIAVEIS DO MESMO.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.IS_CAP_DIFERENTE(1,2240080646);
+-* AUTOR     : Eng. Jose Viegas
+-* DATA      : 18-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION IS_CAP_DIFERENTE (P_CDUNIECO NUMBER, P_NMRECIBO NUMBER) RETURN VARCHAR2;
+
+
+/*
+-* NOME      : GET_RESSEG_CED_DATA
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO CEDIDO A UMA DETERMINADA DATA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 12-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_RESSEG_CED_DATA (PI_CDUNIECO IN NUMBER
+                               ,PI_CDRAMO   IN NUMBER
+                               ,PI_AAAPERTU IN NUMBER
+                               ,PI_NMSINIES IN NUMBER
+                               ,PI_DATAINI   IN DATE
+                               ,PI_DATAFIM   IN DATE
+                               )   RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_PAGAMENTO_LIQ_RES
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO LIQUIDADO A UMA DETERMINADA DATA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 12-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PAGAMENTO_LIQ_RES ( P_CDUNIECO IN NUMBER
+								, P_CDRAMO IN NUMBER
+								, P_AAAPERTU IN NUMBER
+								, P_STATUS IN VARCHAR2
+								, P_NMSINIES IN NUMBER
+								, P_DATA_REF IN DATE) RETURN NUMBER;
+
+
+/*
+-* NOME      : FUN_TAXA_CONSORCIO
+-* OBJECTIVO : RETORNA TAXA DE PREMIO DO AGRUPADOR DO RECIBO NUM CONSORCIO
+-* AUTOR     : JOSE VIEGAS
+-* DATA      : 12-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_TAXA_CONSORCIO ( PI_CDUNIECO IN NUMBER
+                            , PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+/*
+-* NOME      : FUN_PART_CONSORCIO
+-* OBJECTIVO : RETORNA % DE PARTICIPACAO DO AGRUPADOR DO RECIBO NUM CONSORCIO
+-* AUTOR     : JOSE VIEGAS
+-* DATA      : 12-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_PART_CONSORCIO ( PI_CDUNIECO IN NUMBER
+                            , PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_V_COMUNIC_PAG
+-* OBJECTIVO : RETORNA O VALOR FDA COMUNICACAO DE PAGAMENTO NO INTERVALO DE TEMPO INDICADO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_V_COMUNIC_PAG	(PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO IN NUMBER
+							,PI_NMPOLIZA IN NUMBER
+							,PI_DTINICIO IN DATE
+							,PI_DTFIM IN DATE)  RETURN NUMBER ;
+
+
+/*
+-* NOME      : GET_REAJ_RECOB_SIN
+-* OBJECTIVO : RETORNA O REAJUSTE OU O RECOBRO DE UM SINISTRO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_REAJ_RECOB_SIN	(PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO IN NUMBER
+							,PI_NMPOLIZA IN NUMBER
+							,PI_TIPO IN VARCHAR2
+							,PI_DTINICIO IN DATE
+							,PI_DTFIM IN DATE)  RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_SINISTRO_VERIFICADO
+-* OBJECTIVO : RETORNA VALOR DO GRUPO DE DIVIDA PARA UMA DETERMINADA APOLICE NUM DET INTERVALO DE DATAS
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_SINISTRO_VERIFICADO (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_NMPOLIZA IN NUMBER
+								,PI_DTINICIO IN DATE
+								,PI_DTFIM IN DATE) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_DT_VIGENCIA_APOLICE
+-* OBJECTIVO : RETORNA A DATA INICIO OU  DATA FIM DE VIGENCIA PARA APOLICE
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DT_VIGENCIA_APOLICE (P_CDUNIECO IN NUMBER
+								, P_CDRAMO IN NUMBER
+								, P_NMPOLIZA IN NUMBER
+								, P_NMRENOVA IN NUMBER
+								, P_TIPO IN VARCHAR2) RETURN DATE;
+
+
+
+/*
+-* NOME      : GET_PROVISAO_MES_PRELIQ
+-* OBJECTIVO : RETORNA O VALOR DA PROVISAO PARA UM DETEMINADO CONCEITO NUM DETERMINADO MES
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 06-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PROVISAO_MES_PRELIQ (P_CDCIA IN VARCHAR2
+								, P_CDCONLIQ IN VARCHAR2
+								, P_MODALI IN VARCHAR2
+								, P_CDAGRUPA IN VARCHAR2
+								, P_FEPRELIQ IN DATE) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_RESSEG_CED_SIN
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO CEDIDO NUMA DETERMINADA DATA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 05-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_RESSEG_CED_SIN ( P_CDUNIECO IN NUMBER
+							, P_CDRAMO IN NUMBER
+							, P_AAAPERTU IN NUMBER
+							, P_STATUS IN VARCHAR2
+							, P_NMSINIES IN NUMBER
+							, P_DATA_REF IN DATE) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_PAGAMENTO_LIQ_SIN
+-* OBJECTIVO : RETORNA O VALOR DOS PAGAMENTOS LIQUIDADOS A UMA DETERMINADA DATA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 03-01-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PAGAMENTO_LIQ_SIN ( P_CDUNIECO IN NUMBER
+								, P_CDRAMO IN NUMBER
+								, P_AAAPERTU IN NUMBER
+								, P_STATUS IN VARCHAR2
+								, P_NMSINIES IN NUMBER
+								, P_DATA_REF IN DATE) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_NUMERO_BENEFECIARIOS
+-* OBJECTIVO : RETORNA O N# DE BENEFICIARIOS DE UMA DETERMINADA APOLICE
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-12-2004
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_NUMERO_BENEFECIARIOS(PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_ESTADO IN VARCHAR2
+								,PI_NMPOLIZA IN NUMBER
+								) RETURN NUMBER ;
+
+
+FUNCTION GET_GARANTIAS_VIGOR_APOLICE ( P_CDUNIECO IN NUMBER
+									, P_CDRAMO IN NUMBER
+									, P_NMPOLIZA IN NUMBER
+									, P_NMSOLICI IN NUMBER
+									, P_DATA_REF IN DATE) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_TOMADOR_DSR
+-* OBJECTIVO : TRAZER O TOMADOR PARA OS MAPAS DE SINISTROA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-12-2004
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_TOMADOR_DSR(PI_CDUNIECO IN NUMBER
+						,PI_CDRAMO IN NUMBER
+						,PI_ESTADO IN VARCHAR2
+						,PI_NMPOLIZA IN NUMBER
+						,PI_TIPRAMO IN VARCHAR2) RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_MOTIVO_ANUL_LOGI
+-* OBJECTIVO : TRAZER O TIPO DE ANULACAO DA APOLICE ATRAVES DO SUPLEMENTO LOGICO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 07-12-2004
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_MOTIVO_ANUL_LOGI(PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO IN NUMBER
+							,PI_NMPOLIZA IN NUMBER
+							) RETURN VARCHAR2;
+
+
+FUNCTION GET_COD_MOTIVO_ANUL_LOGI(PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_NMPOLIZA IN NUMBER
+								) RETURN VARCHAR2;
+
+
+/*******************************************************************/
+/*
+-* NOME      : GET_TIPO_COSEGURO_PROPOSTA
+-* OBJECTIVO : TRAZER O TIPO DE CO-SEGURO DA PROPOSTA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 03-12-2004
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_TIPO_COSEGURO_PROPOSTA(PI_CDUNIECO IN NUMBER,
+									PI_CDRAMO IN NUMBER,
+									PI_ESTADO IN VARCHAR2,
+									PI_NMPROPUE IN NUMBER,
+									PI_T_OUT    IN VARCHAR2) RETURN VARCHAR2 ;
+
+
+/*
+-* NOME      : GET_MERCADO_PROPOSTA
+-* OBJECTIVO : TRAZER O MERCADO DA PROPOSTA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 03-12-2004
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_MERCADO_PROPOSTA (PI_NMPROPUE IN NUMBER
+								,PI_CDRAMO  IN NUMBER
+								,PI_CDUNIECO IN NUMBER) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_ANO_SUBSCRICAO_RECIBO
+   *  OBJECTIVO : RETORNA O ANO DE SUBSCRICAO DE RISCO DO RECIBO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_ANO_SUBSCRICAO_RECIBO( PI_TIPORECI          IN VARCHAR2
+									,PI_INICIO_VIG_REC    IN DATE
+									,PI_FIM_VIG_REC       IN DATE
+									,PI_INICIO_VIG_APOL   IN DATE
+									,PI_CDUNIECO          IN NUMBER
+									,PI_CDRAMO            IN NUMBER
+									,PI_ESTADO            IN VARCHAR2
+									,PI_NMPOLIZA          IN NUMBER ) RETURN DATE;
+
+
+/*
+   NOME : GET_RESSEGURO_MPAGOSIN
+   *  OBJECTIVO : RETORNA A SOMA DOS VALORES DE RESSEGURO ASSOCIADOS A UM PAGAMENTO DE SINISTRO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_RESSEGURO_MPAGOSIN( PI_CDUNIECO IN NUMBER
+                                ,PI_CDRAMO   IN NUMBER
+                                ,PI_AAAPERTU IN NUMBER
+                                ,PI_STATUS   IN VARCHAR2
+                                ,PI_NMSINIES IN NUMBER
+                                ,PI_CDCONVAL IN VARCHAR2
+                                ,PI_NMORDPAG IN NUMBER ) RETURN NUMBER;
+
+
+/*
+   NOME : GET_RESSEGURO_MPAGOSIN
+   *  OBJECTIVO : RETORNA O CODIGO DO TRATADO DE RESSEGURO ASSOCIADO A UM PAGAMENTO DE SINISTRO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_TRATADO_RESSEGURO_MPAGOSIN( PI_CDUNIECO IN NUMBER
+                                        ,PI_CDRAMO   IN NUMBER
+                                        ,PI_AAAPERTU IN NUMBER
+                                        ,PI_STATUS   IN VARCHAR2
+                                        ,PI_NMSINIES IN NUMBER
+                                        ,PI_CDCONVAL IN VARCHAR2
+                                        ,PI_NMORDPAG IN NUMBER ) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_RESSEGURO_MPAGOSIN
+   *  OBJECTIVO : RETORNA A SOMA DOS VALORES DE RESSEGURO ASSOCIADOS A UMA VALORACAO DE SINISTRO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_RESSEGURO_MSINIVAL( PI_CDUNIECO IN NUMBER
+                                ,PI_CDRAMO   IN NUMBER
+                                ,PI_AAAPERTU IN NUMBER
+                                ,PI_STATUS   IN VARCHAR2
+                                ,PI_NMSINIES IN NUMBER
+                                ,PI_CDCONVAL IN VARCHAR2 ) RETURN NUMBER;
+
+
+/*
+   NOME : GET_RESSEGURO_MPAGOSIN
+   *  OBJECTIVO : RETORNA O CODIGO DO TRATADO DE RESSEGURO ASSOCIADO A UMA VALORACAO DE SINISTRO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_TRATADO_RESSEGURO_MSINIVAL( PI_CDUNIECO IN NUMBER
+                                        ,PI_CDRAMO   IN NUMBER
+                                        ,PI_AAAPERTU IN NUMBER
+                                        ,PI_STATUS   IN VARCHAR2
+                                        ,PI_NMSINIES IN NUMBER
+                                        ,PI_CDCONVAL IN VARCHAR2 ) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_PERCENTAGEM_COSEGURO
+   *  OBJECTIVO : RETORNA A PERCENTAGEM TOTAL DAS CO-SEGURADORAS A DATA
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_PERCENTAGEM_COSEGURO( PI_CDUNIECO IN NUMBER
+								, PI_CDRAMO IN NUMBER
+								, PI_ESTADO IN VARCHAR2
+								, PI_CDTIPCOA IN VARCHAR2 DEFAULT NULL
+								, PI_NMPOLIZA IN NUMBER
+								, PI_DATAACTUAL IN DATE DEFAULT SYSDATE)  RETURN NUMBER;
+
+
+/*
+   NOME : GET_TIPO_COSEGURO
+   *  OBJECTIVO : RETORNA A PERCENTAGEM O CODIGO OU DESCRICAO DO TIPO
+   *                DE CO-SEGURO DA APOLICE
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_TIPO_COSEGURO(PI_CDUNIECO IN NUMBER,
+							PI_CDRAMO IN NUMBER,
+							PI_ESTADO IN VARCHAR2,
+							PI_NMPOLIZA IN NUMBER,
+							PI_DATAACTUAL IN DATE DEFAULT SYSDATE,
+							PI_T_OUT    IN VARCHAR2) RETURN VARCHAR2 ;
+
+
+FUNCTION GET_V_DIVIDA_PREMIO (PI_CDUNIECO IN NUMBER,
+							PI_CDRAMO   IN NUMBER,
+							PI_ESTADO   IN VARCHAR2,
+							PI_NMPOLIZA IN NUMBER
+							) RETURN NUMBER    ;
+
+
+FUNCTION GET_D_DIVIDA_PREMIO (PI_CDUNIECO IN NUMBER,
+							PI_CDRAMO   IN NUMBER,
+							PI_ESTADO   IN VARCHAR2,
+							PI_NMPOLIZA IN NUMBER
+							) RETURN DATE    ;
+
+
+/*
+   NOME : FUN_MAX_DATA
+   *  OBJECTIVO : RETORNA A MAIOR DE DUAS DATAS
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_MAX_DATA(PI_DT1 IN DATE
+                    , PI_DT2 IN DATE
+                    ) RETURN DATE;
+
+
+/*
+   NOME : FUN_DATA_EXIGIBILIDADE
+   *  OBJECTIVO : Data de Exigibilidade
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *  DATA CRIACAO: 27-JUl-2004
+*/
+FUNCTION FUN_DATA_EXIGIBILIDADE (PI_CDTIPRAM IN NUMBER
+								,PI_MODPAG IN NUMBER
+								,PI_CDTIPRECI IN NUMBER
+								,PI_FEINICIO IN DATE
+								,PI_FEEMISIO IN DATE
+								,PI_VALOR IN NUMBER)  RETURN DATE;
+
+
+/*
+   NOME : FUN_N_COMUNIC_MORA
+   *  OBJECTIVO : N# COMUNICACOES EM MORA HA X DIAS
+   *  UTILIZACAO: UTILIZADO NO MAPA M111
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *  DATA CRIACAO: 25-JUN-2004
+*/
+FUNCTION FUN_N_COMUNIC_MORA (PI_CDUNIECO IN NUMBER
+                            ,PI_CDRAMO IN VARCHAR2
+                            ,PI_NMPOLIZA IN NUMBER
+                            ,PI_DT IN DATE )  RETURN NUMBER;
+
+
+/*
+   NOME : FUN_N_PAG_NAO_LIQ
+   *  OBJECTIVO : N# DE PAGAMENTOS AUTORIZADOS MAS NAO LIQUIDADOS HA MAIS DE X DIAS
+   *  UTILIZACAO: UTILIZADO NO MAPA M111
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *  DATA CRIACAO: 25-JUN-2004
+*/
+FUNCTION FUN_N_PAG_NAO_LIQ (PI_CDUNIECO IN NUMBER
+                           ,PI_CDRAMO IN VARCHAR2
+                           ,PI_NMPOLIZA IN NUMBER
+                           ,PI_DT IN DATE )  RETURN NUMBER;						   
+
+
+/*
+   NOME : FUN_N_SIN_SEM_PAG
+   *  OBJECTIVO : RETORNA O N# DE SIN PARA UMA APOLICE QUE TENHHAM SIDO COMUNICADOS HA MAIS DE X DIAS E QUE NAO TENHAM PAGAMENTOS AUTORIZADOS
+   *  UTILIZACAO: UTILIZADO NO MAPA M111
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *  DATA CRIACAO: 25-JUN-2004
+*/
+FUNCTION FUN_N_SIN_SEM_PAG  (PI_CDUNIECO IN NUMBER
+                            ,PI_CDRAMO IN VARCHAR2
+                            ,PI_NMPOLIZA IN NUMBER
+                            ,PI_DT IN DATE) RETURN NUMBER;
+
+
+/*
+   NOME : GET_PAG_AUTOR_SIN_M111
+   *  OBJECTIVO : RETORNA S SE TIVER ALGUM PAGAMENTO AUTORIZADO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_PAG_AUTOR_SIN_M111( PI_CDUNIECO IN NUMBER
+                                ,PI_CDRAMO    IN NUMBER
+                                ,PI_AAAPERTU IN NUMBER
+                                ,PI_NMSINIES IN NUMBER
+                                ,PI_STATUS   IN VARCHAR) RETURN VARCHAR2;
+
+
+/*
+   NOME : FUN_V_SINISTRO_PER
+   *  OBJECTIVO : RETORNA O VALOR DAS PROVISOES E AJUSTAMENTOS DE TODOS OS SINISTROS DE UMA APOLICE PARA UM PERIODO DE TEMPO
+   *  UTILIZACAO: UTILIZADO NO MAPA M111
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *  DATA CRIACAO: 25-JUN-2004
+*/
+FUNCTION FUN_V_SINISTRO_PER  (PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO IN VARCHAR2
+							,PI_NMPOLIZA IN NUMBER
+							,PI_DATAINI IN DATE
+							,PI_DATAFIM IN DATE) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_GAR_PENDENTE
+   *  OBJECTIVO : RETORNA O N# DE GARANTIAS PENDENTES
+   *  UTILIZACAO: UTILIZADO NO MAPA M111
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *  DATA CRIACAO: 25-JUN-2004
+*/
+FUNCTION FUN_GAR_PENDENTE( PI_CDUNIECO IN NUMBER
+						, PI_CDRAMO   IN VARCHAR2
+						, PI_NMSOLICI IN NUMBER
+						, PI_DT IN DATE) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_PMR_VIGENCIA
+   *  OBJECTIVO : RETORNA O PRAZO MEDIO DE RESPOSTA DAS GARANTIAS ENTRE DUAS DATAS
+   *  UTILIZACAO: UTILIZADO NO MAPA M111
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *  DATA CRIACAO: 25-JUN-2004
+*/
+FUNCTION FUN_PMR_VIGENCIA( PI_CDUNIECO IN NUMBER
+							, PI_CDRAMO   IN VARCHAR2
+							, PI_NMSOLICI IN NUMBER
+							, PI_DT_INICIO IN DATE
+							, PI_DT_FIM IN DATE) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_GAR_VIGOR_M111
+   *  OBJECTIVO : RETORNA O N# ,V_SOLICITADO E V_DECIDIDO DAS GARANTIAS PARA UMA APOLICE (M,PR)
+   *  UTILIZACAO: UTILIZADO NO MAPA M111
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *  DATA CRIACAO: 25-JUN-2004
+*/
+FUNCTION FUN_GAR_VIGOR_M111( PI_CDUNIECO IN NUMBER
+							, PI_CDRAMO   IN VARCHAR2
+							, PI_NMSOLICI IN NUMBER
+							, PI_TIPO_DADO IN VARCHAR2) RETURN NUMBER;
+
+
+/*
+   NOME : IS_APOLICE_VALIDA
+   *  OBJECTIVO : RETORNA 'S' SE O ULTIMO SUPLEMENTO LOGICO N#O MATAR A APOLICE
+   *  UTILIZACAO: UTILIZADO NO MAPA OD73
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOSE VIEGAS
+   *  DATA CRIACAO: 25-MAR-2004
+*/
+FUNCTION IS_APOLICE_VALIDA( PI_CDUNIECO IN NUMBER
+                          , PI_CDRAMO   IN VARCHAR2
+                          , PI_ESTADO   IN VARCHAR2
+                          , PI_NMPOLIZA IN NUMBER
+                          , PI_DT_REF   IN DATE DEFAULT SYSDATE) RETURN VARCHAR2;
+
+
+/*
+   NOME : IS_TIPOAVISO_VALIDO
+   *  OBJECTIVO : RETORNA 'S' SE O TIPO DE AVISO FOR VALIDO
+   *  UTILIZACAO: UTILIZADO NA FUNCAO GET_TIPOAVISO.
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOSE VIEGAS
+   *  DATA CRIACAO: 25-MAR-2004
+*/
+FUNCTION IS_TIPOAVISO_VALIDO (PI_TIPOAVISO IN VARCHAR2) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_ATRIBUTO_APOLICE
+   *  OBJECTIVO : RETORNA O CDTIPIDE DO TOMADOR DE UMA APOLICE
+   *  UTILIZACAO: UTILIZADO NA FUNCAO GET_TIPOAVISO.
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOSE VIEGAS
+   *  DATA CRIACAO: 25-MAR-2004
+*/
+FUNCTION GET_ATRIBUTO_APOLICE ( PI_CDUNIECO IN NUMBER
+                              , PI_CDRAMO   IN VARCHAR2
+                              , PI_ESTADO   IN VARCHAR2
+                              , PI_NMPOLIZA IN NUMBER
+                              , PI_CDATRIBU IN NUMBER
+                              , PI_DEFAULT  IN VARCHAR2 DEFAULT NULL
+                              , PI_NMSUPLEM IN NUMBER DEFAULT NULL) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_TIPOTOMADOR_APOLICE
+   *  OBJECTIVO : RETORNA O CDTIPIDE DO TOMADOR DE UMA APOLICE
+   *  UTILIZACAO: NAO E UTILIZADO
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOSE VIEGAS
+   *  DATA CRIACAO: 25-MAR-2004
+*/
+FUNCTION GET_TIPOTOMADOR_APOLICE ( PI_CDUNIECO IN NUMBER
+                                 , PI_CDRAMO   IN NUMBER
+                                 , PI_NMPOLIZA IN NUMBER
+                                 , PI_ESTADO   IN VARCHAR2
+                                 , PI_NMSUPLEM IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : GET_INTERVENTOR_APOLICE
+   *  OBJECTIVO : RETORNA O CDPERSON DO PRIMEIRO INTERVENTOR DE UMA APOLICE
+   *  UTILIZACAO: UTILIZADO NA FUNCAO GET_TIPOAVISO.
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOSE VIEGAS
+   *  DATA CRIACAO: 25-MAR-2004
+*/
+FUNCTION GET_INTERVENTOR_APOLICE ( PI_CDUNIECO IN NUMBER
+                                 , PI_CDRAMO   IN NUMBER
+                                 , PI_NMPOLIZA IN NUMBER
+                                 , PI_ESTADO   IN VARCHAR2
+                                 , PI_NMSITUAC IN NUMBER
+                                 , PI_CDROL    IN VARCHAR2
+                                 , PI_DATA_REF IN DATE DEFAULT SYSDATE) RETURN NUMBER;
+
+
+FUNCTION GET_DT_ANULACAO_REAL_APOL (PI_CDUNIECO IN NUMBER
+									,PI_CDRAMO IN NUMBER
+									,PI_NMPOLIZA IN NUMBER) RETURN DATE;
+
+
+FUNCTION GET_DT_ANULACAO_APOLICE (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_NMPOLIZA IN NUMBER) RETURN DATE;
+
+
+FUNCTION GET_CAPITAL_VIGOR_TOMADOR (PI_CDPERSON IN NUMBER
+									,PI_CDRAMO   IN NUMBER
+									,PI_DIRECCAO IN NUMBER
+									) RETURN NUMBER;
+
+
+FUNCTION GET_ULTIMA_TAXA_TIPO_TOMADOR(PI_CDPERSON IN NUMBER
+									,PI_TIPO     IN NUMBER DEFAULT 0
+									,PI_CDTIPRAM IN NUMBER DEFAULT 0
+									,PI_TIPOTAXA IN VARCHAR2 DEFAULT 'C'
+									) RETURN NUMBER;
+
+
+FUNCTION FUN_DADOS_ADERENTE ( PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO   IN NUMBER
+								,PI_NMPOLIZA IN NUMBER
+								,PI_NMSITUAC IN NUMBER
+								,PI_VALOR    IN VARCHAR2
+								) RETURN VARCHAR2;
+
+
+FUNCTION FUN_DATA_PROVISAO_SIN (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO   IN NUMBER
+								,PI_STATUS   IN VARCHAR2
+								,PI_AAAPERTU IN NUMBER
+								,PI_NMSINIES IN NUMBER
+								) RETURN DATE;
+
+
+FUNCTION FUN_PROVISAO_SIN_DATA (PI_CDUNIECO IN NUMBER
+                               ,PI_CDRAMO   IN NUMBER
+                               ,PI_AAAPERTU IN NUMBER
+                               ,PI_NMSINIES IN NUMBER
+                               ,PI_DATAINI   IN DATE
+                               ,PI_DATAFIM   IN DATE
+                               )   RETURN NUMBER;
+
+
+FUNCTION FUN_PRODUCAO_LIQUIDA_MOV (PI_CDUNIECO IN NUMBER
+                           ,PI_CDRAMO IN NUMBER
+                           ,PI_NMPOLIZA IN NUMBER
+                           ,PI_ANO      IN NUMBER
+                           ,PI_DATAINI   IN DATE
+                           ,PI_DATAFIM   IN DATE
+                              ) RETURN NUMBER;
+
+
+FUNCTION FUN_V_SINISTROS_ACUMULADOS (PI_CDUNIECO IN NUMBER
+									,PI_CDRAMO IN NUMBER
+									,PI_ESTADO IN VARCHAR2
+									,PI_NMPOLIZA IN NUMBER
+									,PI_DATAINI   IN DATE
+									,PI_DATAFIM   IN DATE
+									)   RETURN NUMBER ;
+
+
+FUNCTION FUN_PARTICIPACAO_RESULT_ACUM (PI_CDUNIECO IN NUMBER
+										,PI_CDRAMO IN NUMBER
+										,PI_ESTADO IN VARCHAR2
+										,PI_NMPOLIZA IN NUMBER
+										,PI_DATAINI   IN DATE
+										,PI_DATAFIM   IN DATE
+										)   RETURN NUMBER ;
+
+
+FUNCTION FUN_PROVISAO_SIN_ACUM  (PI_CDUNIECO IN NUMBER
+                                 ,PI_CDRAMO IN NUMBER
+                                 ,PI_ESTADO IN VARCHAR2
+                                 ,PI_NMPOLIZA IN NUMBER
+                                 ,PI_DATAINI   IN DATE
+                                 ,PI_DATAFIM   IN DATE
+                                )   RETURN NUMBER;
+
+
+FUNCTION FUN_ULTIMA_DATA_PART_RESULT(PI_CDUNIECO IN NUMBER
+                                     ,PI_CDRAMO  IN NUMBER
+                                     ,PI_ESTADO  IN VARCHAR2
+                                     ,PI_NMPOLIZA IN NUMBER
+                                     )  RETURN DATE ;
+
+
+FUNCTION FUN_PART_RESULT_PAGA_VIG(PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO  IN NUMBER
+								,PI_ESTADO  IN VARCHAR2
+								,PI_NMPOLIZA IN NUMBER
+								,PI_NMRENOVA IN NUMBER
+								) RETURN NUMBER;
+
+
+FUNCTION FUN_BONIF_APOL_VIG (PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO  IN NUMBER
+							,PI_ESTADO  IN VARCHAR2
+							,PI_NMPOLIZA IN NUMBER
+							,PI_NMRENOVA IN NUMBER
+							,PI_TIPO     IN VARCHAR2
+							)  RETURN NUMBER;
+
+
+FUNCTION GET_PRIM_ANO_FIM_VIGENCIA( PI_CDUNIECO IN NUMBER
+                              , PI_CDRAMO   IN NUMBER
+                              , PI_NMPOLIZA IN NUMBER) RETURN DATE;
+
+
+FUNCTION FUN_PREMIO_BRUTO_APOL_PER (PI_CDUNIECO IN NUMBER
+									,PI_CDRAMO  IN NUMBER
+									,PI_ESTADO  IN VARCHAR2
+									,PI_NMPOLIZA IN NUMBER
+									,PI_DATAINI  IN DATE
+									,PI_DATAFIM  IN DATE
+									)  RETURN NUMBER;
+
+
+FUNCTION FUN_PREMIO_BRUTO_APOL_VIG (PI_CDUNIECO IN NUMBER
+									,PI_CDRAMO  IN NUMBER
+									,PI_ESTADO  IN VARCHAR2
+									,PI_NMPOLIZA IN NUMBER
+									,PI_NMRENOVA IN NUMBER
+									)  RETURN NUMBER ;
+
+
+FUNCTION GET_DET_ATRIBUTO_APOL(PI_NMTABLA IN NUMBER
+                                ,PI_OTCLAVE1 IN VARCHAR2) RETURN VARCHAR2;
+
+
+FUNCTION FUN_CONCEITO_APOL_PER (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_DATAINI  IN DATE
+                              ,PI_DATAFIM  IN DATE
+                              ,PI_CONCEITO IN VARCHAR2
+                              )  RETURN NUMBER;
+
+
+FUNCTION FUN_CONCEITO_APOL_VIG (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_NMRENOVA IN NUMBER
+                              ,PI_CONCEITO IN VARCHAR2
+                              )  RETURN NUMBER;
+
+
+FUNCTION FUN_DATA_EMISSAO_APOLICE( PI_CDUNIECO IN NUMBER
+									,PI_CDRAMO   IN NUMBER
+									,PI_ESTADO   IN VARCHAR2
+									,PI_NMPOLIZA IN NUMBER
+									,PI_NMRENOVA IN NUMBER
+									) RETURN DATE ;
+
+
+FUNCTION GET_ULTIMA_TAXA_TOMADOR(PI_CDPERSON IN NUMBER
+                                ,PI_CDTIPRAM IN NUMBER DEFAULT 0
+                                ,PI_TIPOTAXA IN VARCHAR2 DEFAULT 'C') RETURN NUMBER;
+
+
+FUNCTION GET_TAXA_MEDIA_TOMADOR(PI_CDPERSON IN NUMBER
+								,PI_CDTIPRAM IN NUMBER DEFAULT 0
+								,PI_TIPOTAXA IN VARCHAR2 DEFAULT 'C'
+								,PI_DTINICIO IN DATE DEFAULT  TO_DATE('01-01-1900','DD-MM-RRRR')
+								,PI_DTFIM    IN DATE DEFAULT  SYSDATE   ) RETURN NUMBER;
+
+
+FUNCTION GET_DT_PLAF_CAU_VIGOR_ENT(PI_CDPERSON IN NUMBER) RETURN DATE ;
+
+
+FUNCTION GET_PLAF_CAU_VIGOR_ENT(PI_CDPERSON IN NUMBER) RETURN NUMBER ;
+
+
+FUNCTION GET_RESP_EXTRA_PAT_ENT(PI_CDPERSON IN NUMBER) RETURN NUMBER ;
+
+
+FUNCTION GET_SOLVABILIDADE_ENT (PI_CDPERSON IN NUMBER) RETURN NUMBER ;
+
+
+FUNCTION GET_PROD_NOVA_TOMADOR (PI_CDUNIECO    IN NUMBER
+                               ,PI_CDRAMO      IN NUMBER
+                               ,PI_DIRECCAO    IN VARCHAR2
+                               ,PI_CDPERSON    IN NUMBER
+                               ,PI_DTINICIO    IN DATE
+                               ,PI_DTFIM       IN DATE
+                               )   RETURN NUMBER ;
+
+
+FUNCTION GET_PROD_CONT_TOMADOR (PI_CDUNIECO    IN NUMBER
+                               ,PI_CDRAMO      IN NUMBER
+                               ,PI_DIRECCAO    IN VARCHAR2
+                               ,PI_CDPERSON    IN NUMBER
+                               ,PI_DTINICIO    IN DATE
+                               ,PI_DTFIM       IN DATE
+                               )   RETURN NUMBER ;
+
+
+FUNCTION FUN_COMISSOES_BRUTAS_ACUM ( PI_CDUNIECO IN NUMBER
+                                    ,PI_CDRAMO   IN NUMBER
+                                    ,PI_ESTADO   IN VARCHAR2
+                                    ,PI_NMPOLIZA IN NUMBER
+                                   )   RETURN NUMBER;
+
+
+FUNCTION FUN_DATA_RENOVACAO_APOLICE( PI_CDUNIECO IN NUMBER
+                                    ,PI_CDRAMO   IN NUMBER
+                                    ,PI_ESTADO   IN VARCHAR2
+                                    ,PI_NMPOLIZA IN NUMBER
+                                    ,PI_NMSUPLEM IN NUMBER
+                                   ) RETURN DATE;
+
+
+FUNCTION FUN_COMISSOES_BRUTAS_ACUM_TEMP ( PI_CDUNIECO IN NUMBER
+                                    ,PI_CDRAMO   IN NUMBER
+                                    ,PI_ESTADO   IN VARCHAR2
+                                    ,PI_NMPOLIZA IN NUMBER
+                                   )   RETURN NUMBER;
+
+
+FUNCTION FUN_PREMIO_APOL_PER (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_DATAINI  IN DATE
+                              ,PI_DATAFIM  IN DATE
+                              )  RETURN NUMBER ;
+
+
+FUNCTION FUN_PREMIO_APOL_VIG (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_NMRENOVA IN NUMBER
+                              )  RETURN NUMBER ;
+
+
+FUNCTION FUN_P_REAL_ACUM_DT_DCL( PI_CDUNIECO   IN NUMBER
+                             , PI_CDRAMO     IN NUMBER
+                             , PI_NMPOLIZA   IN NUMBER
+                             , PI_CDPERSON   IN NUMBER
+                             , PI_DATAINICIO IN DATE
+                             , PI_DATAFIM    IN DATE
+                             , PI_TIPO       IN CHAR) RETURN NUMBER;
+
+
+FUNCTION FUN_P_REAL_ACUM_DT_REG( PI_CDUNIECO   IN NUMBER
+                             , PI_CDRAMO     IN NUMBER
+                             , PI_NMPOLIZA   IN NUMBER
+                             , PI_CDPERSON   IN NUMBER
+                             , PI_DATAINICIO IN DATE
+                             , PI_DATAFIM    IN DATE
+                             , PI_TIPO       IN CHAR) RETURN NUMBER;
+
+
+FUNCTION  GET_VALOR_PROV_SIN ( PI_CDUNIECO   IN NUMBER
+                            , PI_CDRAMO     IN NUMBER
+                            , PI_AAAPERTU   IN NUMBER
+                            , PI_STATUS     IN VARCHAR2
+                            , PI_NMSINIES   IN NUMBER
+                            , PI_CONC       IN VARCHAR2) RETURN NUMBER;
+
+
+FUNCTION  GET_DATA_PROV_SIN ( PI_CDUNIECO   IN NUMBER
+                            , PI_CDRAMO     IN NUMBER
+                            , PI_AAAPERTU   IN NUMBER
+                            , PI_STATUS     IN VARCHAR2
+                            , PI_NMSINIES   IN NUMBER
+                            , PI_CONC       IN VARCHAR2) RETURN DATE;
+
+
+FUNCTION  GET_VOL_VENDAS_EUR (PI_CDPERSON  IN NUMBER,PI_TIPO_VALOR IN VARCHAR2) RETURN NUMBER;
+
+
+FUNCTION  GET_ATRIB_APOLICE_POR_VIG ( PI_CDUNIECO   IN NUMBER
+									, PI_CDRAMO     IN NUMBER
+									, PI_ESTADO     IN VARCHAR2
+									, PI_NMPOLIZA   IN NUMBER
+									, PI_CDATRIBU   IN VARCHAR2
+									, PI_NMANUIDADE IN NUMBER) RETURN VARCHAR2;
+
+
+FUNCTION GET_PROCESSO_COM_SINISTRO(PI_CDUNIECO IN NUMBER
+									,PI_NMPROAME IN NUMBER
+									,PI_CDTIPORA IN VARCHAR2
+									) RETURN NUMBER;
+
+
+FUNCTION FUN_TAXA_COMPROMISSO(PI_CDUNIECO IN NUMBER
+                            ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+FUNCTION FUN_ACERTO(PI_CDUNIECO IN NUMBER
+                   ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+FUNCTION FUN_PARTICIPACAO( PI_CDUNIECO IN NUMBER
+                         , PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+FUNCTION FUN_IVA(PI_CDUNIECO IN NUMBER
+                   ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+FUNCTION FUN_VALOR_FACTURA( PI_CDUNIECO IN NUMBER
+                          , PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+FUNCTION FUN_TOTAL_IMPOSTO( PI_CDUNIECO IN NUMBER
+                          , PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+FUNCTION GET_TAXA_COMISSAO_CON(PI_NMCUADRO    IN VARCHAR2
+                               ,PI_CDTIPCON   IN VARCHAR2
+                               )  RETURN NUMBER;
+
+
+FUNCTION FUN_DATAINI_REF_M9_10( PI_CDUNIECO   IN NUMBER
+                              , PI_CDRAMO     IN NUMBER
+                              , PI_NMPOLIZA   IN NUMBER
+                              , PI_CDPERSON   IN NUMBER
+                              , PI_FEPERDEC   IN VARCHAR2) RETURN DATE;
+
+
+FUNCTION FUN_DATAFIM_REF_M9_10( PI_CDUNIECO   IN NUMBER
+                              , PI_CDRAMO     IN NUMBER
+                              , PI_NMPOLIZA   IN NUMBER
+                              , PI_CDPERSON   IN NUMBER
+                              , PI_FEPERDEC   IN VARCHAR2) RETURN DATE;
+
+
+/*
+   NOME : GET_VOL_NEG
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: Rui Portugal
+*/
+FUNCTION GET_VOL_NEG ( P_CDPERSON    IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : GET_GESTOR_ENTIDADE
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: Rui Portugal
+*/
+FUNCTION GET_GESTOR_ENTIDADE ( P_CDPERSON    IN NUMBER) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_MARCAS
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: Rui Portugal
+*/
+FUNCTION GET_MARCAS ( P_CDPERSON    IN NUMBER
+                     ,P_TYPE    IN VARCHAR2) RETURN VARCHAR2;
+
+
+/*
+   NOME : GGET_PAISES_IMPEXP
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: Rui Portugal
+*/
+FUNCTION GET_PAISES_IMPEXP ( P_CDPERSON    IN NUMBER
+                            ,P_TYPE    IN VARCHAR2) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_VALOR_CONCEITO_CONTENC
+   *  OBJECTIVO : TRAZER O VALOR TOTAL DE UM CONCEITO DE SINISTRO POR PROCESSO DE CONTENCIOSO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_VALOR_CONCEITO_CONTENC ( P_CDNMPROC    IN NUMBER
+                                      ,P_CDTIPCON    IN VARCHAR2
+                                      ,P_CDIMPUES    IN VARCHAR2
+                                      ,P_CDTIPMOV    IN VARCHAR2) RETURN NUMBER;
+
+
+/*
+   NOME : GET_VALOR_MOV_ECON
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_VALOR_MOV_ECON( P_CDNMPROC    IN NUMBER,
+							P_CDTIPMOV    IN VARCHAR2,
+							P_SINAL       IN NUMBER) RETURN NUMBER  ;
+
+
+FUNCTION GET_ESTADO_ANTERIOR_REC( P_ESTADO    IN NUMBER,
+                                  P_TIPORECI  IN NUMBER,
+                                  P_PTIMPORT     IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : GET_PAGAMENTO_AUTORIZADO_SIN
+   *  OBJECTIVO : RETORNA S OU N CONFORME EXISTAM PAGAMENTOS AUTORIZADOS OU NAO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_PAGAMENTO_AUTORIZADO_SIN( PI_CDUNIECO IN NUMBER
+                                       ,PI_CDRAMO    IN NUMBER
+                                       ,PI_AAAPERTU IN NUMBER
+                                       ,PI_NMSINIES IN NUMBER
+                                       ,PI_STATUS   IN VARCHAR) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_ATRIB_SIT_POR_VIG
+   *  OBJECTIVO : RETORNA O ATRIBUTO DE SITUACAO VALIDO NA VIGENCIA DA APOLICE
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION  GET_ATRIB_SIT_POR_VIG ( PI_CDUNIECO   IN NUMBER
+                                , PI_CDRAMO     IN NUMBER
+                                , PI_ESTADO     IN VARCHAR2
+                                , PI_NMPOLIZA   IN NUMBER
+                                , PI_NMSITUAC   IN NUMBER
+                                , PI_CDTIPSIT   IN VARCHAR2
+                                , PI_CDATRIBU   IN VARCHAR2
+                                , PI_NMANUIDADE IN NUMBER) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_DT_VENCIMENTO_RECIBO
+   *  OBJECTIVO : RETORNA A DATA DE VENCIMENTO DE UM RECIBO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_DT_VENCIMENTO_RECIBO(PI_TIPORECI IN VARCHAR2,
+									PI_TIPODOCID   IN VARCHAR2,
+									PI_FEINICIO   IN DATE,
+									PI_FEEMISIO   IN DATE
+									) RETURN DATE;
+
+
+/*
+   NOME : GET_DPR_FALTA_APOLICE
+   *  OBJECTIVO : RETORNA O N. DE DPRS POR ENTREGAR PARA UMA DETERMINADA APOLICE
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_DPR_FALTA_APOLICE(PI_CDUNIECO IN NUMBER,
+                               PI_CDRAMO   IN NUMBER,
+                   PI_ESTADO   IN VARCHAR2,
+                   PI_NMPOLIZA IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : GET_BALCAO_BANCO
+   *  OBJECTIVO : RETORNA O CODIGO DO BALCAO DE UM DETERMINADO BANCO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_BALCAO_BANCO(PI_CDAGENTE IN VARCHAR2) RETURN VARCHAR2;
+
+
+/*
+   NOME : GET_MORA_RECIBO
+   *  OBJECTIVO : RETORNA A MORA PARA UM DETERMINADO RECIBO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_MORA_RECIBO ( PI_CDUNIECO IN NUMBER
+                          ,PI_NMRECIBO IN NUMBER
+                          ,PI_DT_INFORMACAO IN DATE) RETURN NUMBER ;
+
+
+/*
+   NOME : FUN_PREMIOS_APOL_PER
+   *  OBJECTIVO : RETORNA OS PREMIOS PROCESSADOS DA APOLICE PARA UM DETERMINADO PERIODO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_PREMIOS_APOL_PER(PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO   IN NUMBER
+							,PI_NMPOLIZA IN NUMBER
+							,DT_INICIO IN DATE
+							,DT_FIM IN DATE) RETURN NUMBER;
+
+
+/*
+   NOME : GET_PREMIOS_PROCAPOL
+   *  OBJECTIVO : RETORNA OS PREMIOS PROCESSADOS NA VIGENCIA DA APOLICE
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: ENG. JOSE VIEGAS
+*/
+FUNCTION  GET_PREMIOS_PROCAPOL( PI_CDUNIECO   IN NUMBER
+                              , PI_CDRAMO     IN NUMBER
+                              , PI_ESTADO     IN VARCHAR2
+                              , PI_NMPOLIZA   IN NUMBER
+                              , PI_NMANUIDADE IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : GET_MERCADO
+   *  OBJECTIVO : RETORNA O MERCADO (MI,ME OU MM)
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_MERCADO (PI_NMPOLIZA IN NUMBER
+					,PI_CDRAMO  IN NUMBER
+					,PI_CDUNIECO IN NUMBER
+					,PI_ESTADO  IN VARCHAR2
+					,PI_DT_REF  IN DATE) RETURN VARCHAR2;
+
+
+FUNCTION  GET_V_RECIBO ( PI_CDUNIECO IN NUMBER
+						, PI_CDRAMO IN NUMBER
+						, PI_NMPOLIZA IN NUMBER
+						, PI_CONC IN VARCHAR2
+						) RETURN NUMBER ;
+
+
+/*
+   NOME : GET_V_FACTURA
+   *  OBJECTIVO : RETORNA O VALOR ACUMULADO DAS FACTURAS PARA UMA DETERMINADA PROPOSTA E UM
+                  DETERMINADO TIPO DE CONCEITO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION  GET_V_FACTURA ( PI_CDUNIECO IN NUMBER
+						, PI_CDRAMO IN NUMBER
+						, PI_NMPROPUE IN NUMBER
+						, PI_CONC IN VARCHAR2
+						) RETURN NUMBER ;
+
+
+/*
+   NOME : GET_DATAOCURR_SIN
+   *  OBJECTIVO : RETORNA A DATA DO REGISTO DA PRIMEIRA OCURRENCIA DO SINISTRO, VALIDANDO
+                  SE O SINISTRO E MIGRADO OUT NAO.
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOSE VIEGAS
+*/
+FUNCTION GET_DATAOCURR_SIN( PI_CDUNIECO IN NUMBER
+                          , PI_CDRAMO   IN NUMBER
+                          , PI_AAAPERTU IN NUMBER
+                          , PI_STATUS   IN VARCHAR2
+                          , PI_NMSINIES IN NUMBER) RETURN DATE;
+
+
+/*
+   NOME : GET_V_FACT_APOL_VIG
+   *  OBJECTIVO : RETORNA O VALOR ACUMULADO DAS FACTURAS PARA UMA DETERMINADA APOLICE E UM
+                  DETERMINADO TIPO DE CONCEITO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION  GET_V_FACT_APOL_VIG ( PI_CDUNIECO IN NUMBER
+                               , PI_CDRAMO IN NUMBER
+                               , PI_NMPOLIZA IN NUMBER
+                               , PI_CONC IN VARCHAR2
+                               ) RETURN NUMBER ;
+
+
+/*
+   NOME : GET_V_REC_APOL_VIG
+   *  OBJECTIVO : RETORNA O VALOR ACUMULADO DOS RECIBOS  PARA UMA DETERMINADA APOLICE E UM
+                  DETERMINADO TIPO DE CONCEITO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION  GET_V_REC_APOL_VIG ( PI_CDUNIECO IN NUMBER
+                               , PI_CDRAMO IN NUMBER
+                               , PI_NMPOLIZA IN NUMBER
+                               , PI_CONC IN VARCHAR2
+                               ) RETURN NUMBER ;
+
+
+/*
+   NOME : GET_ANO_OCURR_SIN
+   *  OBJECTIVO : OBTEM O ANO DE OCURRENCIA DO SINISTRO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_ANO_OCURR_SIN( PI_CDUNIECO IN NUMBER
+                            ,PI_CDTIPORA IN VARCHAR2
+                            ,PI_NMCOMAME IN NUMBER
+                            ,PI_NMPROAME IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_TIPO_REC_PAG_SIN
+   *  OBJECTIVO    : Obtem o Nome do Recibo de Pagamento de Sinistro
+   *  UTILIZACAO   :
+   *  VERSAO       : 1.0
+   *  CRIADO POR   : RUI PORTUGAL
+   *  DATA CRIACAO : 04/SET/2002
+*/
+FUNCTION FUN_TIPO_REC_PAG_SIN(PI_CDUNIECO IN NUMBER
+							 ,PI_CDRAMO   IN NUMBER
+							 ,PI_AAAPERTU   IN NUMBER
+							 ,PI_STATUS   IN VARCHAR2
+							 ,PI_NMSINIES   IN NUMBER
+							 ,PI_NMORDPAG IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_PREMIOS_PROCREC
+   *  OBJECTIVO    : PREMIOS PROCESSADOS NA VIGENCIA DO RECIBO
+   *  UTILIZACAO   :
+   *  VERSAO       : 1.0
+   *  CRIADO POR   : Jose Viegas
+   *  DATA CRIACAO : 04/SET/2002
+*/
+FUNCTION FUN_PREMIOS_PROCREC( PI_CDUNIECO IN NUMBER
+                            , PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_PREMIOS_PROC_POR_APOLICE
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_PREMIOS_PROC_APOL(PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO   IN NUMBER
+								,PI_NMPOLIZA IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_PREMIOS_EM_DIVIDA_POR_APOLICE
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_PREMIOS_DIV_APOL(PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO   IN NUMBER
+							,PI_NMPOLIZA IN NUMBER) RETURN NUMBER;
+
+
+/*
+   NOME : GET_TIPO_COBERTURA
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_TIPO_COBERTURA( PI_CDUNIECO IN NUMBER
+                             ,PI_CDRAMO IN VARCHAR2
+                             ,PI_NMPOLIZA IN NUMBER ) RETURN VARCHAR2;
+
+
+/*
+   NOME : FUN_DATA_SUBSCRICAO_PREMIO
+   *  OBJECTIVO :
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_DATA_SUBSCRICAO_PREMIO(PI_CDUNIECO IN NUMBER
+                                  ,PI_CDRAMO  IN NUMBER
+                                  ,PI_NMRECIBO IN NUMBER
+                                  ,PI_NMPOLIZA IN NUMBER
+                                  ,PI_TIPO_COBERTURA IN VARCHAR2
+                                  ) RETURN DATE;
+
+
+/*
+   NOME : FUN_N_GARANTIAS_PROPOSTA
+   *  OBJECTIVO : N# GARANTIAS ASSOCIADO A UMA PROPOSTA
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_N_GARANTIAS_PROPOSTA(PI_CDUNIECO IN NUMBER
+                            ,PI_CDRAMO IN NUMBER
+                            ,PI_NMPROPUE IN NUMBER
+                             ) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_VALOR_CAP_PAGO
+   *  OBJECTIVO : VALOR CAP PAGO PARA UM DETERMINADA APOLICE OU PROPOSTA
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_VALOR_CAP_PAGO(PI_CDUNIECO IN NUMBER
+                            ,PI_CDRAMO IN NUMBER
+                            ,PI_NMPOLIZA IN NUMBER
+                            ,PI_ESTADO_RECIBO IN VARCHAR2) RETURN NUMBER;
+
+
+/*
+   NOME : FUN_GRUPO_ENTIDADE
+   *  OBJECTIVO : NOME DO GRUPO PARA UMA DETERMINADA ENTIDADE
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_GRUPO_ENTIDADE(PI_CDPERSON IN VARCHAR2
+                             ) RETURN VARCHAR2 ;
+
+
+/*
+  NOME      : FUN_RELATORIOS_VA_FONTE
+   *  OBJECTIVO : N# DE RELATORIOS va POR FONTE NUM DETERMINADO INTERVALO DE TEMPO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_RELATORIOS_VA_FONTE(PI_CDFUENTE IN VARCHAR2
+                              ,PI_ANO IN VARCHAR2
+                              ,PI_MES IN VARCHAR2) RETURN NUMBER;
+
+
+/*
+  NOME      : FUN_RELATORIOS_RCC_FONTE
+   *  OBJECTIVO : N# DE RELATORIOS POR FONTE NUM DETERMINADO INTERVALO DE TEMPO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_RELATORIOS_RCC_FONTE(PI_CDFUENTE IN VARCHAR2
+                              ,PI_FEDESDE IN DATE
+                              ,PI_FEHASTA IN DATE) RETURN NUMBER;
+
+
+/*
+  NOME      : FUN_PREMIO_REAL
+   *  OBJECTIVO : FUNCAO PARA CALCULO DO PREMIO REAL DE UMA APOLICE
+   *  UTILIZACAO: EJEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_PREMIO_REAL(1, 100, 4501202, 90002091, SYSDATE-365, SYSDATE) FROM DUAL
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_PREMIO_REAL(PI_CDUNIECO IN NUMBER
+						,PI_CDRAMO   IN NUMBER
+						,PI_NMPOLIZA IN NUMBER
+						,PI_CDPERSON IN NUMBER
+						,PI_DATAINICIO IN DATE
+						,PI_DATAFIM IN DATE) RETURN NUMBER;
+
+
+FUNCTION FUN_PREMIO_REAL_ACUM(PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO   IN NUMBER
+							,PI_NMPOLIZA IN NUMBER
+							,PI_CDPERSON IN NUMBER
+							,PI_DATAINICIO IN DATE
+							,PI_DATAFIM IN DATE
+							,PI_TIPO IN CHAR) RETURN NUMBER;
+
+
+/*
+  NOME      : FUN_REAJPROV_SINISTRO
+   *  OBJECTIVO : FUNCAO PARA REAJUSTES DE PROVISAO INICIAL DE SINISTROS
+   *  UTILIZACAO: EJEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_REAJPROV_SINPAG(1, 100, 2002, 37, '%',  'REC', SYSDATE) FROM DUAL
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOSE VIEGAS
+*/
+/*
+  NOME      : FUN_REAJPROV_SINISTRO
+   *  OBJECTIVO : FUNCAO PARA CALCULO DO PREMIO REAL DE UMA APOLICE
+   *  UTILIZACAO: EJEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_PREMIO_REAL(1, 100, 4501202, 90002091, SYSDATE-365, SYSDATE) FROM DUAL
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_REAJPROV_SINISTRO( PI_CDUNIECO IN NUMBER
+                              , PI_CDRAMO   IN NUMBER
+                              , PI_AAAPERTU IN NUMBER
+                              , PI_NMSINIES IN NUMBER
+                              , PI_CDCONVAL IN VARCHAR2
+                              , PI_TIPOPROV IN VARCHAR2 /* 'PAG' OU 'REC' */
+                              , PI_DATAREF IN DATE DEFAULT SYSDATE) RETURN NUMBER;
+
+
+FUNCTION FUN_IMPRESSOES_OD62_LASTDATE(PI_CDRAMO IN NUMBER
+                            ,PI_CDUNIECO   IN NUMBER
+                            ,PI_ESTADO   IN VARCHAR2
+                            ,PI_NMPOLIZA IN NUMBER) RETURN VARCHAR2;
+
+
+
+FUNCTION FUN_IMPRESSOES_OD62_CONTADOR(PI_CDRAMO IN NUMBER
+                            ,PI_CDUNIECO   IN NUMBER
+                            ,PI_ESTADO   IN VARCHAR2
+                            ,PI_NMPOLIZA IN NUMBER) RETURN NUMBER;
+
+
+FUNCTION GET_MOEDA_REC( PI_CDUNIECO IN NUMBER
+                      , PI_NMRECIBO IN NUMBER
+                      , PI_ESTADO   IN VARCHAR2 DEFAULT 'M') RETURN VARCHAR2;
+
+
+FUNCTION FUN_TIPOAVISO( PI_CDUNIECO IN NUMBER
+                      , PI_NMRECIBO IN NUMBER) RETURN VARCHAR2;
+
+
+FUNCTION FUN_TIPOAVISO_DIT( PI_CDUNIECO IN NUMBER
+                      , PI_NMRECIBO IN NUMBER) RETURN VARCHAR2;
+
+
+/*  NOME      : FUN_MRECIDET
+   *  OBJECTIVO : FUNCION PARA CALCULAR IMPORTES DE MRECIDET
+   *  UTILIZACAO: EJEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_MRECIDET(1,65,'PSDPR',null) FROM DUAL
+   *  VERSAO    : 1.0
+   *  CRIADO POR: xx
+   */
+/* FUNCION PARA CALCULAR IMPORTES DE MRECIDET */
+FUNCTION FUN_MRECIDET(PI_CDUNIECO IN NUMBER
+                     ,PI_NMRECIBO IN NUMBER
+                     ,PI_CDTIPCON IN VARCHAR2
+                     ,PI_CDGARANT IN VARCHAR2) RETURN NUMBER;
+
+
+/*
+      NOME      : FUN_RECIBO_PARC_PAGO
+   *  OBJECTIVO : FUNCAO PARA CALCULAR O VALOR PARCALMENTE PAGO DE UM DETERMINADO RECIBO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_RECIBO_PARC_PAGO(PI_CDUNIECO IN NUMBER
+                              ,PI_NMRECIBO IN NUMBER
+                              ) RETURN NUMBER;
+/* */
+
+
+FUNCTION GET_PRIM_ANO_VIGENCIA( PI_CDUNIECO IN NUMBER
+                              , PI_CDRAMO   IN NUMBER
+                              , PI_NMPOLIZA IN NUMBER) RETURN DATE;
+
+
+/*
+      NOME      : FUN_PERC_DED_APOLICE
+   *  OBJECTIVO : FUNCAO PARA CALCULAR O VALOR DA PERCENTAGEM TOTAL DE DEDUCAO PARA UM DETERMINADA APOLICE
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_PERC_DED_APOLICE(PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO IN NUMBER
+                              ,PI_NMPOLIZA IN NUMBER
+                              ) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_SALDO_SINISTROS(PI_CDUNIECO IN NUMBER
+                        ,PI_CDRAMO IN NUMBER
+                        ,PI_NMPOLIZA IN NUMBER
+                        ,PI_NMANUIDADE IN NUMBER DEFAULT NULL) RETURN NUMBER ;
+/* */
+
+
+FUNCTION FUN_SINISTROS_ACUM(PI_CDUNIECO IN NUMBER
+                        ,PI_CDRAMO IN NUMBER
+                        ,PI_NMPOLIZA IN NUMBER
+                        ) RETURN NUMBER ;
+
+/*
+  NOME      : FUN_PART_RESULT
+   *  OBJECTIVO : FUNCAO PARA CALCULO DA PARTICIPACAO DE RESULTADOS DENTRO DE UM ESPACO DE TEMPO
+   *  UTILIZACAO: EJEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_PART_RESULT(1, 100, 4501202, SYSDATE-365, SYSDATE) FROM DUAL
+   *  COMENTARIO: SE COLOCARMOS AS DATAS A NULL E CALCULADO AUTOMATICAMENTE O ACUMULADO
+                  SE COLOCARMOS A ULTIMA DATA A NULL E CALCULADO A PARTIR DA DATA DE INICIO
+                  SE COLOCARMOS A PRIMEIRA DATA A NULL E CALCULADO ATE A DATA DE FIM
+   *  VERSAO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_PART_RESULT( PI_CDUNIECO IN NUMBER
+                        , PI_CDRAMO IN NUMBER
+                        , PI_NMPOLIZA IN NUMBER
+            , PI_DATAINICIO IN DATE
+            , PI_DATAFIM IN DATE) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PART_RESULT_ACUM(PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO IN NUMBER
+                              ,PI_NMPOLIZA IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION GET_TIPO_MERCADO( PI_CDUNIECO IN NUMBER
+                         , PI_CDRAMO IN NUMBER
+                         , PI_ESTADO IN VARCHAR2
+                         , PI_NMPOLIZA IN NUMBER
+                         , PI_DATAREF IN DATE) RETURN VARCHAR2;
+/* */
+
+
+FUNCTION FUN_TVALOPOL(PI_CDUNIECO IN NUMBER
+                     ,PI_NMRECIBO IN NUMBER
+                     ,PI_CDATRIBU IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_ZWORKCOM(PI_IDPROCESO IN VARCHAR2
+                     ,PI_CDAGENTE  IN VARCHAR2
+                     ,PI_CDUNIECO  IN NUMBER
+                     ,PI_CDTIPCOM  IN VARCHAR2) RETURN NUMBER;
+/* */
+
+
+FUNCTION GET_NUMDPR( PI_CDUNIECO IN NUMBER
+                   , PI_CDRAMO IN NUMBER
+                   , PI_ESTADO IN VARCHAR2
+                   , PI_NMPOLIZA IN NUMBER
+                   , PI_DATAREF IN DATE) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_COMAGEN_N(PI_IDPROCESO IN VARCHAR2
+                       ,PI_CDAGENTE IN VARCHAR2
+                       ,PI_CDUNIECO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PREMIO_COMERCIAL(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+FUNCTION FUN_PREMIO_COMERCIAL_MI(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+FUNCTION FUN_PREMIO_COMERCIAL_ME(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+FUNCTION FUN_PREM_COM_ME_isento(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+FUNCTION FUN_PREM_COM_ME_Nisento(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+
+FUNCTION FUN_CUSTO(PI_CDUNIECO IN NUMBER
+                  ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_BRUTO(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_SELO(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PREMIO_PPD(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_SELO_PPD(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_TAXA_COMP(PI_CDUNIECO IN NUMBER
+						,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_TAXA_ESTUDO(PI_CDUNIECO IN NUMBER
+						,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PREMIO_TOTAL( PI_CDUNIECO IN NUMBER
+                         , PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTA(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTB(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PREMIO_COMERCIAL_RC(PI_CDUNIECO IN NUMBER
+                                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PREMIO_COMERCIAL_RP(PI_CDUNIECO IN NUMBER
+                                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTC(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_CAPITAL_COMERCIAL(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_CAPITAL_POLITICO(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_TAXA_CC(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_TAXA_CP(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */ 
+
+
+FUNCTION FUN_PAMI(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PAMA(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PREMIOS_PROC(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PREMIO_COM_ANU(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_BONIFICACAO(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_BONIFICACION(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_AJUSTE(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+FUNCTION FUN_AJUSTE_MI(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+FUNCTION FUN_AJUSTE_ME(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_CAP_SEG(PI_CDUNIECO IN NUMBER
+                    ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+/* */
+
+
+FUNCTION FUN_CAP_SEG_CRE(PI_CDUNIECO IN NUMBER
+                    ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+/* */
+
+
+FUNCTION FUN_CAP_SEG_FAB(PI_CDUNIECO IN NUMBER
+                    ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+/* */
+
+
+FUNCTION FUN_CAP_SEG_FORA_OCDE(PI_CDUNIECO IN NUMBER
+                    ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+
+/* */
+
+
+FUNCTION FUN_TAXA_PAP(PI_CDUNIECO IN NUMBER
+                    ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTD1(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_SELO_GAR(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_OUTROS_IMP( PI_CDUNIECO IN NUMBER
+                       , PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_OTROS(PI_CDUNIECO IN NUMBER
+                  ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTE(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTF(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTG(PI_CDUNIECO IN NUMBER
+				,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_VALOR_LIQ(PI_CDUNIECO IN NUMBER
+					,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTH(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_ANO_VIG(PI_CDUNIECO IN NUMBER
+                    ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_PTI(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER;
+/* */
+
+
+FUNCTION FUN_RIE_ACU(PI_CDPERSON IN NUMBER
+					,PI_CDTIPRAM IN VARCHAR2
+					,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_RIE_ACU_POT(PI_CDPERSON IN NUMBER
+						,PI_CDTIPRAM IN VARCHAR2
+						,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_RIE_ACU_EFE(PI_CDPERSON IN NUMBER
+						,PI_CDTIPRAM IN VARCHAR2
+						,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_RIE_ACU_MAIS(PI_CDPERSON IN NUMBER
+						,PI_CDTIPRAM IN VARCHAR2
+						,PI_CDRAMO IN NUMBER
+						,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_GAR(PI_CDPERSON IN NUMBER
+					,PI_CDTIPRAM IN VARCHAR2
+					,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_GAR_EFE(PI_CDPERSON IN NUMBER
+						,PI_CDTIPRAM IN VARCHAR2
+						,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_GAR_POT(PI_CDPERSON IN NUMBER
+						,PI_CDTIPRAM IN VARCHAR2
+						,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_GAR_MAIS(PI_CDPERSON IN NUMBER
+						,PI_CDTIPRAM IN VARCHAR2
+						, PI_CDRAMO IN NUMBER
+						,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_POL(PI_CDPERSON IN NUMBER
+					,PI_CDTIPRAM IN VARCHAR2
+					,PI_FECHA IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_COEFI_REAL (p_cdperson in number,
+						p_cdgruent in varchar2,
+						p_cdperpai in number
+						) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_RIE_ACU_GRUPO (PI_CDGRUPO IN VARCHAR2,
+							PI_SWESTADO IN VARCHAR2,
+							PI_CDTIPRAM IN VARCHAR2) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_RIE_ACU_GRUPO_REAL( PI_CDGRUPO IN VARCHAR2
+								, PI_SWESTADO IN VARCHAR2
+								, PI_CDTIPRAM IN VARCHAR2
+								, PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_RIE_ACU_GRUPO_REAL_TIPO( PI_CDGRUPO IN VARCHAR2
+								, PI_SWESTADO IN VARCHAR2
+								, PI_CDTIPRAM IN VARCHAR2
+								, PI_TIPO IN VARCHAR2
+								, PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_RIE_ACU_GRUPO_REAL_MAIS( PI_CDGRUPO IN VARCHAR2
+									, PI_SWESTADO IN VARCHAR2
+									, PI_CDTIPRAM IN VARCHAR2
+									, PI_CDRAMO IN NUMBER
+									, PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_GAR_GRUPO    (PI_CDGRUPO IN VARCHAR2,
+								PI_SWESTADO VARCHAR2,
+								PI_CDTIPRAM IN VARCHAR2,
+								PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_POL_GRUPO(PI_CDGRUPO IN VARCHAR2
+						,PI_SWESTADO VARCHAR2
+						,PI_CDTIPRAM IN VARCHAR2) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_PLAFCRE_GRUPO( p_cdperson IN NUMBER
+							, p_fecha1 IN DATE
+							, p_fecha2  IN DATE
+							, p_ind_tippla IN VARCHAR2
+							, P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_PLAFCRE_VIG_GRUPO( p_cdGRUPO in VARCHAR2
+								, p_fecha1 in date
+								, p_fecha2  in date
+								, P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN DATE;
+/**/
+
+
+FUNCTION FUN_PLAFCAU_VIG_GRUPO( p_cdGRUPO IN VARCHAR2
+								, p_fecha1 IN DATE
+								, p_fecha2  IN DATE
+								, P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN DATE;
+/**/
+
+
+FUNCTION FUN_PLAFCAU_GRUPO (p_cdperson in number,
+							p_fecha1 in date,
+							p_fecha2 in date,
+							p_ind_tippla in VARCHAR2 ) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_PLAFCRE_GRUPO_REAL( p_cdperson IN NUMBER
+								, p_fecha1 IN DATE
+								, p_fecha2  IN DATE
+								, p_ind_tippla IN VARCHAR2
+								, P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_PLAFCAU_GRUPO_REAL ( p_cdperson in number
+                                , p_fecha1 in date
+                                , p_fecha2 in date
+                                , p_ind_tippla in VARCHAR2
+                                , P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+
+
+FUNCTION FUN_PLAF_ENT_IND_CRE (
+                                 p_cdperson in number,
+                                 p_fecha1 in date,
+                                 p_fecha2 in date) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_PLAF_ENT_GLOB_CRE (
+                                 p_cdperson IN NUMBER,
+                                 p_fecha1 IN DATE,
+                                 p_fecha2 IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_PLAF_ENT_VIG_CRE (
+								p_cdperson in number,
+								p_fecha1 in date,
+								p_fecha2 in date) RETURN DATE;
+/**/
+
+
+FUNCTION FUN_PLAF_ENT_CAU (
+							p_cdperson IN NUMBER,
+							p_fecha1 IN DATE,
+							p_fecha2 IN DATE) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_PLAF_VIG_CAU (
+							p_cdperson in number,
+							p_fecha1 in date,
+							p_fecha2 in date) RETURN DATE;
+/**/
+
+
+FUNCTION FUN_NUM_ENT_GRUPO(PI_CDGRUENT IN VARCHAR2
+						, PI_DOMINA VARCHAR2 DEFAULT 'S'
+						) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_ENT_GRUPO(PI_CDGRUPO IN VARCHAR2,
+                               PI_SWESTADO IN VARCHAR2,
+                               PI_CDTIPRAM IN VARCHAR2,
+                               PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_NUM_ENT_GRUPO_TIPO(PI_CDGRUPO IN VARCHAR2,
+                               PI_SWESTADO IN VARCHAR2,
+                               PI_CDTIPRAM IN VARCHAR2,
+							   PI_TIPO IN VARCHAR2,
+                               PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_AMENAZA_NUM (pi_cdperson in number,
+                          pi_cdtipram in VARCHAR2
+                                       ) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_AMENAZA_MON (pi_cdperson IN NUMBER,
+                          pi_cdtipram VARCHAR2
+                                       ) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_SINIESTRO_NUM (pi_cdperson in number,
+                            pi_cdtipram in VARCHAR2
+                                       ) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_SINIESTRO_MON (pi_cdperson IN NUMBER,
+                            pi_cdtipram VARCHAR2
+                                       ) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_CF_ORGAO (PI_CDUNIECO IN NUMBER,
+                       PI_CDRAMO   IN NUMBER,
+                       PI_ESTADO   IN VARCHAR2,
+                       PI_NMPOLIZA IN NUMBER,
+                       PI_DATAREF  IN DATE DEFAULT SYSDATE) RETURN VARCHAR2;
+/**/
+
+
+FUNCTION FUN_CF_ORGAO_PROPOSTA (PI_CDUNIECO IN NUMBER,
+                                PI_CDRAMO   IN NUMBER,
+                                PI_NMPROPUE IN NUMBER) RETURN VARCHAR2;
+/**/
+
+
+FUNCTION FUN_ANO_ANTERIOR (PI_CDUNIECO     IN NUMBER,
+                           PI_CDRAMO       IN NUMBER,
+                           PI_ESTADO       IN VARCHAR2,
+                           PI_NMPOLIZA     IN NUMBER,
+                           PI_ANO_EMISSION IN VARCHAR2) RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_DT_ESTADO_ANALISE (PI_NMPEDIDO IN NUMBER
+								,PI_NMEVENTO IN NUMBER) RETURN DATE;
+/**/
+
+
+FUNCTION FUN_COD_ESTADO_ANALISE (PI_NMPEDIDO IN NUMBER
+								,PI_NMEVENTO IN NUMBER)RETURN VARCHAR2;
+/**/
+
+
+FUNCTION FUN_DES_ESTADO_ANALISE (PI_NMPEDIDO IN NUMBER
+								,PI_NMEVENTO IN NUMBER)RETURN VARCHAR2;
+/**/
+
+
+FUNCTION FUN_ANALISTA_ANALISE (PI_NMPEDIDO IN NUMBER
+							,PI_NMEVENTO IN NUMBER)RETURN VARCHAR2;
+/**/
+
+
+FUNCTION FUN_PLAF_PAIS (PI_PAIS IN VARCHAR2)RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_DES_GRUPCOBERT (  PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO   IN NUMBER
+                              ,PI_NMPROPUE IN VARCHAR2)RETURN VARCHAR2;
+/**/
+
+
+PROCEDURE PRO_GARAN_VIG(PI_CDPERSON IN NUMBER
+						,PI_SWESTADO IN VARCHAR2
+						,PI_TIPO IN VARCHAR2
+						,PI_TIPRAM IN VARCHAR2
+						,PI_FECHA IN DATE
+						,POUT_NMGARANT OUT NUMBER
+						,POUT_MONTANTE OUT NUMBER
+						,POUT_NMPOLIZAS OUT NUMBER);
+/**/
+
+
+PROCEDURE PRO_GARAN_VIG_RAMO(PI_CDPERSON IN NUMBER
+							,PI_SWESTADO IN VARCHAR2
+							,PI_TIPO IN VARCHAR2
+							,PI_TIPRAM IN VARCHAR2
+							,PI_CDRAMO IN NUMBER
+							,PI_FECHA IN DATE
+							,POUT_NMGARANT OUT NUMBER
+							,POUT_MONTANTE OUT NUMBER
+							,POUT_NMPOLIZAS OUT NUMBER);
+/**/
+
+
+PROCEDURE PL_CALCULA_REAL (p_cdperson in number,
+							p_ptnominal in number,
+							p_ptreal in out number,
+							p_error in out number);
+/**/
+
+
+PROCEDURE PL_COEFICIENTE_REAL (p_cdperson IN NUMBER,
+							p_coeficiente IN OUT NUMBER,
+							p_error IN OUT NUMBER );
+/**/
+
+
+PROCEDURE PL_OBTENER_GRUPO (p_cdperson in number,
+							p_cdgruent in out VARCHAR2,
+							p_error in out number);
+/**/
+
+
+PROCEDURE PL_PLAF_ENT_CRE (
+							p_cdperson IN NUMBER,
+							p_fecha1 IN DATE,
+							p_fecha2 IN DATE,
+							p_ptind IN OUT NUMBER,
+							p_ptglo IN OUT NUMBER,
+							p_vigor IN OUT DATE,
+							p_error IN OUT NUMBER);
+/**/
+
+
+PROCEDURE PL_PLAF_ENT_CAU (
+							p_cdperson in number,
+							p_fecha1 in date,
+							p_fecha2 in date,
+							p_ptimport in out number,
+							p_vigor in out date,
+							p_error in out number);
+/**/
+
+
+PROCEDURE PL_PLAFOND_GRUPO (p_cdperson IN NUMBER,
+							p_fecha1 IN DATE,
+							p_fecha2 IN DATE,
+							p_ind_tippla IN VARCHAR2,
+							p_ind_domina IN CHAR,
+							p_ptnom_cre IN OUT NUMBER,
+							p_ptreal_cre IN OUT NUMBER,
+							p_ptnom_cau IN OUT NUMBER,
+							p_ptreal_cau IN OUT NUMBER,
+							p_error IN OUT NUMBER);
+/**/
+
+
+PROCEDURE PL_PLAF_GRUP_PRO(PI_CDGRUENT IN VARCHAR2
+                            ,POUT_MON_CRE OUT NUMBER
+                            ,POUT_MON_CAU OUT NUMBER);
+/**/
+
+
+PROCEDURE PL_AMENAZA(PI_CDPERSON IN NUMBER
+                      ,PI_CDTIPRAM IN VARCHAR2
+                      ,POUT_NUMERO OUT NUMBER
+                      ,POUT_MONTANTE OUT NUMBER);
+/**/
+
+
+PROCEDURE PL_SINIESTRO(PI_CDPERSON IN NUMBER
+                      ,PI_CDTIPRAM IN VARCHAR2
+                      ,POUT_NUMERO OUT NUMBER
+                      ,POUT_MONTANTE OUT NUMBER);
+/**/
+
+
+PROCEDURE PL_TOMADOR(  PI_CDPERSON      IN NUMBER
+                      ,PI_CDTIPRAM      IN VARCHAR2
+                      ,POUT_NUM_POL     OUT NUMBER
+                      ,POUT_ANTIGUIDADE OUT DATE
+                      ,POUT_PREEMI      OUT NUMBER
+                      ,POUT_NMSINIEST   OUT NUMBER
+                      ,POUT_PREDIVI     OUT NUMBER
+                      ,POUT_PMC         OUT NUMBER
+                      ,POUT_AMENAZAS    OUT NUMBER) ;
+/**/
+
+
+PROCEDURE PL_ENTIDAD(PI_CDPERSON IN NUMBER
+					,PI_NMPEDIDO IN VARCHAR2
+					,POUT_DATACONS OUT VARCHAR2,
+					POUT_CAPSOC   OUT NUMBER,
+					POUT_VOLVEN     OUT NUMBER,
+					POUT_RESLIQ     OUT NUMBER,
+					POUT_DATACRC    OUT DATE,
+					POUT_TOTAL      OUT NUMBER,
+					POUT_MORA       OUT NUMBER,
+					POUT_CONTENCIOSO OUT NUMBER,
+					POUT_EXTRA       OUT NUMBER,
+					POUT_RENEGOCI    OUT NUMBER,
+					POUT_NUMBOLE     OUT NUMBER,
+					POUT_TOTAL1     OUT NUMBER,
+					POUT_DATABAN     OUT DATE,
+					POUT_CONCEITO    OUT VARCHAR2,
+					POUT_DATACOM     OUT DATE,
+					POUT_PTLIMSOL    OUT NUMBER,
+					POUT_PTLIMCRE    OUT NUMBER,
+					POUT_SURVEILLANCE OUT VARCHAR2,
+					POUT_OPRIPA       OUT VARCHAR2,
+					POUT_JUDICIL     OUT NUMBER,
+					POUT_BALAN       OUT NUMBER,
+					POUT_DATAREF      OUT VARCHAR2
+);
+
+
+PROCEDURE PL_SEC3_TOMADOR (PI_NMPEDIDO IN VARCHAR2
+						  ,PI_NMEVENTO IN NUMBER
+						  ,POUT_CDUNIECO  OUT NUMBER
+						  ,POUT_CDRAMO   OUT NUMBER
+						  ,POUT_NMPROPUE OUT NUMBER
+						  ,POUT_NMPOLIZA OUT NUMBER
+						  ,POUT_NOME OUT VARCHAR2
+						  ,POUT_NUC  OUT NUMBER
+						  ,POUT_NIPC OUT VARCHAR2
+						  ,POUT_CDCAE OUT VARCHAR2
+						  ,POUT_CONPAG OUT VARCHAR2
+						  ,POUT_RIEG OUT VARCHAR2
+						  ,POUT_TAXA OUT VARCHAR2
+						  ,POUT_SISTAR OUT VARCHAR2
+						  ,POUT_GESTOR OUT VARCHAR2);
+
+
+PROCEDURE PL_GLOBAL_TOMADOR(  PI_CDPERSON       IN NUMBER
+                              ,PI_CDRAMO         IN NUMBER
+                              ,POUT_VENDAS       OUT NUMBER
+                              ,POUT_PREMIOS      OUT NUMBER
+                              ,POUT_AMENAZAS     OUT NUMBER
+                              ,POUT_SINIEST    OUT NUMBER
+                              ,POUT_RECUPERACOES OUT NUMBER
+                              ,POUT_PMP          OUT NUMBER);
+
+
+PROCEDURE PL_ATRIBUTO_POLIZA(PI_CDUNIECO	IN NUMBER
+							,PI_CDRAMO		IN NUMBER
+							,PI_NMPOLIZA	IN NUMBER
+							,POUT_BONIFICACION	OUT VARCHAR2
+							,POUT_PARTICIPACION_RESULT OUT VARCHAR2
+							,POUT_TAXA_PREMIO_COMERCIAL OUT VARCHAR2
+							,POUT_TAXA_PREMIO_POLITICO  OUT VARCHAR2
+							,POUT_PREMIO_MINIMO OUT VARCHAR2
+							,POUT_PREMIO_MAXIMO OUT VARCHAR2
+							,PORCENTAJE_BONIFICION OUT VARCHAR2
+							,PORCENTAJE_ENCARGO OUT VARCHAR2
+							,SALDO_NEGATIVO OUT VARCHAR2
+							,PORCENTAJE_PARTICIPACION OUT VARCHAR2) ;
+
+
+/**/
+PROCEDURE PL_CONSORCIO(PI_CDPERSON IN NUMBER
+					  ,PI_SWESTADO IN VARCHAR2
+					  ,PI_TIPO IN VARCHAR2
+					  ,PI_TIPRAM IN VARCHAR2
+					  ,PI_FECHA IN DATE
+					  ,POUT_NMGARANT  OUT NUMBER
+					  ,POUT_MONTANTE  OUT NUMBER
+					  ,POUT_NMPOLIZAS OUT NUMBER);
+
+
+/**/
+FUNCTION FUN_VALORES_DIVIDA (P_CDUNIECO IN NUMBER
+							, P_CDRAMO IN NUMBER
+							,P_ESTADO IN VARCHAR2
+							, P_NMPOLIZA IN NUMBER
+							)RETURN NUMBER;
+/**/
+
+
+FUNCTION FUN_ULTIMA_DPR (P_CDUNIECO IN NUMBER
+						, P_CDRAMO IN NUMBER
+						,P_ESTADO IN VARCHAR2
+						, P_NMPOLIZA IN NUMBER
+						)RETURN DATE;
+/* */
+
+
+FUNCTION FUN_PERCENTAGEM_TOTAL_COAS( PI_CDUNIECO IN NUMBER
+                                   , PI_CDRAMO IN NUMBER
+                                   , PI_ESTADO IN VARCHAR2
+                                   , PI_NMPOLIZA IN NUMBER
+                                   , PI_DATAACTUAL IN DATE DEFAULT SYSDATE)
+RETURN NUMBER;
+/* */
+
+
+PROCEDURE Pl_PEDIDO(PI_NMPEDIDO IN NUMBER
+                                          ,PI_NMEVENTO IN VARCHAR2
+                                          ,PI_CDPERSON IN VARCHAR2
+                                          ,POUT_NMGARANT   OUT NUMBER
+                                          ,POUT_CDPRIORI   OUT VARCHAR2
+                                          ,POUT_IMPSOLCO   OUT NUMBER
+                                          ,POUT_IMPSOLPO   OUT NUMBER
+                                          ,POUT_FEREGISGAR OUT DATE
+                                       ,POUT_FEFINVIG   OUT DATE
+                                          ,POUT_NMMAXPAG   OUT NUMBER
+                                          ,POUT_NMGARANTE  OUT NUMBER
+                                   ,POUT_IMPSOLCO2  OUT NUMBER
+                                   ,POUT_IMPCONCO2  OUT NUMBER
+                                   ,POUT_IMPSOLPO2  OUT NUMBER
+                                   ,POUT_IMPCONPO2  OUT NUMBER
+                                   ,POUT_CDANADEC2  OUT VARCHAR2
+                                   ,POUT_CDDECISI2  OUT VARCHAR2
+                                   ,POUT_FEVIGENC2  OUT DATE
+                                    ,POUT_FEFINVIG2   OUT DATE
+                              ,POUT_PTPROPOS   OUT NUMBER
+                                   ,POUT_PTPRORPC  OUT NUMBER
+                                   ,POUT_FEVALIDA  OUT DATE
+                                   ,POUT_CDDECISI  OUT VARCHAR2
+                                   ,POUT_CDANAEST  OUT VARCHAR2);
+/**/
+
+
+PROCEDURE PL_PLAFONAMIENTO(PI_NMPEDIDO IN NUMBER
+                          ,PI_NMEVENTO IN NUMBER
+                          ,POUT_PTPLAGLOP OUT NUMBER
+                          ,POUT_PTPLAINDP OUT NUMBER
+                          ,POUT_DATAFIN   OUT DATE
+                          ,POUT_CDDECISOR OUT VARCHAR2
+                          ,POUT_PTPLACAUP OUT NUMBER
+                          ,POUT_SWCONTRA  OUT VARCHAR2
+                          ,POUT_RESTRICP  OUT VARCHAR2
+                          ,POUT_CDANALIST OUT VARCHAR2);
+
+/*
+   NOME : FUN_TAXA_VAL_COMISSAO
+   *  OBJECTIVO : RETORNA O VALOR concreto para subsitutir a taxa A UTILIAR
+                  PARA UM DADO CONCEITO, NUM DADO RECIBO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: NUNO FARINHA
+*/
+FUNCTION FUN_TAXA_VAL_COMISSAO (PI_QUADRO_COMISSOES        IN    VARCHAR2
+                           ,PI_PERIODICIDADE_APOLICE   IN    NUMBER
+                           ,PI_RENOVACOES_APOLICE      IN    NUMBER
+                           ,PI_VALOR_PREMIO            IN    NUMBER
+                           ,PI_TIPO_CONCEITO_RECIBO    IN    VARCHAR2
+						   ) RETURN NUMBER;
+/*
+   NOME : FUN_TAXA_COMISSAO
+   *  OBJECTIVO : RETORNA O VALOR DA TAXA DE COMISSAO A UTILIAR
+                  PARA UM DADO CONCEITO, NUM DADO RECIBO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: NUNO FARINHA
+*/
+FUNCTION FUN_TAXA_COMISSAO (PI_QUADRO_COMISSOES        IN    VARCHAR2
+                           ,PI_PERIODICIDADE_APOLICE   IN    NUMBER
+                           ,PI_RENOVACOES_APOLICE      IN    NUMBER
+                           ,PI_VALOR_PREMIO            IN    NUMBER
+                           ,PI_TIPO_CONCEITO_RECIBO    IN    VARCHAR2
+						   ) RETURN NUMBER;
+/*
+   NOME : FUN_TAXA_CAMBIO
+   *  OBJECTIVO : RETORNA O VALOR DA TAXA DE CAMBIO
+                  DADOS A MOEDA BASE, MOEDA FINAL E DATA DE CAMBIO.
+                  SE N#O FOR DADA A MOEDA FINAL, E USADA A MOEDA FUNCIONAL
+                  SE N#O FOR DADA A DATA DE CAMBIO, E USADA A DO FINAL DO MES PASSADO
+   *  UTILIZACAO: PKG_FORMULAS_COSEC.FUN_TAXA_CAMBIO (APOLICE.CDMONEDA)
+   *  VERSAO    : 1.0
+   *  CRIADO POR: NUNO FARINHA
+   *  ALTERADO POR: BRIGIDA RAMOS
+   *  ALTERACAO: SEMPRE QUE N#O FOR ENCONTRADA TAXA DE CAMBIO VERIFICA SE A MOEDA BASE E IGUAL
+   *        A MOEDA FINAL. SE SIM DEVOLVE 1 SE N#O DEVOLVE NULL
+*/
+FUNCTION FUN_TAXA_CAMBIO (PI_MOEDA_BASE     IN   VARCHAR2
+                         ,PI_MODEDA_FINAL   IN   VARCHAR2 DEFAULT NULL
+                         ,PI_DATA_CAMBIO    IN   DATE DEFAULT LAST_DAY(ADD_MONTHS(SYSDATE, -1))
+						 ) RETURN NUMBER;
+/*
+   NOME : GET_INTERVENTOR
+   *  OBJECTIVO : RETORNA O PRIMEIRO INTERVENTOR DE UM DADO RECIBO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOAO BONINA
+*/
+FUNCTION  GET_INTERVENTOR ( PI_CDUNIECO IN NUMBER
+						, PI_NMRECIBO IN NUMBER
+						) RETURN VARCHAR2 ;
+/*
+   NOME : GET_DECLARACOES_EM_FALTA
+   *  OBJECTIVO : RETORNA AS DECLARACOES DE VENDA EM FALTA DESDE A DATA DE EMISSAO
+   *  UTILIZACAO:
+   *  VERSAO    : 1.0
+   *  CRIADO POR: JOAO BONINA
+*/
+FUNCTION GET_DECLARACOES_EM_FALTA(PIN_CDUNIECO IN INTEGER
+                        , PIN_CDRAMO IN INTEGER
+                        , PIN_NMPOLIZA IN INTEGER) RETURN VARCHAR2;
+/*
+-* NOME      : FUN_DATA_VENCIMENTO_REC
+-* OBJECTIVO : RETORNA A DATA DE VENCIMENTO DO RECIBO
+-*
+-* UTILIZACAO:
+-* AUTOR     : BRIGIDA Ramos
+-* DATA      : 03-06-2005
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_DATA_VENCIMENTO_REC (PI_CDTIPRAM IN NUMBER
+								,PI_MODPAG IN NUMBER
+								,PI_CDTIPRECI IN NUMBER
+								,PI_FEINICIO IN DATE
+								,PI_FEEMISIO IN DATE
+								,PI_VALOR IN NUMBER )  RETURN DATE;
+
+/*
+-* NOME      : GET_ATRIBUTOS_SINISTRO
+-* OBJECTIVO : RETORNA O VALOR DE UM ATRIBUTO PARA UM DETERMINADO SINISTRO
+-*
+-* UTILIZACAO:
+-* AUTOR     : BRIGIDA Ramos
+-* DATA      : 27-09-2006
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_ATRIBUTOS_SINISTRO (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN VARCHAR2
+								,PI_AAAPERTU IN NUMBER
+								,PI_STATUS IN VARCHAR2
+								,PI_NMSINIES IN NUMBER
+								,PI_CDATRIBU IN NUMBER
+								,PI_DATA IN DATE
+								)  RETURN VARCHAR2;
+/*
+-* NOME      : GET_VRP
+-* OBJECTIVO : RETORNA O VALOR DE RECUPERACAO TOTAL DOS PROCESSOS
+-* PARA UM INTERVALO DE DATAS E ADVOGADO
+-*
+-* UTILIZACAO:
+-* AUTOR     : BRIGIDA Ramos
+-* DATA      : 16-11-2006
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_VRP (PI_CDPERSON IN VARCHAR2
+				,PI_DT_INICIO IN DATE
+				,PI_DT_FIM IN DATE) RETURN NUMBER;
+
+/*
+-* NOME      : GET_VCEP
+-* OBJECTIVO : RETORNA O VALOR EM CARTEIRA DOS PROCESSOS
+-* PARA UM INTERVALO DE DATAS E ADVOGADO
+-*
+-* UTILIZACAO:
+-* AUTOR     : BRIGIDA Ramos
+-* DATA      : 16-11-2006
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_VCEP (PI_CDPERSON IN VARCHAR2
+				,PI_DT_INICIO IN DATE
+				,PI_DT_FIM IN DATE) RETURN NUMBER;
+
+/*
+-* NOME      : GET_N_INTERVENIENTES_SIN
+-* OBJECTIVO : RETORNA O N# DE INTERVENIENTES DO SINISTRO CONFORME O ROL
+-* ESCOLHIDO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 14-12-2006
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_N_INTERVENIENTES_SIN(PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_AAAPERTU IN NUMBER
+								,PI_STATUS IN VARCHAR2
+								,PI_NMSINIES IN NUMBER
+								,PI_CDROL IN VARCHAR2
+									) RETURN NUMBER;
+
+/*
+-* NOME      : GET_NMEVENTO_ANALISE
+-* OBJECTIVO : RETORNA O N# DE PEDIDO DE ANALISE VALIDO PARA M101
+-* ESCOLHIDO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 19-12-2006
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_NMEVENTO_ANALISE(PI_CDPERSON IN NUMBER
+							) RETURN NUMBER;
+
+/*
+-* NOME      : FUN_PREMIOBRUTO_ACUM_ENT
+-* OBJECTIVO : RETORNA O ACUMULADO DOS PREMIOS BRUTOS (ANTES DE IMPOSTOS E LIQUIDOS
+-* DE ESTORNOS E ANULACOES) ENTRE DUAS DATAS PARA UMA ENTIDADE
+-* AUTOR     : JOAO BERNARDINO
+-* DATA      : 18-12-2009
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_PREMIOBRUTO_ACUM_ENT(PI_CDPERSON IN NUMBER
+								,PI_DATA_REF IN DATE
+								) RETURN NUMBER;
+
+/*
+-* NOME      : FUN_PREMIOBRUTO_ACUM_GRUPO
+-* OBJECTIVO : RETORNA O ACUMULADO DOS PREMIOS BRUTOS (ANTES DE IMPOSTOS E LIQUIDOS
+-* DE ESTORNOS E ANULACOES) ENTRE DUAS DATAS PARA TODAS ENTIDADES DO GRUPO
+-* AUTOR     : JOAO BERNARDINO
+-* DATA      : 18-12-2009
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_PREMIOBRUTO_ACUM_GRUPO( PI_CDGRUENT IN VARCHAR2
+                                   , PI_DATA_REF IN DATE
+                                           ) RETURN NUMBER;
+
+FUNCTION  GET_PAIS_ENT_RISCO ( PI_CDUNIECO IN NUMBER
+                               , PI_CDRAMO IN NUMBER
+                               , PI_NMPOLIZA IN NUMBER
+                               ) RETURN VARCHAR2 ;
+
+/* */
+FUNCTION FUN_PLAFCRE_GRUPO_REAL_NODATE( p_cdperson IN NUMBER
+                               , p_ind_tippla IN VARCHAR2
+                               , P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER;
+
+/* */
+PROCEDURE PL_PLAFOND_GRUPO_NODATE ( p_cdperson IN NUMBER,
+                             p_ind_tippla IN VARCHAR2,
+                             p_ind_domina IN CHAR,
+                             p_ptnom_cre IN OUT NUMBER,
+                             p_ptreal_cre IN OUT NUMBER,
+                             p_error IN OUT NUMBER);
+
+/* */
+PROCEDURE PL_PLAF_ENT_CRE_NODATE ( p_cdperson IN NUMBER,
+							p_ptind IN OUT NUMBER,
+							p_ptglo IN OUT NUMBER,
+                            p_vigor IN OUT DATE,
+							p_error IN OUT NUMBER);
+
+
+/*
+   NOME : GET_DPR_EM_FALTA
+   *  OBJECTIVO : RETORNA AS DPRS EM FALTA DA VIGENCIA MAIS RECENTE
+   *  UTILIZACAO:
+   *  VERSAO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION GET_DPR_EM_FALTA (pin_cdunieco IN  mpolizas.cdunieco%TYPE,
+                           pin_cdramo   IN  mpolizas.cdramo%TYPE,
+                           pin_nmpoliza IN  mpolizas.nmpoliza%TYPE
+						   )
+                           RETURN NUMBER;
+
+/*
+   NOME : GET_DPRS_EM_FALTA
+   *  OBJECTIVO : RETORNA TODAS AS DPRS EM FALTA
+   *  UTILIZACAO:
+   *  VERSAO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION GET_DPRS_EM_FALTA (PIN_CDUNIECO IN INTEGER
+							, PIN_CDRAMO IN INTEGER
+							, PIN_NMPOLIZA IN INTEGER
+							) RETURN NUMBER;
+
+/*
+   NOME : GET_VALOR_ATRIB_RECIBO
+   *  OBJECTIVO : RETORNA O VALOR DO ATRIBUTO DO RECIBO PELO O NOME DO ATRIBUTO
+   *  UTILIZACAO:
+   *  VERSAO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION GET_VALOR_ATRIB_RECIBO (PIN_CDUNIECO IN co_tvalorec.CDATRIBU%TYPE
+								, PIN_NMRECIBO IN co_tvalorec.nmrecibo%TYPE
+								, PIN_ATRIB IN co_tatrirec.DSATRIBU%TYPE
+								) RETURN NUMBER;
+
+/*
+   NOME : FUN_MEDIA_TAXA_CAMBIO_AMEACA
+   *  OBJECTIVO : RETORNA A MEDIA PONDERADA DA TAXA DE CAMBIO PARA O VALOR TOTAL DA AMEACA COMUNICADA
+   *  UTILIZACAO:
+   *  VERSAO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION FUN_MEDIA_TAXA_CAMBIO_AMEACA (PIN_CDUNIECO IN CO_FAAME.CDUNIECO%TYPE
+									, PIN_CDTIPORA IN CO_FAAME.CDTIPORA%TYPE
+									, PIN_NMPROAME IN CO_FAAME.NMPROAME%TYPE
+									, PIN_NMCOMAME IN CO_FAAME.NMCOMAME%TYPE
+									) RETURN NUMBER;
+
+/*
+   NOME : FUN_PAE_APOL_PER
+   *  OBJECTIVO : RETORNA O VALOR DO PREMIO ANUAL ESTIMADO SEM IMPOSTOS DE UMA APOLICE DE UM DETERMINADO PERIODO DE TEMPO PARA OS PRODUTOS 120 E 121
+   *  UTILIZACAO: ESTA FUNCAO E USADA EXCLUSIVAMENTE NO MAPA M4
+   *  VERSAO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION FUN_PAE_APOL_PER (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_DATAINI  IN DATE
+                              ,PI_DATAFIM  IN DATE
+                              )  RETURN NUMBER;
+
+/*
+   NOME : FUN_PROVISAO_COD_SIN_DATA
+   *  OBJECTIVO : RETORNA O VALOR DO PAGAMENTO TOTAL DO SINISTRO POR CODIGO DO MESMO
+   *  UTILIZACAO: ESTA FUNCAO E USADA EXCLUSIVAMENTE NO MAPA M78B-2
+   *  VERSAO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/							  
+FUNCTION FUN_PROVISAO_COD_SIN_DATA (PI_CDUNIECO IN NUMBER
+                               ,PI_CDRAMO   IN NUMBER
+                               ,PI_AAAPERTU IN NUMBER
+                               ,PI_NMSINIES IN NUMBER
+							   ,PI_CDCONVAL IN VARCHAR2
+                               ,PI_DATAINI   IN DATE
+                               ,PI_DATAFIM   IN DATE
+                               )   RETURN NUMBER;							  
+
+/*
+-* NOME      : GET_PAGAMENTO_LIQ_COD_SIN
+-* OBJECTIVO : RETORNA O VALOR DOS PAGAMENTOS LIQUIDADOS A UMA DETERMINADA DATA POR CODIGO DE SINISTRO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 26-05-2017
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PAGAMENTO_LIQ_COD_SIN ( P_CDUNIECO IN NUMBER
+                                , P_CDRAMO IN NUMBER
+								, P_AAAPERTU IN NUMBER
+								, P_STATUS IN VARCHAR2
+								, P_NMSINIES IN NUMBER
+								, P_CDCONVAL IN VARCHAR2
+								, P_DATA_REF IN DATE) RETURN NUMBER;							   
+
+/*
+-* NOME      : GET_RESSEG_CED_COD_DATA
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO CEDIDO A UMA DETERMINADA DATA POR CODIGO DE SINISTRO
+-* AUTOR     : JOAO Ribeiro
+-* DATA      : 26-05-2017
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_RESSEG_CED_COD_DATA (PI_CDUNIECO IN NUMBER
+                               ,PI_CDRAMO   IN NUMBER
+                               ,PI_AAAPERTU IN NUMBER
+                               ,PI_NMSINIES IN NUMBER
+							   ,PI_CDCONVAL IN VARCHAR2
+                               ,PI_DATAINI   IN DATE
+                               ,PI_DATAFIM   IN DATE
+                               )   RETURN NUMBER;
+
+
+/*
+-* NOME      : GET_PAGAMENTO_LIQ_COD_RES
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO LIQUIDADO A UMA DETERMINADA DATA POR CODIGO DE SINISTRO
+-* AUTOR     : JOAO Ribeiro
+-* DATA      : 26-05-2017
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PAGAMENTO_LIQ_COD_RES ( P_CDUNIECO IN NUMBER
+                                , P_CDRAMO IN NUMBER
+								, P_AAAPERTU IN NUMBER
+								, P_STATUS IN VARCHAR2
+								, P_NMSINIES IN NUMBER
+								, P_CDCONVAL IN VARCHAR2
+                                , P_DATA_REF IN DATE) RETURN NUMBER;
+
+
+/*
+-* NOME      : FUN_GARANT_DINAMICAS
+-* OBJECTIVO : RETORNA O RISCO ACUMULADO DAS GARNATIAS DINAMICAS OU O NUMERO DE GARANTIAS DINAMICAS EXISTENTES PARA A ENTIDADE DE RISCO INDICADA
+-* AUTOR     : JOAO Ribeiro
+-* DATA      : 19-06-2017
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_GARANT_DINAMICAS (  PI_CDPERSON IN NUMBER
+                          , PI_TIPO IN VARCHAR2
+                          , PI_TIP IN NUMBER) RETURN number;
+
+
+FUNCTION FUN_DADOS_RISCO (P_FEFINAL IN DATE
+                           , P_CDROL IN VARCHAR2
+						   , P_NMGARANT NUMBER  
+						   , P_NMPROPUE IN NUMBER 
+						   , P_STATUS IN VARCHAR2
+						   , P_CDRAMO IN VARCHAR2
+						   , P_CDUNIECO IN NUMBER
+						   , P_NMSOLICI IN NUMBER) RETURN VARCHAR2; 
+
+
+FUNCTION FUN_PRODUTO (P_CDRAMO IN VARCHAR2 ) RETURN VARCHAR2;
+
+/*
+-* NOME      : FUN_PAE_GRUPO
+-* OBJECTIVO : RETORNA O SUMATÃ¿RIO DOS PRÃ¿MIOS ANUAIS ESTIMADOS DAS APÃ¿LICES DO MESMO GRUPO
+-* AUTOR     : JOAO Ribeiro
+-* DATA      : 11-03-2025
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_PAE_GRUPO ( PI_GRUPO IN VARCHAR2 ) RETURN number;
+
+
+/****************************/
+ PRAGMA RESTRICT_REFERENCES (GET_RESSEGURO_PERCENTAGEM,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ATRIBUTO_APOLICE_MES, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_VARIACAO_CAP,WNDS);
+ PRAGMA RESTRICT_REFERENCES (IS_RECIBO_PPD,WNDS);
+ PRAGMA RESTRICT_REFERENCES (IS_ANULACAO_APOLICE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (IS_SUP_TOTAL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (IS_CAP_DIFERENTE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_RESSEG_CED_DATA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PAGAMENTO_LIQ_RES,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_CONSORCIO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PART_CONSORCIO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_V_COMUNIC_PAG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_REAJ_RECOB_SIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_SINISTRO_VERIFICADO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DT_VIGENCIA_APOLICE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PROVISAO_MES_PRELIQ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_RESSEG_CED_SIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PAGAMENTO_LIQ_SIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_GARANTIAS_VIGOR_APOLICE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_NUMERO_BENEFECIARIOS,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TOMADOR_DSR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_MOTIVO_ANUL_LOGI,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_COD_MOTIVO_ANUL_LOGI,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TIPO_COSEGURO_PROPOSTA, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_MERCADO_PROPOSTA, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ANO_SUBSCRICAO_RECIBO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_RESSEGURO_MPAGOSIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TRATADO_RESSEGURO_MPAGOSIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_RESSEGURO_MSINIVAL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TRATADO_RESSEGURO_MSINIVAL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PERCENTAGEM_COSEGURO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TIPO_COSEGURO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_V_DIVIDA_PREMIO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_D_DIVIDA_PREMIO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_MAX_DATA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DATA_EXIGIBILIDADE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_N_COMUNIC_MORA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_N_PAG_NAO_LIQ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PAG_AUTOR_SIN_M111,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_N_SIN_SEM_PAG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_V_SINISTRO_PER,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_GAR_PENDENTE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PMR_VIGENCIA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_GAR_VIGOR_M111,WNDS);
+ PRAGMA RESTRICT_REFERENCES (IS_APOLICE_VALIDA, WNDS);
+ PRAGMA RESTRICT_REFERENCES (IS_TIPOAVISO_VALIDO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ATRIBUTO_APOLICE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TIPOTOMADOR_APOLICE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_INTERVENTOR_APOLICE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DT_ANULACAO_REAL_APOL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DT_ANULACAO_APOLICE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_CAPITAL_VIGOR_TOMADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ULTIMA_TAXA_TIPO_TOMADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DADOS_ADERENTE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DATA_PROVISAO_SIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PROVISAO_SIN_DATA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PRODUCAO_LIQUIDA_MOV,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_REAJPROV_SINISTRO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_V_SINISTROS_ACUMULADOS,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PARTICIPACAO_RESULT_ACUM,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PROVISAO_SIN_ACUM,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_ULTIMA_DATA_PART_RESULT,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PART_RESULT_PAGA_VIG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_BONIF_APOL_VIG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PRIM_ANO_FIM_VIGENCIA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_BRUTO_APOL_PER,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_BRUTO_APOL_VIG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DET_ATRIBUTO_APOL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CONCEITO_APOL_PER,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CONCEITO_APOL_VIG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DATA_EMISSAO_APOLICE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ULTIMA_TAXA_TOMADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TAXA_MEDIA_TOMADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DT_PLAF_CAU_VIGOR_ENT,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PLAF_CAU_VIGOR_ENT,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_RESP_EXTRA_PAT_ENT,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_SOLVABILIDADE_ENT,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PROD_CONT_TOMADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PROD_NOVA_TOMADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_COMISSOES_BRUTAS_ACUM,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DATA_RENOVACAO_APOLICE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_COMISSOES_BRUTAS_ACUM_TEMP,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_APOL_PER,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_APOL_VIG ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_P_REAL_ACUM_DT_DCL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_P_REAL_ACUM_DT_REG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_VALOR_PROV_SIN ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DATA_PROV_SIN ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_VOL_VENDAS_EUR ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ATRIB_APOLICE_POR_VIG ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PROCESSO_COM_SINISTRO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TAXA_COMISSAO_CON,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DATAINI_REF_M9_10,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DATAFIM_REF_M9_10,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_VOL_NEG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_GESTOR_ENTIDADE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_MARCAS,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PAISES_IMPEXP,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_VALOR_CONCEITO_CONTENC,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_VALOR_MOV_ECON,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ESTADO_ANTERIOR_REC,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PAGAMENTO_AUTORIZADO_SIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ATRIB_SIT_POR_VIG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DT_VENCIMENTO_RECIBO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DPR_FALTA_APOLICE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_BALCAO_BANCO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_MORA_RECIBO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIOS_APOL_PER,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_MERCADO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_V_RECIBO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_V_FACTURA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_V_REC_APOL_VIG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_V_FACT_APOL_VIG,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PRIM_ANO_VIGENCIA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ANO_OCURR_SIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TIPO_REC_PAG_SIN,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIOS_PROC_APOL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIOS_DIV_APOL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TIPO_COBERTURA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DATA_SUBSCRICAO_PREMIO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_N_GARANTIAS_PROPOSTA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_VALOR_CAP_PAGO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_GRUPO_ENTIDADE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RELATORIOS_VA_FONTE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RELATORIOS_RCC_FONTE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_REAL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_REAL_ACUM,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_IMPRESSOES_OD62_LASTDATE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_IMPRESSOES_OD62_CONTADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_MRECIDET, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RECIBO_PARC_PAGO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TVALOPOL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_ZWORKCOM, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_COMAGEN_N,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_COMERCIAL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_COMERCIAL_MI, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_COMERCIAL_ME, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREM_COM_ME_isento, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREM_COM_ME_Nisento, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CUSTO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_SELO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_PPD, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_SELO_PPD, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_COMP, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_ESTUDO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_BRUTO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTA, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTB, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_COMERCIAL_RC, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_COMERCIAL_RP, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTC, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CAPITAL_COMERCIAL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CAPITAL_POLITICO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_CC, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_CP, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PAMI, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PAMA, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIOS_PROC, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIOS_PROCREC, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_COM_ANU, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_BONIFICACAO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_AJUSTE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_AJUSTE_MI, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_AJUSTE_ME, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CAP_SEG, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CAP_SEG_CRE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CAP_SEG_FAB, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CAP_SEG_FORA_OCDE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_PAP, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTD1, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_SELO_GAR, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_OUTROS_IMP, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_OTROS, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTF, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTG, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_VALOR_LIQ, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTH, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_ANO_VIG, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PTI, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RIE_ACU, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RIE_ACU_POT, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RIE_ACU_EFE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RIE_ACU_MAIS, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_GAR, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_GAR_EFE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_GAR_POT, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_GAR_MAIS, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_POL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (PRO_GARAN_VIG, WNDS);
+ PRAGMA RESTRICT_REFERENCES (PRO_GARAN_VIG_RAMO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_COEFI_REAL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RIE_ACU_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RIE_ACU_GRUPO_REAL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_RIE_ACU_GRUPO_REAL_MAIS, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_GAR_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_POL_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAF_ENT_IND_CRE , WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAF_ENT_GLOB_CRE , WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAF_ENT_VIG_CRE , WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAF_ENT_CAU ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAF_VIG_CAU , WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_ENT_GRUPO ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_NUM_ENT_GRUPO ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_PLAF_ENT_CRE , WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_PLAF_ENT_CAU , WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAFCRE_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAFCRE_VIG_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAFCAU_VIG_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAFCAU_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAFCRE_GRUPO_REAL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAFCAU_GRUPO_REAL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_AMENAZA_NUM, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_AMENAZA_MON, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_SINIESTRO_NUM, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_SINIESTRO_MON, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_CF_ORGAO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_PLAFOND_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_CALCULA_REAL , WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_COEFICIENTE_REAL , WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_OBTENER_GRUPO , WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_PLAF_GRUP_PRO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_AMENAZA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_SINIESTRO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_TOMADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (Pl_Entidad,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_SEC3_TOMADOR ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_GLOBAL_TOMADOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_ATRIBUTO_POLIZA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_CONSORCIO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_VALORES_DIVIDA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DT_ESTADO_ANALISE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_COD_ESTADO_ANALISE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DES_ESTADO_ANALISE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_ANALISTA_ANALISE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAF_PAIS,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DES_GRUPCOBERT,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_ULTIMA_DPR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PERCENTAGEM_TOTAL_COAS,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_NUMDPR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_ANO_ANTERIOR,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIO_TOTAL,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_SINISTROS_ACUM,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_SALDO_SINISTROS,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PART_RESULT_ACUM,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PART_RESULT,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PERC_DED_APOLICE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_COMISSAO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_CAMBIO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DATAOCURR_SIN, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_INTERVENTOR, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PREMIOS_PROCAPOL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_DECLARACOES_EM_FALTA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TAXA_COMPROMISSO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_ACERTO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PARTICIPACAO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_IVA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_VALOR_FACTURA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TOTAL_IMPOSTO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DATA_VENCIMENTO_REC,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_CLASSE_FACTURA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ATRIBUTOS_SINISTRO,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_VRP,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_VCEP,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_NMEVENTO_ANALISE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_N_INTERVENIENTES_SIN, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PREMIO_CEDIDO_REC, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_TIPO_CEDENCIA_REC,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DADOS_ADERENTE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_TIPO_IDE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ATRIBUTO_APOLICE_DATA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_ATRIB_APOLICE_DATA,WNDS);
+ PRAGMA RESTRICT_REFERENCES (TIPO_ROL, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIOBRUTO_ACUM_ENT, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PREMIOBRUTO_ACUM_GRUPO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (GET_PAIS_ENT_RISCO, WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PLAFCRE_GRUPO_REAL_NODATE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_PLAFOND_GRUPO_NODATE, WNDS);
+ PRAGMA RESTRICT_REFERENCES (PL_PLAF_ENT_CRE_NODATE,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_DADOS_RISCO ,WNDS);
+ PRAGMA RESTRICT_REFERENCES (FUN_PRODUTO,WNDS); 
+
+
+END Pkg_Formulas_Cosec;
+
+-- ===== BODY (PACKAGE BODY) =====
+
+PACKAGE BODY	"PKG_FORMULAS_COSEC" AS
+/*
+-*
+-* ÚLTIMAS ALTERAÇÕES AO PACKAGE
+-*
+-*   DATA       AUTOR               DESCRIÇÃO
+-*   ========== ================== ===================================================
+-*   25-11-2004 JOSÉ VIEGAS        Acrescentado controlo de versões do package
+-*   03-12-2004 BRIGIDA RAMOS      Acrescentado nova função GET_MERCADO_PROPOSTA e
+-*                                   GET_TIPO_COSEGURO_PROPOSTA
+-*   07-12-2004 BRIGIDA RAMOS      Acrescentado nova função GET_MOTIVO_ANUL_LOGI
+-*   10-12-2004 BRIGIDA RAMOS      Acrescentado nova função GET_TOMADOR_DSR
+-*   10-12-2004 BRIGIDA RAMOS      Acrescentado nova função GET_NUMERO_BENEFICIARIOS
+-*   03-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_PAGAMENTO_LIQ_SIN
+-*   05-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_RESSEG_CED_SIN
+-*   06-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_PROVISAO_MES_PRELIQ
+-*   07-01-2005 BRIGIDA RAMOS      Alteração da função FUN_N_COMUNIC_MORA
+-*   10-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_DT_VIGENCIA_APOLICE
+-*   10-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_SINISTRO_VERFICADO
+-*   10-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_REAJ_RECOB_SIN
+-*   10-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_V_COMUNIC_PAG
+-*   12-01-2005 JOSÉ VIEGAS        Acrescentada nova função FUN_TAXA_CONSÉRCIO para o E.E7 e E.E8
+-*   12-01-2005 JOSÉ VIEGAS				 Acrescentada nova função FUN_PART_CONSÉRCIO para o E.E7 e E.E8
+-*   12-01-2005 JOSÉ VIEGAS        Alterada função FUN_TIPOAVISO para novos tiposaviso (EC,FC,GC e G1C)
+-*   13-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_PAGAMENTO_LIQ_RES
+-*   13-01-2005 BRIGIDA RAMOS      Acrescentado nova função GET_RESSEG_CED_DATA
+-*   17-01-2005 BRIGIDA RAMOS      Alteração da função GET_PAGAMENTO_LIQ_SIN
+-*   17-01-2005 BRIGIDA RAMOS      Alteração da função GET_PAGAMENTO_LIQ_RES
+-*   18-01-2005 JOSÉ VIEGAS        Alterada função FUN_TIPOAVISO para novos tiposaviso (6E,7E e 8E)
+-*   18-01-2005 JOSÉ VIEGAS        Acrescentada nova função IS_ANULACAO_APOLICE usada nos novos tiposaviso
+-*   18-01-2005 JOSÉ VIEGAS        Acrescentada nova função IS_SUP_TOTAL usada nos novos tiposaviso
+-*   18-01-2005 JOSÉ VIEGAS        Acrescentada nova função IS_CAP_DIFERENTE usada nos novos tiposaviso
+-*   20-01-2005 BRIGIDA RAMOS      Alteração da função GET_ANO_SUBSCRICAO_RECIBO
+-*   21-01-2005 JOSÉ VIEGAS        Correcção da conversão de numeros em formato de texto nas funções
+-*                                 FUN_PART_CONSORCIO, FUN_TAXA_CONSORCIO e FUN_TAXA_PAP
+-*   21-01-2005 José Viegas       Alterada função FUN_TIPOAVISO na forma de classificação dos 6E,7E e 8E
+-*   27-01-2005 BRIGIDA RAMOS      Correcção GET_TOMADOR_DSR
+-*   27-01-2005 BRIGIDA RAMOS      Correcção GET_NUMERO_BENEFICIARIOS
+-*   03-02-2005 JOSÉ VIEGAS        Acrescentada nova função que retorna a variação de capital seguro com base num recibo
+-*   21-03-2005 JOSÉ VIEGAS        Corrigida formula que obtem taxa para prever maior numero de casas decimais
+-*   13-04-2005 JOSÉ VIEGAS        Adicionado o tipo 76 a facturas APC
+-*   03-06-2005 BRIGIDA RAMOS      Adicionada função FUN_DATA_VENCIMENTO_REC
+-*   13-09-2005 BRIGIDA RAMOS      Correcção da função FUN_GRUPO_ENTIDADE
+-*   27-10-2005 BRIGIDA RAMOS      Correcção do procedimento PRO_GARAN_VIG
+-*   18-01-2006 JOSÉ VIEGAS        Correcção das funções que convertem o valor FEPERDEC na tabela de declarações de venda
+-*                                 para data, indicando que o mês está em Português.
+-*   23-01-2006 BRIGIDA RAMOS      Alteracao da função GET_D_DIVIDA_PREMIO
+-*   14-02-2006 JOSÉ VIEGAS        ACRESCIMO DA FUNÇÃO GET_CLASSE_FACTURA
+-*   04-04-2006 JOSÉ VIEGAS        ACRESCIMO DO ESTADO 16 E 17 NO ESTADO ANTERIOR
+-*   03-05-2006 JOSÉ VIEGAS        ACRESCIMO DA FUNÇÃO GET_ATRIBUTO_APOLICE_MES
+-*   06-09-2006 JOSÉ VIEGAS        HINT NA FUNCAO FUN_PROVISAO_SIN_DATA /*+RULE * APÓS MIGRAÇÃO PARA 9I
+-*   08-09-2006 JOSE VIEGAS        OPTIMIZAÇÃO DA FUNÇÃO GET_VOL_VENDAS_EUR POR MOTIVOS DE MIGRAÇÃO PARA 9I
+-*   08-09-2006 JOSE VIEGAS        OPTIMIZAÇÃO DA FUNÇÃO GET_RESSEG_SEG_DATA POR MOTIVOS DE MIGRAÇÃO PARA 9I
+-*   27-09-2006 BRIGIDA RAMOS      ACRESCIMO DA FUNÇÃO QUE RETORNA O VALOR DO ATRIBUTO DO SINISTRO GET_ATRIBUTOS_SINISTRO
+-*   14-12-2006 BRIGIDA RAMOS      FUNÇÃO  GET_N_INTERVENIENTES_SIN
+-*   20-12-2006 JOSÉ VIEGAS        FUNÇÃO GET_PREMIO_CEDIDO_REC E GET_TIPO_CEDENCIA_REC
+-*   26-12-2006 JOSÉ VIEGAS        CORRECÇÃO DAS FUNÇÕES GET_PREMIO_CEDIDO_REC E GET_TIPO_CEDENCIA_REC
+-*   27-12-2006 BRIGIDA RAMOS      ALTERAÇÃO DA FUNÇÃO GET_TIPO_CEDENCIA_REC
+-*   08-01-2007 JOSÉ VIEGAS        ACRESCIMO DO TIPO 76 À FUNÇÃO GET_CLASSE_FACTURA
+-*                                 CORRIGIDA FUNÇÃO GET_TIPO_CEDENCIA_REC PARA NÃO CONSIDERAR 'QPCREPOL'
+-*   28-03-2007 BRIGIDA RAMOS      ALTERAÇÃO DA FUNÇÃO GET_TIPO_CEDENCIA_REC
+-*   28-11-2008 VITOR RODRIGUES    INCLUSÃO DOS TIPOS DE RECIBO 73,74,75 NA FUN_TIPOAVISO
+-*   17-02-2009 ARLINDO RODRIGUES  ADICIONADA A FUNCAO GET_ATRIBUTO_APOLICE_DATA
+-*   20-04-2009 JOAO BERNARDINO    ALTERADA A PROCEDURE PRO_GARAN_VIG
+-*   18-12-2009 JOAO BERNARDINO    ADICIONADA A FUNCAO FUN_PREMIOBRUTO_ACUM_ENT
+-*   18-12-2009 JOAO BERNARDINO    ADICIONADA A FUNCAO FUN_PREMIOBRUTO_ACUM_GRUPO
+-*   13-03-2013 MÁRIO DE ALMEIDA   INTRODUÇÃO DOS NOVOS CONCEITOS PARA O RECIBO
+-*	 15-07-2014 JOÃO RIBEIRO	     INTRODUÇÃO DO PRODUTO 106 NA FUNÇÃO FUN_TIPOAVISO E COLOCAÇÃO DOS TIPOS DE RECIBO 47,48 E 49 PARA OS DOCUMENTOS E.E1, E.E4 E E.E9.1
+-*   10-10-2014 João Ribeiro	     Correcção à função GET_DPR_FALTA_APOLICE para incluir o estado da apólice na query do cursor para melhorar a performance da função
+
+-*/
+  VERSAO         CONSTANT NUMBER:=166;
+  DATA_VERSAO    CONSTANT DATE:= TO_DATE('06-01-2010 13:00','DD-MM-YYYY HH24:MI');
+  AUTOR_PACKAGE  CONSTANT VARCHAR2(100):='Eng. José Viegas';
+  AUTOR_VERSAO   CONSTANT VARCHAR2(100):='José Viegas';
+
+/*
+-* NOME      : GET_PACKINFO
+-* OBJECTIVO : MANTER INFORMAÇÃO SOBRE VERSÃO DO PACKAGE
+-* UTILIZACAO: PKG_FORMULAS_COSEC.GET_PACKINFO('VERSAO');
+-* AUTOR     : Eng. José Viegas
+-* DATA      : 25-11-2004
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PACKINFO (P_TIPO_INFO VARCHAR2 DEFAULT 'COMPLETE') RETURN VARCHAR2 IS
+AUX VARCHAR2(200);
+BEGIN
+	IF P_TIPO_INFO = INFO_VERSAO THEN  /* DEVOLVE VERSÃO DO PACKAGE */
+	  RETURN 'v'||TO_CHAR(VERSAO);
+	ELSIF P_TIPO_INFO = INFO_DATA_VERSAO THEN
+	  RETURN TO_CHAR(DATA_VERSAO,'YYYY-MM-DD HH24:MI');
+	ELSIF P_TIPO_INFO = INFO_AUTOR_PACKAGE THEN
+	  RETURN AUTOR_PACKAGE;
+	ELSIF P_TIPO_INFO = INFO_AUTOR_VERSAO THEN
+	  RETURN AUTOR_VERSAO;
+	ELSIF P_TIPO_INFO = INFO_DATA_PACKAGE THEN
+	  BEGIN
+		SELECT
+		  TO_CHAR(CREATED,'YYYY-MM-DD HH24:MI')
+		INTO
+		  AUX
+		FROM
+		  ALL_OBJECTS
+		WHERE
+			OBJECT_NAME='PKG_FORMULAS_COSEC'
+		AND OBJECT_TYPE='PACKAGE BODY'
+		AND OWNER = (SELECT USERNAME FROM USER_USERS);
+		RETURN AUX;
+	  EXCEPTION
+		WHEN OTHERS THEN
+		 RETURN 'PKG_FORMULAS_COSEC v'||VERSAO||'('||TO_CHAR(DATA_VERSAO,'YYMMDDHH24MI')||')';
+	  END;
+	ELSIF P_TIPO_INFO = INFO_DATA_INSTALACAO THEN
+	  BEGIN
+		SELECT
+		  TO_CHAR(LAST_DDL_TIME,'YYYY-MM-DD HH24:MI')
+		INTO
+		  AUX
+		FROM
+		  ALL_OBJECTS
+		WHERE
+			OBJECT_NAME='PKG_FORMULAS_COSEC'
+		AND OBJECT_TYPE='PACKAGE BODY'
+		AND OWNER = (SELECT USERNAME FROM USER_USERS);
+		RETURN AUX;
+	  EXCEPTION
+		WHEN OTHERS THEN
+		 RETURN 'PKG_FORMULAS_COSEC v'||VERSAO||'('||TO_CHAR(DATA_VERSAO,'YYMMDDHH24MI')||')';
+	  END;
+	ELSIF P_TIPO_INFO = INFO_OWNER THEN
+	  SELECT USERNAME INTO AUX FROM USER_USERS;
+	  RETURN AUX;
+	ELSE
+	  RETURN 'PKG_FORMULAS_COSEC v'||VERSAO||'('||TO_CHAR(DATA_VERSAO,'YYMMDDHH24MI')||')';
+	END IF;
+END GET_PACKINFO;
+
+
+  /*
+   NOME : GET_RESSEGURO_GET_RESSEGURO_PERCENTAGEM
+   *  OBJECTIVO :
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: ALDO TITA
+*/
+FUNCTION GET_RESSEGURO_PERCENTAGEM( PI_CDUNIECO IN NUMBER
+                                ,PI_CDRAMO   IN NUMBER
+                                ,PI_AAAPERTU IN NUMBER
+                                ,PI_STATUS   IN VARCHAR2
+                                ,PI_NMSINIES IN NUMBER
+                                ,PI_CDCONVAL IN VARCHAR2) RETURN NUMBER
+IS
+AUX_N NUMBER;
+BEGIN
+	SELECT ABS(NVL(v1.PTIMPRET, 0) + NVL(v1.PTIMPREF, 0) + NVL(v1.PTIMPOLR, 0)) / (ABS(NVL(v1.PTIMPRET, 0) + NVL(v1.PTIMPREF, 0) + NVL(v1.PTIMPOLR, 0)) + ABS(NVL(v1.PTIMPOBL, 0) + NVL(v1.PTIMPFAC, 0) + NVL(v1.PTIMPOLC, 0)))
+	INTO AUX_N
+	FROM msinival v1
+	WHERE v1.cdunieco = PI_CDUNIECO
+		AND v1.cdramo = PI_CDRAMO
+		AND v1.aaapertu = PI_AAAPERTU
+		AND v1.STATUS = PI_STATUS
+		AND v1.nmsinies = PI_NMSINIES
+		AND v1.cdconval = PI_CDCONVAL
+		AND v1.nmordina = (
+			SELECT max(v2.nmordina)
+			FROM msinival v2
+			WHERE v2.cdunieco = v1.cdunieco
+				AND v2.cdramo = v1.cdramo
+				AND v2.aaapertu = v1.aaapertu
+				AND v2.STATUS = v1.STATUS
+				AND v2.nmsinies = v1.nmsinies
+				AND v2.cdconval = v1.cdconval
+				AND v2.ptpagos <> 0
+			);
+
+    RETURN NVL(AUX_N,0);
+
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_RESSEGURO_PERCENTAGEM;
+
+/*
+-*  NOME      : GFUN_TIPO_IDE
+-*  OBJECTIVO : RETORNA A DESCRICAO CONSOANTE O IDE DO TOMADOR
+-*  UTILIZAÇÃO:
+-*  VERSÃO    : 1.0
+-*  AUTOR     : VITOR RODRIGUES
+-*  DATA      : 12-01-2009
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   12-01-2009 VITOR RODRIGUES    DEVOLVER A DESCRICAO DO TIPO DE IDE*/
+
+
+FUNCTION FUN_TIPO_IDE (P_CDTIPIDE IN VARCHAR2 ) RETURN VARCHAR2 IS
+
+AUX_DESCRIPC TMANTENI.DESCRIPC%TYPE;
+
+BEGIN
+
+	SELECT TIPO_IDE.DESCRIPC
+	INTO AUX_DESCRIPC
+	FROM TMANTENI TIPO_IDE
+	WHERE 1 = 1
+		AND tipo_ide.codigo = P_CDTIPIDE
+		AND tipo_ide.cdtabla = 'TTIPOIDE';
+
+	RETURN AUX_DESCRIPC;
+
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END ;
+
+
+/*
+-*  NOME      : GET_PREMIO_CEDIDO_REC
+-*  OBJECTIVO : RETORNA O VALOR DO PRÉMIO CEDIDO DUM RECIBO A UMA DADA DATA
+-*  UTILIZAÇÃO: UTILIZADO NO MAPA M158
+-*  VERSÃO    : 1.0
+-*  AUTOR     : JOSE VIEGAS
+-*  DATA      : 20-JUN-2006
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   20-12-2006 JOSE VIEGAS     ESTADO DOS MOVIMENTOS DEVE SER 'M' E NÃO 'P'
+-*
+*/
+FUNCTION GET_PREMIO_CEDIDO_REC(P_CDUNIECO IN VARCHAR2
+							, P_NMRECIBO IN NUMBER
+							, P_DATA IN DATE DEFAULT SYSDATE) RETURN NUMBER
+IS
+  NRET NUMBER;
+BEGIN
+	SELECT SUM(DECODE(VAL_RESSEG.CDCOREAS, 'PRIMACRE', VAL_RESSEG.PTIMPORT, 'PRIMACAU', VAL_RESSEG.PTIMPORT, 'PRIMAOPL', VAL_RESSEG.PTIMPORT, 'PRIMAFAC', VAL_RESSEG.PTIMPORT, 0) * DECODE(SUBSTR(TRIM(MOV_RESSEG.CDNEGOCI), 1, 1), '2', - 1, DECODE(TRIM(MOV_RESSEG.CDNEGOCI), '503', - 1, '***', - 1, 1)))
+	INTO NRET
+	FROM MMOREREA MOV_RESSEG
+		,MTARITRA VAL_RESSEG
+	WHERE MOV_RESSEG.CDUNIECO = P_CDUNIECO
+		AND MOV_RESSEG.NMRECIBO = P_NMRECIBO
+		--  AND MOV_RESSEG.ESTADO   = 'P'
+		AND VAL_RESSEG.NMMOVIM = MOV_RESSEG.NMMOVIM
+		AND VAL_RESSEG.NMRECIBO = MOV_RESSEG.NMRECIBO
+		AND VAL_RESSEG.NMPOLIZA = MOV_RESSEG.NMPOLIZA
+		AND VAL_RESSEG.ESTADO = MOV_RESSEG.ESTADO
+		AND VAL_RESSEG.CDRAMO = MOV_RESSEG.CDRAMO
+		AND VAL_RESSEG.CDUNIECO = MOV_RESSEG.CDUNIECO;
+
+	RETURN NVL(NRET,0);
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN 0;
+END GET_PREMIO_CEDIDO_REC;
+
+
+FUNCTION Tipo_rol (wcdramo NUMBER,wcdrol VARCHAR2)RETURN VARCHAR2 IS
+   rol VARCHAR2(2);
+BEGIN
+ IF wcdrol = 'CDROLTOM' THEN
+   SELECT CDROLTOM
+     INTO rol
+     FROM mparapro
+    WHERE cdramo = wcdramo;
+     RETURN (rol);
+ ELSIF wcdrol = 'CDROLASE' THEN
+    SELECT CDROLASE
+      INTO rol
+      FROM mparapro
+     WHERE cdramo = wcdramo;
+        RETURN (rol);
+ ELSIF wcdrol = 'CDROLRIE' THEN
+    SELECT CDROLRIE
+      INTO rol
+      FROM mparapro
+     WHERE cdramo = wcdramo;
+        RETURN (rol);
+ ELSIF wcdrol ='CDROLADE' THEN
+     SELECT CDROLADE
+       INTO rol
+       FROM mparapro
+      WHERE cdramo = wcdramo;
+     RETURN (rol);
+ ELSIF wcdrol ='CDROLOTO' THEN
+     SELECT CDROLOTO
+       INTO rol
+       FROM mparapro
+      WHERE cdramo = wcdramo;
+      RETURN (rol);
+END IF;
+
+RETURN NULL;
+
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+		RETURN NULL;
+END;
+
+
+/*
+-*  NOME      : GET_TIPO_CEDENCIA_REC
+-*  OBJECTIVO : RETORNA TIPO DE RESSEGURO DO RECIBO
+-*  UTILIZAÇÃO: UTILIZADO NO MAPA M158
+-*  VERSÃO    : 1.0
+-*  AUTOR     : JOSE VIEGAS
+-*  DATA      : 20-JUN-2006
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   20-12-2006 JOSE VIEGAS     ESTADO DOS MOVIMENTOS DEVE SER 'M' E NÃO 'P'
+-*
+*/
+FUNCTION GET_TIPO_CEDENCIA_REC(P_CDUNIECO IN VARCHAR2
+							, P_NMRECIBO IN NUMBER
+							, P_DATA IN DATE DEFAULT SYSDATE) RETURN VARCHAR2
+IS
+  NRET VARCHAR2(50);
+BEGIN
+	SELECT DISTINCT DECODE(VAL_RESSEG.CDCONTRE, 'FACPURO', 'F', 'OLCRECOM', 'F', 'QPCRECOM', 'T', 'QPCAUCAO', 'T', 'QPCAU1', 'T', 'QPCREPOL', 'T', NULL)
+	INTO NRET
+	FROM MMOREREA MOV_RESSEG
+		,MTARITRA VAL_RESSEG
+	WHERE MOV_RESSEG.CDUNIECO = P_CDUNIECO
+		AND MOV_RESSEG.NMRECIBO = P_NMRECIBO
+		AND MOV_RESSEG.ESTADO = 'M'
+		AND VAL_RESSEG.NMPRELIQ = (
+			SELECT MIN(Z.NMPRELIQ)
+			FROM MTARITRA Z
+			WHERE 1 = 1
+				AND Z.NMSUPLEM = VAL_RESSEG.NMSUPLEM
+				AND Z.NMRECIBO = VAL_RESSEG.NMRECIBO
+				AND Z.NMPOLIZA = VAL_RESSEG.NMPOLIZA
+				AND Z.ESTADO = VAL_RESSEG.ESTADO
+				AND Z.CDRAMO = VAL_RESSEG.CDRAMO
+				AND Z.CDUNIECO = VAL_RESSEG.CDUNIECO
+			)
+		AND VAL_RESSEG.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MTARITRA X
+			WHERE 1 = 1
+				AND X.NMRECIBO = VAL_RESSEG.NMRECIBO
+				AND X.NMPOLIZA = VAL_RESSEG.NMPOLIZA
+				AND X.ESTADO = VAL_RESSEG.ESTADO
+				AND X.CDRAMO = VAL_RESSEG.CDRAMO
+				AND X.CDUNIECO = VAL_RESSEG.CDUNIECO
+			)
+		AND VAL_RESSEG.NMMOVIM = MOV_RESSEG.NMMOVIM
+		--  AND VAL_RESSEG.CDCONTRE!= 'QPCREPOL'
+		AND VAL_RESSEG.NMRECIBO = MOV_RESSEG.NMRECIBO
+		AND VAL_RESSEG.NMPOLIZA = MOV_RESSEG.NMPOLIZA
+		AND VAL_RESSEG.ESTADO = MOV_RESSEG.ESTADO
+		AND VAL_RESSEG.CDRAMO = MOV_RESSEG.CDRAMO
+		AND VAL_RESSEG.CDUNIECO = MOV_RESSEG.CDUNIECO;
+
+	RETURN NRET;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN '';
+END GET_TIPO_CEDENCIA_REC;
+
+
+/*
+-* NOME      : GET_NMEVENTO_ANALISE
+-* OBJECTIVO : RETORNA O NÃO DE EVENTO DE ANALISE VÁLIDO PARA M101
+-* ESCOLHIDO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 19-12-2006
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_NMEVENTO_ANALISE(PI_CDPERSON IN NUMBER
+                 ) RETURN NUMBER IS
+ AUX_PEDIDO CO_DETAANR.NMEVENTO%TYPE;
+ AUX_N NUMBER;
+BEGIN
+	SELECT COUNT(*)
+	INTO AUX_N
+	FROM CO_DETAANR DETALHEANALISERISCO
+		,CO_PEDIANR PEDIDOANALISERISCO
+	WHERE 1 = 1
+		AND DETALHEANALISERISCO.FEULTEST = (
+			SELECT MAX(X.FEULTEST)
+			FROM CO_DETAANR X
+			WHERE X.NMPEDIDO = DETALHEANALISERISCO.NMPEDIDO
+				AND X.CDEVENTO = DETALHEANALISERISCO.CDEVENTO
+			)
+		AND DetalheAnaliseRisco.cdevento IN (
+			'PL'
+			,'PC'
+			)
+		AND CASE DETALHEANALISERISCO.CDESTADO
+			WHEN 'PD'
+				THEN 'S'
+			WHEN 'PA'
+				THEN 'S'
+			ELSE 'N'
+			END = 'S'
+		AND DetalheAnaliseRisco.nmpedido = PedidoAnaliseRisco.nmpedido
+		AND PEDIDOANALISERISCO.SWANALIS = 'N'
+		AND PEDIDOANALISERISCO.CDPERSON = PI_CDPERSON;
+
+	IF AUX_N =0 THEN
+		RETURN NULL;
+	ELSE
+		IF AUX_N >1 THEN
+			BEGIN
+				SELECT DETALHEANALISERISCO.NMEVENTO
+				INTO AUX_PEDIDO
+				FROM CO_DETAANR DETALHEANALISERISCO
+					,CO_PEDIANR PEDIDOANALISERISCO
+				WHERE 1 = 1
+					AND DETALHEANALISERISCO.FEULTEST = (
+						SELECT MAX(X.FEULTEST)
+						FROM CO_DETAANR X
+						WHERE X.NMPEDIDO = DETALHEANALISERISCO.NMPEDIDO
+							AND X.CDEVENTO = DETALHEANALISERISCO.CDEVENTO
+						)
+					AND DetalheAnaliseRisco.cdevento = 'PC'
+					AND DetalheAnaliseRisco.nmpedido = PedidoAnaliseRisco.nmpedido
+					AND PEDIDOANALISERISCO.SWANALIS = 'N'
+					AND PEDIDOANALISERISCO.CDPERSON = PI_CDPERSON;
+
+
+				RETURN AUX_PEDIDO;
+			END;
+		ELSE
+			BEGIN
+				SELECT DETALHEANALISERISCO.NMEVENTO
+				INTO AUX_PEDIDO
+				FROM CO_DETAANR DETALHEANALISERISCO
+					,CO_PEDIANR PEDIDOANALISERISCO
+				WHERE 1 = 1
+					AND DETALHEANALISERISCO.FEULTEST = (
+						SELECT MAX(X.FEULTEST)
+						FROM CO_DETAANR X
+						WHERE X.NMPEDIDO = DETALHEANALISERISCO.NMPEDIDO
+							AND X.CDEVENTO = DETALHEANALISERISCO.CDEVENTO
+						)
+					AND DetalheAnaliseRisco.cdevento IN (
+						'PL'
+						,'PC'
+						)
+					AND CASE DETALHEANALISERISCO.CDESTADO
+						WHEN 'PD'
+							THEN 'S'
+						WHEN 'PA'
+							THEN 'S'
+						ELSE 'N'
+						END = 'S'
+					AND DetalheAnaliseRisco.nmpedido = PedidoAnaliseRisco.nmpedido
+					AND PEDIDOANALISERISCO.SWANALIS = 'N'
+					AND PEDIDOANALISERISCO.CDPERSON = PI_CDPERSON;
+
+				RETURN AUX_PEDIDO;
+			END;
+		END IF;
+    END IF;
+EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END GET_NMEVENTO_ANALISE;
+
+
+/*
+-* NOME      : GET_N_INTERVENIENTES_SIN
+-* OBJECTIVO : RETORNA O NÃO DE INTERVENIENTES DO SINISTRO CONFORME O ROL
+-* ESCOLHIDO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 14-12-2006
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_N_INTERVENIENTES_SIN(PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_AAAPERTU IN NUMBER
+								,PI_STATUS IN VARCHAR2
+								,PI_NMSINIES IN NUMBER
+								,PI_CDROL IN VARCHAR2
+									) RETURN NUMBER IS
+AUX_NUM NUMBER;
+BEGIN
+	SELECT COUNT(*)
+	INTO AUX_NUM
+	FROM MSINIPER
+	WHERE 1 = 1
+		AND CDROL = PI_CDROL
+		AND NMSINIES = PI_NMSINIES
+		AND STATUS = PI_STATUS
+		AND AAAPERTU = PI_AAAPERTU
+		AND CDRAMO = PI_CDRAMO
+		AND CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_NUM;
+EXCEPTION
+	WHEN OTHERS THEN RETURN 0;
+END GET_N_INTERVENIENTES_SIN;
+
+
+/*
+-* NOME      : GET_VCEP
+-* OBJECTIVO : RETORNA O VALOR EM CARTEIRA DOS PROCESSOS
+-* PARA UM INTERVALO DE DATAS E ADVOGADO
+-*
+-* UTILIZACAO:
+-* AUTOR     : Brígida Ramos
+-* DATA      : 16-11-2006
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_VCEP ( PI_CDPERSON IN VARCHAR2
+				, PI_DT_INICIO IN DATE
+				, PI_DT_FIM IN DATE) RETURN NUMBER
+IS
+aux_VALOR NUMBER;
+BEGIN
+/*SELECT ABS(SUM(P.NMVALINI)) INTO aux_VALOR FROM CO_PRCON P WHERE P.CDNMPROC IN (
+  SELECT DISTINCT PROCESSO.CDNMPROC
+         FROM CO_PRCON PROCESSO,CO_DILIG DILIGENCIA
+         WHERE DECODE(PROCESSO.CDTIPCON,'RS',DILIGENCIA.CDENTAVO,PROCESSO.CDENTAVO)=PI_CDPERSON
+         AND DECODE(DILIGENCIA.FEFIN,NULL,'S','N')='S'
+           AND DILIGENCIA.FEAPERMV BETWEEN PI_DT_INICIO AND PI_DT_FIM
+         AND DILIGENCIA.CDTIPDIL='TF'
+         AND DILIGENCIA.CDNMPROC=PROCESSO.CDNMPROC);
+/* NÃO ESTÁ EM PRODUÇÃO AINDA */
+    RETURN NVL(aux_VALOR,0);
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN -1;
+END GET_VCEP;
+
+
+/*
+-* NOME      : GET_VRP
+-* OBJECTIVO : RETORNA O VALOR DE RECUPERACAO TOTAL DOS PROCESSOS
+-* PARA UM INTERVALO DE DATAS E ADVOGADO
+-*
+-* UTILIZACAO:
+-* AUTOR     : Brígida Ramos
+-* DATA      : 16-11-2006
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_VRP (PI_CDPERSON IN VARCHAR2
+				,PI_DT_INICIO IN DATE
+				,PI_DT_FIM IN DATE) RETURN NUMBER
+IS
+aux_VALOR NUMBER;
+BEGIN
+/*
+        SELECT SUM(nvl(MOVIMENTO.NMVALMOV,0)) INTO aux_VALOR
+         FROM CO_CONME MOVIMENTO
+        , CO_PRCON PROCESSO
+        , CO_DILIG ADV
+         WHERE
+         1=1
+         AND ADV.CDNMPROC=PROCESSO.CDNMPROC
+         AND ADV.FEFIN IS  NULL
+         AND ADV.CDTIPDIL='TF'
+         AND MOVIMENTO.NMVALMOV <0
+         AND MOVIMENTO.CDTIPMOV IN ('CI','CP','CR','CV','CT')
+         AND MOVIMENTO.FEMOVIM BETWEEN PI_DT_INICIO AND PI_DT_FIM
+         AND DECODE(PROCESSO.CDTIPCON,'RS',ADV.CDENTAVO,PROCESSO.CDENTAVO) =PI_CDPERSON
+         AND MOVIMENTO.CDNMPROC=PROCESSO.CDNMPROC;  /* NÃO ESTÁ EM PRODUÇÃO AINDA */
+    RETURN NVL(aux_VALOR,0);
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN -1;
+END GET_VRP;
+
+
+/*
+-* NOME      : GET_ATRIBUTOS_SINISTRO
+-* OBJECTIVO : RETORNA O VALOR DE UM ATRIBUTO PARA UM DETERMINADO SINISTRO
+-*
+-* UTILIZACAO:
+-* AUTOR     : Brígida Ramos
+-* DATA      : 27-09-2006
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_ATRIBUTOS_SINISTRO (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN VARCHAR2
+								,PI_AAAPERTU IN NUMBER
+								,PI_STATUS IN VARCHAR2
+								,PI_NMSINIES IN NUMBER
+								,PI_CDATRIBU IN NUMBER
+								,PI_DATA IN DATE
+								)  RETURN VARCHAR2
+IS
+  auxRESULT HVALOSIN.OTVALOR%TYPE;
+BEGIN
+	SELECT OTVALOR
+	INTO auxRESULT
+	FROM HVALOSIN HIST_SINISTRO
+	WHERE 1 = 1
+		AND HIST_SINISTRO.CDATRIBU = PI_CDATRIBU
+		AND HIST_SINISTRO.NMSINIES = PI_NMSINIES
+		AND HIST_SINISTRO.STATUS = PI_STATUS
+		AND HIST_SINISTRO.AAAPERTU = PI_AAAPERTU
+		AND HIST_SINISTRO.CDRAMO = PI_CDRAMO
+		AND HIST_SINISTRO.CDUNIECO = PI_CDUNIECO
+		AND HIST_SINISTRO.NUMHISTO = (
+			SELECT MAX(X.NUMHISTO)
+			FROM MSINIHIS X
+			WHERE 2 = 2
+				AND TRUNC(X.FESISTEM) <= NVL(PI_DATA, SYSDATE)
+				AND X.NMSINIES = PI_NMSINIES
+				AND X.STATUS = PI_STATUS
+				AND X.AAAPERTU = PI_AAAPERTU
+				AND X.CDRAMO = PI_CDRAMO
+				AND X.CDUNIECO = PI_CDUNIECO
+			);
+
+    RETURN auxRESULT;
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN NULL;
+END GET_ATRIBUTOS_SINISTRO;
+
+
+/*
+-*  NOME      : GET_ATRIBUTO_APOLICE_MES
+-*  OBJECTIVO : RETORNA O ATRIBUTO DE UMA APOLICE RELATIVO A UM DADO MES
+-*  UTILIZAÇÃO: UTILIZADO NO MAPA M4
+-*  VERSÃO    : 1.0
+-*  AUTOR     : JOSE VIEGAS
+-*  DATA      : 03-MAI-2006
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+*/
+FUNCTION GET_ATRIBUTO_APOLICE_MES ( PI_CDUNIECO IN NUMBER
+                                  , PI_CDRAMO   IN VARCHAR2
+                                  , PI_ESTADO   IN VARCHAR2
+                                  , PI_NMPOLIZA IN NUMBER
+                                  , PI_CDATRIBU IN NUMBER
+                                  , PI_MES      IN DATE DEFAULT SYSDATE
+                                  , PI_DEFAULT  IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2
+IS
+  auxRESULT VARCHAR2(200);
+BEGIN
+	SELECT OTVALOR
+	INTO auxRESULT
+	FROM TVALOPOL ATRIBUTOS
+	WHERE 1 = 1
+		AND ATRIBUTOS.STATUS = 'V'
+		AND ATRIBUTOS.CDATRIBU = PI_CDATRIBU
+		AND ATRIBUTOS.NMSUPLEM = (
+			SELECT NVL(MAX(X.NMSUPLEM), 0)
+			FROM TVALOPOL X
+			WHERE X.CDATRIBU = ATRIBUTOS.CDATRIBU
+				AND X.NMSUPLEM <= DECODE(PI_MES, NULL, TO_CHAR(SYSDATE, 'J'), TO_CHAR(TRUNC(PI_MES, 'MONTH'), 'J')) || '99999999999'
+				AND X.STATUS = ATRIBUTOS.STATUS
+				AND X.NMPOLIZA = ATRIBUTOS.NMPOLIZA
+				AND X.ESTADO = ATRIBUTOS.ESTADO
+				AND X.CDRAMO = ATRIBUTOS.CDRAMO
+				AND X.CDUNIECO = ATRIBUTOS.CDUNIECO
+			)
+		AND ATRIBUTOS.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTOS.ESTADO = PI_ESTADO
+		AND ATRIBUTOS.CDRAMO = PI_CDRAMO
+		AND ATRIBUTOS.CDUNIECO = PI_CDUNIECO;
+
+  RETURN auxRESULT;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN PI_DEFAULT;
+END GET_ATRIBUTO_APOLICE_MES;
+
+
+/*
+-*  NOME      : GET_ATRIBUTO_APOLICE_DATA
+-*  OBJECTIVO : RETORNA O ATRIBUTO DE UMA APOLICE RELATIVO A UMA DADA DATA
+-*  UTILIZAÇÃO:
+-*  VERSÃO    : 1.0
+-*  AUTOR     : ARLINDO RODRIGUES
+-*  DATA      : 17-FEV-2009
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+*/
+FUNCTION GET_ATRIBUTO_APOLICE_DATA ( PI_CDUNIECO IN NUMBER
+                                   , PI_CDRAMO   IN VARCHAR2
+                                   , PI_ESTADO   IN VARCHAR2
+                                   , PI_NMPOLIZA IN NUMBER
+                                   , PI_CDATRIBU IN NUMBER
+                                   , PI_DATA     IN DATE DEFAULT SYSDATE
+                                   , PI_DEFAULT  IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2
+IS
+  auxRESULT VARCHAR2(200);
+
+BEGIN
+	SELECT OTVALOR
+	INTO auxRESULT
+	FROM TVALOPOL ATRIBUTOS
+	WHERE 1 = 1
+		AND ATRIBUTOS.STATUS = 'V'
+		AND ATRIBUTOS.CDATRIBU = PI_CDATRIBU
+		AND ATRIBUTOS.NMSUPLEM = (
+			SELECT NVL(MAX(X.NMSUPLEM), 0)
+			FROM TVALOPOL X
+			WHERE X.CDATRIBU = ATRIBUTOS.CDATRIBU
+				AND X.NMSUPLEM <= DECODE(PI_DATA, NULL, TO_CHAR(SYSDATE, 'J'), TO_CHAR(PI_DATA, 'J')) || '99999999999'
+				AND X.STATUS = ATRIBUTOS.STATUS
+				AND X.NMPOLIZA = ATRIBUTOS.NMPOLIZA
+				AND X.ESTADO = ATRIBUTOS.ESTADO
+				AND X.CDRAMO = ATRIBUTOS.CDRAMO
+				AND X.CDUNIECO = ATRIBUTOS.CDUNIECO
+			)
+		AND ATRIBUTOS.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTOS.ESTADO = PI_ESTADO
+		AND ATRIBUTOS.CDRAMO = PI_CDRAMO
+		AND ATRIBUTOS.CDUNIECO = PI_CDUNIECO;
+
+  RETURN auxRESULT;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN PI_DEFAULT;
+
+END GET_ATRIBUTO_APOLICE_DATA;
+
+
+FUNCTION GET_ATRIB_APOLICE_DATA ( PI_CDUNIECO IN NUMBER
+							   , PI_CDRAMO   IN VARCHAR2
+							   , PI_ESTADO   IN VARCHAR2
+							   , PI_NMPOLIZA IN NUMBER
+							   , PI_CDATRIBU IN NUMBER
+							   , PI_DATA     IN DATE DEFAULT SYSDATE
+							   , PI_DEFAULT  IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2
+IS
+  auxRESULT VARCHAR2(200);
+
+BEGIN
+	SELECT OTVALOR
+	INTO auxRESULT
+	FROM TVALOPOL ATRIBUTOS
+	WHERE 1 = 1
+		AND ATRIBUTOS.STATUS = 'V'
+		AND ATRIBUTOS.CDATRIBU = PI_CDATRIBU
+		AND ATRIBUTOS.NMSUPLEM = (
+			SELECT NVL(MAX(X.NMSUPLEM), 0)
+			FROM TVALOPOL X
+			WHERE X.CDATRIBU = ATRIBUTOS.CDATRIBU
+				AND X.NMSUPLEM <= DECODE(PI_DATA, NULL, TO_CHAR(SYSDATE, 'J'), TO_CHAR(PI_DATA, 'J')) || '99999999999'
+				AND X.NMPOLIZA = ATRIBUTOS.NMPOLIZA
+				AND X.ESTADO = ATRIBUTOS.ESTADO
+				AND X.CDRAMO = ATRIBUTOS.CDRAMO
+				AND X.CDUNIECO = ATRIBUTOS.CDUNIECO
+			)
+		AND ATRIBUTOS.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTOS.ESTADO = PI_ESTADO
+		AND ATRIBUTOS.CDRAMO = PI_CDRAMO
+		AND ATRIBUTOS.CDUNIECO = PI_CDUNIECO;
+
+  RETURN auxRESULT;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN PI_DEFAULT;
+
+END GET_ATRIB_APOLICE_DATA;
+
+
+/*
+-* NOME      : GET_CLASSEFACTURA
+-* OBJECTIVO : RETORNA A CLASSE DE UMA FACTURA PARA DIFERENCIAR EM TERMOS DE SECÇÕES
+-* UTILIZACAO: PKG_FORMULAS_COSEC.GET_CLASSE_FACTURA(82);
+-* AUTOR     : Eng. José Viegas
+-* DATA      : 14-03-2006
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   08-01-2007 JOSE VIEGAS     ACRESCIMO DO TIPORECI 76
+-*/
+   FUNCTION GET_CLASSE_FACTURA (P_TIPORECI IN NUMBER) RETURN VARCHAR2
+  IS
+  BEGIN
+    IF P_TIPORECI = 76 THEN
+      RETURN 'APC';
+    ELSIF P_TIPORECI = 82 THEN
+      RETURN 'APC_82';
+    ELSE
+      RETURN 'X';
+    END IF;
+    RETURN 'X';
+  END GET_CLASSE_FACTURA;
+
+
+/*
+-* NOME      : FUN_DATA_VENCIMENTO_REC
+-* OBJECTIVO : RETORNA A DATA DE VENCIMENTO DO RECIBO
+-*
+-* UTILIZACAO:
+-* AUTOR     : Brígida Ramos
+-* DATA      : 03-06-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_DATA_VENCIMENTO_REC (PI_CDTIPRAM IN NUMBER
+                 ,PI_MODPAG IN NUMBER
+                ,PI_CDTIPRECI IN NUMBER
+                ,PI_FEINICIO IN DATE
+                ,PI_FEEMISIO IN DATE
+                ,PI_VALOR IN NUMBER )  RETURN DATE
+IS
+BEGIN
+    IF (PI_CDTIPRECI IN (79,82,83,90,91,92,95,96,97)) THEN
+       RETURN PI_FEEMISIO+30;
+    ELSE
+        IF (PI_VALOR>=0) THEN
+            IF (PI_CDTIPRECI=0) THEN
+                RETURN PI_FEINICIO;
+            END IF;
+            IF (PI_CDTIPRECI=1) THEN
+                RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=2) THEN
+                IF (PI_CDTIPRAM=1) THEN
+                   IF (PI_MODPAG=1) THEN
+                         RETURN PI_FEINICIO;
+                       ELSE
+                      RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+                    END IF;
+                ELSE
+                      RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+                   END IF;
+            END IF;
+            IF (PI_CDTIPRECI=3) THEN
+                IF (PI_CDTIPRAM=1) THEN
+                  RETURN PI_FEINICIO;
+                ELSE
+                  RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+                END IF;
+            END IF;
+            IF (PI_CDTIPRECI=4) THEN
+                  RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=7) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=8) THEN
+                IF (PI_CDTIPRAM=1) THEN
+                     RETURN PI_FEINICIO;
+                ELSE
+                       RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+                END IF;
+            END IF;
+            IF (PI_CDTIPRECI=93) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=98) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=99) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=9) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+        ELSE
+                RETURN NULL;
+        END IF;
+     END IF;
+     RETURN NULL;
+END FUN_DATA_VENCIMENTO_REC;
+/*
+-* NOME      : FUN_VARIACAO_CAP
+-* OBJECTIVO : RETORNA A VARIAÇÃO DE CAPITAL SEGURO DA APÓLICE PARA EFEITOS DE ESTORNO
+-*             VERIFICANDO A INFORMAÇÃO NOS ATRIBUTOS VARIÁVEIS DO RECIBO DE ESTORNO.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.FUN_VARIACAO_CAP(1,2240080646);
+-* AUTOR     : Eng. José Viegas
+-* DATA      : 03-02-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_VARIACAO_CAP (P_CDUNIECO IN NUMBER, P_NMRECIBO IN NUMBER) RETURN NUMBER IS
+ AUX_RET VARCHAR2(10);
+BEGIN
+  SELECT
+    --TO_NUMBER(OTVALOR,'9999999999D99', 'NLS_NUMERIC_CHARACTERS = ''.,''')
+	COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR,'.',','),'-,','-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0) 
+  INTO
+    AUX_RET
+  FROM
+    CO_TVALOREC
+  WHERE
+      CDUNIECO = P_CDUNIECO
+  AND NMRECIBO = P_NMRECIBO
+  AND CDATRIBU = 2;
+  RETURN AUX_RET;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 0;
+END FUN_VARIACAO_CAP;
+
+/*
+-* NOME      : IS_RECIBO_PPD
+-* OBJECTIVO : VALIDAR SE UM RECIBO TEM O CONCEITO PPD NA MRECIDET.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.IS_RECIBO_PPD(1,2240080646);
+-* AUTOR     : João Ribeiro
+-* DATA      : 06-01-2023
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   06-01-2023 João Ribeiro    ENTRADA EM PRODUÇÃO DO ISSUE 1320
+-*
+-*/
+FUNCTION IS_RECIBO_PPD (P_CDUNIECO NUMBER, P_NMRECIBO NUMBER) RETURN VARCHAR2 IS
+ AUX_RET NUMBER;
+BEGIN
+	SELECT
+		count(*)
+	INTO AUX_RET
+	FROM MRECIDET
+	WHERE CDUNIECO = P_CDUNIECO
+		AND NMRECIBO = P_NMRECIBO
+		AND cdtipcon like '%PPD%';
+
+	IF AUX_RET != 0 THEN
+		RETURN 'S';
+	END IF;
+	RETURN 'N';
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN 'N';
+END IS_RECIBO_PPD;
+
+/*
+-* NOME      : IS_ANULACAO_APOLICE
+-* OBJECTIVO : VALIDAR SE UM RECIBO DE ESTORNO É DERIVADO DE UM SUPLEMENTO DE ANULAÇÃO
+-*             VERIFICANDO A INFORMAÇÃO NOS ATRIBUTOS VARIÁVEIS DO MESMO.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.IS_ANULACAO_APOLICE(1,2240080646);
+-* AUTOR     : Eng. José Viegas
+-* DATA      : 18-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   03-02-2005 JOSÉ VIEGAS    ENTRADA EM PRODUÇÃO DO ISSUE PARA ATRIBUTOS VARIÁVEIS DO RECIBO DE
+
+ESTORNO
+-*
+-*/
+FUNCTION IS_ANULACAO_APOLICE (P_CDUNIECO NUMBER, P_NMRECIBO NUMBER) RETURN VARCHAR2 IS
+ AUX_RET VARCHAR2(10);
+BEGIN
+	SELECT
+		--TO_NUMBER(OTVALOR)
+		COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0)
+	INTO AUX_RET
+	FROM CO_TVALOREC
+	WHERE CDUNIECO = P_CDUNIECO
+		AND NMRECIBO = P_NMRECIBO
+		AND CDATRIBU = 1;
+
+	IF AUX_RET = 52 THEN
+		RETURN 'S';
+	END IF;
+	RETURN 'N';
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN 'N';
+END IS_ANULACAO_APOLICE;
+
+
+/*
+-* NOME      : IS_SUP_TOTAL
+-* OBJECTIVO : VALIDAR SE UM RECIBO DE ESTORNO É DERIVADO DE UM SUPLEMENTO TOTAL
+-*             VERIFICANDO A INFORMAÇÃO NOS ATRIBUTOS VARIÁVEIS DO MESMO.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.IS_SUP_TOTAL(1,2240080646);
+-* AUTOR     : Eng. José Viegas
+-* DATA      : 18-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   03-02-2005 JOSÉ VIEGAS    ENTRADA EM PRODUÇÃO DO ISSUE PARA ATRIBUTOS VARIÁVEIS DO RECIBO DE
+
+ESTORNO
+-*
+-*/
+FUNCTION IS_SUP_TOTAL (P_CDUNIECO NUMBER, P_NMRECIBO NUMBER) RETURN VARCHAR2 IS
+ AUX_RET VARCHAR2(10);
+BEGIN
+	SELECT
+		--TO_NUMBER(OTVALOR)
+		COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0)
+	INTO AUX_RET
+	FROM CO_TVALOREC
+	WHERE CDUNIECO = P_CDUNIECO
+		AND NMRECIBO = P_NMRECIBO
+		AND CDATRIBU = 1;
+
+	IF AUX_RET = 44 THEN
+		RETURN 'S';
+	END IF;
+	RETURN 'N';
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN 'N';
+END IS_SUP_TOTAL;
+
+
+/*
+-* NOME      : IS_CAP_DIFERENTE
+-* OBJECTIVO : VALIDAR SE UM RECIBO DE ESTORNO É DERIVADO DE UM SUPLEMENTO QUE ORIGINOU
+-*             ALTERAÇÃO DE CAPITAL SEGURADO VERIFICANDO A INFORMAÇÃO NOS ATRIBUTOS VARIÁVEIS DO MESMO.
+-* UTILIZACAO: PKG_FORMULAS_COSEC.IS_CAP_DIFERENTE(1,2240080646);
+-* AUTOR     : Eng. José Viegas
+-* DATA      : 18-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   03-02-2005 JOSÉ VIEGAS    ENTRADA EM PRODUÇÃO DO ISSUE PARA ATRIBUTOS VARIÁVEIS DO RECIBO DE
+
+ESTORNO
+-*
+-*/
+FUNCTION IS_CAP_DIFERENTE (P_CDUNIECO NUMBER, P_NMRECIBO NUMBER) RETURN VARCHAR2 IS
+ AUX_RET VARCHAR2(10);
+BEGIN
+	SELECT
+		--TO_NUMBER(OTVALOR,'9999999999D99', 'NLS_NUMERIC_CHARACTERS = ''.,''')
+		COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0)
+	INTO AUX_RET
+	FROM CO_TVALOREC
+	WHERE CDUNIECO = P_CDUNIECO
+		AND NMRECIBO = P_NMRECIBO
+		AND CDATRIBU = 2;
+
+	IF AUX_RET != 0 THEN
+		RETURN 'S';
+	END IF;
+		RETURN 'N';
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN 'N';
+END IS_CAP_DIFERENTE;
+
+
+/*
+-* NOME      : GET_RESSEG_CED_DATA
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO CEDIDO A UMA DETERMINADA DATA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 13-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   08-09-2006 JOSE VIEGAS     HINT PARA OPTIMIZAÇÃO APÓS MIGRAÇÃO PARA 9I
+-*
+-*/
+FUNCTION GET_RESSEG_CED_DATA (PI_CDUNIECO IN NUMBER
+						   ,PI_CDRAMO   IN NUMBER
+						   ,PI_AAAPERTU IN NUMBER
+						   ,PI_NMSINIES IN NUMBER
+						   ,PI_DATAINI   IN DATE
+						   ,PI_DATAFIM   IN DATE
+						   )   RETURN NUMBER IS
+AUX_PROVISAO MSINIVAL.PTPAGOS%TYPE;
+BEGIN
+	SELECT /*+ NO_EXPAND */
+		SUM((NVL(VALORSIN.PTIMPOBL, 0) + NVL(VALORSIN.PTIMPFAC, 0) + NVL(VALORSIN.PTIMPOLC, 0)) * Pkg_Formulas_Cosec.FUN_TAXA_CAMBIO(VALORSIN.CDMONEDA))
+	INTO AUX_PROVISAO
+	FROM MSINIVAL VALORSIN
+	WHERE VALORSIN.FEMOVIMI BETWEEN NVL(PI_DATAINI, VALORSIN.FEMOVIMI)
+			AND PI_DATAFIM
+		AND VALORSIN.CDUNIECO = PI_CDUNIECO
+		AND VALORSIN.CDRAMO = PI_CDRAMO
+		AND VALORSIN.AAAPERTU = PI_AAAPERTU
+		AND VALORSIN.STATUS = 'M'
+		AND VALORSIN.NMSINIES = PI_NMSINIES;
+
+	RETURN AUX_PROVISAO;
+EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END GET_RESSEG_CED_DATA;
+
+
+/*
+-* NOME      : GET_PAGAMENTO_LIQ_RES
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO LIQUIDADO A UMA DETERMINADA DATA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 13-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   17-01-2005 BRIGIDA RAMOS    DEIXA DE SE CONSIDERAR OS PAGAMENTOS COM O SWVIGOR='A'
+-*/
+FUNCTION GET_PAGAMENTO_LIQ_RES ( P_CDUNIECO IN NUMBER
+							, P_CDRAMO IN NUMBER
+							, P_AAAPERTU IN NUMBER
+							, P_STATUS IN VARCHAR2
+							, P_NMSINIES IN NUMBER
+							, P_DATA_REF IN DATE) RETURN NUMBER AS
+AUX_VALOR MDSPASIN.IMPREFER%TYPE;
+BEGIN
+	SELECT SUM(NVL(PAG.PTIMPOBL, 0) + NVL(PAG.PTIMPFAC, 0) + NVL(PAG.PTIMPOLC, 0))
+	INTO AUX_VALOR
+	FROM MPAGOSIN PAG
+	WHERE 1 = 1
+		AND DECODE(PAG.SWVIGOR, 'V', PAG.FECOBRO, DECODE(PAG.FEPREVIS, NULL, PAG.FEAUTORI, PAG.FEPREVIS)) <= P_DATA_REF
+		AND DECODE(PAG.CDTIPMOV, 1, 'S', 3, 'S', 'N') = 'S'
+		AND PAG.SWVIGOR != 'A'
+		AND PAG.SWESTADO = 3
+		AND PAG.NMSINIES = P_NMSINIES
+		AND PAG.STATUS = P_STATUS
+		AND PAG.AAAPERTU = P_AAAPERTU
+		AND PAG.CDRAMO = P_CDRAMO
+		AND PAG.CDUNIECO = P_CDUNIECO;
+
+    RETURN AUX_VALOR;
+EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END GET_PAGAMENTO_LIQ_RES;
+
+
+/*
+-* NOME      : FUN_TAXA_CONSORCIO
+-* OBJECTIVO : RETORNA TAXA DE PRÉMIO DO AGRUPADOR DO RECIBO NUM CONSÉRCIO
+-* AUTOR     : JOSÉ VIEGAS
+-* DATA      : 12-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_TAXA_CONSORCIO ( PI_CDUNIECO IN NUMBER
+                            , PI_NMRECIBO IN NUMBER) RETURN NUMBER
+AS
+  RET_AUX VARCHAR2(40);
+BEGIN
+	SELECT
+		--TO_NUMBER(ATRIBUTO_RISCO.OTVALOR,'9G999D99999', 'NLS_NUMERIC_CHARACTERS = ''.,''')
+		COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(ATRIBUTO_RISCO.OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0)
+	INTO RET_AUX
+	FROM MRECIBO RECIBO
+		,MPOLIPER ENTIDADE_RISCO
+		,TVALOSIT ATRIBUTO_RISCO
+	WHERE ATRIBUTO_RISCO.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND ATRIBUTO_RISCO.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND ATRIBUTO_RISCO.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND ATRIBUTO_RISCO.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND ATRIBUTO_RISCO.NMSITUAC = ENTIDADE_RISCO.NMSITUAC
+		AND ATRIBUTO_RISCO.CDATRIBU = 3 /* TAXA PREMIO */
+		AND ATRIBUTO_RISCO.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM TVALOSIT X
+			WHERE X.CDUNIECO = ATRIBUTO_RISCO.CDUNIECO
+				AND X.CDRAMO = ATRIBUTO_RISCO.CDRAMO
+				AND X.ESTADO = ATRIBUTO_RISCO.ESTADO
+				AND X.NMPOLIZA = ATRIBUTO_RISCO.NMPOLIZA
+				AND X.NMSITUAC = ATRIBUTO_RISCO.NMSITUAC
+				AND X.CDATRIBU = ATRIBUTO_RISCO.CDATRIBU
+				AND X.NMSUPLEM <= RECIBO.NMSUPLEM
+			)
+		AND ENTIDADE_RISCO.CDUNIECO = RECIBO.CDUNIECO
+		AND ENTIDADE_RISCO.CDRAMO = RECIBO.CDRAMO
+		AND ENTIDADE_RISCO.ESTADO = RECIBO.ESTADO
+		AND ENTIDADE_RISCO.NMPOLIZA = RECIBO.NMPOLIZA
+		AND ENTIDADE_RISCO.CDPERSON = RECIBO.CDPERSON
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO;
+
+	RETURN RET_AUX;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_TAXA_CONSORCIO;
+
+
+/*
+-* NOME      : FUN_PART_CONSORCIO
+-* OBJECTIVO : RETORNA % DE PARTICIPACAO DO AGRUPADOR DO RECIBO NUM CONSÉRCIO
+-* AUTOR     : JOSÉ VIEGAS
+-* DATA      : 12-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   21-01-2005 José Viegas    Correcção da conversão de valores decimais
+-*
+-*/
+FUNCTION FUN_PART_CONSORCIO ( PI_CDUNIECO IN NUMBER
+                            , PI_NMRECIBO IN NUMBER) RETURN NUMBER
+AS
+  RET_AUX VARCHAR2(40);
+BEGIN
+	SELECT
+		--TO_NUMBER(ATRIBUTO_RISCO.OTVALOR,'9G999D9999', 'NLS_NUMERIC_CHARACTERS = ''.,''')
+		COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(ATRIBUTO_RISCO.OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0)
+	INTO RET_AUX
+	FROM MRECIBO RECIBO
+		,MPOLIPER ENTIDADE_RISCO
+		,TVALOSIT ATRIBUTO_RISCO
+	WHERE ATRIBUTO_RISCO.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND ATRIBUTO_RISCO.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND ATRIBUTO_RISCO.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND ATRIBUTO_RISCO.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND ATRIBUTO_RISCO.NMSITUAC = ENTIDADE_RISCO.NMSITUAC
+		AND ATRIBUTO_RISCO.CDATRIBU = 1 /* % CONSORCIO */
+		AND ATRIBUTO_RISCO.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM TVALOSIT X
+			WHERE X.CDUNIECO = ATRIBUTO_RISCO.CDUNIECO
+				AND X.CDRAMO = ATRIBUTO_RISCO.CDRAMO
+				AND X.ESTADO = ATRIBUTO_RISCO.ESTADO
+				AND X.NMPOLIZA = ATRIBUTO_RISCO.NMPOLIZA
+				AND X.NMSITUAC = ATRIBUTO_RISCO.NMSITUAC
+				AND X.CDATRIBU = ATRIBUTO_RISCO.CDATRIBU
+				AND X.NMSUPLEM <= RECIBO.NMSUPLEM
+			)
+		AND ENTIDADE_RISCO.CDUNIECO = RECIBO.CDUNIECO
+		AND ENTIDADE_RISCO.CDRAMO = RECIBO.CDRAMO
+		AND ENTIDADE_RISCO.ESTADO = RECIBO.ESTADO
+		AND ENTIDADE_RISCO.NMPOLIZA = RECIBO.NMPOLIZA
+		AND ENTIDADE_RISCO.CDPERSON = RECIBO.CDPERSON
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO;
+
+	RETURN RET_AUX;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_PART_CONSORCIO;
+
+
+/*
+-* NOME      : GET_V_COMUNIC_PAG
+-* OBJECTIVO : RETORNA O VALOR DA COMUNICAÇÃO DE PAGAMENTO NO INTERVALO DE TEMPO INDICADO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_V_COMUNIC_PAG (PI_CDUNIECO IN NUMBER
+						  ,PI_CDRAMO IN NUMBER
+						  ,PI_NMPOLIZA IN NUMBER
+						  ,PI_DTINICIO IN DATE
+						  ,PI_DTFIM IN DATE)  RETURN NUMBER AS
+AUX_VALOR CO_COPDE.NMIMPPAG%TYPE;
+BEGIN
+	SELECT SUM(VALOR.NMIMPPAG * VALOR.TASACAMB)
+	INTO AUX_VALOR
+	FROM MSINIEST SINISTRO
+		,CO_COPDE VALOR
+	WHERE 1 = 1
+		AND NVL(VALOR.FEPAGO, VALOR.FEEMISIO) BETWEEN PI_DTINICIO
+			AND PI_DTFIM
+		AND VALOR.NMCOMAME = SINISTRO.NMCOMAME
+		AND VALOR.NMPROAME = SINISTRO.NMPROAME
+		AND VALOR.CDTIPORA = SINISTRO.CDTIPORA
+		AND VALOR.CDUNIECO = SINISTRO.CDUNIECO
+		AND SINISTRO.NMPOLIZA = PI_NMPOLIZA
+		AND SINISTRO.CDRAMO = PI_CDRAMO
+		AND SINISTRO.CDUNIECO = PI_CDUNIECO;
+
+RETURN AUX_VALOR;
+EXCEPTION
+    WHEN OTHERS THEN  RETURN NULL;
+END GET_V_COMUNIC_PAG;
+
+
+/*
+-* NOME      : GET_REAJ_RECOB_SIN
+-* OBJECTIVO : RETORNA O REAJUSTE OU O RECOBRO DE UM SINISTRO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_REAJ_RECOB_SIN (PI_CDUNIECO IN NUMBER
+						  ,PI_CDRAMO IN NUMBER
+						  ,PI_NMPOLIZA IN NUMBER
+						  ,PI_TIPO IN VARCHAR2
+						  ,PI_DTINICIO IN DATE
+						  ,PI_DTFIM IN DATE)  RETURN NUMBER AS
+AUX_REAJ MSINIVAL.PTPAGOS%TYPE;
+AUX_RECOB MSINIVAL.PTRECOBR%TYPE;
+BEGIN
+	SELECT SUM(VALOR.PTPAGOS)
+		,SUM(VALOR.PTRECOBR)
+	INTO AUX_REAJ
+		,AUX_RECOB
+	FROM MSINIEST SINISTRO
+		,MSINIVAL VALOR
+	WHERE 1 = 1
+		AND FEMOVIMI BETWEEN PI_DTINICIO
+			AND PI_DTFIM
+		AND DECODE(VALOR.NMORDINA, 1, 'N', 'S') = 'S'
+		AND VALOR.NMSINIES = SINISTRO.NMSINIES
+		AND VALOR.STATUS = SINISTRO.STATUS
+		AND VALOR.AAAPERTU = SINISTRO.AAAPERTU
+		AND VALOR.CDRAMO = SINISTRO.CDRAMO
+		AND VALOR.CDUNIECO = SINISTRO.CDUNIECO
+		AND SINISTRO.NMPOLIZA = PI_NMPOLIZA
+		AND SINISTRO.CDRAMO = PI_CDRAMO
+		AND SINISTRO.CDUNIECO = PI_CDUNIECO;
+
+    IF (PI_TIPO='P') THEN
+        RETURN AUX_REAJ;
+    ELSE
+        RETURN AUX_RECOB;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN RETURN NULL;
+END GET_REAJ_RECOB_SIN;
+
+
+/*
+-* NOME      : GET_SINISTRO_VERIFICADO
+-* OBJECTIVO : RETORNA VALOR DO GRUPO DE DÍVIDA PARA UMA DETERMINADA APOLICE NUM DET INTERVALO DE DATAS
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_SINISTRO_VERIFICADO (PI_CDUNIECO IN NUMBER
+								  ,PI_CDRAMO IN NUMBER
+								  ,PI_NMPOLIZA IN NUMBER
+								  ,PI_DTINICIO IN DATE
+								  ,PI_DTFIM IN DATE) RETURN NUMBER AS
+AUX_VALOR CO_GRDEU.NMLIMRES%TYPE;
+BEGIN
+	SELECT SUM(GRUPODIV.NMLIMRES * GRUPODIV.TASACAMB)
+	INTO AUX_VALOR
+	FROM CO_COAME COMUNICACAO
+		,CO_GRDEU GRUPODIV
+	WHERE 1 = 1
+		AND GRUPODIV.NMCOMAME = COMUNICACAO.NMCOMAME
+		AND GRUPODIV.NMPROAME = COMUNICACAO.NMPROAME
+		AND GRUPODIV.CDTIPORA = COMUNICACAO.CDTIPORA
+		AND GRUPODIV.CDUNIECO = COMUNICACAO.CDUNIECO
+		AND COMUNICACAO.FEPROSIN BETWEEN PI_DTINICIO
+			AND PI_DTFIM
+		AND COMUNICACAO.NMPOLIZA = PI_NMPOLIZA
+		AND COMUNICACAO.CDRAMO = PI_CDRAMO
+		AND COMUNICACAO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_VALOR;
+EXCEPTION
+    WHEN OTHERS THEN RETURN NULL;
+END GET_SINISTRO_VERIFICADO;
+
+
+/*
+-* NOME      : GET_DT_VIGENCIA_APOLICE
+-* OBJECTIVO : RETORNA A DATA INICIO OU DATA FIM DE VIGÊNCIA PARA APÓLICE
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_DT_VIGENCIA_APOLICE (P_CDUNIECO IN NUMBER
+								, P_CDRAMO IN NUMBER
+								, P_NMPOLIZA IN NUMBER
+								, P_NMRENOVA IN NUMBER
+								, P_TIPO IN VARCHAR2) RETURN DATE AS
+AUX_INICIO DATE;
+AUX_FIM    DATE;
+BEGIN
+	SELECT APOLICE.FEEFECTO
+		,DECODE(APOLICE.OTTEMPOT, 'T', APOLICE.FEVENCIM, APOLICE.FEPROREN - 1)
+	INTO AUX_INICIO
+		,AUX_FIM
+	FROM MPOLIZAS APOLICE
+	WHERE 1 = 1
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 1 = 1
+				AND X.NMRENOVA = P_NMRENOVA
+				AND X.NMPOLIZA = P_NMPOLIZA
+				AND X.CDRAMO = P_CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDUNIECO = P_CDUNIECO
+			)
+		AND APOLICE.NMRENOVA = P_NMRENOVA
+		AND APOLICE.NMPOLIZA = P_NMPOLIZA
+		AND APOLICE.ESTADO = 'M'
+		AND APOLICE.CDRAMO = P_CDRAMO
+		AND APOLICE.CDUNIECO = P_CDUNIECO;
+
+    IF (P_TIPO='I')  THEN
+        RETURN AUX_INICIO;
+    ELSE
+        IF (P_TIPO='F') THEN
+            RETURN AUX_FIM;
+        ELSE
+            RETURN NULL;
+        END IF;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN RETURN NULL;
+END GET_DT_VIGENCIA_APOLICE;
+
+
+/*
+-* NOME      : GET_PROVISAO_MES_PRELIQ
+-* OBJECTIVO : RETORNA O VALOR DA PROVISÃO PARA UM DETEMINADO CONCEITO NUM DETERMINADO MES
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 06-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PROVISAO_MES_PRELIQ (P_CDCIA IN VARCHAR2
+								, P_CDCONLIQ IN VARCHAR2
+								, P_MODALI IN VARCHAR2
+								, P_CDAGRUPA IN VARCHAR2
+								, P_FEPRELIQ IN DATE) RETURN NUMBER AS
+AUX_VALOR MPRELIQR.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO AUX_VALOR
+	FROM MPRELIQR
+	WHERE 1 = 1
+		AND FEPRELIQ = P_FEPRELIQ
+		AND MODALI = P_MODALI
+		AND CDAGRUPA = P_CDAGRUPA
+		AND CDCONLIQ = P_CDCONLIQ
+		AND CDCIA = P_CDCIA;
+
+    RETURN AUX_VALOR;
+EXCEPTION
+    WHEN OTHERS THEN RETURN NULL;
+END GET_PROVISAO_MES_PRELIQ;
+
+
+/*
+-* NOME      : GET_RESSEG_CED_SIN
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO CEDIDO NUMA DETERMINADA DATA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 05-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_RESSEG_CED_SIN ( P_CDUNIECO IN NUMBER
+							, P_CDRAMO IN NUMBER
+							, P_AAAPERTU IN NUMBER
+							, P_STATUS IN VARCHAR2
+							, P_NMSINIES IN NUMBER
+							, P_DATA_REF IN DATE) RETURN NUMBER AS
+AUX_VALOR MCONRETR.PTIMPCON%TYPE;
+BEGIN
+	SELECT SUM(RESS.PTIMPCON)
+	INTO AUX_VALOR
+	FROM MCONRETR RESS
+	WHERE 1 = 1
+		AND TRUNC(RESS.FEMOVIMI) = TRUNC(P_DATA_REF)
+		AND RESS.NMSINIES = P_NMSINIES
+		AND RESS.STATUS = P_STATUS
+		AND RESS.AAAPERTU = P_AAAPERTU
+		AND RESS.CDRAMO = P_CDRAMO
+		AND RESS.CDUNIECO = P_CDUNIECO;
+
+	RETURN AUX_VALOR;
+EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END GET_RESSEG_CED_SIN;
+
+
+/*
+-* NOME      : GET_PAGAMENTO_LIQ_SIN
+-* OBJECTIVO : RETORNA O VALOR DOS PAGAMENTOS LIQUIDADOS A UMA DETERMINADA DATA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 03-01-2005
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   17-01-2005 BRIGIDA RAMOS    DEIXA DE SE CONSIDERAR OS PAGAMENTOS COM O SWVIGOR='A'
+-*/
+FUNCTION GET_PAGAMENTO_LIQ_SIN ( P_CDUNIECO IN NUMBER
+								, P_CDRAMO IN NUMBER
+								, P_AAAPERTU IN NUMBER
+								, P_STATUS IN VARCHAR2
+								, P_NMSINIES IN NUMBER
+								, P_DATA_REF IN DATE) RETURN NUMBER AS
+AUX_VALOR MDSPASIN.IMPREFER%TYPE;
+BEGIN
+	SELECT SUM(DETPAG.IMPREFER)
+	INTO AUX_VALOR
+	FROM MPAGOSIN PAG
+		,MDSPASIN DETPAG
+	WHERE 1 = 1
+		AND DETPAG.NMORDPAG = PAG.NMORDPAG
+		AND DETPAG.NMSINIES = PAG.NMSINIES
+		AND DETPAG.STATUS = PAG.STATUS
+		AND DETPAG.AAAPERTU = PAG.AAAPERTU
+		AND DETPAG.CDRAMO = PAG.CDRAMO
+		AND DETPAG.CDUNIECO = PAG.CDUNIECO
+		AND DECODE(PAG.SWVIGOR, 'V', PAG.FECOBRO, DECODE(PAG.FEPREVIS, NULL, PAG.FEAUTORI, PAG.FEPREVIS)) <= P_DATA_REF
+		AND DECODE(PAG.CDTIPMOV, 1, 'S', 3, 'S', 'N') = 'S'
+		AND PAG.SWVIGOR != 'A'
+		AND PAG.SWESTADO = 3
+		AND PAG.NMSINIES = P_NMSINIES
+		AND PAG.STATUS = P_STATUS
+		AND PAG.AAAPERTU = P_AAAPERTU
+		AND PAG.CDRAMO = P_CDRAMO
+		AND PAG.CDUNIECO = P_CDUNIECO;
+
+RETURN AUX_VALOR;
+
+EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END GET_PAGAMENTO_LIQ_SIN;
+
+
+FUNCTION GET_GARANTIAS_VIGOR_APOLICE ( P_CDUNIECO IN NUMBER
+									, P_CDRAMO IN NUMBER
+									, P_NMPOLIZA IN NUMBER
+									, P_NMSOLICI IN NUMBER
+									, P_DATA_REF IN DATE) RETURN NUMBER AS
+  AUX_QTD NUMBER;
+  TOTAL   NUMBER:=0;
+  AUX_DATA DATE;
+BEGIN
+	/* GARANTIAS EM VIGÉR À DATA */
+	SELECT COUNT(*)
+	INTO AUX_QTD
+	FROM CO_PROGAR GARANTIA
+	WHERE GARANTIA.FEREGISGAR <= P_DATA_REF
+		AND DECODE(GARANTIA.SWESTADO, 'M', 'S', 'PR', 'S', 'N') = 'S'
+		AND P_DATA_REF BETWEEN GARANTIA.FEVIGENC
+			AND NVL(GARANTIA.FEFINVIG, P_DATA_REF)
+		AND GARANTIA.NMPROPUE = P_NMSOLICI
+		AND GARANTIA.CDRAMO = P_CDRAMO
+		AND GARANTIA.CDUNIECO = P_CDUNIECO;
+
+	TOTAL:=TOTAL+AUX_QTD;
+
+	/* GARANTIAS SUBSTITUIDAS OU ANULADAS A PEDIDO VIGÊNTES À DATA */
+	SELECT COUNT(*)
+	INTO AUX_QTD
+	FROM CO_PROGAR GARANTIA
+	WHERE GARANTIA.FEREGISGAR <= P_DATA_REF
+		AND DECODE(GARANTIA.SWESTADO, 'S', 'S', 'AP', 'S', 'AC', 'S', 'N') = 'S'
+		AND GARANTIA.FEFINVIG IS NOT NULL
+		AND P_DATA_REF BETWEEN GARANTIA.FEVIGENC
+			AND GARANTIA.FEFINVIG
+		AND GARANTIA.NMPROPUE = P_NMSOLICI
+		AND GARANTIA.CDRAMO = P_CDRAMO
+		AND GARANTIA.CDUNIECO = P_CDUNIECO;
+
+	TOTAL:=TOTAL+AUX_QTD;
+	/* GARANTIAS ANULADAS VIGÊNTES À DATA E CUJA ANULAÇÃO DA FACTURA TENHA SIDO POSTERIOR À DATA*/
+	AUX_DATA:=GET_DT_ANULACAO_APOLICE(P_CDUNIECO, P_CDRAMO, P_NMPOLIZA);
+
+	IF AUX_DATA IS NULL OR AUX_DATA >= P_DATA_REF THEN
+		SELECT COUNT(*)
+		INTO AUX_QTD
+		FROM CO_PROGAR GARANTIA
+		WHERE GARANTIA.FEREGISGAR <= P_DATA_REF
+			AND DECODE(GARANTIA.SWESTADO, 'A', 'S', 'N') = 'S'
+			AND GARANTIA.NMPROPUE = P_NMSOLICI
+			AND GARANTIA.CDRAMO = P_CDRAMO
+			AND GARANTIA.CDUNIECO = P_CDUNIECO;
+
+	END IF;
+	TOTAL:=TOTAL+AUX_QTD;
+	RETURN TOTAL;
+EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END GET_GARANTIAS_VIGOR_APOLICE;
+
+
+/*
+-* NOME      : GET_NUMERO_BENEFECIARIOS
+-* OBJECTIVO : RETORNA O NÃO DE BENEFICIARIOS DE UMA DETERMINADA APOLICE
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-12-2004
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_NUMERO_BENEFECIARIOS(PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_ESTADO IN VARCHAR2
+								,PI_NMPOLIZA IN NUMBER
+								) RETURN NUMBER IS
+AUX_NUM NUMBER;
+BEGIN
+	SELECT COUNT(BENEF.CDPERSON)
+	INTO AUX_NUM
+	FROM MPOLIPER BENEF
+	WHERE 1 = 1
+		AND BENEF.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE 1 = 1
+				AND X.CDPERSON = BENEF.CDPERSON
+				AND X.STATUS = BENEF.STATUS
+				AND X.CDROL = BENEF.CDROL
+				AND X.NMPOLIZA = BENEF.NMPOLIZA
+				AND X.ESTADO = BENEF.ESTADO
+				AND X.CDRAMO = BENEF.CDRAMO
+				AND X.CDUNIECO = BENEF.CDUNIECO
+			)
+		AND BENEF.STATUS = 'V'
+		AND BENEF.CDROL = 'BE'
+		AND BENEF.NMPOLIZA = PI_NMPOLIZA
+		AND BENEF.ESTADO = PI_ESTADO
+		AND BENEF.CDRAMO = PI_CDRAMO
+		AND BENEF.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_NUM;
+EXCEPTION
+	WHEN OTHERS THEN RETURN 0;
+END GET_NUMERO_BENEFECIARIOS;
+
+
+/*
+-* NOME      : GET_TOMADOR_DSR
+-* OBJECTIVO : TRAZER O TOMADOR PARA OS MAPAS DE SINISTROA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 10-12-2004
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_TOMADOR_DSR(PI_CDUNIECO IN NUMBER
+						,PI_CDRAMO IN NUMBER
+						,PI_ESTADO IN VARCHAR2
+						,PI_NMPOLIZA IN NUMBER
+						,PI_TIPRAMO IN VARCHAR2) RETURN NUMBER IS
+AUX_BENEF MPERSONA.CDPERSON%TYPE;
+BEGIN
+    IF (PI_TIPRAMO='2') THEN
+		BEGIN
+			SELECT BENEF_MIN.CDPERSON
+			INTO AUX_BENEF
+			FROM MPOLIPER BENEF
+				,MPOLIPER BENEF_MIN
+			WHERE 1 = 1
+				AND ROWNUM = 1
+				AND BENEF_MIN.NMSUPLEM = (
+					SELECT MIN(X.NMSUPLEM)
+					FROM MPOLIPER X
+					WHERE 1 = 1
+						AND X.STATUS = BENEF_MIN.STATUS
+						AND X.CDROL = BENEF_MIN.CDROL
+						AND X.NMPOLIZA = BENEF_MIN.NMPOLIZA
+						AND X.ESTADO = BENEF_MIN.ESTADO
+						AND X.CDRAMO = BENEF_MIN.CDRAMO
+						AND X.CDUNIECO = BENEF_MIN.CDUNIECO
+					)
+				AND BENEF_MIN.CDPERSON = BENEF.CDPERSON
+				AND BENEF_MIN.STATUS = BENEF.STATUS
+				AND BENEF_MIN.CDROL = BENEF.CDROL
+				AND BENEF_MIN.ESTADO = BENEF.ESTADO
+				AND BENEF_MIN.NMPOLIZA = BENEF.NMPOLIZA
+				AND BENEF_MIN.CDRAMO = BENEF.CDRAMO
+				AND BENEF_MIN.CDUNIECO = BENEF.CDUNIECO
+				AND BENEF.NMSUPLEM = (
+					SELECT MAX(X.NMSUPLEM)
+					FROM MPOLIPER X
+					WHERE 1 = 1
+						AND X.CDPERSON = BENEF.CDPERSON
+						AND X.STATUS = BENEF.STATUS
+						AND X.CDROL = BENEF.CDROL
+						AND X.NMPOLIZA = BENEF.NMPOLIZA
+						AND X.ESTADO = BENEF.ESTADO
+						AND X.CDRAMO = BENEF.CDRAMO
+						AND X.CDUNIECO = BENEF.CDUNIECO
+					)
+				AND BENEF.STATUS = 'V'
+				AND BENEF.CDROL = 'BE'
+				AND BENEF.NMPOLIZA = PI_NMPOLIZA
+				AND BENEF.ESTADO = PI_ESTADO
+				AND BENEF.CDRAMO = PI_CDRAMO
+				AND BENEF.CDUNIECO = PI_CDUNIECO;
+
+		EXCEPTION
+            WHEN OTHERS THEN
+				BEGIN
+					SELECT BENEF.CDPERSON
+					INTO AUX_BENEF
+					FROM MPOLIPER BENEF
+					WHERE 1 = 1
+						AND BENEF.NMSUPLEM = (
+							SELECT MAX(X.NMSUPLEM)
+							FROM MPOLIPER X
+							WHERE 1 = 1
+								AND X.STATUS = BENEF.STATUS
+								AND X.CDROL = BENEF.CDROL
+								AND X.NMPOLIZA = BENEF.NMPOLIZA
+								AND X.ESTADO = BENEF.ESTADO
+								AND X.CDRAMO = BENEF.CDRAMO
+								AND X.CDUNIECO = BENEF.CDUNIECO
+							)
+						AND BENEF.STATUS = 'V'
+						AND BENEF.CDROL = 'SE'
+						AND BENEF.NMPOLIZA = PI_NMPOLIZA
+						AND BENEF.ESTADO = PI_ESTADO
+						AND BENEF.CDRAMO = PI_CDRAMO
+						AND BENEF.CDUNIECO = PI_CDUNIECO;
+
+				EXCEPTION
+					WHEN OTHERS THEN AUX_BENEF:=NULL;
+				END;
+		END;
+	END IF;
+	IF (PI_TIPRAMO!='2') THEN
+		BEGIN
+			SELECT BENEF.CDPERSON
+			INTO AUX_BENEF
+			FROM MPOLIPER BENEF
+			WHERE 1 = 1
+				AND BENEF.NMSUPLEM = (
+					SELECT MAX(X.NMSUPLEM)
+					FROM MPOLIPER X
+					WHERE 1 = 1
+						AND X.STATUS = BENEF.STATUS
+						AND X.CDROL = BENEF.CDROL
+						AND X.NMPOLIZA = BENEF.NMPOLIZA
+						AND X.ESTADO = BENEF.ESTADO
+						AND X.CDRAMO = BENEF.CDRAMO
+						AND X.CDUNIECO = BENEF.CDUNIECO
+					)
+				AND BENEF.STATUS = 'V'
+				AND BENEF.CDROL = 'TO'
+				AND BENEF.NMSITUAC = 0
+				AND BENEF.NMPOLIZA = PI_NMPOLIZA
+				AND BENEF.ESTADO = PI_ESTADO
+				AND BENEF.CDRAMO = PI_CDRAMO
+				AND BENEF.CDUNIECO = PI_CDUNIECO;
+
+        EXCEPTION
+			WHEN OTHERS THEN AUX_BENEF:=NULL;
+		END;
+	END IF;
+	RETURN AUX_BENEF;
+EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END GET_TOMADOR_DSR;
+
+
+/*
+-* NOME      : GET_MOTIVO_ANUL_LOGI
+-* OBJECTIVO : TRAZER O TIPO DE ANULAÇÃO DA APÓLICE ATRAVÉS DO SUPLEMENTO LÓGICO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 07-12-2004
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_MOTIVO_ANUL_LOGI(PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO IN NUMBER
+							,PI_NMPOLIZA IN NUMBER) RETURN VARCHAR2 IS
+AUX_MOTIVO TMANTENI.DESCRIPL%TYPE;
+BEGIN
+	SELECT MOTIVO.DESCRIPL
+	INTO AUX_MOTIVO
+	FROM TDESCSUP SUPLOGIC
+		,MSUPLEME SUPLEMENTO
+		,MPOLIZAS APOLICE
+		,TMANTENI MOTIVO
+	WHERE 2 = 2
+		AND MOTIVO.CODIGO = APOLICE.CDMOTANU
+		AND MOTIVO.CDTABLA = 'MMOTANU'
+		AND APOLICE.NMSUPLEM = SUPLEMENTO.NMSUPLEM
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.CDUNIECO = PI_CDUNIECO
+		AND SUPLOGIC.CDTIPSUP = '52'
+		AND SUPLEMENTO.SWANULA IS NOT NULL
+		AND SUPLEMENTO.NSUPLOGI = SUPLOGIC.NSUPLOGI
+		AND SUPLEMENTO.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLEMENTO.ESTADO = SUPLOGIC.ESTADO
+		AND SUPLEMENTO.CDRAMO = PI_CDRAMO
+		AND SUPLEMENTO.CDUNIECO = PI_CDUNIECO
+		AND SUPLOGIC.NSUPLOGI = (
+			SELECT MAX(X.NSUPLOGI)
+			FROM TDESCSUP X
+			WHERE 2 = 2
+				AND X.NMPOLIZA = PI_NMPOLIZA
+				AND X.ESTADO = 'M'
+				AND X.CDRAMO = PI_CDRAMO
+				AND X.CDUNIECO = PI_CDUNIECO
+			)
+		AND SUPLOGIC.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLOGIC.ESTADO = 'M'
+		AND SUPLOGIC.CDRAMO = PI_CDRAMO
+		AND SUPLOGIC.CDUNIECO = PI_CDUNIECO;
+
+    RETURN AUX_MOTIVO;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_MOTIVO_ANUL_LOGI;
+
+
+FUNCTION GET_COD_MOTIVO_ANUL_LOGI(PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_NMPOLIZA IN NUMBER) RETURN VARCHAR2 IS
+AUX_MOTIVO TMANTENI.DESCRIPL%TYPE;
+BEGIN
+	SELECT MOTIVO.CODIGO
+	INTO AUX_MOTIVO
+	FROM TDESCSUP SUPLOGIC
+		,MSUPLEME SUPLEMENTO
+		,MPOLIZAS APOLICE
+		,TMANTENI MOTIVO
+	WHERE 2 = 2
+		AND MOTIVO.CODIGO = APOLICE.CDMOTANU
+		AND MOTIVO.CDTABLA = 'MMOTANU'
+		AND APOLICE.NMSUPLEM = SUPLEMENTO.NMSUPLEM
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.CDUNIECO = PI_CDUNIECO
+		AND SUPLOGIC.CDTIPSUP = '52'
+		AND SUPLEMENTO.SWANULA IS NOT NULL
+		AND SUPLEMENTO.NSUPLOGI = SUPLOGIC.NSUPLOGI
+		AND SUPLEMENTO.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLEMENTO.ESTADO = SUPLOGIC.ESTADO
+		AND SUPLEMENTO.CDRAMO = PI_CDRAMO
+		AND SUPLEMENTO.CDUNIECO = PI_CDUNIECO
+		AND SUPLOGIC.NSUPLOGI = (
+			SELECT MAX(X.NSUPLOGI)
+			FROM TDESCSUP X
+			WHERE 2 = 2
+				AND X.NMPOLIZA = PI_NMPOLIZA
+				AND X.ESTADO = 'M'
+				AND X.CDRAMO = PI_CDRAMO
+				AND X.CDUNIECO = PI_CDUNIECO
+			)
+		AND SUPLOGIC.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLOGIC.ESTADO = 'M'
+		AND SUPLOGIC.CDRAMO = PI_CDRAMO
+		AND SUPLOGIC.CDUNIECO = PI_CDUNIECO;
+
+    RETURN AUX_MOTIVO;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_COD_MOTIVO_ANUL_LOGI;
+
+
+/*
+-* NOME      : GET_TIPO_COSEGURO_PROPOSTA
+-* OBJECTIVO : TRAZER O TIPO DE CO-SEGURO DA PROPOSTA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 03-12-2004
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_TIPO_COSEGURO_PROPOSTA(PI_CDUNIECO IN NUMBER,
+								   PI_CDRAMO IN NUMBER,
+								   PI_ESTADO IN VARCHAR2,
+								   PI_NMPROPUE IN NUMBER,
+								   PI_T_OUT    IN VARCHAR2) RETURN VARCHAR2 IS
+AUX_TIPO TMANTENI.DESCRIPL%TYPE;
+BEGIN
+	SELECT DECODE(UPPER(PI_T_OUT), 'C', PROPOSTA.INDCOASEG, 'D', DESC_COAS.DESCRIPL, PROPOSTA.INDCOASEG)
+	INTO AUX_TIPO
+	FROM CO_PROPOL PROPOSTA
+		,TMANTENI DESC_COAS
+	WHERE 1 = 1
+		AND PROPOSTA.INDCOASEG = DESC_COAS.CODIGO
+		AND DESC_COAS.CDTABLA = 'TTIPOCOA'
+		AND PROPOSTA.CDUNIECO = PI_CDUNIECO
+		AND PROPOSTA.CDRAMO = PI_CDRAMO
+		AND PROPOSTA.NMPROPUE = PI_NMPROPUE;
+
+    RETURN AUX_TIPO;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_TIPO_COSEGURO_PROPOSTA;
+
+
+/*
+-* NOME      : GET_MERCADO_PROPOSTA
+-* OBJECTIVO : TRAZER O MERCADO DA PROPOSTA
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 03-12-2004
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_MERCADO_PROPOSTA (PI_NMPROPUE IN NUMBER
+							,PI_CDRAMO  IN NUMBER
+							,PI_CDUNIECO IN NUMBER
+							) RETURN VARCHAR2
+IS
+AUX_MI      NUMBER;
+AUX_ME      NUMBER;
+BEGIN
+	IF SUBSTR(PI_CDRAMO,1,1) = '2' THEN
+		RETURN 'MM';
+	ELSIF PI_CDRAMO=110 THEN
+		RETURN 'MI';
+	ELSE
+		SELECT NVL(SUM(DECODE(ATRIBUTO.CDATRIBU, 12, ATRIBUTO.OTVALOR)), 0) MI
+			,NVL(SUM(DECODE(ATRIBUTO.CDATRIBU, 13, ATRIBUTO.OTVALOR)), 0) ME
+		INTO AUX_MI
+			,AUX_ME
+		FROM CO_TVALOPRO ATRIBUTO
+		WHERE ATRIBUTO.CDATRIBU IN (
+				12
+				,13
+				)
+			AND ATRIBUTO.NMPROPUE = PI_NMPROPUE
+			AND ATRIBUTO.CDRAMO = PI_CDRAMO
+			AND ATRIBUTO.CDUNIECO = PI_CDUNIECO;
+
+		IF AUX_MI !=0 AND AUX_ME=0 THEN
+			RETURN 'MI';
+		ELSIF AUX_MI =0 AND AUX_ME!=0 THEN
+			RETURN 'ME';
+		ELSE
+			RETURN'MM';
+		END IF;
+	END IF;
+EXCEPTION
+    WHEN OTHERS THEN RETURN NULL;
+END GET_MERCADO_PROPOSTA;
+
+
+/*
+   NOME : GET_ANO_SUBSCRICAO_RECIBO
+   *  OBJECTIVO : RETORNA O ANO DE SUBSCRICAO DE RISCO DO RECIBO
+   *  UTILIZAÇÃO:
+   *  ALTERACAO : CORRECÇÃO DE CÉLCULO PARA OS PRODUTOS DE CAUÇÃO
+   *  VERSÃO    : 2.0
+   *  CRIADO POR: RUI PORTUGAL
+   *  ALTERADO POR: BRIGIDA RAMOS
+   *  ALTERADO POR: MÁRIO DE ALMEIDA para incluir os produtos 120 e 121
+*/
+FUNCTION GET_ANO_SUBSCRICAO_RECIBO( PI_TIPORECI          IN VARCHAR2
+                                   ,PI_INICIO_VIG_REC    IN DATE
+                                   ,PI_FIM_VIG_REC       IN DATE
+                                   ,PI_INICIO_VIG_APOL   IN DATE
+                                   ,PI_CDUNIECO          IN NUMBER
+                                   ,PI_CDRAMO            IN NUMBER
+                                   ,PI_ESTADO            IN VARCHAR2
+                                   ,PI_NMPOLIZA          IN NUMBER ) RETURN DATE
+IS
+AUX_D DATE;
+AUX_C VARCHAR2(100);
+AUX_CDTIPORA NUMBER;
+BEGIN
+	SELECT CDTIPORA
+	INTO AUX_CDTIPORA
+	FROM TRAMOS
+	WHERE 1 = 1
+		AND TRAMOS.CDRAMO = PI_CDRAMO;
+
+    IF AUX_CDTIPORA = 1 AND PI_TIPORECI  IN (93,94) THEN
+		IF PI_INICIO_VIG_REC!=PI_FIM_VIG_REC THEN
+			AUX_D:=PI_FIM_VIG_REC-1;
+		ELSE
+			AUX_D := PI_INICIO_VIG_REC;
+		END IF;
+    ELSIF AUX_CDTIPORA = 1 AND PI_TIPORECI NOT IN (93,94) THEN
+		AUX_D := PI_INICIO_VIG_REC;
+    ELSIF AUX_CDTIPORA = 2 THEN
+		SELECT ATRIBUTO11
+		INTO AUX_C
+		FROM GD_ATRIBUTOS_APOLICE_MV ATRIBUTOS_APOL
+		WHERE 1 = 1
+			AND ATRIBUTOS_APOL.CDUNIECO = PI_CDUNIECO
+			AND ATRIBUTOS_APOL.CDRAMO = PI_CDRAMO
+			AND ATRIBUTOS_APOL.ESTADO = PI_ESTADO
+			AND ATRIBUTOS_APOL.NMPOLIZA = PI_NMPOLIZA;
+
+		IF TRIM(AUX_C) IN ('1','4') THEN
+			AUX_D :=Pkg_Formulas_Cosec.GET_PRIM_ANO_VIGENCIA(PI_CDUNIECO,PI_CDRAMO,PI_NMPOLIZA);
+		ELSIF TRIM(AUX_C) IN ('2','5') THEN
+            AUX_D :=PI_INICIO_VIG_APOL;
+		ELSIF TRIM(AUX_C) IN ('3','6') THEN
+			IF PI_TIPORECI NOT IN (93,94) THEN
+				AUX_D := PI_INICIO_VIG_REC;
+			ELSE
+				AUX_D := PI_FIM_VIG_REC;
+			END IF;
+		END IF;
+    END IF;
+	RETURN AUX_D;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_ANO_SUBSCRICAO_RECIBO;
+
+
+/*
+   NOME : GET_RESSEGURO_MPAGOSIN
+   *  OBJECTIVO : RETORNA A SOMA DOS VALORES DE RESSEGURO ASSOCIADOS A UM PAGAMENTO DE SINISTRO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_RESSEGURO_MPAGOSIN( PI_CDUNIECO IN NUMBER
+                                ,PI_CDRAMO   IN NUMBER
+                                ,PI_AAAPERTU IN NUMBER
+                                ,PI_STATUS   IN VARCHAR2
+                                ,PI_NMSINIES IN NUMBER
+                                ,PI_CDCONVAL IN VARCHAR2
+                                ,PI_NMORDPAG IN NUMBER ) RETURN NUMBER
+IS
+AUX_N NUMBER;
+BEGIN
+	SELECT SUM(PTIMPCON)
+	INTO AUX_N
+	FROM MPAGOTRA RESSEGURO
+	WHERE 1 = 1
+		AND RESSEGURO.NMORDPAG = PI_NMORDPAG
+		AND RESSEGURO.CDCONVAL = PI_CDCONVAL
+		AND RESSEGURO.NMSINIES = PI_NMSINIES
+		AND RESSEGURO.STATUS = PI_STATUS
+		AND RESSEGURO.AAAPERTU = PI_AAAPERTU
+		AND RESSEGURO.CDRAMO = PI_CDRAMO
+		AND RESSEGURO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN NVL(AUX_N,0);
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_RESSEGURO_MPAGOSIN;
+
+
+/*
+   NOME : GET_RESSEGURO_MPAGOSIN
+   *  OBJECTIVO : RETORNA O CODIGO DO TRATADO DE RESSEGURO ASSOCIADO A UM PAGAMENTO DE SINISTRO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_TRATADO_RESSEGURO_MPAGOSIN( PI_CDUNIECO IN NUMBER
+                                        ,PI_CDRAMO   IN NUMBER
+                                        ,PI_AAAPERTU IN NUMBER
+                                        ,PI_STATUS   IN VARCHAR2
+                                        ,PI_NMSINIES IN NUMBER
+                                        ,PI_CDCONVAL IN VARCHAR2
+                                        ,PI_NMORDPAG IN NUMBER ) RETURN VARCHAR2
+IS
+AUX_C VARCHAR2(10);
+BEGIN
+	SELECT MAX(CDCONTRE)
+	INTO AUX_C
+	FROM MPAGOTRA RESSEGURO
+	WHERE 1 = 1
+		AND RESSEGURO.NMORDPAG = PI_NMORDPAG
+		AND RESSEGURO.CDCONVAL = PI_CDCONVAL
+		AND RESSEGURO.NMSINIES = PI_NMSINIES
+		AND RESSEGURO.STATUS = PI_STATUS
+		AND RESSEGURO.AAAPERTU = PI_AAAPERTU
+		AND RESSEGURO.CDRAMO = PI_CDRAMO
+		AND RESSEGURO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_C;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_TRATADO_RESSEGURO_MPAGOSIN;
+
+
+/*
+   NOME : GET_RESSEGURO_MPAGOSIN
+   *  OBJECTIVO : RETORNA A SOMA DOS VALORES DE RESSEGURO ASSOCIADOS A UMA VALORAÇÃO DE SINISTRO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_RESSEGURO_MSINIVAL( PI_CDUNIECO IN NUMBER
+                                ,PI_CDRAMO   IN NUMBER
+                                ,PI_AAAPERTU IN NUMBER
+                                ,PI_STATUS   IN VARCHAR2
+                                ,PI_NMSINIES IN NUMBER
+                                ,PI_CDCONVAL IN VARCHAR2 ) RETURN NUMBER
+IS
+AUX_N NUMBER;
+BEGIN
+	SELECT SUM(PTIMPCON)
+	INTO AUX_N
+	FROM MCONRETR RESSEGURO
+	WHERE 1 = 1
+		AND RESSEGURO.CDCONVAL = PI_CDCONVAL
+		AND RESSEGURO.NMSINIES = PI_NMSINIES
+		AND RESSEGURO.STATUS = PI_STATUS
+		AND RESSEGURO.AAAPERTU = PI_AAAPERTU
+		AND RESSEGURO.CDRAMO = PI_CDRAMO
+		AND RESSEGURO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN NVL(AUX_N,0);
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_RESSEGURO_MSINIVAL;
+
+
+/*
+   NOME : GET_RESSEGURO_MPAGOSIN
+   *  OBJECTIVO : RETORNA O CÉDIGO DO TRATADO DE RESSEGURO ASSOCIADO A UMA VALORAÇÃO DE SINISTRO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION GET_TRATADO_RESSEGURO_MSINIVAL( PI_CDUNIECO IN NUMBER
+                                        ,PI_CDRAMO   IN NUMBER
+                                        ,PI_AAAPERTU IN NUMBER
+                                        ,PI_STATUS   IN VARCHAR2
+                                        ,PI_NMSINIES IN NUMBER
+                                        ,PI_CDCONVAL IN VARCHAR2 ) RETURN VARCHAR2
+IS
+AUX_C VARCHAR2(10);
+BEGIN
+	SELECT MAX(CDCONTRE)
+	INTO AUX_C
+	FROM MCONRETR RESSEGURO
+	WHERE 1 = 1
+		AND RESSEGURO.CDCONVAL = PI_CDCONVAL
+		AND RESSEGURO.NMSINIES = PI_NMSINIES
+		AND RESSEGURO.STATUS = PI_STATUS
+		AND RESSEGURO.AAAPERTU = PI_AAAPERTU
+		AND RESSEGURO.CDRAMO = PI_CDRAMO
+		AND RESSEGURO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_C;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_TRATADO_RESSEGURO_MSINIVAL;
+
+
+FUNCTION GET_PERCENTAGEM_COSEGURO( PI_CDUNIECO IN NUMBER
+								, PI_CDRAMO IN NUMBER
+								, PI_ESTADO IN VARCHAR2
+								, PI_CDTIPCOA IN VARCHAR2 DEFAULT NULL
+								, PI_NMPOLIZA IN NUMBER
+								, PI_DATAACTUAL IN DATE DEFAULT SYSDATE) RETURN NUMBER
+AS
+  PERC_COASEG NUMBER;
+BEGIN
+	SELECT SUM(X.PORCPART)
+	INTO PERC_COASEG
+	FROM MPOLICOA X
+	WHERE X.CDUNIECO = PI_CDUNIECO
+		AND X.CDRAMO = PI_CDRAMO
+		AND X.ESTADO = PI_ESTADO
+		AND X.NMPOLIZA = PI_NMPOLIZA
+		AND X.CDTIPCOA = NVL(PI_CDTIPCOA, 'C')
+		AND X.STATUS = 'V'
+		AND X.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLICOA Z
+			WHERE Z.CDUNIECO = X.CDUNIECO
+				AND Z.CDRAMO = X.CDRAMO
+				AND Z.ESTADO = X.ESTADO
+				AND Z.NMPOLIZA = X.NMPOLIZA
+				AND Z.CDTIPCOA = X.CDTIPCOA
+				AND Z.CDCIA = X.CDCIA
+				AND Z.NMSUPLEM <= TO_CHAR(PI_DATAACTUAL, 'J') || '99999999999'
+			);
+
+	RETURN PERC_COASEG;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_PERCENTAGEM_COSEGURO;
+
+
+FUNCTION GET_TIPO_COSEGURO(PI_CDUNIECO IN NUMBER,
+					   PI_CDRAMO IN NUMBER,
+					   PI_ESTADO IN VARCHAR2,
+					   PI_NMPOLIZA IN NUMBER,
+					   PI_DATAACTUAL IN DATE DEFAULT SYSDATE,
+					   PI_T_OUT    IN VARCHAR2) RETURN VARCHAR2 IS
+AUX_TIPO TMANTENI.DESCRIPL%TYPE;
+BEGIN
+	SELECT DECODE(UPPER(PI_T_OUT), 'C', APOLICE.CDTIPCOA, 'D', DESC_COAS.DESCRIPL, APOLICE.CDTIPCOA)
+	INTO AUX_TIPO
+	FROM MPOLIZAS APOLICE
+		,TMANTENI DESC_COAS
+	WHERE 1 = 1
+		AND APOLICE.CDTIPCOA = DESC_COAS.CODIGO
+		AND DESC_COAS.CDTABLA = 'TTIPOCOA'
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 1 = 1
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.NMSUPLEM <= TO_CHAR(PI_DATAACTUAL, 'J') || '99999999999'
+			)
+		AND APOLICE.CDUNIECO = PI_CDUNIECO
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.ESTADO = PI_ESTADO
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA;
+
+    RETURN AUX_TIPO;
+    EXCEPTION
+		WHEN OTHERS THEN
+    RETURN NULL;
+END GET_TIPO_COSEGURO;
+
+
+FUNCTION GET_V_DIVIDA_PREMIO (PI_CDUNIECO IN NUMBER,
+							PI_CDRAMO   IN NUMBER,
+							PI_ESTADO   IN VARCHAR2,
+							PI_NMPOLIZA IN NUMBER
+							) RETURN  NUMBER IS
+AUX_VALOR MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(RECIBO.PTIMPORT)
+	INTO AUX_VALOR
+	FROM MRECIBO RECIBO
+		,GD_ATRIBUTOS_APOLICE_MV ATRIBUTO
+		,GD_TIPOS_DOCUMENTO TIPODOC
+		,TRAMOS RAMO
+	WHERE 1 = 1
+		AND DECODE(TIPODOC.ID, 1, Pkg_Formulas_Cosec.FUN_DATA_EXIGIBILIDADE(RAMO.CDTIPRAM, ATRIBUTO.ATRIBUTO14, RECIBO.TIPORECI, RECIBO.FEINICIO, RECIBO.FEEMISIO, RECIBO.PTIMPORT), TRUNC(SYSDATE)) <= TRUNC(SYSDATE)
+		AND RECIBO.CDRAMO = RAMO.CDRAMO
+		AND RECIBO.NMPOLIZA = ATRIBUTO.NMPOLIZA
+		AND ATRIBUTO.ESTADO = PI_ESTADO
+		AND RECIBO.CDRAMO = ATRIBUTO.CDRAMO
+		AND RECIBO.CDUNIECO = ATRIBUTO.CDUNIECO /* ACRESCIMO ESTADO 16 E 17 2006/04/04 */
+		AND DECODE(TIPODOC.ID, 1, DECODE(RECIBO.CDESTADO, 1, 'S', 5, 'S', 15, 'S', 16, 'S', 17, 'S', 'N'), 2, DECODE(RECIBO.CDESTADO, 6, 'S', 'N'), 'N') = 'S'
+		AND SIGN(RECIBO.PTIMPORT - 0) = TIPODOC.SINAL_VALOR
+		AND RECIBO.TIPORECI = TIPODOC.TIPORECI
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+    RETURN AUX_VALOR;
+EXCEPTION
+    WHEN OTHERS THEN RETURN -1;
+END GET_V_DIVIDA_PREMIO;
+
+
+FUNCTION GET_D_DIVIDA_PREMIO (PI_CDUNIECO IN NUMBER,
+							PI_CDRAMO   IN NUMBER,
+							PI_ESTADO   IN VARCHAR2,
+							PI_NMPOLIZA IN NUMBER
+							) RETURN DATE  IS
+AUX_DATA  MRECIBO.FEEMISIO%TYPE;
+BEGIN
+	SELECT MIN(RECIBO.FEEXIGIB)
+	/*    DECODE(TIPODOC.ID,1,Pkg_Formulas_Cosec.FUN_DATA_EXIGIBILIDADE (RAMO.CDTIPRAM
+					 ,ATRIBUTO.ATRIBUTO14
+					,RECIBO.TIPORECI
+					,RECIBO.FEINICIO
+					,RECIBO.FEEMISIO
+					,RECIBO.PTIMPORT),TO_DATE('31-12-9999','DD-MM-RRRR'))*/
+	INTO AUX_DATA
+	FROM MRECIBO RECIBO
+		,GD_ATRIBUTOS_APOLICE_MV ATRIBUTO
+		,GD_TIPOS_DOCUMENTO TIPODOC
+		,TRAMOS RAMO
+	WHERE 1 = 1
+		AND DECODE(TIPODOC.ID, 1, Pkg_Formulas_Cosec.FUN_DATA_EXIGIBILIDADE(RAMO.CDTIPRAM, ATRIBUTO.ATRIBUTO14, RECIBO.TIPORECI, RECIBO.FEINICIO, RECIBO.FEEMISIO, RECIBO.PTIMPORT), TRUNC(SYSDATE)) <= TRUNC(SYSDATE)
+		AND RECIBO.CDRAMO = RAMO.CDRAMO
+		AND RECIBO.NMPOLIZA = ATRIBUTO.NMPOLIZA
+		AND ATRIBUTO.ESTADO = PI_ESTADO
+		AND RECIBO.CDRAMO = ATRIBUTO.CDRAMO
+		AND RECIBO.CDUNIECO = ATRIBUTO.CDUNIECO /*  ACRESCIMO ESTADO 16 E 17 2006/04/04 */
+		AND DECODE(TIPODOC.ID, 1, DECODE(RECIBO.CDESTADO, 1, 'S', 5, 'S', 15, 'S', 16, 'S', 17, 'S', 'N'), 'N') = 'S'
+		AND SIGN(RECIBO.PTIMPORT - 0) = TIPODOC.SINAL_VALOR
+		AND RECIBO.TIPORECI = TIPODOC.TIPORECI
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+    RETURN AUX_DATA;
+EXCEPTION
+    WHEN OTHERS THEN RETURN NULL;
+END GET_D_DIVIDA_PREMIO;
+
+
+FUNCTION FUN_MAX_DATA(PI_DT1 IN DATE
+                    , PI_DT2 IN DATE
+                    ) RETURN DATE
+IS
+BEGIN
+	IF (PI_DT1>=PI_DT2) THEN
+		RETURN PI_DT1;
+	ELSE
+		RETURN PI_DT2;
+	END IF;
+END FUN_MAX_DATA;
+
+
+FUNCTION FUN_DATA_EXIGIBILIDADE (PI_CDTIPRAM IN NUMBER
+								,PI_MODPAG IN NUMBER
+								,PI_CDTIPRECI IN NUMBER
+								,PI_FEINICIO IN DATE
+								,PI_FEEMISIO IN DATE
+								,PI_VALOR IN NUMBER )  RETURN DATE
+IS
+BEGIN
+    IF (PI_CDTIPRECI IN (79,82,83,90,91,92,95,96,97)) THEN
+       RETURN PI_FEEMISIO+30;
+    ELSE
+        IF (PI_VALOR>=0) THEN
+            IF (PI_CDTIPRECI=0) THEN
+                RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO);
+            END IF;
+            IF (PI_CDTIPRECI=1) THEN
+                RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=2) THEN
+                IF (PI_CDTIPRAM=1) THEN
+                   IF (PI_MODPAG=1) THEN
+                         RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO);
+                       ELSE
+                      RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+                    END IF;
+                ELSE
+                      RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+                   END IF;
+            END IF;
+            IF (PI_CDTIPRECI=3) THEN
+                IF (PI_CDTIPRAM=1) THEN
+                  RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO);
+                ELSE
+                  RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+                END IF;
+            END IF;
+            IF (PI_CDTIPRECI=4) THEN
+                  RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=7) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=8) THEN
+                IF (PI_CDTIPRAM=1) THEN
+                     RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO);
+                ELSE
+                       RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+                END IF;
+            END IF;
+            IF (PI_CDTIPRECI=93) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=98) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=99) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+            IF (PI_CDTIPRECI=9) THEN
+               RETURN FUN_MAX_DATA(PI_FEINICIO,PI_FEEMISIO+40);
+            END IF;
+        ELSE
+			RETURN NULL;
+        END IF;
+	END IF;
+	RETURN NULL;
+END FUN_DATA_EXIGIBILIDADE;
+
+
+FUNCTION FUN_N_COMUNIC_MORA (PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO   IN VARCHAR2
+							,PI_NMPOLIZA IN NUMBER
+							,PI_DT IN DATE) RETURN NUMBER
+IS
+AUX_N NUMBER;
+AUX_PROV NUMBER;
+BEGIN
+	SELECT COUNT(*)
+	INTO AUX_N
+	FROM CO_COAME COMUNICACAO
+	WHERE 1 = 1
+		AND COMUNICACAO.FECOMUNI < PI_DT
+		AND COMUNICACAO.FECIERRE IS NULL
+		AND COMUNICACAO.NMPOLIZA = PI_NMPOLIZA
+		AND COMUNICACAO.CDRAMO = PI_CDRAMO
+		AND COMUNICACAO.CDUNIECO = PI_CDUNIECO;
+
+	SELECT COUNT(*)
+	INTO AUX_PROV
+	FROM (
+		SELECT DISTINCT COMUNIC.NMCOMAME
+			,COMUNIC.NMPROAME
+			,COMUNIC.CDTIPORA
+			,COMUNIC.CDRAMO
+		FROM MSINIEST SINISTRO
+			,CO_COAME COMUNIC
+			,MSINIVAL PROV
+		WHERE 1 = 1
+			AND PROV.PTPAGOS <> 0
+			AND PROV.NMSINIES = SINISTRO.NMSINIES
+			AND PROV.STATUS = SINISTRO.STATUS
+			AND PROV.AAAPERTU = SINISTRO.AAAPERTU
+			AND PROV.CDRAMO = SINISTRO.CDRAMO
+			AND PROV.CDUNIECO = SINISTRO.CDUNIECO
+			AND SINISTRO.CDUNIECO = COMUNIC.CDUNIECO
+			AND SINISTRO.CDRAMO = COMUNIC.CDRAMO
+			AND SINISTRO.CDTIPORA = COMUNIC.CDTIPORA
+			AND SINISTRO.NMCOMAME = COMUNIC.NMCOMAME
+			AND SINISTRO.NMPROAME = COMUNIC.NMPROAME
+			AND COMUNIC.FECOMUNI < PI_DT
+			AND COMUNIC.FECIERRE IS NULL
+			AND COMUNIC.NMPOLIZA = PI_NMPOLIZA
+			AND COMUNIC.CDRAMO = PI_CDRAMO
+			AND COMUNIC.CDUNIECO = PI_CDUNIECO
+		);
+
+	RETURN AUX_N-AUX_PROV;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_N_COMUNIC_MORA;
+
+
+FUNCTION FUN_N_PAG_NAO_LIQ (PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO IN VARCHAR2
+							,PI_NMPOLIZA IN NUMBER
+							,PI_DT IN DATE )  RETURN NUMBER
+IS
+AUX_N NUMBER;
+BEGIN
+	SELECT COUNT(*)
+	INTO AUX_N
+	FROM MSINIEST SINISTRO
+		,MPAGOSIN PAGAMENTO
+	WHERE 1 = 1
+		AND PAGAMENTO.SWVIGOR = 'V'
+		AND DECODE(PAGAMENTO.CDTIPMOV, '1', 'S', '14', 'S', 'N') = 'S'
+		AND PAGAMENTO.FEAUTORI < PI_DT
+		AND PAGAMENTO.SWESTADO = '2'
+		AND PAGAMENTO.NMSINIES = SINISTRO.NMSINIES
+		AND PAGAMENTO.STATUS = SINISTRO.STATUS
+		AND PAGAMENTO.AAAPERTU = SINISTRO.AAAPERTU
+		AND PAGAMENTO.CDRAMO = SINISTRO.CDRAMO
+		AND PAGAMENTO.CDUNIECO = SINISTRO.CDUNIECO
+		AND DECODE(SINISTRO.CDESTADO, '2', 'N', '3', 'N', '5', 'N', 'S') = 'S'
+		AND SINISTRO.NMPOLIZA = PI_NMPOLIZA
+		AND SINISTRO.CDRAMO = PI_CDRAMO
+		AND SINISTRO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_N;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_N_PAG_NAO_LIQ;
+
+
+FUNCTION FUN_N_SIN_SEM_PAG  (PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO IN VARCHAR2
+							,PI_NMPOLIZA IN NUMBER
+							,PI_DT IN DATE) RETURN NUMBER
+IS
+AUX_N NUMBER;
+BEGIN
+	SELECT COUNT(*)
+	INTO AUX_N
+	FROM MSINIEST SINISTRO
+		,CO_PARSI
+	WHERE 1 = 1
+		AND DECODE(GET_PAG_AUTOR_SIN_M111(SINISTRO.CDUNIECO, SINISTRO.CDRAMO, SINISTRO.AAAPERTU, SINISTRO.NMSINIES, 'M'), 'S', 'N', 'S') = 'S'
+		AND CO_PARSI.FEPARSIN < PI_DT
+		AND CO_PARSI.ESTPART = 'V'
+		AND CO_PARSI.NMCOMAME = SINISTRO.NMCOMAME
+		AND CO_PARSI.NMPROAME = SINISTRO.NMPROAME
+		AND CO_PARSI.CDTIPORA = SINISTRO.CDTIPORA
+		AND CO_PARSI.CDUNIECO = SINISTRO.CDUNIECO
+		AND DECODE(SINISTRO.CDESTADO, '2', 'N', '3', 'N', '5', 'N', 'S') = 'S'
+		AND SINISTRO.CDUNIECO = PI_CDUNIECO
+		AND SINISTRO.CDRAMO = PI_CDRAMO
+		AND SINISTRO.NMPOLIZA = PI_NMPOLIZA;
+
+	RETURN AUX_N;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_N_SIN_SEM_PAG;
+
+
+FUNCTION GET_PAG_AUTOR_SIN_M111( PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO    IN NUMBER
+								,PI_AAAPERTU IN NUMBER
+								,PI_NMSINIES IN NUMBER
+								,PI_STATUS   IN VARCHAR) RETURN VARCHAR2
+IS
+AUX VARCHAR2(1);
+BEGIN
+	SELECT 'S'
+	INTO AUX
+	FROM DUAL
+	WHERE EXISTS (
+			SELECT 'S'
+			FROM MPAGOSIN
+			WHERE 2 = 2
+				AND SWESTADO IN (
+					3
+					,2
+					)
+				AND NMSINIES = PI_NMSINIES
+				AND STATUS = 'M'
+				AND AAAPERTU = PI_AAAPERTU
+				AND CDRAMO = PI_CDRAMO
+				AND CDUNIECO = PI_CDUNIECO
+			);
+
+	RETURN AUX;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END GET_PAG_AUTOR_SIN_M111;
+
+
+FUNCTION FUN_V_SINISTRO_PER  (PI_CDUNIECO IN NUMBER
+							,PI_CDRAMO IN VARCHAR2
+							,PI_NMPOLIZA IN NUMBER
+							,PI_DATAINI IN DATE
+							,PI_DATAFIM IN DATE) RETURN NUMBER
+IS
+AUX_PROVISAO NUMBER;
+BEGIN
+	SELECT SUM(VALORSIN.PTPAGOS * Pkg_Formulas_Cosec.FUN_TAXA_CAMBIO(VALORSIN.CDMONEDA))
+	INTO AUX_PROVISAO
+	FROM MSINIEST SINISTRO
+		,MSINIVAL VALORSIN
+	WHERE 1 = 1
+		AND VALORSIN.CDCONVAL LIKE '_1__'
+		AND VALORSIN.FEMOVIMI BETWEEN PI_DATAINI
+			AND PI_DATAFIM
+		AND VALORSIN.NMSINIES = SINISTRO.NMSINIES
+		AND VALORSIN.STATUS = SINISTRO.STATUS
+		AND VALORSIN.AAAPERTU = SINISTRO.AAAPERTU
+		AND VALORSIN.CDRAMO = SINISTRO.CDRAMO
+		AND VALORSIN.CDUNIECO = SINISTRO.CDUNIECO
+		AND SINISTRO.NMPOLIZA = PI_NMPOLIZA
+		AND SINISTRO.CDRAMO = PI_CDRAMO
+		AND SINISTRO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_PROVISAO;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_V_SINISTRO_PER;
+
+
+FUNCTION FUN_GAR_PENDENTE( PI_CDUNIECO IN NUMBER
+						, PI_CDRAMO   IN VARCHAR2
+						, PI_NMSOLICI IN NUMBER
+						, PI_DT IN DATE) RETURN NUMBER
+IS
+AUX_PEND NUMBER;
+BEGIN
+	SELECT SUM(1) N_PEND
+	INTO AUX_PEND
+	FROM CO_PROGAR GARANTIA
+	WHERE 1 = 1
+		AND GARANTIA.FEREGISGAR < PI_DT
+		AND DECODE(GARANTIA.SWESTADO, 'PE', 'S', 'PN', 'S', 'PP', 'S', 'N') = 'S'
+		AND GARANTIA.NMPROPUE = PI_NMSOLICI
+		AND GARANTIA.CDRAMO = PI_CDRAMO
+		AND GARANTIA.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_PEND;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_GAR_PENDENTE;
+
+
+FUNCTION FUN_PMR_VIGENCIA( PI_CDUNIECO IN NUMBER
+						, PI_CDRAMO   IN VARCHAR2
+						, PI_NMSOLICI IN NUMBER
+						, PI_DT_INICIO IN DATE
+						, PI_DT_FIM IN DATE) RETURN NUMBER
+IS
+AUX_PM NUMBER;
+BEGIN
+	SELECT SUM(GARANTIA.FEDECISI - GARANTIA.FEREGISGAR) / SUM(1) PMR
+	INTO AUX_PM
+	FROM CO_PROGAR GARANTIA
+	WHERE 1 = 1
+		AND GARANTIA.FEDECISI BETWEEN PI_DT_INICIO
+			AND SYSDATE --PI_DT_FIM
+		AND GARANTIA.FEDECISI IS NOT NULL
+		AND GARANTIA.NMPROPUE = PI_NMSOLICI
+		AND GARANTIA.CDRAMO = PI_CDRAMO
+		AND GARANTIA.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_PM;
+EXCEPTION
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_PMR_VIGENCIA;
+
+
+FUNCTION FUN_GAR_VIGOR_M111( PI_CDUNIECO IN NUMBER
+							, PI_CDRAMO   IN VARCHAR2
+							, PI_NMSOLICI IN NUMBER
+							, PI_TIPO_DADO IN VARCHAR2) RETURN NUMBER
+IS
+    AUX_N CO_PROGAR.IMPSOLCO%TYPE;
+    AUX_SOL CO_PROGAR.IMPSOLCO%TYPE;
+    AUX_DEC CO_PROGAR.IMPSOLCO%TYPE;
+BEGIN
+	SELECT SUM(1) N
+		,SUM(GARANTIA.IMPSOLCO) SOL
+		,SUM(GARANTIA.IMPCONCO) CONC
+	INTO AUX_N
+		,AUX_SOL
+		,AUX_DEC
+	FROM CO_PROGAR GARANTIA
+	WHERE 1 = 1
+		AND DECODE(GARANTIA.SWESTADO, 'M', 'S', 'PR', 'S', 'N') = 'S'
+		AND GARANTIA.NMPROPUE = PI_NMSOLICI
+		AND GARANTIA.CDRAMO = PI_CDRAMO
+		AND GARANTIA.CDUNIECO = PI_CDUNIECO;
+
+    IF PI_TIPO_DADO='CONT' THEN
+    RETURN AUX_N;
+    END IF;
+    IF PI_TIPO_DADO='SOLIC' THEN
+    RETURN AUX_SOL;
+    END IF;
+    IF PI_TIPO_DADO='DECID' THEN
+    RETURN AUX_DEC;
+    END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+             RETURN NULL;
+END FUN_GAR_VIGOR_M111;
+
+
+FUNCTION IS_APOLICE_VALIDA( PI_CDUNIECO IN NUMBER
+                          , PI_CDRAMO   IN VARCHAR2
+                          , PI_ESTADO   IN VARCHAR2
+                          , PI_NMPOLIZA IN NUMBER
+                          , PI_DT_REF   IN DATE DEFAULT SYSDATE) RETURN VARCHAR2
+IS
+  AUX_TIPOSUP     TDESCSUP.CDTIPSUP%TYPE;
+BEGIN
+
+  /* VAI BUSCAR O TIPO DE SUPLEMENTO DO ÚLTIMO SULEMENTO LÓGICO EMITIDO
+À DATA REFERENCIA (POR OMISSÃO SYSDATE) */
+	SELECT SUPLOGIC.CDTIPSUP
+	INTO AUX_TIPOSUP
+	FROM TDESCSUP SUPLOGIC
+	WHERE 2 = 2
+		AND SUPLOGIC.NSUPLOGI = (
+			SELECT MAX(X.NSUPLOGI)
+			FROM MSUPLEME X
+			WHERE 2 = 2
+				AND X.NMSUPLEM <= TO_CHAR(PI_DT_REF, 'J') || '99999999999'
+				AND X.NMPOLIZA = SUPLOGIC.NMPOLIZA
+				AND X.ESTADO = SUPLOGIC.ESTADO
+				AND X.CDRAMO = SUPLOGIC.CDRAMO
+				AND X.CDUNIECO = SUPLOGIC.CDUNIECO
+			) /* OBTEM O MAX SUPLEMENTO LÓGICO DA
+	APOLICE À DATA REF */
+		AND SUPLOGIC.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLOGIC.ESTADO = PI_ESTADO
+		AND SUPLOGIC.CDRAMO = PI_CDRAMO
+		AND SUPLOGIC.CDUNIECO = PI_CDUNIECO;
+
+
+  IF (AUX_TIPOSUP='52') THEN
+    /* SE O ÚLTIMO SUPLEMENTO FOR DE ANULAÇÃO ENTÃO A APOLICE ESTÁ ANULADA */
+    RETURN 'N';
+  END IF;
+
+  /* SENÃO...ESTÁ VÉLIDA */
+  RETURN 'S';
+
+EXCEPTION
+  WHEN OTHERS THEN
+    /* SE HOUVER ERRO REPORTA-O COM RESULTADO AMBIGUO (X) */
+    RETURN 'X';
+END IS_APOLICE_VALIDA;
+
+
+FUNCTION IS_TIPOAVISO_VALIDO (PI_TIPOAVISO IN VARCHAR2) RETURN VARCHAR2
+IS
+  auxVALIDO VARCHAR2(1):='N';
+BEGIN
+	SELECT VALIDO
+	INTO auxVALIDO
+	FROM GD_TIPOS_AVISO
+	WHERE ID = PI_TIPOAVISO;
+
+	RETURN auxVALIDO;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN auxVALIDO;
+END IS_TIPOAVISO_VALIDO;
+
+
+FUNCTION GET_ATRIBUTO_APOLICE ( PI_CDUNIECO IN NUMBER
+                              , PI_CDRAMO   IN VARCHAR2
+                              , PI_ESTADO   IN VARCHAR2
+                              , PI_NMPOLIZA IN NUMBER
+                              , PI_CDATRIBU IN NUMBER
+                              , PI_DEFAULT  IN VARCHAR2 DEFAULT NULL
+                              , PI_NMSUPLEM IN NUMBER DEFAULT NULL) RETURN VARCHAR2
+IS
+  auxRESULT VARCHAR2(200);
+BEGIN
+	SELECT OTVALOR
+	INTO auxRESULT
+	FROM TVALOPOL ATRIBUTOS
+	WHERE 1 = 1
+		AND ATRIBUTOS.STATUS = 'V'
+		AND ATRIBUTOS.CDATRIBU = PI_CDATRIBU
+		AND ATRIBUTOS.NMSUPLEM = (
+			SELECT NVL(MAX(X.NMSUPLEM), 0)
+			FROM TVALOPOL X
+			WHERE X.CDATRIBU = ATRIBUTOS.CDATRIBU
+				AND X.NMSUPLEM <= NVL(PI_NMSUPLEM, TO_CHAR(SYSDATE, 'J') || '99999999999')
+				AND X.STATUS = ATRIBUTOS.STATUS
+				AND X.NMPOLIZA = ATRIBUTOS.NMPOLIZA
+				AND X.ESTADO = ATRIBUTOS.ESTADO
+				AND X.CDRAMO = ATRIBUTOS.CDRAMO
+				AND X.CDUNIECO = ATRIBUTOS.CDUNIECO
+			)
+		AND ATRIBUTOS.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTOS.ESTADO = PI_ESTADO
+		AND ATRIBUTOS.CDRAMO = PI_CDRAMO
+		AND ATRIBUTOS.CDUNIECO = PI_CDUNIECO;
+
+	RETURN auxRESULT;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN PI_DEFAULT;
+END GET_ATRIBUTO_APOLICE;
+
+
+FUNCTION GET_TIPOTOMADOR_APOLICE ( PI_CDUNIECO IN NUMBER
+                                 , PI_CDRAMO   IN NUMBER
+                                 , PI_NMPOLIZA IN NUMBER
+                                 , PI_ESTADO   IN VARCHAR2
+                                 , PI_NMSUPLEM IN NUMBER) RETURN NUMBER
+IS
+  auxTIPO NUMBER;
+BEGIN
+	SELECT ENTIDADE.CDTIPIDE
+	INTO auxTIPO
+	FROM MPOLIPER INTERVENTOR
+		,MPERSONA ENTIDADE
+	WHERE 1 = 1
+		AND ENTIDADE.CDPERSON = INTERVENTOR.CDPERSON
+		AND INTERVENTOR.CDROL = 'TO'
+		AND INTERVENTOR.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE X.CDROL = INTERVENTOR.CDROL
+				AND X.NMSUPLEM <= PI_NMSUPLEM
+				AND X.NMSITUAC = INTERVENTOR.NMSITUAC
+				AND X.NMPOLIZA = INTERVENTOR.NMPOLIZA
+				AND X.ESTADO = INTERVENTOR.ESTADO
+				AND X.CDRAMO = INTERVENTOR.CDRAMO
+				AND X.CDUNIECO = INTERVENTOR.CDUNIECO
+			)
+		AND INTERVENTOR.NMSITUAC = 0
+		AND INTERVENTOR.NMPOLIZA = PI_NMPOLIZA
+		AND INTERVENTOR.ESTADO = PI_ESTADO
+		AND INTERVENTOR.CDRAMO = PI_CDRAMO
+		AND INTERVENTOR.CDUNIECO = PI_CDUNIECO;
+
+  RETURN auxTIPO;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 0;
+END GET_TIPOTOMADOR_APOLICE;
+
+
+FUNCTION GET_INTERVENTOR_APOLICE ( PI_CDUNIECO IN NUMBER
+                                 , PI_CDRAMO   IN NUMBER
+                                 , PI_NMPOLIZA IN NUMBER
+                                 , PI_ESTADO   IN VARCHAR2
+                                 , PI_NMSITUAC IN NUMBER
+                                 , PI_CDROL    IN VARCHAR2
+                                 , PI_DATA_REF IN DATE DEFAULT SYSDATE) RETURN NUMBER
+IS
+  auxPERSONA NUMBER;
+BEGIN
+	SELECT CDPERSON
+	INTO auxPERSONA
+	FROM MPOLIPER INTERVENTOR
+	WHERE INTERVENTOR.CDROL = PI_CDROL
+		AND INTERVENTOR.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE X.CDROL = INTERVENTOR.CDROL
+				AND X.NMSUPLEM <= TO_CHAR(PI_DATA_REF, 'J') || '99999999999'
+				AND X.NMSITUAC = INTERVENTOR.NMSITUAC
+				AND X.NMPOLIZA = INTERVENTOR.NMPOLIZA
+				AND X.ESTADO = INTERVENTOR.ESTADO
+				AND X.CDRAMO = INTERVENTOR.CDRAMO
+				AND X.CDUNIECO = INTERVENTOR.CDUNIECO
+			)
+		AND INTERVENTOR.NMSITUAC LIKE NVL(PI_NMSITUAC, '%')
+		AND INTERVENTOR.NMPOLIZA = PI_NMPOLIZA
+		AND INTERVENTOR.ESTADO = PI_ESTADO
+		AND INTERVENTOR.CDRAMO = PI_CDRAMO
+		AND INTERVENTOR.CDUNIECO = PI_CDUNIECO;
+
+	RETURN auxPERSONA;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 0;
+END GET_INTERVENTOR_APOLICE;
+
+
+FUNCTION GET_DT_ANULACAO_REAL_APOL (PI_CDUNIECO IN NUMBER
+								, PI_CDRAMO IN NUMBER
+								,PI_NMPOLIZA IN NUMBER)
+RETURN DATE IS
+  AUX_TIPOSUP TDESCSUP.CDTIPSUP%TYPE;
+  AUX_DT_ANULACAO TDESCSUP.FEEMISIO%TYPE;
+BEGIN
+	SELECT SUPLOGIC.CDTIPSUP
+		,SUPLOGIC.FEEMISIO
+	INTO AUX_TIPOSUP
+		,AUX_DT_ANULACAO
+	FROM TDESCSUP SUPLOGIC
+	WHERE 2 = 2
+		AND SUPLOGIC.NSUPLOGI = (
+			SELECT MAX(X.NSUPLOGI)
+			FROM TDESCSUP X
+			WHERE 2 = 2
+				AND X.NMPOLIZA = PI_NMPOLIZA
+				AND X.ESTADO = 'M'
+				AND X.CDRAMO = PI_CDRAMO
+				AND X.CDUNIECO = PI_CDUNIECO
+			)
+		AND SUPLOGIC.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLOGIC.ESTADO = 'M'
+		AND SUPLOGIC.CDRAMO = PI_CDRAMO
+		AND SUPLOGIC.CDUNIECO = PI_CDUNIECO;
+
+    IF (AUX_TIPOSUP='52') THEN
+       RETURN AUX_DT_ANULACAO;
+    ELSE
+       RETURN NULL;
+    END IF;
+    EXCEPTION
+    WHEN OTHERS THEN
+      RETURN NULL;
+ END GET_DT_ANULACAO_REAL_APOL;
+
+
+FUNCTION GET_DT_ANULACAO_APOLICE (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_NMPOLIZA IN NUMBER)
+RETURN DATE IS
+  AUX_TIPOSUP TDESCSUP.CDTIPSUP%TYPE;
+  AUX_DT_ANULACAO DATE;
+BEGIN
+	SELECT SUPLOGIC.CDTIPSUP
+		,TO_DATE(SUBSTR(SUPLEMENTO.NMSUPLEM, 1, 7), 'J')
+	INTO AUX_TIPOSUP
+		,AUX_DT_ANULACAO
+	FROM TDESCSUP SUPLOGIC
+		,MSUPLEME SUPLEMENTO
+	WHERE 2 = 2
+		AND SUPLEMENTO.SWANULA IS NOT NULL
+		AND SUPLEMENTO.NSUPLOGI = SUPLOGIC.NSUPLOGI
+		AND SUPLEMENTO.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLEMENTO.ESTADO = SUPLOGIC.ESTADO
+		AND SUPLEMENTO.CDRAMO = PI_CDRAMO
+		AND SUPLEMENTO.CDUNIECO = PI_CDUNIECO
+		AND SUPLOGIC.NSUPLOGI = (
+			SELECT MAX(X.NSUPLOGI)
+			FROM TDESCSUP X
+			WHERE 2 = 2
+				AND X.NMPOLIZA = PI_NMPOLIZA
+				AND X.ESTADO = 'M'
+				AND X.CDRAMO = PI_CDRAMO
+				AND X.CDUNIECO = PI_CDUNIECO
+			)
+		AND SUPLOGIC.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLOGIC.ESTADO = 'M'
+		AND SUPLOGIC.CDRAMO = PI_CDRAMO
+		AND SUPLOGIC.CDUNIECO = PI_CDUNIECO;
+
+    IF (AUX_TIPOSUP='52') THEN
+       RETURN AUX_DT_ANULACAO;
+    ELSE
+       RETURN NULL;
+    END IF;
+    EXCEPTION
+    WHEN OTHERS THEN
+		RETURN NULL;
+ END GET_DT_ANULACAO_APOLICE;
+
+
+FUNCTION GET_CAPITAL_VIGOR_TOMADOR   (PI_CDPERSON IN NUMBER
+									,PI_CDRAMO   IN NUMBER
+									,PI_DIRECCAO IN NUMBER
+									) RETURN NUMBER IS
+AUX_CAPITAL NUMBER;
+BEGIN
+	SELECT
+		--SUM(TO_NUMBER(REPLACE(ATRIBUTOSAPOLICE.ATRIBUTO24,'.',',')))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(ATRIBUTOSAPOLICE.ATRIBUTO24, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO AUX_CAPITAL
+	FROM GD_INTERVENIENTES_APOLICE_MV APOLICES
+		,MPOLIZAS VIVAS
+		,GD_ATRIBUTOS_APOLICE_MV ATRIBUTOSAPOLICE
+	WHERE 2 = 2
+		AND TO_NUMBER(ATRIBUTOSAPOLICE.ATRIBUTO2) = PI_DIRECCAO
+		AND ATRIBUTOSAPOLICE.ESTADO = 'M'
+		AND ATRIBUTOSAPOLICE.NMPOLIZA = APOLICES.NMPOLIZA
+		AND ATRIBUTOSAPOLICE.CDRAMO = PI_CDRAMO
+		AND ATRIBUTOSAPOLICE.CDUNIECO = 1
+		AND VIVAS.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 2 = 2
+				AND X.STATUS = VIVAS.STATUS
+				AND X.NMPOLIZA = VIVAS.NMPOLIZA
+				AND X.ESTADO = 'M'
+				AND X.CDRAMO = PI_CDRAMO
+				AND X.CDUNIECO = 1
+			)
+		AND VIVAS.STATUS = 'V'
+		AND IS_APOLICE_VALIDA(VIVAS.CDUNIECO, VIVAS.CDRAMO, VIVAS.ESTADO, VIVAS.NMPOLIZA) = 'S'
+		AND VIVAS.NMPOLIZA = APOLICES.NMPOLIZA
+		AND VIVAS.ESTADO = 'M'
+		AND VIVAS.CDRAMO = PI_CDRAMO
+		AND VIVAS.CDUNIECO = 1
+		AND APOLICES.CDPERSON = PI_CDPERSON
+		AND APOLICES.CDROL = 'TO'
+		AND APOLICES.ESTADO = 'M'
+		AND APOLICES.CDRAMO = PI_CDRAMO
+		AND APOLICES.CDUNIECO = 1;
+
+    RETURN AUX_CAPITAL;
+	EXCEPTION
+		WHEN OTHERS THEN RETURN NULL;
+END GET_CAPITAL_VIGOR_TOMADOR;
+
+
+FUNCTION GET_ULTIMA_TAXA_TIPO_TOMADOR(PI_CDPERSON IN NUMBER
+									,PI_TIPO     IN NUMBER DEFAULT 0
+									,PI_CDTIPRAM IN NUMBER DEFAULT 0
+									,PI_TIPOTAXA IN VARCHAR2 DEFAULT 'C') RETURN NUMBER IS
+AUX_OUT NUMBER;
+BEGIN
+	IF PI_TIPO = 3 THEN
+		SELECT TO_NUMBER(REPLACE(DECODE(PI_TIPOTAXA, 'P', DECODE(RAMO.CDTIPRAM, 1, ATRIBUTOS.ATRIBUTO30, 2, NULL, NULL), DECODE(RAMO.CDTIPRAM, 1, ATRIBUTOS.ATRIBUTO28, 2, ATRIBUTOS.ATRIBUTO23, NULL)), '.', ',')) ULTIMA_TAXA
+		INTO AUX_OUT
+		FROM TRAMOS RAMO
+			,GD_INTERVENIENTES_APOLICE_MV INTERVENIENTES
+			,GD_ATRIBUTOS_APOLICE_MV ATRIBUTOS
+			,MPOLIZAS APOLICE
+		WHERE 1 = 1
+			AND ATRIBUTOS.CDUNIECO = INTERVENIENTES.CDUNIECO
+			AND ATRIBUTOS.CDRAMO = INTERVENIENTES.CDRAMO
+			AND ATRIBUTOS.ESTADO = INTERVENIENTES.ESTADO
+			AND ATRIBUTOS.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+			AND APOLICE.CDUNIECO = INTERVENIENTES.CDUNIECO
+			AND APOLICE.CDRAMO = INTERVENIENTES.CDRAMO
+			AND APOLICE.ESTADO = INTERVENIENTES.ESTADO
+			AND APOLICE.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+			AND APOLICE.STATUS = 'V'
+			--      AND IS_APOLICE_VALIDA(APOLICE.CDUNIECO, APOLICE.CDRAMO, APOLICE.ESTADO, APOLICE.NMPOLIZA)='S'
+			AND APOLICE.NMSUPLEM = (
+				SELECT MAX(NMSUPLEM)
+				FROM MPOLIZAS X
+				WHERE 1 = 1
+					AND X.CDUNIECO = APOLICE.CDUNIECO
+					AND X.CDRAMO = APOLICE.CDRAMO
+					AND X.ESTADO = APOLICE.ESTADO
+					AND X.NMPOLIZA = APOLICE.NMPOLIZA
+					AND X.STATUS = APOLICE.STATUS
+				)
+			AND RAMO.CDTIPRAM = DECODE(PI_CDTIPRAM, 1, 1, 2, 2, RAMO.CDTIPRAM)
+			AND RAMO.CDRAMO = INTERVENIENTES.CDRAMO
+			AND INTERVENIENTES.CDROL = 'TO'
+			AND INTERVENIENTES.CDPERSON = PI_CDPERSON
+			AND ROWNUM = 1
+		ORDER BY APOLICE.FEEFECTO DESC;
+
+    RETURN AUX_OUT;
+
+	ELSE
+		SELECT ATRIBUTOS.TASACOM ULTIMA_TAXA
+		INTO AUX_OUT
+		FROM TRAMOS RAMO
+			,GD_INTERVENIENTES_APOLICE_MV INTERVENIENTES
+			,CO_PROPOL ATRIBUTOS
+			,MPOLIZAS APOLICE
+		WHERE 1 = 1
+			AND ATRIBUTOS.CDUNIECO = APOLICE.CDUNIECO
+			AND ATRIBUTOS.CDRAMO = APOLICE.CDRAMO
+			AND ATRIBUTOS.SWESTADO = 'M'
+			AND ATRIBUTOS.NMPROPUE = APOLICE.NMSOLICI
+			AND APOLICE.CDUNIECO = INTERVENIENTES.CDUNIECO
+			AND APOLICE.CDRAMO = INTERVENIENTES.CDRAMO
+			AND APOLICE.ESTADO = INTERVENIENTES.ESTADO
+			AND APOLICE.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+			AND APOLICE.STATUS = 'V'
+			--      AND IS_APOLICE_VALIDA(APOLICE.CDUNIECO, APOLICE.CDRAMO, APOLICE.ESTADO, APOLICE.NMPOLIZA)='S' --
+			-- validar se faz sentido
+			AND APOLICE.NMSUPLEM = (
+				SELECT MAX(NMSUPLEM)
+				FROM MPOLIZAS X
+				WHERE 1 = 1
+					AND X.CDUNIECO = APOLICE.CDUNIECO
+					AND X.CDRAMO = APOLICE.CDRAMO
+					AND X.ESTADO = APOLICE.ESTADO
+					AND X.NMPOLIZA = APOLICE.NMPOLIZA
+					AND X.STATUS = APOLICE.STATUS
+				)
+			AND RAMO.CDTIPRAM = DECODE(PI_CDTIPRAM, 1, 1, 2, 2, RAMO.CDTIPRAM)
+			AND RAMO.CDRAMO = INTERVENIENTES.CDRAMO
+			AND INTERVENIENTES.CDROL = 'TO'
+			AND INTERVENIENTES.CDPERSON = PI_CDPERSON
+			AND ROWNUM = 1
+		ORDER BY APOLICE.FEEFECTO DESC;
+
+		RETURN AUX_OUT;
+	END IF;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_ULTIMA_TAXA_TIPO_TOMADOR;
+
+
+/*
+  NOME          : FUN_DADOS_ADERENTE
+   *  OBJECTIVO : FUNÇÃO QUE RETORNA O VALOR DO NUC, NIPC OU NOME DO ADERENTE
+                       PARA A APÓLICE E NÃO DE SITUACAO ESCOLHIDA
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRÍGIDA RAMOS
+*/
+FUNCTION FUN_DADOS_ADERENTE    ( PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO   IN NUMBER
+								,PI_NMPOLIZA IN NUMBER
+								,PI_NMSITUAC IN NUMBER
+								,PI_VALOR    IN VARCHAR2
+								) RETURN VARCHAR2 IS
+AUX_CDPERSON  MPERSONA.CDPERSON%TYPE;
+AUX_CDIDEPER  MPERSONA.CDIDEPER%TYPE;
+AUX_DSNOMBRE  MPERSONA.DSNOMBRE%TYPE;
+BEGIN
+	SELECT PESSOA.CDPERSON
+		,PESSOA.CDIDEPER
+		,PESSOA.DSNOMBRE
+	INTO AUX_CDPERSON
+		,AUX_CDIDEPER
+		,AUX_DSNOMBRE
+	FROM MPOLIPER ADERENTE
+		,MPERSONA PESSOA
+	WHERE 2 = 2
+		AND PESSOA.CDPERSON = ADERENTE.CDPERSON
+		AND ADERENTE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE X.STATUS = 'V'
+				AND X.CDROL = 'AD'
+				AND X.NMSITUAC = PI_NMSITUAC
+				AND X.NMPOLIZA = PI_NMPOLIZA
+				AND X.CDRAMO = PI_CDRAMO
+				AND X.CDUNIECO = PI_CDUNIECO
+			)
+		AND ADERENTE.STATUS = 'V'
+		AND ADERENTE.CDROL = 'AD'
+		AND ADERENTE.NMSITUAC = PI_NMSITUAC
+		AND ADERENTE.NMPOLIZA = PI_NMPOLIZA
+		AND ADERENTE.CDRAMO = PI_CDRAMO
+		AND ADERENTE.CDUNIECO = PI_CDUNIECO;
+
+    IF PI_VALOR='NOME' THEN
+		RETURN AUX_DSNOMBRE;
+	ELSE
+		IF PI_VALOR='NIPC' THEN
+			RETURN AUX_CDIDEPER;
+		ELSE
+			RETURN AUX_CDPERSON;
+		END IF;
+    END IF;
+    EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END FUN_DADOS_ADERENTE;
+
+
+FUNCTION FUN_DATA_PROVISAO_SIN (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO   IN NUMBER
+								,PI_STATUS   IN VARCHAR2
+								,PI_AAAPERTU IN NUMBER
+								,PI_NMSINIES IN NUMBER
+								) RETURN DATE IS
+AUX_DT_PROVISAO MSINIVAL.FEMOVIMI%TYPE;
+BEGIN
+	SELECT MIN(DTPROV.FEMOVIMI)
+	INTO AUX_DT_PROVISAO
+	FROM MSINIVAL DTPROV
+	WHERE 2 = 2
+		AND DTPROV.FEMOVIMI = (
+			SELECT MIN(X.FEMOVIMI)
+			FROM MSINIVAL X
+			WHERE 2 = 2
+				AND X.NMORDINA = 1
+				AND X.NMSINIES = DTPROV.NMSINIES
+				AND X.AAAPERTU = DTPROV.AAAPERTU
+				AND X.STATUS = DTPROV.STATUS
+				AND X.CDRAMO = DTPROV.CDRAMO
+				AND X.CDUNIECO = DTPROV.CDUNIECO
+			)
+		AND DTPROV.NMORDINA = 1
+		AND DTPROV.NMSINIES = PI_NMSINIES
+		AND DTPROV.AAAPERTU = PI_AAAPERTU
+		AND DTPROV.STATUS = PI_STATUS
+		AND DTPROV.CDRAMO = PI_CDRAMO
+		AND DTPROV.CDUNIECO = PI_CDUNIECO;
+
+     RETURN (AUX_DT_PROVISAO);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_DATA_PROVISAO_SIN;
+
+
+FUNCTION FUN_PROVISAO_SIN_DATA (PI_CDUNIECO IN NUMBER
+                               ,PI_CDRAMO   IN NUMBER
+                               ,PI_AAAPERTU IN NUMBER
+                               ,PI_NMSINIES IN NUMBER
+                               ,PI_DATAINI   IN DATE
+                               ,PI_DATAFIM   IN DATE
+                               )   RETURN NUMBER IS
+AUX_PROVISAO MSINIVAL.PTPAGOS%TYPE;
+BEGIN
+	SELECT /*+ RULE */
+		SUM(VALORSIN.PTPAGOS * Pkg_Formulas_Cosec.FUN_TAXA_CAMBIO(VALORSIN.CDMONEDA))
+	INTO AUX_PROVISAO
+	FROM MSINIVAL VALORSIN
+	WHERE VALORSIN.FEMOVIMI BETWEEN NVL(PI_DATAINI, VALORSIN.FEMOVIMI)
+			AND PI_DATAFIM
+		AND VALORSIN.CDUNIECO = PI_CDUNIECO
+		AND VALORSIN.CDRAMO = PI_CDRAMO
+		AND VALORSIN.AAAPERTU = PI_AAAPERTU
+		AND VALORSIN.STATUS = 'M'
+		AND VALORSIN.NMSINIES = PI_NMSINIES;
+
+	RETURN AUX_PROVISAO;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PROVISAO_SIN_DATA;
+
+
+FUNCTION FUN_PRODUCAO_LIQUIDA_MOV (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_NMPOLIZA IN NUMBER
+								,PI_ANO      IN NUMBER
+								,PI_DATAINI   IN DATE
+								,PI_DATAFIM   IN DATE
+								) RETURN NUMBER IS
+AUX_PRODUCAO MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(RECIBO.PREMIO_COMERCIAL + RECIBO.ACERTO_PREMIO)
+	INTO AUX_PRODUCAO
+	FROM GD_MOVIMENTOS_CARTEIRA_VW RECIBO
+	WHERE 2 = 2
+		AND TO_NUMBER(TO_CHAR(RECIBO.DATA_COMP, 'RRRR')) = NVL(PI_ANO, TO_NUMBER(TO_CHAR(SYSDATE, 'RRRR')))
+		AND RECIBO.DT_RECIBO BETWEEN PI_DATAINI
+			AND PI_DATAFIM
+		AND DECODE(RECIBO.CDESTADO, '3', 'N', '7', 'N', '15', 'N', 'S') = 'S'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO_APOLICE = 'M'
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_PRODUCAO;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PRODUCAO_LIQUIDA_MOV;
+
+
+FUNCTION FUN_V_SINISTROS_ACUMULADOS (PI_CDUNIECO IN NUMBER
+                                 ,PI_CDRAMO IN NUMBER
+                                 ,PI_ESTADO IN VARCHAR2
+                                 ,PI_NMPOLIZA IN NUMBER
+                                 ,PI_DATAINI   IN DATE
+                                 ,PI_DATAFIM   IN DATE
+                                )   RETURN NUMBER IS
+AUX_SIN MSINIVAL.PTPAGOS%TYPE;
+BEGIN
+	SELECT NULL
+	INTO AUX_SIN
+	FROM DUAL;
+
+	RETURN AUX_SIN;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_V_SINISTROS_ACUMULADOS;
+
+
+FUNCTION FUN_PARTICIPACAO_RESULT_ACUM (PI_CDUNIECO IN NUMBER
+                                 ,PI_CDRAMO IN NUMBER
+                                 ,PI_ESTADO IN VARCHAR2
+                                 ,PI_NMPOLIZA IN NUMBER
+                                 ,PI_DATAINI   IN DATE
+                                 ,PI_DATAFIM   IN DATE
+                                )   RETURN NUMBER IS
+AUX_PART MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT NULL
+	INTO AUX_PART
+	FROM DUAL;
+
+	RETURN AUX_PART;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PARTICIPACAO_RESULT_ACUM;
+
+
+FUNCTION FUN_PROVISAO_SIN_ACUM  (PI_CDUNIECO IN NUMBER
+								,PI_CDRAMO IN NUMBER
+								,PI_ESTADO IN VARCHAR2
+								,PI_NMPOLIZA IN NUMBER
+								,PI_DATAINI   IN DATE
+								,PI_DATAFIM   IN DATE
+								)   RETURN NUMBER IS
+AUX_PROVISAO MSINIVAL.PTPAGOS%TYPE;
+BEGIN
+	SELECT SUM(VALORSIN.PTPAGOS * Pkg_Formulas_Cosec.FUN_TAXA_CAMBIO(VALORSIN.CDMONEDA))
+	INTO AUX_PROVISAO
+	FROM MSINIEST SINISTRO
+		,MSINIVAL VALORSIN
+	WHERE VALORSIN.FEMOVIMI BETWEEN PI_DATAINI
+			AND PI_DATAFIM
+		AND SINISTRO.CDUNIECO = VALORSIN.CDUNIECO
+		AND SINISTRO.CDRAMO = VALORSIN.CDRAMO
+		AND SINISTRO.AAAPERTU = VALORSIN.AAAPERTU
+		AND SINISTRO.STATUS = VALORSIN.STATUS
+		AND SINISTRO.NMSINIES = VALORSIN.NMSINIES
+		AND SINISTRO.CDUNIECO = PI_CDUNIECO
+		AND SINISTRO.CDRAMO = PI_CDRAMO
+		AND SINISTRO.NMPOLIZA = PI_NMPOLIZA
+		AND DECODE(SINISTRO.CDESTADO, '2', 'N', 'S') = 'S';
+
+	RETURN AUX_PROVISAO;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PROVISAO_SIN_ACUM;
+
+
+FUNCTION FUN_ULTIMA_DATA_PART_RESULT(PI_CDUNIECO IN NUMBER
+									,PI_CDRAMO  IN NUMBER
+									,PI_ESTADO  IN VARCHAR2
+									,PI_NMPOLIZA IN NUMBER
+									)  RETURN DATE IS
+AUX_DATA DATE;
+BEGIN
+	SELECT MAX(GREATEST(RECIBO.FEEMISIO, RECIBO.FEINICIO))
+	INTO AUX_DATA
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DECODE(DETRECIBO.CDTIPCON, 'PARES', 'S', 'PARES ME', 'S', 'PARES MI', 'S', 'N') = 'S'
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = PI_ESTADO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_DATA;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_ULTIMA_DATA_PART_RESULT;
+
+
+FUNCTION FUN_PART_RESULT_PAGA_VIG(PI_CDUNIECO IN NUMBER
+							   ,PI_CDRAMO  IN NUMBER
+							   ,PI_ESTADO  IN VARCHAR2
+							   ,PI_NMPOLIZA IN NUMBER
+							   ,PI_NMRENOVA IN NUMBER
+							  ) RETURN NUMBER IS
+AUX_PARES MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_PARES
+	FROM MPOLIZAS APOLICE
+		,MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DECODE(DETRECIBO.CDTIPCON, 'PARES', 'S', 'PARES ME', 'S', 'PARES MI', 'S', 'N') = 'S'
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND TRUNC(RECIBO.FEESTADO) >= APOLICE.FEEFECTO
+		AND TRUNC(RECIBO.FEESTADO) < DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)
+		AND RECIBO.NMPOLIZA = APOLICE.NMPOLIZA
+		AND RECIBO.ESTADO = APOLICE.ESTADO
+		AND RECIBO.CDRAMO = APOLICE.CDRAMO
+		AND RECIBO.CDUNIECO = APOLICE.CDUNIECO
+		AND DECODE(RECIBO.CDESTADO, 7, 'S', 'N') = 'S'
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMRENOVA = PI_NMRENOVA - 1
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+			)
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.ESTADO = PI_ESTADO
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.cdunieco = PI_CDUNIECO;
+
+	RETURN AUX_PARES;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PART_RESULT_PAGA_VIG;
+
+
+FUNCTION FUN_BONIF_APOL_VIG (PI_CDUNIECO IN NUMBER
+						  ,PI_CDRAMO  IN NUMBER
+						  ,PI_ESTADO  IN VARCHAR2
+						  ,PI_NMPOLIZA IN NUMBER
+						  ,PI_NMRENOVA IN NUMBER
+						  ,PI_TIPO     IN VARCHAR2
+						  )  RETURN NUMBER IS
+AUX_CONCEITO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	IF PI_NMRENOVA IS NULL THEN
+		SELECT SUM(DETRECIBO.PTIMPORT)
+		INTO AUX_CONCEITO
+		FROM MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE DECODE(DETRECIBO.CDTIPCON, 'BONIF', 'S', 'BONIF MI', 'S', 'BONIF ME', 'S', 'N') = 'S'
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND SIGN(DETRECIBO.PTIMPORT) = DECODE(PI_TIPO, 'BONIFICACAO', - 1, 1)
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+			AND RECIBO.ESTADO = PI_ESTADO
+			AND RECIBO.CDRAMO = PI_CDRAMO
+			AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	ELSE
+		SELECT NVL(SUM(DETRECIBO.PTIMPORT), 0)
+		INTO AUX_CONCEITO
+		FROM MPOLIZAS APOLICE
+			,MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE DECODE(DETRECIBO.CDTIPCON, 'BONIF', 'S', 'BONIF ME', 'S', 'BONIF MI', 'S', 'N') = 'S'
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND SIGN(DETRECIBO.PTIMPORT) = DECODE(PI_TIPO, 'BONIFICACAO', - 1, 1)
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) >= APOLICE.FEEFECTO
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) < DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)
+			AND RECIBO.NMPOLIZA = APOLICE.NMPOLIZA
+			AND RECIBO.ESTADO = APOLICE.ESTADO
+			AND RECIBO.CDRAMO = APOLICE.CDRAMO
+			AND RECIBO.CDUNIECO = APOLICE.CDUNIECO
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND APOLICE.NMSUPLEM = (
+				SELECT MAX(X.NMSUPLEM)
+				FROM MPOLIZAS X
+				WHERE X.NMRENOVA = PI_NMRENOVA - 1
+					AND X.NMPOLIZA = APOLICE.NMPOLIZA
+					AND X.ESTADO = APOLICE.ESTADO
+					AND X.CDRAMO = APOLICE.CDRAMO
+					AND X.CDUNIECO = APOLICE.CDUNIECO
+				)
+			AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+			AND APOLICE.ESTADO = PI_ESTADO
+			AND APOLICE.CDRAMO = PI_CDRAMO
+			AND APOLICE.cdunieco = PI_CDUNIECO;
+
+	END IF;
+	RETURN NVL(AUX_CONCEITO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_BONIF_APOL_VIG;
+
+
+FUNCTION GET_PRIM_ANO_FIM_VIGENCIA( PI_CDUNIECO IN NUMBER
+                              , PI_CDRAMO   IN NUMBER
+                              , PI_NMPOLIZA IN NUMBER) RETURN DATE AS
+ RES DATE;
+BEGIN
+	SELECT DECODE(m.ottempot, 'R', M.FEPROREN, FEVENCIM)
+	INTO RES
+	FROM mpolizas m
+	WHERE m.cdunieco = PI_CDUNIECO
+		AND m.cdramo = PI_CDRAMO
+		AND m.estado = 'M'
+		AND m.nmpoliza = PI_NMPOLIZA
+		AND m.nmsuplem = (
+			SELECT MIN(mm.nmsuplem)
+			FROM mpolizas mm
+			WHERE mm.cdunieco = m.cdunieco
+				AND mm.cdramo = m.cdramo
+				AND mm.estado = m.estado
+				AND mm.nmpoliza = m.nmpoliza
+			);
+
+  RETURN RES;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_PRIM_ANO_FIM_VIGENCIA;
+
+
+FUNCTION FUN_PREMIO_BRUTO_APOL_PER (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_DATAINI  IN DATE
+                              ,PI_DATAFIM  IN DATE
+                              )  RETURN NUMBER IS
+AUX_PREMIO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_PREMIO
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE 1 = 1
+		AND DETRECIBO.CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				),'PPDIV','CADM')
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = PI_ESTADO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) BETWEEN NVL(PI_DATAINI, TO_DATE('01-01-1900', 'DD-MM-RRRR'))
+			AND NVL(PI_DATAFIM, SYSDATE);
+
+	RETURN NVL(AUX_PREMIO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PREMIO_BRUTO_APOL_PER;
+
+
+FUNCTION FUN_PREMIO_BRUTO_APOL_VIG (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_NMRENOVA IN NUMBER
+                              )  RETURN NUMBER IS
+AUX_PREMIO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	IF PI_NMRENOVA IS NULL THEN
+		SELECT SUM(DETRECIBO.PTIMPORT)
+		INTO AUX_PREMIO
+		FROM MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE 1 = 1
+			AND DETRECIBO.CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				),'PPDIV','CADM')
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+			AND RECIBO.ESTADO = PI_ESTADO
+			AND RECIBO.CDRAMO = PI_CDRAMO
+			AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	ELSE
+		SELECT NVL(SUM(DETRECIBO.PTIMPORT), 0)
+		INTO AUX_PREMIO
+		FROM MPOLIZAS APOLICE
+			,MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE 1 = 1
+			AND DETRECIBO.CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				),'PPDIV','CADM')
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) >= APOLICE.FEEFECTO
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) < DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)
+			AND RECIBO.NMPOLIZA = APOLICE.NMPOLIZA
+			AND RECIBO.ESTADO = APOLICE.ESTADO
+			AND RECIBO.CDRAMO = APOLICE.CDRAMO
+			AND RECIBO.CDUNIECO = APOLICE.CDUNIECO
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND APOLICE.NMSUPLEM = (
+				SELECT MAX(X.NMSUPLEM)
+				FROM MPOLIZAS X
+				WHERE X.NMRENOVA = PI_NMRENOVA - 1
+					AND X.NMPOLIZA = APOLICE.NMPOLIZA
+					AND X.ESTADO = APOLICE.ESTADO
+					AND X.CDRAMO = APOLICE.CDRAMO
+					AND X.CDUNIECO = APOLICE.CDUNIECO
+				)
+			AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+			AND APOLICE.ESTADO = PI_ESTADO
+			AND APOLICE.CDRAMO = PI_CDRAMO
+			AND APOLICE.cdunieco = PI_CDUNIECO;
+
+	END IF;
+	RETURN NVL(AUX_PREMIO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PREMIO_BRUTO_APOL_VIG;
+
+
+FUNCTION GET_DET_ATRIBUTO_APOL(PI_NMTABLA IN NUMBER
+                              ,PI_OTCLAVE1 IN VARCHAR2) RETURN VARCHAR2 IS
+AUX_DESC TTAPVAAT.OTVALOR26%TYPE;
+BEGIN
+	SELECT OTVALOR26
+	INTO AUX_DESC
+	FROM TTAPVAAT
+	WHERE OTCLAVE1 = PI_OTCLAVE1
+		AND NMTABLA = PI_NMTABLA;
+
+	RETURN AUX_DESC;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_DET_ATRIBUTO_APOL;
+
+
+FUNCTION FUN_CONCEITO_APOL_PER (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_DATAINI  IN DATE
+                              ,PI_DATAFIM  IN DATE
+                              ,PI_CONCEITO IN VARCHAR2
+                              )  RETURN NUMBER IS
+AUX_CONCEITO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_CONCEITO
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DECODE(DETRECIBO.CDTIPCON, PI_CONCEITO, 'S', 'N') = 'S'
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = PI_ESTADO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) BETWEEN NVL(PI_DATAINI, TO_DATE('01-01-1900', 'DD-MM-RRRR'))
+			AND NVL(PI_DATAFIM, SYSDATE);
+
+	RETURN NVL(AUX_CONCEITO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_CONCEITO_APOL_PER;
+
+
+FUNCTION FUN_CONCEITO_APOL_VIG (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_NMRENOVA IN NUMBER
+                              ,PI_CONCEITO IN VARCHAR2
+                              )  RETURN NUMBER IS
+AUX_CONCEITO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	IF PI_NMRENOVA IS NULL THEN
+		SELECT SUM(DETRECIBO.PTIMPORT)
+		INTO AUX_CONCEITO
+		FROM MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE DECODE(DETRECIBO.CDTIPCON, PI_CONCEITO, 'S', 'N') = 'S'
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+			AND RECIBO.ESTADO = PI_ESTADO
+			AND RECIBO.CDRAMO = PI_CDRAMO
+			AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	ELSE
+		SELECT NVL(SUM(DETRECIBO.PTIMPORT), 0)
+		INTO AUX_CONCEITO
+		FROM MPOLIZAS APOLICE
+			,MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE DECODE(DETRECIBO.CDTIPCON, PI_CONCEITO, 'S', 'N') = 'S'
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) >= APOLICE.FEEFECTO
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) < DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)
+			AND RECIBO.NMPOLIZA = APOLICE.NMPOLIZA
+			AND RECIBO.ESTADO = APOLICE.ESTADO
+			AND RECIBO.CDRAMO = APOLICE.CDRAMO
+			AND RECIBO.CDUNIECO = APOLICE.CDUNIECO
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND APOLICE.NMSUPLEM = (
+				SELECT MAX(X.NMSUPLEM)
+				FROM MPOLIZAS X
+				WHERE X.NMRENOVA = PI_NMRENOVA - 1
+					AND X.NMPOLIZA = APOLICE.NMPOLIZA
+					AND X.ESTADO = APOLICE.ESTADO
+					AND X.CDRAMO = APOLICE.CDRAMO
+					AND X.CDUNIECO = APOLICE.CDUNIECO
+				)
+			AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+			AND APOLICE.ESTADO = PI_ESTADO
+			AND APOLICE.CDRAMO = PI_CDRAMO
+			AND APOLICE.cdunieco = PI_CDUNIECO;
+
+	END IF;
+	RETURN NVL(AUX_CONCEITO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_CONCEITO_APOL_VIG;
+
+
+FUNCTION FUN_DATA_EMISSAO_APOLICE( PI_CDUNIECO IN NUMBER
+                                    ,PI_CDRAMO   IN NUMBER
+                                    ,PI_ESTADO   IN VARCHAR2
+                                    ,PI_NMPOLIZA IN NUMBER
+                                    ,PI_NMRENOVA IN NUMBER
+                                   ) RETURN DATE IS
+AUX_EMISSAO  TDESCSUP.FEEMISIO%TYPE;
+BEGIN
+	SELECT SUPLEMENTO_LOGICO.FEEMISIO
+	INTO AUX_EMISSAO
+	FROM MPOLIZAS APOLICE
+		,MSUPLEME SUPLEMENTO
+		,TDESCSUP SUPLEMENTO_LOGICO
+	WHERE SUPLEMENTO_LOGICO.NSUPLOGI = SUPLEMENTO.NSUPLOGI
+		AND SUPLEMENTO_LOGICO.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLEMENTO_LOGICO.ESTADO = PI_ESTADO
+		AND SUPLEMENTO_LOGICO.CDRAMO = PI_CDRAMO
+		AND SUPLEMENTO_LOGICO.CDUNIECO = PI_CDUNIECO
+		AND SUPLEMENTO.NMSUPLEM = APOLICE.NMSUPLEM
+		AND SUPLEMENTO.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLEMENTO.ESTADO = PI_ESTADO
+		AND SUPLEMENTO.CDRAMO = PI_CDRAMO
+		AND SUPLEMENTO.CDUNIECO = PI_CDUNIECO
+		AND APOLICE.NMSUPLEM = (
+			SELECT MIN(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMRENOVA = PI_NMRENOVA
+				AND X.NMPOLIZA = PI_NMPOLIZA
+				AND X.ESTADO = PI_ESTADO
+				AND X.CDRAMO = PI_CDRAMO
+				AND X.CDUNIECO = PI_CDUNIECO
+			)
+		AND APOLICE.NMRENOVA = PI_NMRENOVA
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.ESTADO = PI_ESTADO
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_EMISSAO;
+EXCEPTION
+WHEN OTHERS THEN RETURN NULL;
+END FUN_DATA_EMISSAO_APOLICE;
+
+
+FUNCTION GET_ULTIMA_TAXA_TOMADOR(PI_CDPERSON IN NUMBER
+                                ,PI_CDTIPRAM IN NUMBER DEFAULT 0
+                                ,PI_TIPOTAXA IN VARCHAR2 DEFAULT 'C')
+
+RETURN NUMBER IS
+AUX_OUT NUMBER;
+BEGIN
+	SELECT TO_NUMBER(REPLACE(DECODE(PI_TIPOTAXA, 'P', DECODE(RAMO.CDTIPRAM, 1, ATRIBUTOS.ATRIBUTO30, 2, NULL, NULL), DECODE(RAMO.CDTIPRAM, 1, ATRIBUTOS.ATRIBUTO28, 2, ATRIBUTOS.ATRIBUTO23, NULL)), '.', ',')) ULTIMA_TAXA
+	INTO AUX_OUT
+	FROM TRAMOS RAMO
+		,GD_INTERVENIENTES_APOLICE_MV INTERVENIENTES
+		,GD_ATRIBUTOS_APOLICE_MV ATRIBUTOS
+		,MPOLIZAS APOLICE
+	WHERE 1 = 1
+		AND ATRIBUTOS.CDUNIECO = INTERVENIENTES.CDUNIECO
+		AND ATRIBUTOS.CDRAMO = INTERVENIENTES.CDRAMO
+		AND ATRIBUTOS.ESTADO = INTERVENIENTES.ESTADO
+		AND ATRIBUTOS.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND APOLICE.CDUNIECO = INTERVENIENTES.CDUNIECO
+		AND APOLICE.CDRAMO = INTERVENIENTES.CDRAMO
+		AND APOLICE.ESTADO = INTERVENIENTES.ESTADO
+		AND APOLICE.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		-- AND IS_APOLICE_VALIDA(APOLICE.CDUNIECO, APOLICE.CDRAMO, APOLICE.ESTADO, APOLICE.NMPOLIZA)='S' --
+		--validar se faz sentido
+		AND APOLICE.STATUS = 'V'
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 1 = 1
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.STATUS = APOLICE.STATUS
+			)
+		AND RAMO.CDTIPRAM = DECODE(PI_CDTIPRAM, 1, 1, 2, 2, RAMO.CDTIPRAM)
+		AND RAMO.CDRAMO = INTERVENIENTES.CDRAMO
+		AND INTERVENIENTES.CDROL = 'TO'
+		AND INTERVENIENTES.CDPERSON = PI_CDPERSON
+		AND ROWNUM = 1
+	ORDER BY APOLICE.FEEFECTO DESC;
+
+	RETURN AUX_OUT;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_ULTIMA_TAXA_TOMADOR;
+
+
+FUNCTION GET_TAXA_MEDIA_TOMADOR(PI_CDPERSON IN NUMBER
+                               ,PI_CDTIPRAM IN NUMBER DEFAULT 0
+                   ,PI_TIPOTAXA IN VARCHAR2 DEFAULT 'C'
+                               ,PI_DTINICIO IN DATE DEFAULT  TO_DATE('01-01-1900','DD-MM-RRRR')
+                               ,PI_DTFIM    IN DATE DEFAULT  SYSDATE   ) RETURN NUMBER IS
+AUX_MEDIA NUMBER;
+BEGIN
+	SELECT
+		-- AVG(TO_NUMBER(REPLACE(ATRIBUTOS.OTVALOR,'.',',')))
+		AVG(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(ATRIBUTOS.OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO AUX_MEDIA
+	FROM TRAMOS RAMO
+		,GD_INTERVENIENTES_APOLICE_MV INTERVENIENTES
+		,TVALOPOL ATRIBUTOS
+		,MPOLIZAS APOLICE
+		,MPOLIZAS PRIMAPOLICE
+	WHERE 1 = 1
+		AND PRIMAPOLICE.NMSUPLEM = (
+			SELECT MIN(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 2 = 2
+				AND X.CDUNIECO = PRIMAPOLICE.CDUNIECO
+				AND X.CDRAMO = PRIMAPOLICE.CDRAMO
+				AND X.ESTADO = PRIMAPOLICE.ESTADO
+				AND X.NMPOLIZA = PRIMAPOLICE.NMPOLIZA
+				AND X.STATUS = PRIMAPOLICE.STATUS
+			)
+		AND PRIMAPOLICE.STATUS = 'V'
+		AND PRIMAPOLICE.NMPOLIZA = APOLICE.NMPOLIZA
+		AND PRIMAPOLICE.ESTADO = APOLICE.ESTADO
+		AND PRIMAPOLICE.CDRAMO = APOLICE.CDRAMO
+		AND PRIMAPOLICE.CDUNIECO = APOLICE.CDUNIECO
+		AND ATRIBUTOS.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM TVALOPOL X
+			WHERE 2 = 2
+				AND X.NMSUPLEM <= (TO_CHAR(PI_DTFIM, 'J') || '99999999999')
+				AND X.CDATRIBU = ATRIBUTOS.CDATRIBU
+				AND X.NMPOLIZA = ATRIBUTOS.NMPOLIZA
+				AND X.ESTADO = ATRIBUTOS.ESTADO
+				AND X.CDRAMO = ATRIBUTOS.CDRAMO
+				AND X.CDUNIECO = ATRIBUTOS.CDUNIECO
+			)
+		AND ATRIBUTOS.CDUNIECO = INTERVENIENTES.CDUNIECO
+		AND ATRIBUTOS.CDRAMO = INTERVENIENTES.CDRAMO
+		AND ATRIBUTOS.ESTADO = INTERVENIENTES.ESTADO
+		AND ATRIBUTOS.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND ATRIBUTOS.CDATRIBU = DECODE(PI_TIPOTAXA, 'P', DECODE(RAMO.CDTIPRAM, 1, '30', 2, NULL, NULL), DECODE(RAMO.CDTIPRAM, 1, '28', 2, '23', NULL))
+		AND APOLICE.CDUNIECO = INTERVENIENTES.CDUNIECO
+		AND APOLICE.CDRAMO = INTERVENIENTES.CDRAMO
+		AND APOLICE.ESTADO = INTERVENIENTES.ESTADO
+		AND APOLICE.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND APOLICE.STATUS = 'V'
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 1 = 1
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.STATUS = APOLICE.STATUS
+			)
+		AND PRIMAPOLICE.FEEFECTO <= PI_DTFIM
+		AND DECODE(APOLICE.FEANULAC, NULL, DECODE(APOLICE.OTTEMPOT, 'T', APOLICE.FEVENCIM, APOLICE.FEPROREN - 1), APOLICE.FEANULAC) >= PI_DTINICIO
+		AND RAMO.CDTIPRAM = DECODE(PI_CDTIPRAM, 1, 1, 2, 2, RAMO.CDTIPRAM)
+		AND RAMO.CDRAMO = INTERVENIENTES.CDRAMO
+		AND INTERVENIENTES.CDROL = 'TO'
+		AND INTERVENIENTES.CDPERSON = PI_CDPERSON;
+
+	RETURN AUX_MEDIA;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_TAXA_MEDIA_TOMADOR;
+
+
+FUNCTION GET_DT_PLAF_CAU_VIGOR_ENT(PI_CDPERSON IN NUMBER) RETURN DATE IS
+AUX_PLAF CO_PLAFONCA.DATAINI%TYPE;
+BEGIN
+	SELECT PLAFOND.DATAINI
+	INTO AUX_PLAF
+	FROM CO_PLAFONCA PLAFOND
+	WHERE PLAFOND.DATAINI = (
+			SELECT MAX(X.DATAINI)
+			FROM CO_PLAFONCA X
+			WHERE X.CDPERSON = PLAFOND.CDPERSON
+			)
+		AND PLAFOND.DATAINI != PLAFOND.DATAFIN
+		AND PLAFOND.CDPERSON = PI_CDPERSON;
+
+	RETURN AUX_PLAF;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_DT_PLAF_CAU_VIGOR_ENT;
+
+
+FUNCTION GET_PLAF_CAU_VIGOR_ENT(PI_CDPERSON IN NUMBER) RETURN NUMBER IS
+AUX_PLAF CO_PLAFONCA.PTIMPORT%TYPE;
+BEGIN
+	SELECT PLAFOND.PTIMPORT
+	INTO AUX_PLAF
+	FROM CO_PLAFONCA PLAFOND
+	WHERE PLAFOND.DATAINI = (
+			SELECT MAX(X.DATAINI)
+			FROM CO_PLAFONCA X
+			WHERE X.CDPERSON = PLAFOND.CDPERSON
+			)
+		AND PLAFOND.DATAINI != PLAFOND.DATAFIN
+		AND PLAFOND.CDPERSON = PI_CDPERSON;
+
+	RETURN NVL(AUX_PLAF,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_PLAF_CAU_VIGOR_ENT;
+
+
+FUNCTION GET_RESP_EXTRA_PAT_ENT(PI_CDPERSON IN NUMBER) RETURN NUMBER IS
+AUX_RESP CO_ENTICRC.PTCREDIT%TYPE;
+BEGIN
+	SELECT SUM(RESP.PTCREDIT)
+	INTO AUX_RESP
+	FROM CO_ENTICRC RESP
+	WHERE RESP.DATACRC = (
+			SELECT MAX(A.DATACRC)
+			FROM CO_ENTICRC A
+			WHERE A.CDPERSON = RESP.CDPERSON
+				--                      AND A.TIPOCRED=RESP.TIPOCRED
+			)
+		/*AND RESP.NMORDCRC  =( SELECT MAX (A.NMORDCRC)
+						  FROM CO_ENTICRC A
+						  WHERE
+						  A.CDPERSON=RESP.CDPERSON
+						  AND A.TIPOCRED=RESP.TIPOCRED
+						  AND A.DATACRC=RESP.DATACRC
+						  ) */
+		AND SUBSTR(RESP.CLASCRED, 1, 1) IN (
+			1
+			,2
+			)
+		AND RESP.TIPOCRED = '06'
+		AND RESP.CDPERSON = PI_CDPERSON;
+
+	RETURN NVL(AUX_RESP,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_RESP_EXTRA_PAT_ENT;
+
+
+FUNCTION GET_SOLVABILIDADE_ENT (PI_CDPERSON IN NUMBER) RETURN NUMBER IS
+AUX_SOLV CO_ICRACIO.SOLVAB%TYPE;
+AUX_CONTAGEM NUMBER;
+BEGIN
+	SELECT COUNT(X.TIPOBALAN)
+	INTO AUX_CONTAGEM
+	FROM CO_ICRACIO X
+	WHERE X.ANOREF = (
+			SELECT MAX(A.ANOREF)
+			FROM CO_ICRACIO A
+			WHERE A.CDPERSON = PI_CDPERSON
+			);
+
+	IF AUX_CONTAGEM>1    THEN
+		SELECT SOLV.SOLVAB
+		INTO AUX_SOLV
+		FROM CO_ICRACIO SOLV
+		WHERE SOLV.ANOREF = (
+				SELECT MAX(A.ANOREF)
+				FROM CO_ICRACIO A
+				WHERE A.CDPERSON = SOLV.CDPERSON
+				)
+			AND SOLV.TIPOBALAN = 'I'
+			AND SOLV.CDPERSON = PI_CDPERSON;
+
+	ELSE
+		SELECT SOLV.SOLVAB
+		INTO AUX_SOLV
+		FROM CO_ICRACIO SOLV
+		WHERE SOLV.ANOREF = (
+				SELECT MAX(A.ANOREF)
+				FROM CO_ICRACIO A
+				WHERE A.CDPERSON = SOLV.CDPERSON
+				)
+			AND SOLV.CDPERSON = PI_CDPERSON;
+
+	END IF;
+
+	RETURN NVL(AUX_SOLV,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_SOLVABILIDADE_ENT;
+
+
+FUNCTION GET_PROD_NOVA_TOMADOR (PI_CDUNIECO    IN NUMBER
+                               ,PI_CDRAMO      IN NUMBER
+                               ,PI_DIRECCAO    IN VARCHAR2
+                               ,PI_CDPERSON    IN NUMBER
+                               ,PI_DTINICIO    IN DATE
+                               ,PI_DTFIM       IN DATE
+                               )   RETURN NUMBER IS
+AUX_PRODUCAO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	/*PRODUCAO_NOVA*/
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_PRODUCAO
+	FROM GD_INTERVENIENTES_APOLICE_MV INTERVENIENTES
+		,TVALOPOL ATRIBUTOS
+		,MPOLIZAS APOLICE
+		,MPOLIZAS PRIMAPOLICE
+		,MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE 1 = 1
+		AND DETRECIBO.CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					AND CODIGO NOT IN (
+						'BONIF'
+						,'BONIF ME'
+						,'BONIF MI'
+						,'PACER'
+						,'PACER ME'
+						,'PACER MI'
+						)
+				),'PPDIV','CADM')
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND RECIBO.ESTADO = 'M'
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) < DECODE(SIGN(ROUND(MONTHS_BETWEEN(TRUNC(DECODE(PRIMAPOLICE.OTTEMPOT, 'R', PRIMAPOLICE.FEPROREN, PRIMAPOLICE.FEVENCIM)), PRIMAPOLICE.FEEFECTO)) - 12), 1, ADD_MONTHS(PRIMAPOLICE.FEEFECTO + 1, 12), TRUNC(DECODE(PRIMAPOLICE.OTTEMPOT, 'R', PRIMAPOLICE.FEPROREN, PRIMAPOLICE.FEVENCIM)))
+		AND PRIMAPOLICE.NMSUPLEM = (
+			SELECT MIN(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 2 = 2
+				AND X.CDUNIECO = PRIMAPOLICE.CDUNIECO
+				AND X.CDRAMO = PRIMAPOLICE.CDRAMO
+				AND X.ESTADO = PRIMAPOLICE.ESTADO
+				AND X.NMPOLIZA = PRIMAPOLICE.NMPOLIZA
+			)
+		AND PRIMAPOLICE.NMPOLIZA = APOLICE.NMPOLIZA
+		AND PRIMAPOLICE.ESTADO = APOLICE.ESTADO
+		AND PRIMAPOLICE.CDRAMO = APOLICE.CDRAMO
+		AND PRIMAPOLICE.CDUNIECO = APOLICE.CDUNIECO
+		AND ATRIBUTOS.OTVALOR = PI_DIRECCAO
+		AND ATRIBUTOS.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM TVALOPOL X
+			WHERE 2 = 2
+				AND X.NMSUPLEM <= (TO_CHAR(PI_DTFIM, 'J') || '99999999999')
+				AND X.CDATRIBU = ATRIBUTOS.CDATRIBU
+				AND X.NMPOLIZA = ATRIBUTOS.NMPOLIZA
+				AND X.ESTADO = ATRIBUTOS.ESTADO
+				AND X.CDRAMO = ATRIBUTOS.CDRAMO
+				AND X.CDUNIECO = ATRIBUTOS.CDUNIECO
+			)
+		AND ATRIBUTOS.CDUNIECO = INTERVENIENTES.CDUNIECO
+		AND ATRIBUTOS.CDRAMO = INTERVENIENTES.CDRAMO
+		AND ATRIBUTOS.ESTADO = INTERVENIENTES.ESTADO
+		AND ATRIBUTOS.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND ATRIBUTOS.CDATRIBU = 2
+		AND APOLICE.CDUNIECO = INTERVENIENTES.CDUNIECO
+		AND APOLICE.CDRAMO = INTERVENIENTES.CDRAMO
+		AND APOLICE.ESTADO = INTERVENIENTES.ESTADO
+		AND APOLICE.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 1 = 1
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+			)
+		AND PRIMAPOLICE.FEEFECTO <= PI_DTFIM
+		AND DECODE(APOLICE.FEANULAC, NULL, DECODE(APOLICE.OTTEMPOT, 'T', APOLICE.FEVENCIM, APOLICE.FEPROREN - 1), APOLICE.FEANULAC) >= PI_DTINICIO
+		AND INTERVENIENTES.CDROL = 'TO'
+		AND INTERVENIENTES.CDPERSON = PI_CDPERSON;
+
+	RETURN NVL(AUX_PRODUCAO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_PROD_NOVA_TOMADOR;
+
+
+FUNCTION GET_PROD_CONT_TOMADOR (PI_CDUNIECO    IN NUMBER
+                               ,PI_CDRAMO      IN NUMBER
+                               ,PI_DIRECCAO    IN VARCHAR2
+                               ,PI_CDPERSON    IN NUMBER
+                               ,PI_DTINICIO    IN DATE
+                               ,PI_DTFIM       IN DATE
+                               )   RETURN NUMBER IS
+AUX_PRODUCAO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	/*PRODUCAO_CONTINUADA*/
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_PRODUCAO
+	FROM GD_INTERVENIENTES_APOLICE_MV INTERVENIENTES
+		,TVALOPOL ATRIBUTOS
+		,MPOLIZAS APOLICE
+		,MPOLIZAS PRIMAPOLICE
+		,MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE 1 = 1
+		AND DETRECIBO.CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					AND CODIGO NOT IN (
+						'BONIF'
+						,'BONIF ME'
+						,'BONIF MI'
+						,'PACER'
+						,'PACER ME'
+						,'PACER MI'
+						)
+				),'PPDIV','CADM')
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND RECIBO.ESTADO = 'M'
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) >= DECODE(SIGN(ROUND(MONTHS_BETWEEN(TRUNC(DECODE(PRIMAPOLICE.OTTEMPOT, 'R', PRIMAPOLICE.FEPROREN, PRIMAPOLICE.FEVENCIM)), PRIMAPOLICE.FEEFECTO)) - 12), 1, ADD_MONTHS(PRIMAPOLICE.FEEFECTO + 1, 12), TRUNC(DECODE(PRIMAPOLICE.OTTEMPOT, 'R', PRIMAPOLICE.FEPROREN, PRIMAPOLICE.FEVENCIM)))
+		AND PRIMAPOLICE.NMSUPLEM = (
+			SELECT MIN(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 2 = 2
+				AND X.CDUNIECO = PRIMAPOLICE.CDUNIECO
+				AND X.CDRAMO = PRIMAPOLICE.CDRAMO
+				AND X.ESTADO = PRIMAPOLICE.ESTADO
+				AND X.NMPOLIZA = PRIMAPOLICE.NMPOLIZA
+			)
+		AND PRIMAPOLICE.NMPOLIZA = APOLICE.NMPOLIZA
+		AND PRIMAPOLICE.ESTADO = APOLICE.ESTADO
+		AND PRIMAPOLICE.CDRAMO = APOLICE.CDRAMO
+		AND PRIMAPOLICE.CDUNIECO = APOLICE.CDUNIECO
+		AND ATRIBUTOS.OTVALOR = PI_DIRECCAO
+		AND ATRIBUTOS.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM TVALOPOL X
+			WHERE 2 = 2
+				AND X.NMSUPLEM <= (TO_CHAR(PI_DTFIM, 'J') || '99999999999')
+				AND X.CDATRIBU = ATRIBUTOS.CDATRIBU
+				AND X.NMPOLIZA = ATRIBUTOS.NMPOLIZA
+				AND X.ESTADO = ATRIBUTOS.ESTADO
+				AND X.CDRAMO = ATRIBUTOS.CDRAMO
+				AND X.CDUNIECO = ATRIBUTOS.CDUNIECO
+			)
+		AND ATRIBUTOS.CDUNIECO = INTERVENIENTES.CDUNIECO
+		AND ATRIBUTOS.CDRAMO = INTERVENIENTES.CDRAMO
+		AND ATRIBUTOS.ESTADO = INTERVENIENTES.ESTADO
+		AND ATRIBUTOS.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND ATRIBUTOS.CDATRIBU = 2
+		AND APOLICE.CDUNIECO = INTERVENIENTES.CDUNIECO
+		AND APOLICE.CDRAMO = INTERVENIENTES.CDRAMO
+		AND APOLICE.ESTADO = INTERVENIENTES.ESTADO
+		AND APOLICE.NMPOLIZA = INTERVENIENTES.NMPOLIZA
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE 1 = 1
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+			)
+		AND PRIMAPOLICE.FEEFECTO <= PI_DTFIM
+		AND DECODE(APOLICE.FEANULAC, NULL, DECODE(APOLICE.OTTEMPOT, 'T', APOLICE.FEVENCIM, APOLICE.FEPROREN - 1), APOLICE.FEANULAC) >= PI_DTINICIO
+		AND INTERVENIENTES.CDROL = 'TO'
+		AND INTERVENIENTES.CDPERSON = PI_CDPERSON;
+
+	RETURN NVL(AUX_PRODUCAO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_PROD_CONT_TOMADOR;
+
+
+FUNCTION FUN_COMISSOES_BRUTAS_ACUM ( PI_CDUNIECO IN NUMBER
+                                    ,PI_CDRAMO   IN NUMBER
+                                    ,PI_ESTADO   IN VARCHAR2
+                                    ,PI_NMPOLIZA IN NUMBER
+                                   )   RETURN NUMBER IS
+AUX_COMISSAO GD_COMISSOES_AGENTE.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(NVL(COMISSAO.VALOR_NORMAL, 0) + NVL(COMISSAO.VALOR_REPERCUTIDO, 0))
+	INTO AUX_COMISSAO
+	FROM MRECIBO RECIBO
+		,GD_COMISSOES_AGENTE COMISSAO
+	WHERE RECIBO.NMRECIBO = COMISSAO.NMRECIBO
+		AND RECIBO.CDUNIECO = COMISSAO.CDUNIECO
+		AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = PI_ESTADO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_COMISSAO;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_COMISSOES_BRUTAS_ACUM;
+
+
+FUNCTION FUN_DATA_RENOVACAO_APOLICE( PI_CDUNIECO IN NUMBER
+                                    ,PI_CDRAMO   IN NUMBER
+                                    ,PI_ESTADO   IN VARCHAR2
+                                    ,PI_NMPOLIZA IN NUMBER
+                                    ,PI_NMSUPLEM IN NUMBER
+                                   ) RETURN DATE IS
+AUX_RENOVACAO  TDESCSUP.FEEMISIO%TYPE;
+BEGIN
+	SELECT SUPLEMENTO_LOGICO.FEEMISIO
+	INTO AUX_RENOVACAO
+	FROM MSUPLEME SUPLEMENTO
+		,TDESCSUP SUPLEMENTO_LOGICO
+	WHERE SUPLEMENTO_LOGICO.NSUPLOGI = SUPLEMENTO.NSUPLOGI
+		AND SUPLEMENTO_LOGICO.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLEMENTO_LOGICO.ESTADO = PI_ESTADO
+		AND SUPLEMENTO_LOGICO.CDRAMO = PI_CDRAMO
+		AND SUPLEMENTO_LOGICO.CDUNIECO = PI_CDUNIECO
+		AND SUPLEMENTO.NMSUPLEM = PI_NMSUPLEM
+		AND SUPLEMENTO.NMPOLIZA = PI_NMPOLIZA
+		AND SUPLEMENTO.ESTADO = PI_ESTADO
+		AND SUPLEMENTO.CDRAMO = PI_CDRAMO
+		AND SUPLEMENTO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_RENOVACAO;
+EXCEPTION
+WHEN OTHERS THEN RETURN NULL;
+END FUN_DATA_RENOVACAO_APOLICE;
+
+
+FUNCTION FUN_COMISSOES_BRUTAS_ACUM_TEMP ( PI_CDUNIECO IN NUMBER
+                                    ,PI_CDRAMO   IN NUMBER
+                                    ,PI_ESTADO   IN VARCHAR2
+                                    ,PI_NMPOLIZA IN NUMBER
+                                   )   RETURN NUMBER IS
+AUX_COMISSAO TRECCOM.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(NVL(COMISSAO.PTIMPORT, 0))
+	INTO AUX_COMISSAO
+	FROM MRECIBO RECIBO
+		,TRECCOM COMISSAO
+	WHERE RECIBO.NMRECIBO = COMISSAO.NMRECIBO
+		AND RECIBO.CDUNIECO = COMISSAO.CDUNIECO
+		AND DECODE(COMISSAO.CDTIPCOM, 'N', 'S', 'R', 'S', 'N') = 'S'
+		AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = PI_ESTADO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+RETURN AUX_COMISSAO;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_COMISSOES_BRUTAS_ACUM_TEMP;
+
+
+FUNCTION FUN_PREMIO_APOL_PER (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_DATAINI  IN DATE
+                              ,PI_DATAFIM  IN DATE
+                              )  RETURN NUMBER IS
+AUX_PREMIO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_PREMIO
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE 1 = 1
+		AND DETRECIBO.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+			),'PPDIV')
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = PI_ESTADO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) BETWEEN NVL(PI_DATAINI, TO_DATE('01-01-1900', 'DD-MM-RRRR'))
+			AND NVL(PI_DATAFIM, SYSDATE);
+
+	RETURN NVL(AUX_PREMIO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PREMIO_APOL_PER;
+
+
+FUNCTION FUN_PREMIO_APOL_VIG (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_NMRENOVA IN NUMBER
+                              )  RETURN NUMBER IS
+AUX_PREMIO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	IF PI_NMRENOVA IS NULL THEN
+		SELECT SUM(DETRECIBO.PTIMPORT)
+		INTO AUX_PREMIO
+		FROM MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE 1 = 1
+			AND DETRECIBO.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+			),'PPDIV')
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+			AND RECIBO.ESTADO = PI_ESTADO
+			AND RECIBO.CDRAMO = PI_CDRAMO
+			AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	ELSE
+		SELECT NVL(SUM(DETRECIBO.PTIMPORT), 0)
+		INTO AUX_PREMIO
+		FROM MPOLIZAS APOLICE
+			,MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE 1 = 1
+			AND DETRECIBO.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+			),'PPDIV')
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) >= APOLICE.FEEFECTO
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) < DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)
+			AND RECIBO.NMPOLIZA = APOLICE.NMPOLIZA
+			AND RECIBO.ESTADO = APOLICE.ESTADO
+			AND RECIBO.CDRAMO = APOLICE.CDRAMO
+			AND RECIBO.CDUNIECO = APOLICE.CDUNIECO
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND APOLICE.NMSUPLEM = (
+				SELECT MAX(X.NMSUPLEM)
+				FROM MPOLIZAS X
+				WHERE X.NMRENOVA = PI_NMRENOVA - 1
+					AND X.NMPOLIZA = APOLICE.NMPOLIZA
+					AND X.ESTADO = APOLICE.ESTADO
+					AND X.CDRAMO = APOLICE.CDRAMO
+					AND X.CDUNIECO = APOLICE.CDUNIECO
+				)
+			AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+			AND APOLICE.ESTADO = PI_ESTADO
+			AND APOLICE.CDRAMO = PI_CDRAMO
+			AND APOLICE.cdunieco = PI_CDUNIECO;
+
+	END IF;
+	RETURN NVL(AUX_PREMIO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PREMIO_APOL_VIG;
+
+
+/*
+  NOME          : FUN_P_REAL_ACUM_DT_PRM
+   *  OBJECTIVO : FUNÇÃO PARA CALCULO DOS PRÉMIOS REAIS (DPR) PELA DATA DE DECLARACAO
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL / BRÍGIDA RAMOS
+*/
+FUNCTION FUN_P_REAL_ACUM_DT_DCL( PI_CDUNIECO   IN NUMBER
+                             , PI_CDRAMO     IN NUMBER
+                             , PI_NMPOLIZA   IN NUMBER
+                             , PI_CDPERSON   IN NUMBER
+                             , PI_DATAINICIO IN DATE
+                             , PI_DATAFIM    IN DATE
+                             , PI_TIPO       IN CHAR) RETURN NUMBER IS
+  AUX_STR   NUMBER;
+  AUX_ACERTO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DECODE(UPPER(PI_TIPO), 'POL', IMDEPOLI, 'COM', IMDECOME + IMDECOMI, 'COM+POL', IMDECOME + IMDECOMI + IMDEPOLI, 'ME', IMDECOME, 'MI', IMDECOMI, IMPREAL))
+	INTO AUX_STR
+	FROM CO_DECVEN
+	WHERE NMPOLIZA = PI_NMPOLIZA
+		AND CDUNIECO = PI_CDUNIECO
+		AND CDRAMO = PI_CDRAMO
+		AND CDPERSON = PI_CDPERSON
+		AND ADD_MONTHS(TO_DATE(feperdec, 'Mon-RR', 'NLS_DATE_LANGUAGE=PORTUGUESE'), - 1) BETWEEN DECODE(PI_DATAINICIO, NULL, TO_DATE('01-01-1900', 'DD-MM-RRRR'), PI_DATAINICIO)
+			AND PI_DATAFIM;
+
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_ACERTO
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DECODE(DETRECIBO.CDTIPCON, 'PACER', 'S', 'PACER MI', 'S', 'PACER ME', 'S', 'N') = 'S'
+		AND TRUNC(RECIBO.FEINICIO) BETWEEN DECODE(PI_DATAINICIO, NULL, TO_DATE('01-01-1900', 'DD-MM-RRRR'), PI_DATAINICIO)
+			AND PI_DATAFIM
+		AND DECODE(RECIBO.CDESTADO, '2', 'N', '8', 'N', '12', 'N', 'S') = 'S'
+		AND RECIBO.TIPORECI = '93'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = 'M'
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN NVL(aux_str,0)+NVL(AUX_ACERTO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_P_REAL_ACUM_DT_DCL;
+
+
+/*
+  NOME          : FUN_P_REAL_ACUM_DT_REG
+   *  OBJECTIVO : FUNÇÃO PARA CALCULO DOS PRÉMIOS REAIS (DPR) PELA DATA DE REGISTO
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL / BRÍGIDA RAMOS
+*/
+FUNCTION FUN_P_REAL_ACUM_DT_REG( PI_CDUNIECO   IN NUMBER
+                             , PI_CDRAMO     IN NUMBER
+                             , PI_NMPOLIZA   IN NUMBER
+                             , PI_CDPERSON   IN NUMBER
+                             , PI_DATAINICIO IN DATE
+                             , PI_DATAFIM    IN DATE
+                             , PI_TIPO       IN CHAR) RETURN NUMBER IS
+  AUX_STR   NUMBER;
+  AUX_ACERTO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DECODE(UPPER(PI_TIPO), 'POL', IMDEPOLI, 'COM', IMDECOME + IMDECOMI, 'COM+POL', IMDECOME + IMDECOMI + IMDEPOLI, 'ME', IMDECOME, 'MI', IMDECOMI, IMPREAL))
+	INTO aux_str
+	FROM co_decven
+	WHERE nmpoliza = PI_NMPOLIZA
+		AND cdunieco = PI_CDUNIECO
+		AND cdramo = PI_CDRAMO
+		AND cdperson = PI_CDPERSON
+		AND TRUNC(FEDECLAR) BETWEEN DECODE(PI_DATAINICIO, NULL, TO_DATE('01-01-1900', 'DD-MM-RRRR'), PI_DATAINICIO)
+			AND PI_DATAFIM;
+
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_ACERTO
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DECODE(DETRECIBO.CDTIPCON, 'BONIF', 'S', 'BONIF MI', 'S', 'BONIF ME', 'S', 'PACER', 'S', 'PACER ME', 'S', 'PACER MI', 'S', 'N') = 'S'
+		AND TRUNC(RECIBO.FEINICIO) BETWEEN DECODE(PI_DATAINICIO, NULL, TO_DATE('01-01-1900', 'DD-MM-RRRR'), PI_DATAINICIO)
+			AND PI_DATAFIM
+		AND DECODE(RECIBO.CDESTADO, '2', 'N', '8', 'N', '12', 'N', 'S') = 'S'
+		AND RECIBO.TIPORECI = '93'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = 'M'
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN NVL(aux_str,0)+NVL(AUX_ACERTO,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_P_REAL_ACUM_DT_REG;
+
+
+/*
+   NOME : GET_VALOR_PROV_SIN
+   *  OBJECTIVO : RETORNA O VALOR DO PRIMEIRO PROVIOSIONAMENTO POR CONCEITO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: Rui Portugal 23/03/2003 e Brígida Ramos
+*/
+FUNCTION  GET_VALOR_PROV_SIN ( PI_CDUNIECO   IN NUMBER
+                            , PI_CDRAMO     IN NUMBER
+                            , PI_AAAPERTU   IN NUMBER
+                            , PI_STATUS     IN VARCHAR2
+                            , PI_NMSINIES   IN NUMBER
+                            , PI_CONC       IN VARCHAR2) RETURN NUMBER
+IS
+  AUX_STR_CONC VARCHAR2(1);
+  AUX_VALOR MSINIVAL.PTPAGOS%TYPE;
+BEGIN
+  IF PI_CONC='INDE' THEN
+    AUX_STR_CONC:='1';
+  ELSIF PI_CONC='DESP' THEN
+    AUX_STR_CONC:='2';
+  ELSIF PI_CONC='HON' THEN
+    AUX_STR_CONC:='3';
+  ELSIF PI_CONC='JUR' THEN
+    AUX_STR_CONC:='4';
+  ELSE
+    AUX_STR_CONC:='0';
+  END IF;
+	SELECT SUM(SINIVAL.PTPAGOS * CAMBIO.PTCAMBIO)
+	INTO AUX_VALOR
+	FROM MSINIVAL SINIVAL
+		,TCAMBIOS CAMBIO
+	WHERE 1 = 1
+		AND CAMBIO.CDMONEDA = (
+			SELECT TK.CDEURO
+			FROM TKRNLPAR TK
+			)
+		AND CAMBIO.CDMONBAS = SINIVAL.CDMONEDA
+		AND CAMBIO.FEVALOR = (
+			SELECT MAX(X.FEVALOR)
+			FROM TCAMBIOS X
+			WHERE X.CDMONEDA = CAMBIO.CDMONEDA
+				AND X.CDMONBAS = CAMBIO.CDMONBAS
+				AND X.FEVALOR <= LAST_DAY(ADD_MONTHS(SYSDATE, - 1))
+			)
+		AND SINIVAL.CDUNIECO = PI_CDUNIECO
+		AND SINIVAL.CDRAMO = PI_CDRAMO
+		AND SINIVAL.AAAPERTU = PI_AAAPERTU
+		AND SINIVAL.STATUS = PI_STATUS
+		AND SINIVAL.NMSINIES = PI_NMSINIES
+		AND SINIVAL.NMORDINA = 1
+		AND SUBSTR(SINIVAL.CDCONVAL, 2, 1) = DECODE(AUX_STR_CONC, '0', SUBSTR(SINIVAL.CDCONVAL, 2, 1), AUX_STR_CONC);
+
+  RETURN AUX_VALOR;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_VALOR_PROV_SIN;
+
+
+/*
+   NOME : GET_DATA_PROV_SIN
+   *  OBJECTIVO : RETORNA A DATA DO PRIMEIRO PROVIOSIONAMENTO POR CONCEITO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: Rui Portugal 23/03/2003
+*/
+FUNCTION  GET_DATA_PROV_SIN ( PI_CDUNIECO   IN NUMBER
+                            , PI_CDRAMO     IN NUMBER
+                            , PI_AAAPERTU   IN NUMBER
+                            , PI_STATUS     IN VARCHAR2
+                            , PI_NMSINIES   IN NUMBER
+                            , PI_CONC       IN VARCHAR2) RETURN DATE
+IS
+  AUX_STR_CONC VARCHAR2(1);
+  AUX_DATA MSINIVAL.FEMOVIMI%TYPE;
+BEGIN
+  IF PI_CONC='INDE' THEN
+    AUX_STR_CONC:='1';
+  ELSIF PI_CONC='DESP' THEN
+    AUX_STR_CONC:='2';
+  ELSIF PI_CONC='HON' THEN
+    AUX_STR_CONC:='3';
+  ELSIF PI_CONC='JUR' THEN
+    AUX_STR_CONC:='4';
+  ELSE
+    AUX_STR_CONC:='0';
+  END IF;
+	SELECT MIN(SINIVAL.FEMOVIMI)
+	INTO AUX_DATA
+	FROM MSINIVAL SINIVAL
+	WHERE 1 = 1
+		AND SINIVAL.CDUNIECO = PI_CDUNIECO
+		AND SINIVAL.CDRAMO = PI_CDRAMO
+		AND SINIVAL.AAAPERTU = PI_AAAPERTU
+		AND SINIVAL.STATUS = PI_STATUS
+		AND SINIVAL.NMSINIES = PI_NMSINIES
+		AND SINIVAL.NMORDINA = 1
+		AND SUBSTR(SINIVAL.CDCONVAL, 2, 1) = DECODE(AUX_STR_CONC, '0', SUBSTR(SINIVAL.CDCONVAL, 2, 1), AUX_STR_CONC);
+
+  RETURN AUX_DATA;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_DATA_PROV_SIN;
+
+
+/*
+   NOME : GET_VOL_VENDAS_EUR
+   *  OBJECTIVO : RETORNA O VALOR DO VOLUME DE VENDAS DE UMA ENTIDADE EM eur
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+   *
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   08-09-2006 JOSE VIEGAS    OPTIMIZAÇÃO DA QUERY POR MOTIVOS DE MIGRAÇÃO PARA 9I
+*/
+FUNCTION  GET_VOL_VENDAS_EUR (PI_CDPERSON  IN NUMBER,PI_TIPO_VALOR IN VARCHAR2) RETURN NUMBER
+IS
+  AUX_VENDAS CO_ICDEMRE.POVEND%TYPE;
+  AUX_ANOREF CO_ICDEMRE.ANOREF%TYPE;
+  AUX_CONTAGEM NUMBER;
+BEGIN
+	SELECT /*+ ordered  */
+    (NVL(VENDAS.DR1, 0)) * CAMBIO.PTCAMBIO
+	,VENDAS.ANOREF
+	INTO AUX_VENDAS
+		,AUX_ANOREF
+	FROM CO_SNC_DEMRE VENDAS
+		,CO_ICCONTROL MOEDA
+		,TCAMBIOS CAMBIO
+	WHERE 2 = 2
+		AND CAMBIO.FEVALOR = (
+			SELECT MAX(TCAM2.FEVALOR)
+			FROM TCAMBIOS TCAM2
+			WHERE TCAM2.CDMONEDA = CAMBIO.CDMONEDA
+				AND TCAM2.CDMONBAS = CAMBIO.CDMONBAS
+				AND TCAM2.FEVALOR <= LAST_DAY(ADD_MONTHS(SYSDATE, - 1))
+			)
+		AND CAMBIO.CDMONEDA = (
+			SELECT TK.CDEURO
+			FROM TKRNLPAR TK
+			)
+		AND CAMBIO.CDMONBAS = MOEDA.CDMONEDA
+		AND MOEDA.CDPERSON = VENDAS.CDPERSON
+		AND MOEDA.ANOBAL = VENDAS.ANOREF
+		AND MOEDA.TIPOBALAN = VENDAS.TIPOBALAN
+		AND VENDAS.TIPOBALAN = 'IS'
+		AND VENDAS.ANOREF = (
+			SELECT MAX(X.ANOREF)
+			FROM CO_SNC_DEMRE X
+			WHERE X.CDPERSON = VENDAS.CDPERSON
+                and X.TIPOBALAN = VENDAS.TIPOBALAN
+				AND (NVL(X.DR1, 0)) > 0
+			)
+		AND (NVL(VENDAS.DR1, 0)) > 0
+		AND VENDAS.CDPERSON = PI_CDPERSON
+        ;
+
+	IF PI_TIPO_VALOR='ANO'THEN
+    RETURN AUX_ANOREF;
+  END IF;
+
+  RETURN AUX_VENDAS;
+EXCEPTION
+  WHEN OTHERS THEN RETURN 0;
+END GET_VOL_VENDAS_EUR;
+
+
+/*
+   NOME : GET_ATRIB_APOLICE_POR_VIG
+   *  OBJECTIVO : RETORNA O ATRIBUTO DA APOLICE VALIDO NA VIGENCIA DA APOLICE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION  GET_ATRIB_APOLICE_POR_VIG ( PI_CDUNIECO   IN NUMBER
+									, PI_CDRAMO     IN NUMBER
+									, PI_ESTADO     IN VARCHAR2
+									, PI_NMPOLIZA   IN NUMBER
+									, PI_CDATRIBU   IN VARCHAR2
+									, PI_NMANUIDADE IN NUMBER) RETURN VARCHAR2
+IS
+  AUX_VALOR TVALOPOL.OTVALOR%TYPE;
+  AUX_NMANUIDADE NUMBER;
+BEGIN
+  IF PI_NMANUIDADE IS NULL THEN
+    AUX_NMANUIDADE:=999;
+  ELSE
+    AUX_NMANUIDADE:=PI_NMANUIDADE;
+  END IF;
+	SELECT ATRIBUTOS.OTVALOR
+	INTO AUX_VALOR
+	FROM TVALOPOL ATRIBUTOS
+		,MPOLIZAS APOLICE
+	WHERE 2 = 2
+		AND ATRIBUTOS.CDUNIECO = APOLICE.CDUNIECO
+		AND ATRIBUTOS.CDRAMO = APOLICE.CDRAMO
+		AND ATRIBUTOS.ESTADO = APOLICE.ESTADO
+		AND ATRIBUTOS.NMPOLIZA = APOLICE.NMPOLIZA
+		AND ATRIBUTOS.STATUS = 'V'
+		AND ATRIBUTOS.CDATRIBU = PI_CDATRIBU
+		AND ATRIBUTOS.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM TVALOPOL X
+			WHERE X.NMSUPLEM < TO_CHAR(DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN - 1, APOLICE.FEVENCIM), 'J') || '99999999999'
+				AND X.CDATRIBU = ATRIBUTOS.CDATRIBU
+				--AND X.STATUS = ATRIBUTOS.STATUS
+				AND X.NMPOLIZA = ATRIBUTOS.NMPOLIZA
+				AND X.ESTADO = ATRIBUTOS.ESTADO
+				AND X.CDRAMO = ATRIBUTOS.CDRAMO
+				AND X.CDUNIECO = ATRIBUTOS.CDUNIECO
+			)
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMRENOVA <= PI_NMANUIDADE - 1
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+			)
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.ESTADO = PI_ESTADO
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.CDUNIECO = PI_CDUNIECO;
+
+	RETURN AUX_VALOR;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_ATRIB_APOLICE_POR_VIG;
+
+
+FUNCTION GET_PROCESSO_COM_SINISTRO ( PI_CDUNIECO IN NUMBER
+                                    ,PI_NMPROAME IN NUMBER
+                                    ,PI_CDTIPORA IN VARCHAR2
+                                    ) RETURN NUMBER IS
+AUX_N NUMBER;
+BEGIN
+	SELECT SUM(1)
+	INTO AUX_N
+	FROM MSINIEST SINISTRO
+	WHERE SINISTRO.NMPROAME = PI_NMPROAME
+		AND SINISTRO.CDTIPORA = PI_CDTIPORA
+		AND SINISTRO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN NVL(AUX_N,0);
+EXCEPTION
+WHEN OTHERS THEN
+	RETURN 0;
+END;
+
+
+FUNCTION GET_TAXA_COMISSAO_CON(PI_NMCUADRO    IN VARCHAR2
+                               ,PI_CDTIPCON   IN VARCHAR2
+                               )  RETURN NUMBER IS
+AUX_TAXA NUMBER;
+BEGIN
+	SELECT TAXA.POCOMPRO
+	INTO AUX_TAXA
+	FROM TCUCOPRO TAXA
+	WHERE TAXA.NMCUADRO = PI_NMCUADRO
+		AND TAXA.CDTIPCON = PI_CDTIPCON;
+
+	RETURN NVL(AUX_TAXA,0);
+EXCEPTION
+WHEN OTHERS THEN
+	RETURN 0;
+END;
+
+
+FUNCTION FUN_DATAINI_REF_M9_10( PI_CDUNIECO   IN NUMBER
+                              , PI_CDRAMO     IN NUMBER
+                              , PI_NMPOLIZA   IN NUMBER
+                              , PI_CDPERSON   IN NUMBER
+                              , PI_FEPERDEC   IN VARCHAR2) RETURN DATE IS
+  AUX_STR    DATE;
+  AUX_DATE   DATE;
+BEGIN
+  AUX_DATE:=ADD_MONTHS(TO_DATE(PI_FEPERDEC ,'MON-RR'),-1);
+  AUX_STR:=TO_DATE('01-01-'||TO_CHAR(AUX_DATE,'RRRR'),'DD-MM-RRRR');
+
+  RETURN NVL(AUX_STR,SYSDATE);
+END FUN_DATAINI_REF_M9_10;
+
+
+FUNCTION FUN_DATAFIM_REF_M9_10( PI_CDUNIECO   IN NUMBER
+                              , PI_CDRAMO     IN NUMBER
+                              , PI_NMPOLIZA   IN NUMBER
+                              , PI_CDPERSON   IN NUMBER
+                              , PI_FEPERDEC   IN VARCHAR2) RETURN DATE IS
+  AUX_STR   DATE;
+  AUX_DATE   DATE;
+BEGIN
+  AUX_DATE:=ADD_MONTHS(TO_DATE(PI_FEPERDEC ,'MON-RR'),-1);
+	SELECT MAX(TO_DATE(FEPERDEC, 'MON-RR'))
+	INTO AUX_STR
+	FROM CO_DECVEN
+	WHERE NMPOLIZA = PI_NMPOLIZA
+		AND CDUNIECO = PI_CDUNIECO
+		AND CDRAMO = PI_CDRAMO
+		AND CDPERSON = PI_CDPERSON;
+
+  IF TO_CHAR(AUX_STR,'RRRR')<TO_CHAR(SYSDATE,'RRRR') THEN
+    aux_str:=TO_DATE('31-12-'||TO_CHAR(AUX_DATE,'RRRR'),'DD-MM-RRRR');
+  ELSE
+	aux_str:=TO_DATE('01-'||TO_CHAR(ADD_MONTHS(SYSDATE,1),'MM')||'-'||TO_CHAR(AUX_DATE,'RRRR'),'DD-MM-RRRR')-1;
+  END IF;
+
+  RETURN NVL(aux_str,SYSDATE);
+END FUN_DATAFIM_REF_M9_10;
+
+
+/*
+   NOME : GET_VOL_NEG
+   *  OBJECTIVO :
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: Rui Portugal
+*/
+FUNCTION GET_VOL_NEG ( P_CDPERSON    IN NUMBER) RETURN NUMBER IS
+AUX_VALOR NUMBER;
+BEGIN
+	SELECT A.PTVENDTO
+	INTO AUX_VALOR
+	FROM CO_ENTICOM A
+	WHERE A.CDPERSON = P_CDPERSON
+		AND A.DATACOM = (
+			SELECT MAX(X.DATACOM)
+			FROM CO_ENTICOM X
+			WHERE 1 = 1
+				AND X.CDPERSON = A.CDPERSON
+			);
+
+	RETURN NVL(AUX_VALOR,0);
+EXCEPTION
+WHEN OTHERS THEN
+	RETURN 0;
+END;
+
+
+/*
+   NOME : GET_GESTOR_ENTIDADE
+   *  OBJECTIVO :
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: Rui Portugal
+*/
+FUNCTION GET_GESTOR_ENTIDADE ( P_CDPERSON    IN NUMBER) RETURN VARCHAR2 AS
+AUX_VALOR VARCHAR2(1000);
+ CURSOR ENT IS
+	SELECT A.DATACOM
+		,A.dsnombre
+		,A.Funcao
+	FROM co_com_relent A
+	WHERE A.cdperson = P_CDPERSON
+		AND A.nmorden = (
+			SELECT NVL(MAX(X.nmorden), 0)
+			FROM co_com_relent X
+			WHERE 1 = 1
+				AND X.cdperson = A.cdperson
+				AND X.dsnombre = A.dsnombre
+				AND X.Funcao IS NOT NULL
+			);
+
+BEGIN
+  AUX_VALOR:=NULL;
+  FOR RW IN ENT LOOP
+    IF AUX_VALOR IS NULL THEN
+        AUX_VALOR:=RW.Funcao || ' => ' || RW.dsnombre;
+    ELSE
+      AUX_VALOR:=AUX_VALOR || ', ' || RW.Funcao || ' => ' || RW.dsnombre;
+    END IF;
+  END LOOP;
+RETURN AUX_VALOR;
+EXCEPTION
+WHEN OTHERS THEN
+RETURN '';
+END;
+
+
+/*
+   NOME : GET_MARCAS
+   *  OBJECTIVO :
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: Rui Portugal
+*/
+FUNCTION GET_MARCAS ( P_CDPERSON    IN NUMBER
+                     ,P_TYPE    IN VARCHAR2) RETURN VARCHAR2 AS
+AUX_VALOR VARCHAR2(200);
+ CURSOR MARCAS IS
+	SELECT A.DATACOM
+		,A.NOMEMARC
+		,A.SWMARCA
+	FROM CO_COM_MARCAS A
+	WHERE A.CDPERSON = P_CDPERSON
+		AND A.DATACOM = (
+			SELECT MAX(X.DATACOM)
+			FROM CO_COM_MARCAS X
+			WHERE X.CDPERSON = A.CDPERSON
+			);
+
+BEGIN
+  AUX_VALOR:=NULL;
+  FOR RW IN MARCAS LOOP
+    IF AUX_VALOR IS NULL THEN
+        AUX_VALOR:=RW.NOMEMARC;
+    ELSE
+      AUX_VALOR:=AUX_VALOR || ', ' || RW.NOMEMARC;
+    END IF;
+  END LOOP;
+RETURN AUX_VALOR;
+EXCEPTION
+WHEN OTHERS THEN
+RETURN '';
+END;
+
+
+/*
+   NOME : GGET_PAISES_IMPEXP
+   *  OBJECTIVO :
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: Rui Portugal
+*/
+FUNCTION GET_PAISES_IMPEXP ( P_CDPERSON    IN NUMBER
+                            ,P_TYPE    IN VARCHAR2) RETURN VARCHAR2 AS
+AUX_VALOR VARCHAR2(200);
+ CURSOR IMP IS
+	SELECT A.DATACOM
+		,A.CDPAIS
+		,A.SWIMPEXP
+	FROM CO_COM_EXPIMP A
+	WHERE A.CDPERSON = P_CDPERSON
+		AND A.DATACOM = (
+			SELECT MAX(X.DATACOM)
+			FROM CO_COM_EXPIMP X
+			WHERE X.CDPERSON = A.CDPERSON
+			);
+
+BEGIN
+  AUX_VALOR:=NULL;
+  FOR RW IN IMP LOOP
+    IF P_TYPE = 'IMP' THEN
+      IF RW.SWIMPEXP='I' THEN
+        IF AUX_VALOR IS NULL THEN
+            AUX_VALOR:=RW.CDPAIS;
+        ELSE
+            AUX_VALOR:=AUX_VALOR || ', ' || RW.CDPAIS;
+        END IF;
+      END IF;
+    ELSIF P_TYPE = 'EXP' THEN
+      IF RW.SWIMPEXP='E' THEN
+        IF AUX_VALOR IS NULL THEN
+            AUX_VALOR:=RW.CDPAIS;
+        ELSE
+            AUX_VALOR:=AUX_VALOR || ', ' || RW.CDPAIS;
+        END IF;
+      END IF;
+    ELSE
+      IF AUX_VALOR IS NULL THEN
+          AUX_VALOR:=RW.CDPAIS;
+      ELSE
+          AUX_VALOR:=AUX_VALOR || ', ' || RW.CDPAIS;
+        END IF;
+    END IF;
+  END LOOP;
+RETURN AUX_VALOR;
+EXCEPTION
+WHEN OTHERS THEN
+RETURN '';
+END;
+
+
+/*
+   NOME : GET_VALOR_CONCEITO_CONTENC
+   *  OBJECTIVO : TRAZER O VALOR TOTAL DE UM CONCEITO DE SINISTRO POR PROCESSO DE CONTENCIOSO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_VALOR_CONCEITO_CONTENC ( P_CDNMPROC     IN NUMBER
+                                      ,P_CDTIPCON    IN VARCHAR2
+                                      ,P_CDIMPUES    IN VARCHAR2
+                                      ,P_CDTIPMOV    IN VARCHAR2) RETURN NUMBER
+IS
+AUX_VALOR MDSPASIN.IMPREFER%TYPE;
+BEGIN
+	SELECT SUM(DETALHE_PAG.IMPREFER)
+	INTO AUX_VALOR
+	FROM MPAGOSIN PAGAMENTO
+		,MDSPASIN DETALHE_PAG
+		,CO_MVCON MOVIMENTO_CONT
+	WHERE PAGAMENTO.CDTIPMOV = P_CDTIPMOV
+		AND DETALHE_PAG.CDIMPUES = P_CDIMPUES
+		AND PAGAMENTO.NMSINIES = MOVIMENTO_CONT.NMSINIES
+		AND PAGAMENTO.STATUS = MOVIMENTO_CONT.STATUS
+		AND PAGAMENTO.AAAPERTU = MOVIMENTO_CONT.AAAPERTU
+		AND PAGAMENTO.CDRAMO = MOVIMENTO_CONT.CDRAMO
+		AND PAGAMENTO.CDUNIECO = MOVIMENTO_CONT.CDUNIECO
+		AND MOVIMENTO_CONT.NMORDEN = (
+			SELECT MAX(A.NMORDEN)
+			FROM CO_MVCON A
+			WHERE A.NMSINIES = MOVIMENTO_CONT.NMSINIES
+				AND A.STATUS = MOVIMENTO_CONT.STATUS
+				AND A.AAAPERTU = MOVIMENTO_CONT.AAAPERTU
+				AND A.CDRAMO = MOVIMENTO_CONT.CDRAMO
+				AND A.CDUNIECO = MOVIMENTO_CONT.CDUNIECO
+			)
+		AND DETALHE_PAG.NMORDPAG = PAGAMENTO.NMORDPAG
+		AND DETALHE_PAG.NMSINIES = PAGAMENTO.NMSINIES
+		AND DETALHE_PAG.STATUS = PAGAMENTO.STATUS
+		AND DETALHE_PAG.AAAPERTU = PAGAMENTO.AAAPERTU
+		AND DETALHE_PAG.CDRAMO = PAGAMENTO.CDRAMO
+		AND DETALHE_PAG.CDUNIECO = PAGAMENTO.CDUNIECO
+		AND MOVIMENTO_CONT.CDNMPROC = P_CDNMPROC
+		AND MOVIMENTO_CONT.CDTIPCON = P_CDTIPCON;
+
+	RETURN NVL(AUX_VALOR,0);
+EXCEPTION
+WHEN OTHERS THEN
+	RETURN 0;
+END;
+
+
+/*
+   NOME : GET_VALOR_MOV_ECON
+   *  OBJECTIVO :
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_VALOR_MOV_ECON      ( P_CDNMPROC    IN NUMBER,
+                                  P_CDTIPMOV    IN VARCHAR2
+                                  ,P_SINAL       IN NUMBER) RETURN NUMBER
+IS
+AUX_VALOR CO_CONME.NMVALMOV%TYPE;
+BEGIN
+	SELECT SUM(MOV_ECON.NMVALMOV)
+	INTO AUX_VALOR
+	FROM CO_CONME MOV_ECON
+	WHERE 2 = 2
+		AND MOV_ECON.CDNMPROC = P_CDNMPROC
+		AND MOV_ECON.CDTIPMOV = P_CDTIPMOV
+		AND SIGN(MOV_ECON.NMVALMOV) = P_SINAL;
+
+	RETURN NVL(AUX_VALOR,0);
+EXCEPTION
+WHEN OTHERS THEN
+	RETURN 0;
+END;
+
+
+/*
+   NOME : GET_ESTADO_ANTERIOR_REC
+   *  OBJECTIVO : RETORNA O ESTADO INICIAL DO RECIBO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS/RUI_PORTUGAL
+*/
+FUNCTION GET_ESTADO_ANTERIOR_REC( P_ESTADO    IN NUMBER,
+                                  P_TIPORECI  IN NUMBER,
+                                  P_PTIMPORT     IN NUMBER) RETURN NUMBER
+IS
+AUX NUMBER(2);
+BEGIN
+  IF P_ESTADO = 1 THEN
+    RETURN 1;
+  ELSIF P_ESTADO = 3 THEN
+    RETURN 1;
+  ELSIF P_ESTADO = 4 THEN
+    RETURN 1;
+  ELSIF P_ESTADO = 5 THEN
+    RETURN 1;
+  ELSIF P_ESTADO = 16 THEN
+    RETURN 1;
+  ELSIF P_ESTADO = 17 THEN
+    RETURN 1;
+  ELSIF P_ESTADO = 6 THEN
+    RETURN 6;
+  ELSIF P_ESTADO = 7 THEN
+    RETURN 6;
+  ELSIF P_ESTADO = 13 THEN
+    RETURN 13;
+  ELSIF P_ESTADO = 14 THEN
+    RETURN 1;
+  ELSIF P_ESTADO = 15 THEN
+    RETURN 1;
+  ELSIF P_ESTADO = 30 THEN
+    RETURN 1;
+  ELSIF P_ESTADO IN (2,8,12) THEN
+   IF P_TIPORECI IN (5,6,94) THEN
+     RETURN 6;
+   ELSIF  P_PTIMPORT<=0 AND P_TIPORECI IN (4,93,98,99) THEN
+     RETURN 6;
+   ELSIF  P_PTIMPORT>0 AND P_TIPORECI IN (4,93,98,99) THEN
+     RETURN 1;
+   ELSE
+     IF P_TIPORECI=0 THEN
+       RETURN 1;
+     ELSE
+       RETURN 13;
+     END IF;
+   END IF;
+  ELSE
+    RETURN 0;
+  END IF;
+END GET_ESTADO_ANTERIOR_REC;
+
+
+/*
+   NOME : GET_PAGAMENTO_AUTORIZADO_SIN
+   *  OBJECTIVO : RETORNA S OU N CONFORME EXISTAM PAGAMENTOS AUTORIZADOS OU NAO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_PAGAMENTO_AUTORIZADO_SIN( PI_CDUNIECO IN NUMBER
+                                       ,PI_CDRAMO    IN NUMBER
+                                       ,PI_AAAPERTU IN NUMBER
+                                       ,PI_NMSINIES IN NUMBER
+                                       ,PI_STATUS   IN VARCHAR ) RETURN VARCHAR2
+IS
+AUX VARCHAR2(1);
+BEGIN
+     IF PI_STATUS IS NULL THEN
+		SELECT 'S'
+		INTO AUX
+		FROM DUAL
+		WHERE EXISTS (
+				SELECT 'S'
+				FROM MPAGOSIN
+				WHERE 2 = 2
+					AND SWESTADO IN (
+						3
+						,2
+						) /* DESCOMENTADO A PEDIDO DO DR. SALES 2004/08/03 */
+					AND NMSINIES = PI_NMSINIES
+					AND AAAPERTU = PI_AAAPERTU
+					AND CDRAMO = PI_CDRAMO
+					AND CDUNIECO = PI_CDUNIECO
+					AND STATUS = 'M'
+				);
+
+     ELSE
+		SELECT 'S'
+		INTO AUX
+		FROM DUAL
+		WHERE EXISTS (
+				SELECT 'S'
+				FROM MPAGOSIN
+				WHERE 2 = 2
+					AND SWESTADO IN (
+						3
+						,2
+						) /* DESCOMENTADO A PEDIDO DO DR. SALES 2004/08/03 */
+					AND NMSINIES = PI_NMSINIES
+					AND AAAPERTU = PI_AAAPERTU
+					AND CDRAMO = PI_CDRAMO
+					AND CDUNIECO = PI_CDUNIECO
+					AND STATUS = PI_STATUS
+				);
+
+     END IF;
+RETURN AUX;
+EXCEPTION
+    WHEN OTHERS THEN
+         RETURN 'N';
+END GET_PAGAMENTO_AUTORIZADO_SIN;
+
+
+/*
+   NOME : GET_ATRIB_SIT_POR_VIG
+   *  OBJECTIVO : RETORNA O ATRIBUTO DE SITUACAO VALIDO NA VIGENCIA DA APOLICE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION  GET_ATRIB_SIT_POR_VIG ( PI_CDUNIECO   IN NUMBER
+                                , PI_CDRAMO     IN NUMBER
+                                , PI_ESTADO     IN VARCHAR2
+                                , PI_NMPOLIZA   IN NUMBER
+                                , PI_NMSITUAC   IN NUMBER
+                                , PI_CDTIPSIT   IN VARCHAR2
+                                , PI_CDATRIBU   IN VARCHAR2
+                                , PI_NMANUIDADE IN NUMBER) RETURN VARCHAR2
+IS
+  AUX_VALOR TVALOSIT.OTVALOR%TYPE;
+  AUX_NMANUIDADE NUMBER;
+BEGIN
+  IF PI_NMANUIDADE IS NULL THEN
+    AUX_NMANUIDADE:=999;
+  ELSE
+    AUX_NMANUIDADE:=PI_NMANUIDADE;
+  END IF;
+	SELECT SITUACAO.OTVALOR
+	INTO AUX_VALOR
+	FROM MPOLIZAS APOLICE
+		,TVALOSIT SITUACAO
+	WHERE 1 = 1
+		AND SITUACAO.CDUNIECO = APOLICE.CDUNIECO
+		AND SITUACAO.CDRAMO = APOLICE.CDRAMO
+		AND SITUACAO.ESTADO = APOLICE.ESTADO
+		AND SITUACAO.NMPOLIZA = APOLICE.NMPOLIZA
+		AND SITUACAO.NMSITUAC = PI_NMSITUAC
+		AND SITUACAO.STATUS = 'V'
+		AND SITUACAO.CDTIPSIT = PI_CDTIPSIT
+		AND SITUACAO.CDATRIBU = PI_CDATRIBU
+		AND SITUACAO.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM TVALOSIT X
+			WHERE 1 = 1
+				AND X.NMSUPLEM < TO_CHAR(DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN - 1, APOLICE.FEVENCIM), 'J') || '99999999999'
+				AND X.CDATRIBU = SITUACAO.CDATRIBU
+				AND X.CDTIPSIT = SITUACAO.CDTIPSIT
+				--                             AND X.STATUS   = SITUACAO.STATUS
+				AND X.NMSITUAC = SITUACAO.NMSITUAC
+				AND X.NMPOLIZA = SITUACAO.NMPOLIZA
+				AND X.ESTADO = SITUACAO.ESTADO
+				AND X.CDRAMO = SITUACAO.CDRAMO
+				AND X.CDUNIECO = SITUACAO.CDUNIECO
+			)
+		--
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMRENOVA <= AUX_NMANUIDADE - 1
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+			)
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.ESTADO = PI_ESTADO
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.CDUNIECO = PI_CDUNIECO;
+
+  RETURN AUX_VALOR;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_ATRIB_SIT_POR_VIG;
+
+
+/*
+   NOME : GET_DT_VENCIMENTO_RECIBO
+   *  OBJECTIVO : RETORNA A DATA DE VENCIMENTO DE UM RECIBO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_DT_VENCIMENTO_RECIBO(PI_TIPORECI IN VARCHAR2,
+							   PI_TIPODOCID   IN VARCHAR2,
+							   PI_FEINICIO   IN DATE,
+							   PI_FEEMISIO   IN DATE
+                   ) RETURN DATE AS
+AUX_VENCIMENTO MRECIBO.FEINICIO%TYPE;
+BEGIN
+	SELECT DECODE(PI_TIPORECI, '0', PI_FEINICIO, DECODE(PI_TIPODOCID, '2', DECODE(SIGN(PI_FEINICIO - PI_FEEMISIO), 1, PI_FEINICIO, PI_FEEMISIO), '5', DECODE(SIGN(PI_FEINICIO - PI_FEEMISIO), 1, PI_FEINICIO, PI_FEEMISIO), '3', PI_FEEMISIO + 30, '4', PI_FEEMISIO + 30, DECODE(SIGN(PI_FEINICIO - (PI_FEEMISIO + 40)), 1, PI_FEINICIO, (PI_FEEMISIO + 40))))
+	INTO AUX_VENCIMENTO
+	FROM DUAL;
+
+	RETURN TRUNC(AUX_VENCIMENTO);
+EXCEPTION
+	WHEN OTHERS THEN RETURN TO_DATE('01-01-1900','DD-MM-RRRR');
+END GET_DT_VENCIMENTO_RECIBO;
+
+
+/*
+   NOME : GET_DPR_FALTA_APOLICE
+   *  OBJECTIVO : RETORNA O N. DE DPRS POR ENTREGAR PARA UMA DETERMINADA APOLICE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_DPR_FALTA_APOLICE(PI_CDUNIECO IN NUMBER,
+                               PI_CDRAMO   IN NUMBER,
+                               PI_ESTADO   IN VARCHAR2,
+                               PI_NMPOLIZA IN NUMBER) RETURN NUMBER AS
+  DECLS_EM_FALTA NUMBER;
+  DATA MPOLIZAS.FEEFECTO%TYPE;
+  DUMMY CO_DECVEN.FEPERDEC%TYPE;
+  SEPARADOR_ANO VARCHAR2(4);
+  PRI_MES_ANO NUMBER;
+  PRI_VIGENCIA NUMBER;
+
+  CURSOR VIGENCIAS IS
+		SELECT APOL.FEEMISIO
+			,APOL.FEEFECTO
+			,APOL.FEPROREN
+			,ATRIB.OTVALOR
+		FROM MPOLIZAS APOL
+			,TVALOPOL ATRIB
+		WHERE 1 = 1
+			AND ATRIB.CDATRIBU = 15
+			AND ATRIB.CDRAMO = APOL.CDRAMO
+			AND ATRIB.CDUNIECO = APOL.CDUNIECO
+			AND ATRIB.NMPOLIZA = APOL.NMPOLIZA
+			AND ATRIB.ESTADO = APOL.ESTADO
+			AND ATRIB.NMSUPLEM = APOL.NMSUPLEM
+			AND APOL.NMRENOVA >= (
+				SELECT MAX(X.NMRENOVA - 1)
+				FROM MPOLIZAS X
+				WHERE 1 = 1
+					AND X.NMPOLIZA = APOL.NMPOLIZA
+					AND X.ESTADO = APOL.ESTADO
+					AND X.CDRAMO = APOL.CDRAMO
+					AND X.CDUNIECO = APOL.CDUNIECO
+				)
+			AND APOL.NMPOLIZA = PI_NMPOLIZA
+			AND APOL.CDRAMO = PI_CDRAMO
+			AND APOL.CDUNIECO = PI_CDUNIECO
+			AND APOL.ESTADO = PI_ESTADO;
+
+BEGIN
+  SEPARADOR_ANO := '1500';
+  PRI_MES_ANO    := 1;
+  PRI_VIGENCIA   := 1;
+  DECLS_EM_FALTA := 0;
+  FOR RW IN VIGENCIAS LOOP
+	IF RW.OTVALOR != 0 THEN
+		IF PRI_VIGENCIA = 0 THEN
+		  DATA := RW.FEEFECTO;
+		ELSE
+		  DATA := ADD_MONTHS(RW.FEEFECTO, RW.OTVALOR);
+		  PRI_VIGENCIA := 0;
+		END IF;
+		WHILE (DATA < RW.FEPROREN) LOOP
+		BEGIN
+		  IF (DATA >= ADD_MONTHS(SYSDATE, -1)) THEN
+			RETURN DECLS_EM_FALTA;
+		  ELSE
+			BEGIN
+				SELECT DECVEN.FEPERDEC
+				INTO DUMMY
+				FROM CO_DECVEN DECVEN
+				WHERE 1 = 1
+					AND DECVEN.FEPERDEC = TO_CHAR(DATA, 'MON-RR')
+					AND DECVEN.NMORDEN = 1
+					AND DECVEN.nmpoliza = PI_NMPOLIZA
+					AND DECVEN.CDRAMO = PI_CDRAMO
+					AND DECVEN.cdunieco = PI_CDUNIECO;
+
+			EXCEPTION
+			  WHEN NO_DATA_FOUND THEN
+				DECLS_EM_FALTA := DECLS_EM_FALTA+1;
+			   /* ACRESCENTADO PARA EVITAR ERROS DE DUPLOS REGISTOS 2004/08/03 */
+			  WHEN OTHERS THEN
+				NULL;
+			END;
+			DATA := ADD_MONTHS(DATA, RW.OTVALOR);
+		  END IF;
+		END;
+		END LOOP;
+	END IF;
+  END LOOP;
+  RETURN DECLS_EM_FALTA;
+END;
+
+
+/*
+   NOME : GET_BALCAO_BANCO
+   *  OBJECTIVO : RETORNA O CODIGO DO BALCAO DE UM DETERMINADO BANCO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_BALCAO_BANCO(PI_CDAGENTE IN VARCHAR2) RETURN VARCHAR2 AS
+AUX_CODIGO TVALOAGE.OTVALOR%TYPE;
+BEGIN
+	SELECT SUBSTR(OTVALOR, 21, 4)
+	INTO AUX_CODIGO
+	FROM TVALOAGE
+	WHERE TVALOAGE.CDATRIBU = 3
+		AND TVALOAGE.CDAGENTE = PI_CDAGENTE;
+
+RETURN AUX_CODIGO;
+EXCEPTION
+WHEN OTHERS THEN RETURN '';
+END;
+
+
+/*
+   NOME : GET_MORA_RECIBO
+   *  OBJECTIVO : RETORNA A MORA PARA UM DETERMINADO RECIBO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_MORA_RECIBO ( PI_CDUNIECO IN NUMBER
+                          ,PI_NMRECIBO IN NUMBER
+                          ,PI_DT_INFORMACAO IN DATE) RETURN NUMBER AS
+AUX_MORA NUMBER(4,0);
+BEGIN
+/*SELECT TRUNC(PI_DT_INFORMACAO) - TRUNC(DECODE( SIGN(RECIBO.NMRECINUE-3000000000)
+,-1,RECIBO.FEEMISIO
+,DECODE(RECIBO.TIPORECI,0,RECIBO.FEINICIO
+,DECODE(TIPO_DOC.ID,3,RECIBO.FEEMISIO
+,4,RECIBO.FEEMISIO
+,DECODE(SIGN(RECIBO.FEEMISIO-RECIBO.FEINICIO+40),
+1,RECIBO.FEEMISIO+40
+,RECIBO.FEINICIO
+))))) MORA INTO AUX_MORA*/
+
+	SELECT DECODE(RECIBO.CDESTADO, 5, TO_DATE(PI_DT_INFORMACAO) - TRUNC(RECIBO.FEESTADO) + 30, TO_DATE(PI_DT_INFORMACAO) - TRUNC(RECIBO.FEESTADO))
+	INTO AUX_MORA
+	FROM GD_TIPOS_DOCUMENTO TIPO_DOC
+		,MRECIBO RECIBO
+	WHERE 2 = 2
+		AND TIPO_DOC.TIPORECI = RECIBO.TIPORECI
+		AND TIPO_DOC.SINAL_VALOR = SIGN(RECIBO.PTIMPORT - 0)
+		AND RECIBO.NMRECIBO = PI_NMRECIBO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+RETURN AUX_MORA;
+EXCEPTION
+WHEN OTHERS THEN RETURN 0;
+END GET_MORA_RECIBO;
+
+
+/*
+   NOME : FUN_PREMIOS_APOL_PER
+   *  OBJECTIVO : RETORNA OS PRÉMIOS PROCESSADOS DA APÓLICE PARA UM DETERMINADO PERIODO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_PREMIOS_APOL_PER(PI_CDUNIECO IN NUMBER
+							 ,PI_CDRAMO   IN NUMBER
+							 ,PI_NMPOLIZA IN NUMBER
+							 ,DT_INICIO IN DATE
+							 ,DT_FIM IN DATE) RETURN NUMBER
+
+AS
+aux_ptimport MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT NVL(SUM(DET_RECIBOS.ptimport), 0)
+	INTO AUX_PTIMPORT
+	FROM mrecibo RECIBOS
+		,MRECIDET DET_RECIBOS
+		,MPOLIZAS APOLICE
+	WHERE 1 = 1
+		AND DET_RECIBOS.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+				AND CODIGO NOT IN (
+					'BONIF'
+					,'BONIF ME'
+					,'BONIF MI'
+					,'PACER'
+					,'PACER ME'
+					,'PACER MI'
+					)
+			),'PPDIV')
+		AND DET_RECIBOS.NMRECIBO = RECIBOS.NMRECIBO
+		AND DET_RECIBOS.CDUNIECO = RECIBOS.CDUNIECO
+		AND RECIBOS.cdestado NOT IN (
+			2
+			,15
+			)
+		AND DECODE(SIGN(RECIBOS.feemisio - RECIBOs.FEINICIO), - 1, RECIBOs.FEINICIO, RECIBOs.FEEMISIO) BETWEEN DT_INICIO
+			AND DT_FIM
+		AND RECIBOS.nmpoliza = APOLICE.nmpoliza
+		AND RECIBOS.estado = 'M'
+		AND RECIBOS.cdramo = APOLICE.cdramo
+		AND RECIBOS.cdunieco = APOLICE.cdunieco
+		AND APOLICE.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM mpolizas X
+			WHERE X.nmpoliza = APOLICE.nmpoliza
+				AND X.estado = APOLICE.estado
+				AND X.cdramo = APOLICE.cdramo
+				AND X.cdunieco = APOLICE.cdunieco
+			)
+		AND APOLICE.nmpoliza = PI_NMPOLIZA
+		AND APOLICE.estado = 'M'
+		AND APOLICE.cdramo = PI_CDRAMO
+		AND APOLICE.cdunieco = PI_CDUNIECO;
+
+   RETURN NVL(aux_ptimport,0);
+EXCEPTION
+    WHEN OTHERS THEN RETURN 0;
+END FUN_PREMIOS_APOL_PER;
+
+
+/*
+   NOME : GET_PREMIOS_PROCAPOL
+   *  OBJECTIVO : RETORNA OS PRÉMIOS PROCESSADOS NA VIGENCIA DA APOLICE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: ENG. JOSÉ VIEGAS
+*/
+FUNCTION  GET_PREMIOS_PROCAPOL( PI_CDUNIECO   IN NUMBER
+                              , PI_CDRAMO     IN NUMBER
+                              , PI_ESTADO     IN VARCHAR2
+                              , PI_NMPOLIZA   IN NUMBER
+                              , PI_NMANUIDADE IN NUMBER) RETURN NUMBER
+IS
+  AUX_PTIMPORT NUMBER;
+BEGIN
+  IF PI_NMANUIDADE IS NULL THEN
+	SELECT NVL(SUM(PREMIOS_APOLICE.ptimport), 0)
+	INTO AUX_PTIMPORT
+	FROM mrecibo RECIBOS_APOLICE
+		,MRECIDET PREMIOS_APOLICE
+	WHERE 1 = 1
+		AND PREMIOS_APOLICE.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+			),'PPDIV')
+		AND PREMIOS_APOLICE.NMRECIBO = RECIBOS_APOLICE.NMRECIBO
+		AND PREMIOS_APOLICE.CDUNIECO = RECIBOS_APOLICE.CDUNIECO
+		--
+		AND RECIBOS_APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBOS_APOLICE.ESTADO = PI_ESTADO
+		AND RECIBOS_APOLICE.CDRAMO = PI_CDRAMO
+		AND RECIBOS_APOLICE.cdunieco = PI_CDUNIECO;
+
+  ELSE
+	SELECT NVL(SUM(PREMIOS_APOLICE.ptimport), 0)
+	INTO AUX_PTIMPORT
+	FROM mPOLIZAS APOLICE
+		,mrecibo RECIBOS_APOLICE
+		,MRECIDET PREMIOS_APOLICE
+	WHERE 1 = 1
+		AND PREMIOS_APOLICE.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+			),'PPDIV')
+		AND PREMIOS_APOLICE.NMRECIBO = RECIBOS_APOLICE.NMRECIBO
+		AND PREMIOS_APOLICE.CDUNIECO = RECIBOS_APOLICE.CDUNIECO
+		--
+		AND RECIBOS_APOLICE.fEinicio >= APOLICE.FEEFECTO
+		AND RECIBOS_APOLICE.fEinicio < DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)
+		--
+		AND RECIBOS_APOLICE.nmpoliza = APOLICE.nmpoliza
+		AND RECIBOS_APOLICE.estado = APOLICE.estado
+		AND RECIBOS_APOLICE.cdramo = APOLICE.cdramo
+		AND RECIBOS_APOLICE.cdunieco = APOLICE.cdunieco
+		--
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMRENOVA = PI_NMANUIDADE - 1
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+			)
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.ESTADO = PI_ESTADO
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.cdunieco = PI_CDUNIECO;
+
+  END IF;
+  RETURN NVL(aux_ptimport,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN 0;
+END GET_PREMIOS_PROCAPOL;
+
+
+/*
+   NOME : GET_MERCADO
+   *  OBJECTIVO : RETORNA O MERCADO (MI,ME OU MM)
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.1
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_MERCADO(PI_NMPOLIZA IN NUMBER
+				  ,PI_CDRAMO  IN NUMBER
+				  ,PI_CDUNIECO IN NUMBER
+				  ,PI_ESTADO  IN VARCHAR2
+				  ,PI_DT_REF  IN DATE) RETURN VARCHAR2 IS
+AUX_MI      NUMBER;
+AUX_ME      NUMBER;
+BEGIN
+	IF SUBSTR(PI_CDRAMO,1,1) = '2' THEN
+	   RETURN 'MM';
+	ELSIF PI_CDRAMO=110 THEN
+	   RETURN 'MI';
+	ELSE
+		SELECT NVL(SUM(DECODE(ATRIBUTO.CDATRIBU, 26, ATRIBUTO.OTVALOR)), 0) MI
+			,NVL(SUM(DECODE(ATRIBUTO.CDATRIBU, 27, ATRIBUTO.OTVALOR)), 0) ME
+		INTO AUX_MI
+			,AUX_ME
+		FROM TVALOPOL ATRIBUTO
+		WHERE ATRIBUTO.STATUS = 'V'
+			AND ATRIBUTO.CDATRIBU IN (
+				26
+				,27
+				)
+			AND NMSUPLEM = (
+				SELECT MAX(NMSUPLEM)
+				FROM TVALOPOL X
+				WHERE X.CDATRIBU = ATRIBUTO.CDATRIBU
+					AND X.NMSUPLEM <= TO_CHAR(PI_DT_REF, 'J') || '99999999999'
+					AND X.NMPOLIZA = ATRIBUTO.NMPOLIZA
+					AND X.ESTADO = ATRIBUTO.ESTADO
+					AND X.CDRAMO = ATRIBUTO.CDRAMO
+					AND X.CDUNIECO = ATRIBUTO.CDUNIECO
+				)
+			AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+			AND ATRIBUTO.ESTADO = PI_ESTADO
+			AND ATRIBUTO.CDRAMO = PI_CDRAMO
+			AND ATRIBUTO.CDUNIECO = PI_CDUNIECO;
+
+		IF AUX_MI !=0 AND AUX_ME=0 THEN
+			RETURN 'MI';
+		ELSIF AUX_MI =0 AND AUX_ME!=0 THEN
+			RETURN 'ME';
+		ELSE
+			RETURN'MM';
+		END IF;
+	END IF;
+EXCEPTION
+    WHEN OTHERS THEN RETURN NULL;
+END;
+
+
+FUNCTION  GET_V_RECIBO ( PI_CDUNIECO IN NUMBER
+					   , PI_CDRAMO IN NUMBER
+					   , PI_NMPOLIZA IN NUMBER
+					   , PI_CONC IN VARCHAR2
+					   ) RETURN NUMBER IS
+AUX_IMPREC MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_IMPREC
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DETRECIBO.CDTIPCON = PI_CONC
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+RETURN AUX_IMPREC;
+EXCEPTION
+       WHEN OTHERS THEN RETURN 0;
+END GET_V_RECIBO;
+
+
+/*
+   NOME : GET_V_FACTURA
+   *  OBJECTIVO : RETORNA O VALOR ACUMULADO DAS FACTURAS PARA UMA DETERMINADA PROPOTA E UM
+                  DETERMINADO TIPO DE CONCEITO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION  GET_V_FACTURA ( PI_CDUNIECO IN NUMBER
+                               , PI_CDRAMO IN NUMBER
+                               , PI_NMPROPUE IN NUMBER
+                               , PI_CONC IN VARCHAR2
+                               ) RETURN NUMBER IS
+AUX_IMPCOST CO_FACTUR.IMPCOSTE%TYPE;
+BEGIN
+	SELECT SUM(FACTURA.IMPCOSTE)
+	INTO AUX_IMPCOST
+	FROM CO_FACTUR FACTURA
+	WHERE FACTURA.NMPROPUE = PI_NMPROPUE
+		AND FACTURA.CODCONC = PI_CONC
+		AND FACTURA.CDRAMO = PI_CDRAMO
+		AND FACTURA.CDUNIECO = PI_CDUNIECO;
+
+RETURN AUX_IMPCOST;
+EXCEPTION
+       WHEN OTHERS THEN RETURN 0;
+END GET_V_FACTURA;
+
+
+/*
+   NOME : GET_V_FACT_APOL_VIG
+   *  OBJECTIVO : RETORNA O VALOR ACUMULADO DAS FACTURAS PARA UMA DETERMINADA APÓLICE E UM
+                  DETERMINADO TIPO DE CONCEITO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION  GET_V_FACT_APOL_VIG ( PI_CDUNIECO IN NUMBER
+                               , PI_CDRAMO IN NUMBER
+                               , PI_NMPOLIZA IN NUMBER
+                               , PI_CONC IN VARCHAR2
+                               ) RETURN NUMBER IS
+AUX_IMPCOST CO_FACTUR.IMPCOSTE%TYPE;
+BEGIN
+	SELECT SUM(FACTURA.IMPCOSTE)
+	INTO AUX_IMPCOST
+	FROM CO_FACTUR FACTURA
+	WHERE FACTURA.NMPOLIZA = PI_NMPOLIZA
+		AND FACTURA.CODCONC = PI_CONC
+		AND FACTURA.CDRAMO = PI_CDRAMO
+		AND FACTURA.CDUNIECO = PI_CDUNIECO;
+
+RETURN AUX_IMPCOST;
+EXCEPTION
+       WHEN OTHERS THEN RETURN 0;
+END GET_V_FACT_APOL_VIG;
+
+
+/*
+   NOME : GET_V_REC_APOL_VIG
+   *  OBJECTIVO : RETORNA O VALOR ACUMULADO DOS RECIBOS  PARA UMA DETERMINADA APÓLICE E UM
+                  DETERMINADO TIPO DE CONCEITO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION  GET_V_REC_APOL_VIG ( PI_CDUNIECO IN NUMBER
+                               , PI_CDRAMO IN NUMBER
+                               , PI_NMPOLIZA IN NUMBER
+                               , PI_CONC IN VARCHAR2
+                               ) RETURN NUMBER IS
+AUX_IMPREC MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_IMPREC
+	FROM GD_TIPOS_DOCUMENTO TIPOS_DOC
+		,MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE 1 = 1
+		AND DETRECIBO.CDUNIECO = PI_CDUNIECO
+		AND DETRECIBO.CDTIPCON = PI_CONC
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND TIPOS_DOC.TIPORECI = RECIBO.TIPORECI
+		AND TIPOS_DOC.SINAL_VALOR = SIGN(RECIBO.PTIMPORT - 0)
+		AND DECODE(TIPOS_DOC.ID, 1, 'S', 2, 'S', 'N') = 'S'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+RETURN AUX_IMPREC;
+EXCEPTION
+       WHEN OTHERS THEN RETURN 0;
+END GET_V_REC_APOL_VIG;
+
+
+/*
+   NOME : GET_ANO_OCURR_SIN
+   *  OBJECTIVO : OBTEM O ANO DE OCURRENCIA DO SINISTRO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_ANO_OCURR_SIN( PI_CDUNIECO IN NUMBER
+                            ,PI_CDTIPORA IN VARCHAR2
+                            ,PI_NMCOMAME IN NUMBER
+                            ,PI_NMPROAME IN NUMBER) RETURN NUMBER IS
+  AUX_FECOM   CO_COAME.FECOMUNI%TYPE;
+  AUX_FEAPERT CO_PRAME.FEAPERT%TYPE;
+  AUX_GESTOR  CO_PRAME.CDGESTOR%TYPE;
+BEGIN
+	SELECT COMUNICACAO.FECOMUNI
+		,PROCESSO.CDGESTOR
+		,PROCESSO.FEAPERT
+	INTO AUX_FECOM
+		,AUX_GESTOR
+		,AUX_FEAPERT
+	FROM CO_COAME COMUNICACAO
+		,CO_PRAME PROCESSO
+	WHERE COMUNICACAO.CDUNIECO = PI_CDUNIECO
+		AND COMUNICACAO.CDTIPORA = PI_CDTIPORA
+		AND COMUNICACAO.NMCOMAME = PI_NMCOMAME
+		AND COMUNICACAO.NMPROAME = PI_NMPROAME
+		AND PROCESSO.CDUNIECO = PI_CDUNIECO
+		AND PROCESSO.CDTIPORA = PI_CDTIPORA
+		AND PROCESSO.NMPROAME = PI_NMPROAME;
+
+  IF AUX_GESTOR ='MIGRACAO' THEN
+     RETURN TO_NUMBER(TO_CHAR(AUX_FEAPERT,'RRRR'));
+  ELSE
+     RETURN TO_NUMBER(TO_CHAR(AUX_FECOM,'RRRR')) ;
+  END IF;
+END GET_ANO_OCURR_SIN;
+
+
+/*
+-* NOME      : GET_DATAOCURR_SIN
+-* OBJECTIVO : TRAZER DATA DE OCURRÊNCIA DE UM SINISTRO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      :
+-* VERSÃO    : 1.1
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   2004-12-06 BRIGIDA RAMOS      CORRECÇÃO DA FUNÇÃO DE AAAPERTU<= PI_AAAPERTU
+-*                      PARA      AAAPERTU >= PI_AAAPERTU
+-*/
+FUNCTION GET_DATAOCURR_SIN( PI_CDUNIECO IN NUMBER
+                          , PI_CDRAMO   IN NUMBER
+                          , PI_AAAPERTU IN NUMBER
+                          , PI_STATUS   IN VARCHAR2
+                          , PI_NMSINIES IN NUMBER) RETURN DATE IS
+  AUX_RESULT  DATE;
+  NMIGRADO    NUMBER;
+BEGIN
+	SELECT COUNT(*)
+	INTO nMIGRADO
+	FROM GD_SINISTROS_MIGRADOS
+	WHERE AAAPERTU >= PI_AAAPERTU
+		AND CDRAMO = PI_CDRAMO
+		AND LIMITE_MIGRACAO > PI_NMSINIES;
+
+	SELECT DECODE(NMIGRADO, 0, COMUNICACAO.FECOMUNI, COMUNICACAO.FEOCAME) AUX_RESULT
+	INTO AUX_RESULT
+	FROM CO_COAME COMUNICACAO
+		,MSINIEST SINISTRO
+	WHERE COMUNICACAO.CDUNIECO = SINISTRO.CDUNIECO
+		AND COMUNICACAO.CDTIPORA = SINISTRO.CDTIPORA
+		AND COMUNICACAO.NMCOMAME = SINISTRO.NMCOMAME
+		AND COMUNICACAO.NMPROAME = SINISTRO.NMPROAME
+		AND SINISTRO.NMSINIES = PI_NMSINIES
+		AND SINISTRO.STATUS = PI_STATUS
+		AND SINISTRO.AAAPERTU = PI_AAAPERTU
+		AND SINISTRO.CDRAMO = PI_CDRAMO
+		AND SINISTRO.CDUNIECO = PI_CDUNIECO;
+
+  RETURN AUX_RESULT;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN TO_DATE('01-01-1800','DD-MM-YYYY');
+END GET_DATAOCURR_SIN;
+
+
+FUNCTION FUN_TIPO_REC_PAG_SIN(PI_CDUNIECO IN NUMBER
+                                     ,PI_CDRAMO   IN NUMBER
+                                     ,PI_AAAPERTU   IN NUMBER
+                                     ,PI_STATUS   IN VARCHAR2
+                                     ,PI_NMSINIES   IN NUMBER
+                                     ,PI_NMORDPAG IN NUMBER) RETURN NUMBER IS
+TIPMOV mpagosin.cdtipmov%TYPE;
+IMPUES mdspasin.cdimpues%TYPE;
+BEGIN
+	SELECT DetalhePagamentoSinistro.cdimpues
+		,PagamentoSinistro.cdtipmov
+	INTO IMPUES
+		,TIPMOV
+	FROM MPAGOSIN PagamentoSinistro
+		,MDSPASIN DetalhePagamentoSinistro
+	WHERE 1 = 1
+		AND DetalhePagamentoSinistro.cdunieco = PagamentoSinistro.cdunieco
+		AND DetalhePagamentoSinistro.cdramo = PagamentoSinistro.cdramo
+		AND DetalhePagamentoSinistro.aaapertu = PagamentoSinistro.aaapertu
+		AND DetalhePagamentoSinistro.STATUS = PagamentoSinistro.STATUS
+		AND DetalhePagamentoSinistro.nmsinies = PagamentoSinistro.nmsinies
+		AND DetalhePagamentoSinistro.nmordpag = PagamentoSinistro.nmordpag
+		AND DetalhePagamentoSinistro.cdimpues IN (
+			'DESP'
+			,'INDE'
+			,'PENA'
+			,'PENP'
+			,'JUR'
+			,'HONO'
+			,'COAC'
+			,'COAA'
+			)
+		AND PagamentoSinistro.cdunieco = PI_CDUNIECO
+		AND PagamentoSinistro.cdramo = PI_CDRAMO
+		AND PagamentoSinistro.aaapertu = PI_AAAPERTU
+		AND PagamentoSinistro.STATUS = PI_STATUS
+		AND PagamentoSinistro.nmsinies = PI_NMSINIES
+		AND PagamentoSinistro.nmordpag = PI_NMORDPAG;
+
+	IF TIPMOV='1' THEN
+	  IF IMPUES='INDE' THEN
+		RETURN 701;
+	  ELSIF  IMPUES='DESP' THEN
+		RETURN 705;
+	  ELSIF  IMPUES='JUR' THEN
+		RETURN 709;
+	  ELSE
+		RETURN 700;
+	  END IF;
+	ELSIF TIPMOV='2' THEN
+	  IF IMPUES='INDE' THEN
+		RETURN 704;
+	  ELSIF  IMPUES='DESP' THEN
+		RETURN 707;
+	  ELSIF  IMPUES='JUR' THEN
+		RETURN 703;
+	  ELSE
+		RETURN 700;
+	  END IF;
+	ELSIF TIPMOV='21' THEN
+	  IF IMPUES='PENA' OR IMPUES='PENP' THEN
+		RETURN 708;
+	  ELSE
+		RETURN 700;
+	  END IF;
+	ELSE
+	  IF IMPUES='JUR' THEN
+		RETURN 710;
+	  ELSE
+		RETURN 700;
+	  END IF;
+	END IF;
+END FUN_TIPO_REC_PAG_SIN;
+
+
+FUNCTION FUN_PREMIOS_PROCREC( PI_CDUNIECO IN NUMBER
+                              , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+    aux_ptimport MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT NVL(SUM(PREMIOS_APOLICE.ptimport), 0)
+	INTO AUX_PTIMPORT
+	FROM mrecibo RECIBO_INICIAL
+		,mrecibo RECIBOS_APOLICE
+		,MRECIDET PREMIOS_APOLICE
+	WHERE 1 = 1
+		AND PREMIOS_APOLICE.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+			),'PPDIV')
+		AND PREMIOS_APOLICE.NMRECIBO = RECIBOS_APOLICE.NMRECIBO
+		AND PREMIOS_APOLICE.CDUNIECO = RECIBOS_APOLICE.CDUNIECO
+		--
+		AND RECIBOS_APOLICE.fEinicio >= RECIBO_INICIAL.FEINICIO
+		AND RECIBOS_APOLICE.fEinicio < RECIBO_INICIAL.FEFINAL
+		--
+		AND RECIBOS_APOLICE.NMRECIBO != RECIBO_INICIAL.NMRECIBO
+		AND RECIBOS_APOLICE.nmpoliza = RECIBO_INICIAL.nmpoliza
+		AND RECIBOS_APOLICE.estado = RECIBO_INICIAL.estado
+		AND RECIBOS_APOLICE.cdramo = RECIBO_INICIAL.cdramo
+		AND RECIBOS_APOLICE.cdunieco = RECIBO_INICIAL.cdunieco
+		--
+		AND RECIBO_INICIAL.cdunieco = PI_CDUNIECO
+		AND RECIBO_INICIAL.nmrecibo = PI_NMRECIBO;
+
+    RETURN NVL(aux_ptimport,0);
+  EXCEPTION
+    WHEN OTHERS THEN RETURN 0;
+  END FUN_PREMIOS_PROCREC;
+
+
+FUNCTION FUN_PREMIOS_PROC_APOL(PI_CDUNIECO IN NUMBER
+                                     ,PI_CDRAMO   IN NUMBER
+                                     ,PI_NMPOLIZA IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT NVL(SUM(DET_RECIBOS.ptimport), 0)
+	INTO AUX_PTIMPORT
+	FROM mrecibo RECIBOS
+		,MRECIDET DET_RECIBOS
+		,MPOLIZAS APOLICE
+	WHERE 1 = 1
+		AND DET_RECIBOS.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+				AND CODIGO NOT IN (
+					'BONIF'
+					,'BONIF ME'
+					,'BONIF MI'
+					,'PACER'
+					,'PACER ME'
+					,'PACER MI'
+					)
+			),'PPDIV')
+		AND DET_RECIBOS.NMRECIBO = RECIBOS.NMRECIBO
+		AND DET_RECIBOS.CDUNIECO = RECIBOS.CDUNIECO
+		AND RECIBOS.cdestado IN (
+			1
+			,5
+			,14
+			,15
+			,16
+			,17
+			) /* ACRESCIMO ESTADOS 16 E 17 2006/04/04 */
+		AND RECIBOS.nmpoliza = APOLICE.nmpoliza
+		AND RECIBOS.estado = 'M'
+		AND RECIBOS.cdramo = APOLICE.cdramo
+		AND RECIBOS.cdunieco = APOLICE.cdunieco
+		AND APOLICE.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM mpolizas X
+			WHERE X.nmpoliza = APOLICE.nmpoliza
+				AND X.estado = APOLICE.estado
+				AND X.cdramo = APOLICE.cdramo
+				AND X.cdunieco = APOLICE.cdunieco
+			)
+		AND APOLICE.nmpoliza = PI_NMPOLIZA
+		AND APOLICE.estado = 'M'
+		AND APOLICE.cdramo = PI_CDRAMO
+		AND APOLICE.cdunieco = PI_CDUNIECO;
+
+   RETURN NVL(aux_ptimport,0);
+EXCEPTION
+    WHEN OTHERS THEN RETURN 0;
+END FUN_PREMIOS_PROC_APOL;
+
+
+FUNCTION FUN_PREMIOS_DIV_APOL(PI_CDUNIECO IN NUMBER
+                            ,PI_CDRAMO   IN NUMBER
+                            ,PI_NMPOLIZA IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT NVL(SUM(DET_RECIBOS.ptimport), 0)
+	INTO AUX_PTIMPORT
+	FROM mrecibo RECIBOS
+		,MRECIDET DET_RECIBOS
+		,MPOLIZAS APOLICE
+	WHERE 1 = 1
+		AND DET_RECIBOS.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+				AND CODIGO NOT IN (
+					'BONIF'
+					,'BONIF ME'
+					,'BONIF MI'
+					,'PACER'
+					,'PACER ME'
+					,'PACER MI'
+					)
+			),'PPDIV')
+		AND DET_RECIBOS.NMRECIBO = RECIBOS.NMRECIBO
+		AND DET_RECIBOS.CDUNIECO = RECIBOS.CDUNIECO
+		AND RECIBOS.cdestado IN (
+			1
+			,5
+			,14
+			,15
+			,16
+			,17
+			) /* ACRESCIMO ESTADOS 16 E 17 2006/04/04 */
+		AND RECIBOS.nmpoliza = APOLICE.nmpoliza
+		AND RECIBOS.estado = 'M'
+		AND RECIBOS.cdramo = APOLICE.cdramo
+		AND RECIBOS.cdunieco = APOLICE.cdunieco
+		AND APOLICE.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM mpolizas X
+			WHERE X.nmpoliza = APOLICE.nmpoliza
+				AND X.estado = APOLICE.estado
+				AND X.cdramo = APOLICE.cdramo
+				AND X.cdunieco = APOLICE.cdunieco
+			)
+		AND APOLICE.nmpoliza = PI_NMPOLIZA
+		AND APOLICE.estado = 'M'
+		AND APOLICE.cdramo = PI_CDRAMO
+		AND APOLICE.cdunieco = PI_CDUNIECO;
+
+   RETURN NVL(aux_ptimport,0);
+EXCEPTION
+    WHEN OTHERS THEN RETURN 0;
+END FUN_PREMIOS_DIV_APOL;
+
+
+/*
+   NOME : GET_TIPO_COBERTURA
+   *  OBJECTIVO : OBTEM TIPO DE COBERTURA DE RESSEGURO DA APÓLICE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION GET_TIPO_COBERTURA( PI_CDUNIECO IN NUMBER
+                           , PI_CDRAMO IN VARCHAR2
+                           , PI_NMPOLIZA IN NUMBER ) RETURN VARCHAR2
+IS
+  AUX_TIPO VARCHAR2(1);
+BEGIN
+  IF PI_CDRAMO LIKE '1%' THEN
+    IF PI_CDRAMO='102' THEN
+       AUX_TIPO:='I';
+    ELSE
+       AUX_TIPO:='V';
+    END IF;
+  ELSIF PI_CDRAMO LIKE '2%' THEN
+	SELECT (DECODE(ATRIBUTOS_APOL.OTVALOR, '1', 'I', '2', 'R', '3', 'V', '4', 'I', '5', 'R', '6', 'V', ' '))
+	INTO AUX_TIPO
+	FROM TVALOPOL ATRIBUTOS_APOL
+	WHERE ATRIBUTOS_APOL.STATUS = 'V'
+		AND ATRIBUTOS_APOL.NMSUPLEM = (
+			SELECT MAX(X.nmsuplem)
+			FROM tvalopol X
+			WHERE X.NMSUPLEM < TO_CHAR(SYSDATE, 'J') || '99999999999'
+				AND X.cdatribu = ATRIBUTOS_APOL.cdatribu
+				AND X.nmpoliza = ATRIBUTOS_APOL.nmpoliza
+				AND X.estado = ATRIBUTOS_APOL.estado
+				AND X.cdramo = ATRIBUTOS_APOL.cdramo
+				AND X.cdunieco = ATRIBUTOS_APOL.cdunieco
+			)
+		AND ATRIBUTOS_APOL.CDATRIBU = 11
+		AND ATRIBUTOS_APOL.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTOS_APOL.CDRAMO = PI_CDRAMO
+		AND ATRIBUTOS_APOL.NMPOLIZA = PI_NMPOLIZA;
+
+  ELSE
+    AUX_TIPO:=' ' ;
+  END IF;
+RETURN AUX_TIPO;
+EXCEPTION
+    WHEN OTHERS THEN RETURN ' ';
+END GET_TIPO_COBERTURA;
+
+
+/*
+   NOME : FUN_DATA_SUBSCRICAO_PREMIO
+   *  OBJECTIVO :
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_DATA_SUBSCRICAO_PREMIO( PI_CDUNIECO IN NUMBER
+                                   , PI_CDRAMO  IN NUMBER
+                                   , PI_NMRECIBO IN NUMBER
+                                   , PI_NMPOLIZA IN NUMBER
+                                   , PI_TIPO_COBERTURA IN VARCHAR2
+                                   ) RETURN DATE
+IS
+ AUX_DT DATE;
+BEGIN
+  IF PI_TIPO_COBERTURA='I' THEN
+	SELECT A.FEEMISIO
+	INTO AUX_DT
+	FROM MPOLIZAS A
+	WHERE A.CDUNIECO = PI_CDUNIECO
+		AND A.CDRAMO = PI_CDRAMO
+		AND A.NMPOLIZA = PI_NMPOLIZA
+		AND A.ESTADO = 'M'
+		AND A.NMSUPLEM = (
+			SELECT MIN(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMPOLIZA = A.NMPOLIZA
+				AND X.ESTADO = A.ESTADO
+				AND X.CDRAMO = A.CDRAMO
+				AND X.CDUNIECO = A.CDUNIECO
+			);
+
+  ELSIF  PI_TIPO_COBERTURA='R' THEN
+	SELECT A.FEEMISIO
+	INTO AUX_DT
+	FROM MPOLIZAS A
+	WHERE A.CDUNIECO = PI_CDUNIECO
+		AND a.CDRAMO = PI_CDRAMO
+		AND a.NMPOLIZA = PI_NMPOLIZA
+		AND a.ESTADO = 'M'
+		AND a.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMPOLIZA = A.NMPOLIZA
+				AND X.ESTADO = A.ESTADO
+				AND X.CDRAMO = A.CDRAMO
+				AND X.CDUNIECO = A.CDUNIECO
+				AND X.FEEMISIO <= SYSDATE
+			);
+
+  ELSIF PI_TIPO_COBERTURA='V' THEN
+	SELECT RECIBO.FEINICIO
+	INTO AUX_DT
+	FROM MRECIBO RECIBO
+	WHERE RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA;
+
+  ELSE
+     AUX_DT:=NULL;
+  END IF;
+  RETURN AUX_DT;
+END FUN_DATA_SUBSCRICAO_PREMIO;
+
+
+/*
+   NOME : FUN_N_GARANTIAS_PROPOSTA
+   *  OBJECTIVO : NÃO GARANTIAS ASSOCIADO A UMA PROPOSTA
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_N_GARANTIAS_PROPOSTA( PI_CDUNIECO IN NUMBER
+                                 , PI_CDRAMO   IN NUMBER
+                                 , PI_NMPROPUE IN NUMBER
+                                 ) RETURN NUMBER AS
+  AUX_COUNT NUMBER;
+BEGIN
+	SELECT COUNT(GARANTIA.NMGARANT)
+	INTO AUX_COUNT
+	FROM CO_PROGAR GARANTIA
+	WHERE GARANTIA.CDUNIECO = PI_CDUNIECO
+		AND GARANTIA.CDRAMO = PI_CDRAMO
+		AND GARANTIA.NMPROPUE = PI_NMPROPUE;
+
+  RETURN NVL(AUX_COUNT,0);
+END FUN_N_GARANTIAS_PROPOSTA;
+
+
+/*
+   NOME : FUN_VALOR_CAP_PAGO
+   *  OBJECTIVO : VALOR CAP PAGO PARA UM DETERMINADA APÓLICE OU PROPOSTA
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_VALOR_CAP_PAGO( PI_CDUNIECO IN NUMBER
+                           , PI_CDRAMO   IN NUMBER
+                           , PI_NMPOLIZA IN NUMBER
+                           , PI_ESTADO_RECIBO IN VARCHAR2 ) RETURN NUMBER AS
+  AUX_SUM MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(RECIBO.PTIMPORT)
+	INTO AUX_SUM
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE RECIBO.ESTADO = PI_ESTADO_RECIBO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND DETRECIBO.CDUNIECO = PI_CDUNIECO
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDTIPCON = 'CAP'
+		AND RECIBO.CDESTADO = 7;
+
+  RETURN NVL(AUX_SUM,0);
+END FUN_VALOR_CAP_PAGO;
+
+
+/*
+   NOME : FUN_GRUPO_ENTIDADE
+   *  OBJECTIVO : NOME DO GRUPO PARA UMA DETERMINADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_GRUPO_ENTIDADE(PI_CDPERSON IN VARCHAR2) RETURN VARCHAR2 AS
+  AUX_NOME CO_GRUPENT.DSGRUENT%TYPE;
+BEGIN
+	SELECT GRUPO_ENTIDADE.DSGRUENT
+	INTO AUX_NOME
+	FROM TVALOPER ATRIBUTO_PESSOA
+		,CO_ENTIREL REL_ENTIDADE
+		,CO_GRUPENT GRUPO_ENTIDADE
+	WHERE ATRIBUTO_PESSOA.CDATRIBU = '21'
+		AND ATRIBUTO_PESSOA.CDPERSON = PI_CDPERSON
+		AND SYSDATE >= GRUPO_ENTIDADE.DATAINI
+		AND SYSDATE < NVL(GRUPO_ENTIDADE.DATAFIM, SYSDATE + 1)
+		AND REL_ENTIDADE.CDPERFIL = ATRIBUTO_PESSOA.OTVALOR
+		AND REL_ENTIDADE.CDGRUENT = GRUPO_ENTIDADE.CDGRUENT
+		AND REL_ENTIDADE.SWDOMINA = 'S';
+
+  RETURN NVL(AUX_NOME,'');
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN NULL;
+  WHEN OTHERS THEN
+    RETURN 'ERRO GRUPO';
+END FUN_GRUPO_ENTIDADE;
+
+
+/*
+  NOME      : FUN_RELATORIOS_VA_FONTE
+   *  OBJECTIVO : NÃO DE RELATÉRIOS VA POR FONTE NUM DETERMINADO INTERVALO DE TEMPO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_RELATORIOS_VA_FONTE(PI_CDFUENTE IN VARCHAR2
+                              ,PI_ANO IN VARCHAR2
+                              ,PI_MES IN VARCHAR2) RETURN NUMBER AS
+AUX_CONT NUMBER;
+BEGIN
+	SELECT SUM(FACTURAS.NMVA)
+	INTO AUX_CONT
+	FROM CO_FACTRCC FACTURAS
+	WHERE TO_CHAR(FACTURAS.FEDESDE, 'YYYY') = PI_ANO
+		AND TO_CHAR(FACTURAS.FEDESDE, 'MM') = PI_MES
+		AND FACTURAS.cdfonte = PI_CDFUENTE;
+
+RETURN NVL(AUX_CONT,0);
+END;
+
+
+/*
+  NOME      : FUN_RELATORIOS_RCC_FONTE
+   *  OBJECTIVO : NÃO DE RELATÉRIOS POR FONTE NUM DETERMINADO INTERVALO DE TEMPO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_RELATORIOS_RCC_FONTE(PI_CDFUENTE IN VARCHAR2
+                              ,PI_FEDESDE IN DATE
+                              ,PI_FEHASTA IN DATE) RETURN NUMBER AS
+AUX_CONT NUMBER;
+BEGIN
+	SELECT COUNT(RESPOSTAS.FERESP)
+	INTO AUX_CONT
+	FROM co_pedircc Pedidos
+		,co_resprcc Respostas
+	WHERE respostas.feresp BETWEEN PI_FEDESDE
+			AND PI_FEHASTA
+		AND DECODE(pedidos.tiporel, 'I', 'S', 'R', 'S', 'N') = 'S'
+		AND respostas.nmpedido = pedidos.nmpedido
+		AND pedidos.cdfonte = PI_CDFUENTE;
+
+RETURN NVL(AUX_CONT,0);
+END;
+
+
+/*
+  NOME      : FUN_PREMIO_REAL
+   *  OBJECTIVO : FUNÇÃO PARA CALCULO DO PREMIO REAL DE UMA APOLICE
+   *  UTILIZAÇÃO: SELECT PKG_FORMULAS_COSEC.FUN_PREMIO_REAL(1, 100, 4501202, 90002091, SYSDATE-365,
+
+SYSDATE) FROM DUAL
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_PREMIO_REAL( PI_CDUNIECO IN NUMBER
+                        , PI_CDRAMO   IN NUMBER
+                        , PI_NMPOLIZA IN NUMBER
+                        , PI_CDPERSON IN NUMBER
+                        , PI_DATAINICIO IN DATE
+                        , PI_DATAFIM IN DATE) RETURN NUMBER IS
+  aux_str   NUMBER;
+  AUX_ACERTO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(impreal)
+	INTO aux_str
+	FROM co_decven
+	WHERE nmpoliza = PI_NMPOLIZA
+		AND cdunieco = PI_CDUNIECO
+		AND cdramo = PI_CDRAMO
+		AND cdperson = PI_CDPERSON
+		--and to_date(feperdec,'Mon-RR') between PI_DATAINICIO and PI_DATAFIM;
+		AND TO_DATE(feperdec, 'Mon-RR', 'NLS_DATE_LANGUAGE=PORTUGUESE') BETWEEN DECODE(PI_DATAINICIO, NULL, TO_DATE('01-01-1900', 'DD-MM-RRRR'), PI_DATAINICIO)
+			AND DECODE(PI_DATAFIM, NULL, TO_DATE('31-12-2099', 'DD-MM-RRRR'), PI_DATAFIM);
+
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_ACERTO
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DECODE(DETRECIBO.CDTIPCON, 'BONIF', 'S', 'BONIF MI', 'S', 'BONIF ME', 'S', 'PACER', 'S', 'PACER ME', 'S', 'PACER MI', 'S', 'N') = 'S'
+		AND TRUNC(RECIBO.FEINICIO) BETWEEN DECODE(PI_DATAINICIO, NULL, TO_DATE('01-01-1900', 'DD-MM-RRRR'), PI_DATAINICIO)
+			AND PI_DATAFIM
+		AND DECODE(RECIBO.CDESTADO, '2', 'N', '8', 'N', '12', 'N', 'S') = 'S'
+		AND RECIBO.TIPORECI = '93'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = 'M'
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+RETURN NVL(aux_str,0)+NVL(AUX_ACERTO,0);
+END FUN_PREMIO_REAL;
+
+
+/*
+  NOME      : FUN_PART_RESULT
+   *  OBJECTIVO : FUNÇÃO PARA CALCULO DA PARTICIPACAO DE RESULTADOS DENTRO DE UM ESPAÉO DE TEMPO
+   *  UTILIZAÇÃO: SELECT PKG_FORMULAS_COSEC.FUN_PART_RESULT(1, 100, 4501202, SYSDATE-365, SYSDATE) FROM DUAL
+   *  COMENTÉRIO: SE COLOCARMOS AS DATAS A NULL É CALCULADO AUTOMATICAMENTE O ACUMULADO
+                  SE COLOCARMOS A ULTIMA DATA A NULL E CALCULADO A PARTIR DA DATA DE INICIO
+                  SE COLOCARMOS A PRIMEIRA DATA A NULL E CALCULADO ATÉ À DATA DE FIM
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_PART_RESULT( PI_CDUNIECO IN NUMBER
+                        , PI_CDRAMO IN NUMBER
+                        , PI_NMPOLIZA IN NUMBER
+                        , PI_DATAINICIO IN DATE
+                        , PI_DATAFIM IN DATE) RETURN NUMBER IS
+  AUX_PTIMPORT MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(RECIBO.PTIMPORT)
+	INTO AUX_PTIMPORT
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DETRECIBO.CDUNIECO = PI_CDUNIECO
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDTIPCON IN (
+			'PARES'
+			,'PARES ME'
+			,'PARES MI'
+			)
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.FEEMISIO BETWEEN DECODE(PI_DATAINICIO, NULL, TO_DATE('01-01-1900', 'DD-MM-RRRR'), PI_DATAINICIO)
+			AND DECODE(PI_DATAFIM, NULL, TO_DATE('31-12-2099', 'DD-MM-RRRR'), PI_DATAFIM);
+
+--  AND RECIBO.FEEMISIO between PI_DATAINICIO and PI_DATAFIM;
+  RETURN NVL(AUX_PTIMPORT,0);
+END FUN_PART_RESULT;
+
+
+/*
+  NOME          : FUN_PREMIO_REAL_ACUM
+   *  OBJECTIVO : FUNÇÃO PARA CALCULO DOS PRÉMIOS REAIS (DPR) DENTRO DE UM ESPAÉO DE TEMPO
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_PREMIO_REAL_ACUM( PI_CDUNIECO   IN NUMBER
+                             , PI_CDRAMO     IN NUMBER
+                             , PI_NMPOLIZA   IN NUMBER
+                             , PI_CDPERSON   IN NUMBER
+                             , PI_DATAINICIO IN DATE
+                             , PI_DATAFIM    IN DATE
+                             , PI_TIPO       IN CHAR) RETURN NUMBER IS
+  aux_str   NUMBER;
+  AUX_ACERTO MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(DECODE(UPPER(PI_TIPO), 'POL', IMDEPOLI, 'COM', IMDECOME + IMDECOMI, 'COM+POL', IMDECOME + IMDECOMI + IMDEPOLI, 'ME', IMDECOME, 'MI', IMDECOMI, IMPREAL))
+	INTO aux_str
+	FROM co_decven
+	WHERE nmpoliza = PI_NMPOLIZA
+		AND cdunieco = PI_CDUNIECO
+		AND cdramo = PI_CDRAMO
+		AND cdperson = PI_CDPERSON
+		AND ADD_MONTHS(TO_DATE(feperdec, 'Mon-RR', 'NLS_DATE_LANGUAGE=PORTUGUESE'), - 1) BETWEEN PI_DATAINICIO
+			AND PI_DATAFIM;
+
+	SELECT SUM(DETRECIBO.PTIMPORT)
+	INTO AUX_ACERTO
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+		AND DECODE(DETRECIBO.CDTIPCON, 'BONIF', 'S', 'BONIF MI', 'S', 'BONIF ME', 'S', 'PACER', 'S', 'PACER ME', 'S', 'PACER MI', 'S', 'N') = 'S'
+		AND TRUNC(RECIBO.FEINICIO) BETWEEN DECODE(PI_DATAINICIO, NULL, TO_DATE('01-01-1900', 'DD-MM-RRRR'), PI_DATAINICIO)
+			AND PI_DATAFIM
+		AND DECODE(RECIBO.CDESTADO, '2', 'N', '8', 'N', '12', 'N', 'S') = 'S'
+		AND RECIBO.TIPORECI = '93'
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND RECIBO.ESTADO = 'M'
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+	RETURN NVL(aux_str,0)+NVL(AUX_ACERTO,0);
+END FUN_PREMIO_REAL_ACUM;
+
+
+/*
+  NOME      : FUN_REAJPROV_SINISTRO
+   *  OBJECTIVO : FUNÇÃO PARA REAJUSTES DE PROVISÃO INICIAL DE SINISTROS
+   *  UTILIZAÇÃO: EXEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_REAJPROV_SINPAG(1, 100, 2002, 37, '%',  'REC', SYSDATE) FROM DUAL
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: JOSE VIEGAS
+*/
+FUNCTION FUN_REAJPROV_SINISTRO( PI_CDUNIECO IN NUMBER
+                              , PI_CDRAMO   IN NUMBER
+                              , PI_AAAPERTU IN NUMBER
+                              , PI_NMSINIES IN NUMBER
+                              , PI_CDCONVAL IN VARCHAR2
+                              , PI_TIPOPROV IN VARCHAR2 /* 'PAG' OU 'REC' */
+                              , PI_DATAREF IN DATE DEFAULT SYSDATE) RETURN NUMBER IS
+  nRES NUMBER;
+BEGIN
+	SELECT SUM(DECODE(PI_TIPOPROV, 'PAG', PTPAGOS, PTRECOBR))
+	INTO nRES
+	FROM MSINIVAL
+	WHERE CDCONVAL LIKE DECODE(PI_CDCONVAL, 'I', '_1%', 'J', '_4%', 'H', '_3%', 'D', '_2%', 'IJ', DECODE(SUBSTR(CDCONVAL, 2, 1), '1', CDCONVAL, '4', CDCONVAL, ''), 'HD', DECODE(SUBSTR(CDCONVAL, 2, 1), '2', CDCONVAL, '3', CDCONVAL, ''), PI_CDCONVAL)
+		AND DECODE(NMORDINA, 1, 'N' /* 1 - Provisões Constituídas e Sinistros
+
+	Pendentes de Pagamento */
+			, 2, 'S' /* 2, 3 - Reajustamentos */
+			, 'S') = 'S' /* 4 - Sinistros Pagos   */
+		AND FEMOVIMI <= PI_DATAREF
+		AND NMSINIES = PI_NMSINIES /* 5 - Sinistros Recuperados */
+		AND AAAPERTU = PI_AAAPERTU
+		AND CDRAMO = PI_CDRAMO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(nRES, 0);
+END FUN_REAJPROV_SINISTRO;
+
+
+/*
+  NOME      : FUN_IMPRESSOES_OD62_LASTDATE
+   *  OBJECTIVO : FUNÇÃO PARA CALCULAR A ÚLTIMA IMPRESSÃO DA CARTA DE CONDIÇÕES DE CRÉDITO
+   *  UTILIZAÇÃO: EXEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_IMPRESSOES_OD62_LASTDATE(100,1,'W',43) FROM DUAL
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_IMPRESSOES_OD62_LASTDATE( PI_CDRAMO   IN NUMBER
+                                     , PI_CDUNIECO IN NUMBER
+                                     , PI_ESTADO   IN VARCHAR2
+                                     , PI_NMPOLIZA IN NUMBER) RETURN VARCHAR2 AS
+  aux_str   VARCHAR2(100);
+BEGIN
+	SELECT TO_CHAR(DATA_EXECUCAO, 'DD-MM-RRRR')
+	INTO aux_str
+	FROM V_DOCUMENTOS_OD62_EXECUTADOS IMPRESSAO
+	WHERE IMPRESSAO.P_CDUNIECO = TO_CHAR(PI_CDUNIECO)
+		AND IMPRESSAO.P_CDRAMO = TO_CHAR(PI_CDRAMO)
+		AND IMPRESSAO.P_ESTADO = '''' || PI_ESTADO || ''''
+		AND IMPRESSAO.P_NMPOLIZA = TO_CHAR(PI_NMPOLIZA)
+		AND IMPRESSAO.ID = (
+			SELECT MAX(IMP.ID)
+			FROM V_DOCUMENTOS_OD62_EXECUTADOS IMP
+			WHERE IMP.P_CDUNIECO = IMPRESSAO.P_CDUNIECO
+				AND IMP.P_CDRAMO = IMPRESSAO.P_CDRAMO
+				AND IMP.P_ESTADO = IMPRESSAO.P_ESTADO
+				AND IMP.P_NMPOLIZA = IMPRESSAO.P_NMPOLIZA
+			);
+
+  RETURN aux_str;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN '';
+END FUN_IMPRESSOES_OD62_LASTDATE;
+
+
+/*
+  NOME      : FUN_IMPRESSOES_OD62_CONTADOR
+   *  OBJECTIVO : FUNÇÃO PARA CALCULAR NUMERO DE IMPRESSÉES PARA CARTA DE CONDIÇÕES DE CRÉDITO
+   *  UTILIZAÇÃO: EXEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_IMPRESSOES_OD62_CONTADOR(100,1,'W',43) FROM DUAL
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_IMPRESSOES_OD62_CONTADOR( PI_CDRAMO   IN NUMBER
+                                     , PI_CDUNIECO IN NUMBER
+                                     , PI_ESTADO   IN VARCHAR2
+                                     , PI_NMPOLIZA IN NUMBER) RETURN NUMBER AS
+  aux_num   NUMBER;
+BEGIN
+	SELECT COUNT(*)
+	INTO aux_num
+	FROM V_DOCUMENTOS_OD62_EXECUTADOS IMPRESSAO
+	WHERE IMPRESSAO.P_CDUNIECO = TO_CHAR(PI_CDUNIECO)
+		AND IMPRESSAO.P_CDRAMO = TO_CHAR(PI_CDRAMO)
+		AND IMPRESSAO.P_ESTADO = '''' || PI_ESTADO || ''''
+		AND IMPRESSAO.P_NMPOLIZA = TO_CHAR(PI_NMPOLIZA);
+
+   RETURN aux_num;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 0;
+END FUN_IMPRESSOES_OD62_CONTADOR;
+
+
+/*  NOME      : FUN_M_RECIDET
+   *  OBJECTIVO : FUNCION PARA CALCULAR IMPORTES DE MRECIDET
+   *  UTILIZAÇÃO: EXEMPLO : SELECT PKG_FORMULAS_COSEC.FUN_MRECIDET(1,65,'PSDPR',null) FROM DUAL
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: xx
+*/
+FUNCTION FUN_MRECIDET(PI_CDUNIECO IN NUMBER
+                     ,PI_NMRECIBO IN NUMBER
+                     ,PI_CDTIPCON IN VARCHAR2
+                     ,PI_CDGARANT IN VARCHAR2) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM mrecidet
+	WHERE CDUNIECO = pi_cdunieco
+		AND NMRECIBO = pi_nmrecibo
+		AND CDTIPCON = pi_cdtipcon
+		AND (
+			CDGARANT = pi_cdgarant
+			OR pi_cdgarant IS NULL
+			);
+
+   RETURN NVL(aux_ptimport,0);
+EXCEPTION
+WHEN OTHERS THEN RETURN 0;
+END;
+
+
+/*
+            NOME      : FUN_RECIBO_PARC_PAGO
+   *  OBJECTIVO : FUNÇÃO PARA CALCULAR O VALOR PARCALMENTE PAGO DE UM DETERMINADO RECIBO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_RECIBO_PARC_PAGO( PI_CDUNIECO IN NUMBER
+                             , PI_NMRECIBO IN NUMBER
+                             ) RETURN NUMBER AS
+  AUX_PTIMPORT CO_SALDOENT.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO AUX_PTIMPORT
+	FROM CO_SALDOENT
+	WHERE CDUNIECO = PI_CDUNIECO
+		AND NMRECINUE = PI_NMRECIBO
+		AND CDPROCED = 'M'
+		AND SWSALDO = 'C'
+		--  AND CDNEGOCI='030'
+		;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END FUN_RECIBO_PARC_PAGO;
+
+
+/*
+      NOME      : FUN_PERC_DED_APOLICE
+   *  OBJECTIVO : FUNÇÃO PARA CALCULAR O VALOR DA PERCENTAGEM TOTAL DE DEDUCAO PARA UM DETERMINADA APOLICE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_PERC_DED_APOLICE( PI_CDUNIECO IN NUMBER
+                             , PI_CDRAMO IN NUMBER
+                             , PI_NMPOLIZA IN NUMBER
+                             ) RETURN NUMBER AS
+  AUX_PTIMPORT MPOLIDED.PORCDEDU%TYPE;
+BEGIN
+	SELECT SUM(PORCDEDU) / 100
+	INTO AUX_PTIMPORT
+	FROM MPOLIDED
+	WHERE CDUNIECO = PI_CDUNIECO
+		AND CDRAMO = PI_CDRAMO
+		AND NMPOLIZA = PI_NMPOLIZA
+		AND NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIDED X
+			WHERE X.CDUNIECO = CDUNIECO
+				AND X.CDRAMO = CDRAMO
+				AND X.ESTADO = ESTADO
+				AND X.NMPOLIZA = NMPOLIZA
+				AND X.CDCIA = CDCIA
+				AND X.CDTIPCOA = CDTIPCOA
+			);
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END FUN_PERC_DED_APOLICE;
+
+
+/*
+   NOME : FUN_SALDO_SINISTROS
+   *  OBJECTIVO : Obtêm valor do sinistro.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 2.0
+   *  CRIADO POR: RUI PORTUGAL
+*/
+FUNCTION FUN_SALDO_SINISTROS( PI_CDUNIECO IN NUMBER
+                           , PI_CDRAMO IN NUMBER
+                           , PI_NMPOLIZA IN NUMBER
+                           , PI_NMANUIDADE IN NUMBER DEFAULT NULL) RETURN NUMBER AS
+  AUX_PTIMPORT MDSPASIN.IMPREFER%TYPE;
+BEGIN
+  IF PI_NMANUIDADE IS NULL THEN
+	SELECT SUM(DECODE(PagSinistro.cdtipmov, 2, 0 - DetPagSinistro.IMPREFER, DetPagSinistro.IMPREFER))
+	INTO aux_ptimport
+	FROM msiniest Sinistro
+		,mpagosin PagSinistro
+		,mdspasin DetPagSinistro
+	WHERE DetPagSinistro.CDUNIECO = PagSinistro.CDUNIECO
+		AND DetPagSinistro.CDRAMO = PagSinistro.CDRAMO
+		AND DetPagSinistro.AAAPERTU = PagSinistro.AAAPERTU
+		AND DetPagSinistro.STATUS = PagSinistro.STATUS
+		AND DetPagSinistro.NMSINIES = PagSinistro.NMSINIES
+		AND DetPagSinistro.NMORDPAG = PagSinistro.NMORDPAG
+		AND DetPagSinistro.CDIMPUES IN (
+			'HONO'
+			,'DESP'
+			,'INDE'
+			,'PENA'
+			)
+		AND PagSinistro.CDUNIECO = Sinistro.CDUNIECO
+		AND PagSinistro.CDRAMO = Sinistro.CDRAMO
+		AND PagSinistro.AAAPERTU = Sinistro.AAAPERTU
+		AND PagSinistro.STATUS = Sinistro.STATUS
+		AND PagSinistro.NMSINIES = Sinistro.NMSINIES
+		AND PagSinistro.SWESTADO IN (
+			2
+			,3
+			)
+		AND Sinistro.CDESTADO != 2
+		AND Sinistro.CDUNIECO = PI_CDUNIECO
+		AND Sinistro.CDRAMO = PI_CDRAMO
+		AND Sinistro.NMPOLIZA = PI_NMPOLIZA;
+
+  ELSE
+	SELECT SUM(DECODE(PagSinistro.cdtipmov, 2, 0 - DetPagSinistro.IMPREFER, DetPagSinistro.IMPREFER))
+	INTO aux_ptimport
+	FROM msiniest Sinistro
+		,mpagosin PagSinistro
+		,mdspasin DetPagSinistro
+		,mpolizas APOLICE
+	WHERE DetPagSinistro.CDUNIECO = PagSinistro.CDUNIECO
+		AND DetPagSinistro.CDRAMO = PagSinistro.CDRAMO
+		AND DetPagSinistro.AAAPERTU = PagSinistro.AAAPERTU
+		AND DetPagSinistro.STATUS = PagSinistro.STATUS
+		AND DetPagSinistro.NMSINIES = PagSinistro.NMSINIES
+		AND DetPagSinistro.NMORDPAG = PagSinistro.NMORDPAG
+		AND DetPagSinistro.CDIMPUES IN (
+			'HONO'
+			,'DESP'
+			,'INDE'
+			,'PENA'
+			)
+		AND PagSinistro.CDUNIECO = Sinistro.CDUNIECO
+		AND PagSinistro.CDRAMO = Sinistro.CDRAMO
+		AND PagSinistro.AAAPERTU = Sinistro.AAAPERTU
+		AND PagSinistro.STATUS = Sinistro.STATUS
+		AND PagSinistro.NMSINIES = Sinistro.NMSINIES
+		AND PagSinistro.SWESTADO IN (
+			2
+			,3
+			)
+		AND DECODE(PagSinistro.SWESTADO, 2, PagSinistro.FEAUTORI, 3, DECODE(PagSinistro.cdtipmov, 1, PagSinistro.FEPAGO, 2, PagSinistro.FECOBRO)) BETWEEN APOLICE.FEEFECTO
+			AND DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)
+		AND Sinistro.CDUNIECO = APOLICE.CDUNIECO
+		AND Sinistro.CDRAMO = APOLICE.CDRAMO
+		AND Sinistro.NMPOLIZA = APOLICE.NMPOLIZA
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMRENOVA = PI_NMANUIDADE - 1
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+			)
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.ESTADO = 'M'
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.cdunieco = PI_CDUNIECO;
+
+  END IF;
+  RETURN NVL(AUX_PTIMPORT,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN 0;
+END FUN_SALDO_SINISTROS;
+
+
+/*
+   NOME : FUN_SINISTROS_ACUM
+   *  OBJECTIVO : Obtêm valor do sinistro.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_SINISTROS_ACUM( PI_CDUNIECO IN NUMBER
+                           , PI_CDRAMO IN NUMBER
+                           , PI_NMPOLIZA IN NUMBER
+                           ) RETURN NUMBER AS
+  AUX_PTIMPORT MVALOSIN.PTPAGOS%TYPE;
+BEGIN
+	SELECT NVL(SUM(PROVISAO_INICIAL + REAJUSTE_PROVISAO - TOTAL_PAGOS), 0)
+	INTO aux_ptimport
+	FROM GD_VALORES_SINISTRO_VW
+	WHERE CDESTADO != 2
+		AND CDUNIECO = PI_CDUNIECO
+		AND CDRAMO = PI_CDRAMO
+		AND NMPOLIZA = PI_NMPOLIZA;
+
+  RETURN AUX_PTIMPORT;
+END FUN_SINISTROS_ACUM;
+
+
+FUNCTION FUN_PART_RESULT_ACUM( PI_CDUNIECO IN NUMBER
+                             , PI_CDRAMO IN NUMBER
+                             , PI_NMPOLIZA IN NUMBER) RETURN NUMBER AS
+  AUX_PTIMPORT MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(RECIBO.PTIMPORT)
+	INTO AUX_PTIMPORT
+	FROM MRECIBO RECIBO
+		,MRECIDET DETRECIBO
+	WHERE RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.CDRAMO = PI_CDRAMO
+		AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+		AND DETRECIBO.CDUNIECO = PI_CDUNIECO
+		AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+		AND DETRECIBO.CDTIPCON IN (
+			'PARES'
+			,'PARES ME'
+			,'PARES MI'
+			);
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END FUN_PART_RESULT_ACUM;
+
+
+FUNCTION GET_MOEDA_REC( PI_CDUNIECO IN NUMBER
+                      , PI_NMRECIBO IN NUMBER
+                      , PI_ESTADO   IN VARCHAR2 DEFAULT 'M') RETURN VARCHAR2
+IS
+  cRES VARCHAR2(10);
+  CURSOR MOEDA_APOLICE IS
+	SELECT CDMONEDA
+	FROM MPOLIZAS APOLICE
+		,MRECIBO RECIBO
+	WHERE APOLICE.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+			)
+		AND APOLICE.NMPOLIZA = RECIBO.NMPOLIZA
+		AND APOLICE.ESTADO = RECIBO.ESTADO
+		AND APOLICE.CDRAMO = RECIBO.CDRAMO
+		AND APOLICE.CDUNIECO = RECIBO.CDUNIECO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+  CURSOR MOEDA_PROPOSTA IS
+
+	SELECT CDMOEDA
+	FROM CO_PROPOL PROPOSTA
+		,MRECIBO RECIBO
+	WHERE PROPOSTA.FEMODIF = (
+			SELECT MAX(FEMODIF)
+			FROM CO_PROPOL X
+			WHERE X.NMPROPUE = PROPOSTA.NMPROPUE
+				AND X.SWESTADO = PROPOSTA.SWESTADO
+				AND X.CDRAMO = PROPOSTA.CDRAMO
+				AND X.CDUNIECO = PROPOSTA.CDUNIECO
+			)
+		AND PROPOSTA.NMPROPUE = RECIBO.NMPOLIZA
+		AND PROPOSTA.CDRAMO = RECIBO.CDRAMO
+		AND PROPOSTA.CDUNIECO = RECIBO.CDUNIECO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+BEGIN
+  IF PI_ESTADO = 'P' THEN
+    FOR RW IN MOEDA_PROPOSTA LOOP
+      cRES := rw.cdmoeda;
+    END LOOP;
+  ELSE
+    FOR RW IN MOEDA_APOLICE LOOP
+      cRES := rw.cdmoneda;
+    END LOOP;
+  END IF;
+  RETURN cRES;
+END GET_MOEDA_REC;
+
+
+/*
+   NOME : FUN_TIPOAVISO
+   *  OBJECTIVO : RETORNA TIPO DE DOCUMENTO DE ACORDO COM O QUADRO COSEC
+   *  UTILIZAÇÃO: UTILIZADO EM TODOS OS DOCUMENTOS E MAPAS DE RECIBOS/FACTURAS/N.C./ESTORNOS
+   *  VERSÃO    : 2.0
+   *  CRIADO POR: JOSE VIEGAS
+   *  DATA CRIACAO: 25-MAR-2002
+   *  ALTERAÇÕES  :
+
+
++------------+-----------------------------------------------------------------------------+-------+
+      |   DATA     |                      DESCRIÇÃO ALTERAÇÃO                                    + VERS.
+
+|
+
+
++------------+-----------------------------------------------------------------------------+-------+
+       07-ABR-2004  MODIFICADO A QUERY DE DADOS DE APOLICE POR FORMA A RETORNAR DADOS QUANDO        102
+                    O DOCUMENTO É REFERENTE A UM PERÉODO ANTERIOR À DATA DE EMISSÃO DA APÓLICE.
+       29-MAR-2004  ACRESCENTADO NOVO TIPO DE AVISO PARA APÓLICES CONSÉRCIO                         101
+       12-JAN-2005  ACRESCENTADO TIPO AVISO EC,FC, GC E G1C para CONSÉRCIO                128
+       21-JAN-2005  Alterado tipo de aviso para consÃ³rcio (6E,7E e 8E)                    133
+	   22-JUL-2013  ACRESTENTADO NOVO TIPO DE AVISO B1A, PARA CDRAMO 120 E 121
+	   15-07-2014   ACRESCENTADO NOVO PRODUTO 106 E TIPO DE RECIBO 47, 48 E 49 PARA OS DOCUMENTOS E.E1, E.E4 E E.E9.1
+*/
+FUNCTION FUN_TIPOAVISO( PI_CDUNIECO IN NUMBER
+                      , PI_NMRECIBO IN NUMBER) RETURN VARCHAR2 IS
+ cRES VARCHAR2(10);
+  CURSOR curDADOS_APOLICE IS
+
+	SELECT APOLICE.CDUNIECO
+		,APOLICE.CDRAMO
+		,RECIBO.ESTADO ESTADO_APOLICE
+		,RECIBO.NMPOLIZA
+		,RECIBO.NMSUPLEM SUP_RECIBO
+		,APOLICE.FEEFECTO DATA_INICIO
+		,APOLICE.OTTEMPOT TIPO_APOLICE
+		,DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM) DATA_VENCIMENTO
+		,APOLICE.FEEMISIO DATA_EMISSAO
+		,ROUND(MONTHS_BETWEEN(DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM), APOLICE.FEEFECTO)) DURACAO
+		,APOLICE.CDTIPCOA
+		,APOLICE.SWTARIFI
+		,APOLICE.SWABRIDO
+		,APOLICE.CDPERPAG
+		,APOLICE.CDTIPREN
+		,APOLICE.NMRENOVA
+		,RECIBO.TIPORECI TIPO_RECIBO
+		,RECIBO.PTIMPORT
+		,MODPAG.OTVALOR MODPAG
+		,GET_ATRIBUTO_APOLICE(RECIBO.CDUNIECO, RECIBO.CDRAMO, RECIBO.ESTADO, RECIBO.NMPOLIZA, 35, 'N', RECIBO.NMSUPLEM) TARIF_CONSORCIO
+		,GET_ATRIBUTO_APOLICE(RECIBO.CDUNIECO, RECIBO.CDRAMO, RECIBO.ESTADO, RECIBO.NMPOLIZA, 36, 'N', RECIBO.NMSUPLEM) TIPOTARIF_CONSORCIO
+		,GET_ATRIBUTO_APOLICE_DATA(PI_CDUNIECO, RECIBO.CDRAMO, 'M', RECIBO.NMPOLIZA, 11, RECIBO.FEINICIO) CGA /* ISSUE 528 16/12/2009 */
+		,NVL(GET_ATRIBUTO_APOLICE_DATA(PI_CDUNIECO, RECIBO.CDRAMO, 'M', RECIBO.NMPOLIZA, 86, RECIBO.FEINICIO), 'N') CGA2 /* ISSUE 726 08/06/2011 */
+		,RAMO.CDTIPRAM
+		,RAMO.CDTIPORA
+	FROM MPOLIZAS APOLICE
+		,TRAMOS RAMO
+		,MRECIBO RECIBO
+		,TVALOPOL MODPAG
+	WHERE 1 = 1
+		AND MODPAG.STATUS (+) = 'V'
+		AND MODPAG.CDATRIBU(+) = 14
+		AND NVL(MODPAG.NMSUPLEM, APOLICE.NMSUPLEM) = (
+			SELECT NVL(MAX(X.NMSUPLEM), APOLICE.NMSUPLEM) /* CORRIGIDO POR JAV 07/04/2004 */
+			FROM TVALOPOL X
+			WHERE X.CDATRIBU = MODPAG.CDATRIBU
+				AND X.NMSUPLEM <= TO_CHAR(RECIBO.FEINICIO, 'J') || '99999999999'
+				AND X.STATUS = MODPAG.STATUS
+				AND X.NMPOLIZA = MODPAG.NMPOLIZA
+				AND X.ESTADO = MODPAG.ESTADO
+				AND X.CDRAMO = MODPAG.CDRAMO
+				AND X.CDUNIECO = MODPAG.CDUNIECO
+			)
+		AND MODPAG.NMPOLIZA(+) = RECIBO.NMPOLIZA
+		AND MODPAG.ESTADO(+) = RECIBO.ESTADO
+		AND MODPAG.CDRAMO(+) = RECIBO.CDRAMO
+		AND MODPAG.CDUNIECO(+) = RECIBO.CDUNIECO
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.NMSUPLEM <= TO_CHAR(RECIBO.FEINICIO, 'J') || '99999999999'
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.STATUS = APOLICE.STATUS
+			)
+		AND APOLICE.STATUS = 'V'
+		AND APOLICE.NMPOLIZA = RECIBO.NMPOLIZA
+		AND APOLICE.ESTADO = RECIBO.ESTADO
+		AND APOLICE.CDRAMO = RECIBO.CDRAMO
+		AND APOLICE.CDUNIECO = RECIBO.CDUNIECO
+		AND RAMO.CDRAMO = RECIBO.CDRAMO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.ESTADO != 'P'
+		AND RECIBO.CDRAMO != 150
+
+
+	UNION
+
+	SELECT RECIBO.CDUNIECO
+		,RECIBO.CDRAMO
+		,RECIBO.ESTADO ESTADO_APOLICE
+		,RECIBO.NMPOLIZA
+		,RECIBO.NMSUPLEM SUP_RECIBO
+		,SYSDATE DATA_INICIO
+		,'N' TIPO_APOLICE
+		,SYSDATE DATA_VENCIMENTO
+		,SYSDATE DATA_EMISSAO
+		,0 DURACAO
+		,'N' CDTIPCOA
+		,'N' SWTARIFI
+		,'N' SWABRIDO
+		,0 CDPERPAG
+		,0 CDTIPREN
+		,0 NMRENOVA
+		,RECIBO.TIPORECI TIPO_RECIBO
+		,RECIBO.PTIMPORT
+		,'N' MODPAG
+		,'N' TARIF_CONSORCIO
+		,'N' TIPOTARIF_CONSORCIO
+		,'N' CGA /* ISSUE 528 16/12/2009 */
+		,'N' CGA2 /* ISSUE 726 08/06/2011 */
+		,RAMO.CDTIPRAM
+		,RAMO.CDTIPORA
+	FROM MRECIBO RECIBO
+		,TRAMOS RAMO
+	WHERE 1 = 1
+		AND RAMO.CDRAMO = RECIBO.CDRAMO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.ESTADO = 'P'
+		AND RECIBO.CDRAMO != 150
+
+	UNION ALL
+
+	--produto 150
+	SELECT APOLICE.CDUNIECO
+		,APOLICE.CDRAMO
+		,RECIBO.ESTADO ESTADO_APOLICE
+		,RECIBO.NMPOLIZA
+		,RECIBO.NMSUPLEM SUP_RECIBO
+		,APOLICE.FEEFECTO DATA_INICIO
+		,APOLICE.OTTEMPOT TIPO_APOLICE
+		,DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM) DATA_VENCIMENTO
+		,APOLICE.FEEMISIO DATA_EMISSAO
+		,ROUND(MONTHS_BETWEEN(DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM), APOLICE.FEEFECTO)) DURACAO
+		,APOLICE.CDTIPCOA
+		,APOLICE.SWTARIFI
+		,APOLICE.SWABRIDO
+		,APOLICE.CDPERPAG
+		,APOLICE.CDTIPREN
+		,APOLICE.NMRENOVA
+		,RECIBO.TIPORECI TIPO_RECIBO
+		,RECIBO.PTIMPORT
+		,'N' MODPAG
+		,'N' TARIF_CONSORCIO
+		,'N' TIPOTARIF_CONSORCIO
+		,'N' CGA /* ISSUE 528 16/12/2009 */
+		,'N' CGA2 /* ISSUE 726 08/06/2011 */
+		,RAMO.CDTIPRAM
+		,RAMO.CDTIPORA
+	FROM MPOLIZAS APOLICE
+		,TRAMOS RAMO
+		,MRECIBO RECIBO
+	WHERE 1 = 1
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.STATUS = APOLICE.STATUS
+			)
+		AND APOLICE.STATUS = 'V'
+		AND APOLICE.NMPOLIZA = RECIBO.NMPOLIZA
+		AND APOLICE.ESTADO = RECIBO.ESTADO
+		AND APOLICE.CDRAMO = RECIBO.CDRAMO
+		AND APOLICE.CDUNIECO = RECIBO.CDUNIECO
+		AND RAMO.CDRAMO = RECIBO.CDRAMO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO
+		AND RECIBO.ESTADO != 'P'
+		AND RECIBO.CDRAMO = 150;
+
+
+AUX_TEMP NUMBER;
+BEGIN
+  FOR RW IN curDADOS_APOLICE LOOP
+    IF  	RW.CDRAMO IN (100,104,105,106,107,108,109,110,116)  AND
+			RW.TIPO_RECIBO IN (0,2)         AND
+			RW.MODPAG = 2                   AND
+			-- ((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105)) OR (RW.CGA = '16' AND RW.CDRAMO = 100)) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('A3') = 'S' THEN
+
+			cRES := 'A3';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF   RW.CDRAMO IN (100,104,105,106,107,108,109,110,116)  AND
+            RW.TIPO_RECIBO IN (0,2)         AND
+            RW.MODPAG = 2                   AND
+            IS_TIPOAVISO_VALIDO('A') = 'S'  THEN
+
+			cRES := 'A';
+
+            DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.TIPO_RECIBO = 9              AND
+			IS_TIPOAVISO_VALIDO('A9') = 'S' THEN
+
+			cRES := 'A9';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,110,111,112,116) AND
+			RW.TIPO_RECIBO = 0                                 AND
+			RW.DURACAO != RW.CDPERPAG                          AND
+			RW.MODPAG   = 1                                    AND
+			--((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105)) OR (RW.CGA = '16' AND RW.CDRAMO = 100)) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('A4') = 'S'                    THEN
+
+			cRES := 'A4';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,110,111,112,116) AND
+			RW.TIPO_RECIBO = 0                                 AND
+			RW.DURACAO != RW.CDPERPAG                          AND
+			RW.MODPAG   = 1                                    AND
+			IS_TIPOAVISO_VALIDO('A1') = 'S'                    THEN
+
+			cRES := 'A1';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,111,112,116)              AND
+			RW.TIPO_RECIBO = 0                                                      AND
+			RW.MODPAG  = 1                                                          AND
+			((RW.TIPO_APOLICE='T' AND RW.CDPERPAG = 0)
+				OR ( RW.TIPO_APOLICE='R' AND (RW.DURACAO = RW.CDPERPAG OR RW.CDPERPAG=0)))        AND
+			-- ((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105)) OR (RW.CGA = '16' AND RW.CDRAMO = 100)) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('A5') = 'S'  THEN
+
+			cRES := 'A5';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,111,112,116)              AND
+			RW.TIPO_RECIBO = 2                                                      AND
+			RW.MODPAG  = 1                                                          AND
+			((RW.TIPO_APOLICE='T' AND RW.DURACAO > 12)
+				OR (RW.TIPO_APOLICE='R' AND (RW.DURACAO = RW.CDPERPAG OR RW.CDPERPAG=0)))  AND
+			--((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105))) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('A5') = 'S'                                         THEN
+
+			cRES := 'A5';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,110,111,112,116) AND
+			RW.TIPO_RECIBO = 2                                 AND
+			RW.MODPAG = 1                                      AND
+			RW.CDPERPAG NOT IN (0,12)                          AND
+			--((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105))) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('A5') = 'S'                    THEN
+
+			cRES := 'A5';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,111,112,116)                          AND
+			RW.TIPO_RECIBO = 0                                                      AND
+			RW.MODPAG  = 1                                                          AND
+			((RW.TIPO_APOLICE='T' AND RW.CDPERPAG = 0)
+				OR ( RW.TIPO_APOLICE='R' AND (RW.DURACAO = RW.CDPERPAG OR RW.CDPERPAG=0))) AND
+			IS_TIPOAVISO_VALIDO('A2') = 'S'                                         THEN
+
+			cRES := 'A2';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,111,112,116)                         AND
+			RW.TIPO_RECIBO = 2                                                     AND
+			RW.MODPAG = 1                                                          AND
+			((RW.TIPO_APOLICE='T' AND RW.DURACAO > 12)
+				OR (RW.TIPO_APOLICE='R' AND (RW.DURACAO = RW.CDPERPAG OR RW.CDPERPAG=0))) AND
+			IS_TIPOAVISO_VALIDO('A2') = 'S'                                        THEN
+
+			cRES := 'A2';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,110,111,112,116) AND
+			RW.TIPO_RECIBO = 2                                 AND
+			RW.MODPAG = 1                                      AND
+			RW.CDPERPAG NOT IN (0,12)                          AND
+			IS_TIPOAVISO_VALIDO('A2') = 'S'                    THEN
+
+			cRES := 'A2';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,110,111,112,116) AND
+			RW.TIPO_RECIBO IN (3,8)                            AND
+			RW.MODPAG = 1                                      AND
+			RW.CDPERPAG NOT IN (0,12)                          AND
+			--((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105)) OR (RW.CGA = '16' AND RW.CDRAMO = 100)) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('B3') = 'S'                    THEN
+
+			cRES := 'B3';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,104,105,108,122,123) AND
+			RW.TIPO_RECIBO IN (1,4,7)            AND
+			RW.PTIMPORT>=0 AND
+			IS_RECIBO_PPD(PI_CDUNIECO,PI_NMRECIBO) = 'S'	AND
+			IS_TIPOAVISO_VALIDO('PPD') = 'S'           THEN
+
+			cRES := 'PPD';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,103,104,105,106,108,109,116) AND
+			RW.TIPO_RECIBO IN (1,7)            AND
+			--((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105))) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('B3') = 'S'           THEN
+
+			cRES := 'B3';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,102,103,104,105,106,107,108,109,110,111,112,116) AND
+			RW.TIPO_RECIBO IN (3,8)                            AND
+			RW.MODPAG = 1                                      AND
+			RW.CDPERPAG NOT IN (0,12)                          AND
+			IS_TIPOAVISO_VALIDO('B') = 'S'                     THEN
+
+			cRES := 'B';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,103,104,105,106,108,109,116) AND
+			RW.TIPO_RECIBO IN (1,7)            AND
+			IS_TIPOAVISO_VALIDO('B1') = 'S'    THEN
+
+			cRES := 'B1';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (107) AND
+			RW.TIPO_RECIBO IN (1,7)            AND
+			IS_TIPOAVISO_VALIDO('B4') = 'S'    THEN
+
+			cRES := 'B4';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (120,121,122,123) AND
+			RW.PTIMPORT>=0 AND
+			RW.TIPO_RECIBO IN (1,7,4)            AND
+			IS_TIPOAVISO_VALIDO('B1A') = 'S'    THEN
+
+			cRES := 'B1A';
+
+			Dbms_Output.Put_Line('-> :'||Cres);
+			RETURN CRES;
+
+	ELSIF	RW.CDRAMO IN (125) AND
+			RW.PTIMPORT>=0 AND
+			RW.TIPO_RECIBO IN (1,7,4)            AND
+			IS_TIPOAVISO_VALIDO('B1B') = 'S'    THEN
+
+			cRES := 'B1B';
+
+			Dbms_Output.Put_Line('-> :'||Cres);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,103,104,105,106,107,108,109,110,116) AND
+			RW.TIPO_RECIBO IN (98,99)              AND
+			RW.PTIMPORT>=0                         AND
+			RW.MODPAG = 2                          AND
+			--((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105)) OR (RW.CGA = '16' AND RW.CDRAMO = 100)) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('C3') = 'S'           THEN
+
+			cRES := 'C3';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,103,104,105,106,107,108,109,110,116) AND
+			RW.TIPO_RECIBO IN (98,99)              AND
+			RW.PTIMPORT>=0                         AND
+			RW.MODPAG = 2                          AND
+			IS_TIPOAVISO_VALIDO('C') = 'S'         THEN
+
+			cRES := 'C';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,103,104,105,106,107,108,109,110,116) AND
+			RW.PTIMPORT>=0                         AND
+			RW.TIPO_RECIBO = 93                    AND
+			--((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105)) OR (RW.CGA = '16' AND RW.CDRAMO = 100)) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('D3') = 'S'           THEN
+
+			cRES := 'D3';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,103,104,105,106,107,108,109,110,116) AND
+			RW.PTIMPORT>=0                         AND
+			RW.TIPO_RECIBO = 93                    AND
+			IS_TIPOAVISO_VALIDO('D') = 'S'         THEN
+
+			cRES := 'D';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (102,112,113)      AND
+			RW.TIPO_RECIBO IN (1,7)         AND
+			IS_TIPOAVISO_VALIDO('D1') = 'S' THEN
+
+			cRES := 'D1';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,103,104,105,106,107,108,109,110,116) AND
+			RW.PTIMPORT>=0                         AND
+			RW.TIPO_RECIBO =  4                    AND
+			--((RW.CGA = '13' AND RW.CDRAMO = 100) OR (RW.CGA = '3' AND RW.CDRAMO IN (104,105)) OR (RW.CGA = '16' AND RW.CDRAMO = 100)) AND
+			RW.CGA2 != 'N' AND
+			IS_TIPOAVISO_VALIDO('N3') = 'S'           THEN
+
+			cRES := 'N3';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (100,101,103,104,105,106,107,108,109,110,116) AND
+			RW.PTIMPORT>=0                         AND
+			RW.TIPO_RECIBO =  4                    AND
+			IS_TIPOAVISO_VALIDO('N') = 'S'         THEN
+
+			cRES := 'N';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDTIPORA = 2 AND  RW.CDTIPRAM = 2     AND
+			RW.PTIMPORT >= 0                AND
+			RW.TARIF_CONSORCIO = 'S'        AND
+			IS_TIPOAVISO_VALIDO('NX') = 'S' THEN
+
+			cRES := 'NX';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDTIPORA = 2 AND  RW.CDTIPRAM = 2      AND
+			RW.PTIMPORT>=0                  AND
+			RW.TIPO_RECIBO =  4             AND
+			IS_TIPOAVISO_VALIDO('N1') = 'S' THEN
+
+			cRES := 'N1';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDTIPORA = 2                                          AND
+			RW.TIPO_RECIBO IN (0, 2)                                                AND
+			((RW.TIPO_APOLICE = 'T' AND RW.CDPERPAG = 0)
+				OR  (RW.TIPO_APOLICE = 'R' AND (RW.DURACAO = RW.CDPERPAG OR RW.CDPERPAG=0))) AND
+			IS_TIPOAVISO_VALIDO('E') = 'S'                                          THEN
+
+			IF RW.TIPOTARIF_CONSORCIO IN ('B','C') AND
+				IS_TIPOAVISO_VALIDO('EC') = 'S'      THEN
+
+				CRES := 'EC';
+			ELSE
+				cRES := 'E';
+			END IF;
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDTIPORA = 2                                          AND
+			RW.TIPO_RECIBO = 2                                                      AND
+			((RW.TIPO_APOLICE = 'T' AND RW.DURACAO > 12)
+				OR (RW.TIPO_APOLICE = 'R' AND (RW.DURACAO = RW.CDPERPAG OR RW.CDPERPAG=0))) AND
+			IS_TIPOAVISO_VALIDO('E') = 'S'                                          THEN
+
+			IF RW.TIPOTARIF_CONSORCIO IN ('B','C') AND
+				IS_TIPOAVISO_VALIDO('EC') = 'S'      THEN
+
+				CRES := 'EC';
+			ELSE
+				cRES := 'E';
+			END IF;
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDTIPORA = 2 AND
+			RW.TIPO_RECIBO = 0             AND
+			RW.DURACAO = RW.CDPERPAG       AND
+			IS_TIPOAVISO_VALIDO('E') = 'S' THEN
+
+			IF RW.TIPOTARIF_CONSORCIO IN ('B','C') AND
+				IS_TIPOAVISO_VALIDO('EC') = 'S'      THEN
+
+				CRES := 'EC';
+			ELSE
+				cRES := 'E';
+			END IF;
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDTIPORA = 2 AND
+			RW.TIPO_RECIBO = 0             AND
+			RW.DURACAO != RW.CDPERPAG      AND
+			IS_TIPOAVISO_VALIDO('F') = 'S' THEN
+
+			IF RW.TIPOTARIF_CONSORCIO IN ('B','C') AND
+				IS_TIPOAVISO_VALIDO('FC') = 'S'      THEN
+
+				CRES := 'FC';
+			ELSE
+				cRES := 'F';
+			END IF;
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDTIPORA = 2 AND
+			RW.TIPO_RECIBO IN (3,8)        AND
+			RW.CDPERPAG NOT IN (0,12)      AND
+			IS_TIPOAVISO_VALIDO('G') = 'S' THEN
+
+			IF RW.TIPOTARIF_CONSORCIO IN ('B','C') AND
+				IS_TIPOAVISO_VALIDO('GC') = 'S'      THEN
+
+				CRES := 'GC';
+			ELSE
+				cRES := 'G';
+			END IF;
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDTIPORA = 2 AND
+			RW.TIPO_RECIBO IN (1,2,7)         AND
+			IS_TIPOAVISO_VALIDO('G1') = 'S'   THEN
+
+			IF RW.TIPOTARIF_CONSORCIO IN ('B','C') AND
+				IS_TIPOAVISO_VALIDO('G1C') = 'S'      THEN
+
+				CRES := 'G1C';
+			ELSE
+			cRES := 'G1';
+			END IF;
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (111,112,210,300) AND
+			RW.TIPO_RECIBO IN (0,2)        AND
+			IS_TIPOAVISO_VALIDO('H') = 'S' THEN
+
+			cRES := 'H';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO = 300                             AND
+			RW.TIPO_RECIBO IN (0,2)                     AND
+			RW.TIPO_APOLICE = 'R'                       AND
+			(RW.DURACAO = RW.CDPERPAG OR RW.CDPERPAG=0) AND
+			IS_TIPOAVISO_VALIDO('I') = 'S'              THEN
+
+			cRES := 'I';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO   = 300              AND
+			RW.TIPO_RECIBO = 0             AND
+			RW.DURACAO != RW.CDPERPAG      AND
+			IS_TIPOAVISO_VALIDO('J') = 'S' THEN
+
+			cRES := 'J';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO = 300                AND
+			RW.TIPO_RECIBO IN (3,8)        AND
+			RW.CDPERPAG NOT IN (0,12)      AND
+			IS_TIPOAVISO_VALIDO('L') = 'S' THEN
+
+			cRES := 'L';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO IN (111,112,300)     AND
+			RW.TIPO_RECIBO IN (1,7)        AND
+			IS_TIPOAVISO_VALIDO('M') = 'S' THEN
+
+			cRES := 'M';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    /*-----ISSUE 803*/
+    ELSIF	RW.CDRAMO = 150                 AND
+			RW.TIPO_RECIBO IN(0,2,1,7)      AND
+			IS_TIPOAVISO_VALIDO('P') = 'S'  THEN
+
+			cRES := 'P';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+
+    ELSIF	RW.CDRAMO = 150 AND
+			RW.PTIMPORT>=0                  AND
+			RW.TIPO_RECIBO = 4              AND
+			IS_TIPOAVISO_VALIDO('P') = 'S'  THEN
+
+			cRES := 'P';
+
+			DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+			RETURN CRES;
+    /*-----FIM ISSUE 803*/
+
+/****************************************************
+-- Definição de Tipos de Aviso do Tipos de Estorno
+*****************************************************/
+    ELSIF RW.TIPO_RECIBO IN (5,6)                            AND
+          RW.CDRAMO LIKE '2%'                                AND
+          RW.TIPOTARIF_CONSORCIO IN ('B','C')                AND
+          IS_ANULACAO_APOLICE(PI_CDUNIECO,PI_NMRECIBO) = 'S' AND
+          IS_TIPOAVISO_VALIDO('6E') = 'S'                    THEN
+      CRES := '6E';
+      DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+      RETURN CRES;
+
+    ELSIF RW.TIPO_RECIBO IN (5,6)                           AND
+          RW.CDRAMO LIKE '2%'                               AND
+          RW.TIPOTARIF_CONSORCIO IN ('B','C')               AND
+          IS_SUP_TOTAL(PI_CDUNIECO,PI_NMRECIBO) ='S'        AND
+          IS_CAP_DIFERENTE(PI_CDUNIECO,PI_NMRECIBO) = 'S'   AND
+          IS_TIPOAVISO_VALIDO('7E') ='S'                    THEN
+      CRES := '7E';
+      DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+      RETURN CRES;
+
+    ELSIF RW.TIPO_RECIBO IN (5,6)                         AND
+          RW.CDRAMO LIKE '2%'                             AND
+          RW.TIPOTARIF_CONSORCIO IN ('B','C')             AND
+          IS_SUP_TOTAL(PI_CDUNIECO,PI_NMRECIBO) = 'S'     AND
+          IS_CAP_DIFERENTE(PI_CDUNIECO,PI_NMRECIBO) = 'N' AND
+          IS_TIPOAVISO_VALIDO('8E')='S'                   THEN
+      CRES := '8E';
+      DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+      RETURN CRES;
+
+    ELSIF RW.PTIMPORT < 0                 AND
+          RW.CDRAMO LIKE '2%'             AND
+          RW.TARIF_CONSORCIO='S'          AND
+          IS_TIPOAVISO_VALIDO('5E') = 'S' THEN
+      cRES := '5E';
+      DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+      RETURN CRES;
+
+    ELSIF RW.TIPO_RECIBO IN (5,6)         AND
+          IS_TIPOAVISO_VALIDO('1E') = 'S' THEN
+      cRES := '1E';
+      DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+      RETURN CRES;
+
+    ELSIF RW.PTIMPORT<0                   AND
+          RW.CDRAMO LIKE '1%'             AND
+          RW.TIPO_RECIBO IN (98,99)       AND
+          IS_TIPOAVISO_VALIDO('1E') = 'S' THEN
+      cRES := '1E';
+      DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+      RETURN CRES;
+
+    ELSIF RW.PTIMPORT<0                   AND
+          RW.TIPO_RECIBO = 93             AND
+          IS_TIPOAVISO_VALIDO('2E') = 'S' THEN
+      cRES := '2E';
+      DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+      RETURN CRES;
+
+	ELSIF RW.PTIMPORT<0                  AND
+          RW.CDRAMO IN (100,104,105,108,122,123)         AND
+          RW.TIPO_RECIBO =  4            AND
+		  IS_RECIBO_PPD(PI_CDUNIECO,PI_NMRECIBO) = 'S' AND
+          IS_TIPOAVISO_VALIDO('1PPD') = 'S'    THEN
+          cRES:='1PPD';
+          RETURN cRES;
+
+	ELSIF RW.PTIMPORT<0                  AND
+          RW.CDRAMO IN (120,121,122,123)         AND
+          RW.TIPO_RECIBO =  4            AND
+          IS_TIPOAVISO_VALIDO('1EA') = 'S'    THEN
+          cRES:='1EA';
+          RETURN cRES;
+
+	ELSIF RW.PTIMPORT<0                  AND
+          RW.CDRAMO IN (125)         AND
+          RW.TIPO_RECIBO =  4            AND
+          IS_TIPOAVISO_VALIDO('1EB') = 'S'    THEN
+          cRES:='1EB';
+          RETURN cRES;
+
+    ELSIF RW.PTIMPORT<0                    AND
+          RW.CDRAMO LIKE '1%'              AND
+          RW.TIPO_RECIBO =  4              THEN
+            SELECT
+              COUNT(*)
+            INTO
+              AUX_TEMP
+            FROM
+              MRECIDET DET
+            WHERE 1=1
+            AND DET.NMRECIBO=PI_NMRECIBO
+            AND DET.CDUNIECO=PI_CDUNIECO
+            AND DET.CDTIPCON IN ('PARES', 'PARES ME', 'PARES MI');
+      IF AUX_TEMP>=1                     AND
+         IS_TIPOAVISO_VALIDO('3E') = 'S' THEN
+        cRES := '3E';
+        DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+        RETURN CRES;
+      ELSIF IS_TIPOAVISO_VALIDO('1E') = 'S' THEN
+        cRES := '1E';
+        DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+        RETURN CRES;
+      ELSE
+        cRES := 'X';
+        DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+        RETURN CRES;
+      END IF;
+
+    ELSIF RW.PTIMPORT<0                  AND
+          RW.CDRAMO LIKE '2%'            AND
+          RW.TIPO_RECIBO =  4            THEN
+            SELECT
+              COUNT(*)
+            INTO
+              AUX_TEMP
+            FROM
+              MRECIDET DET
+            WHERE 1=1
+            AND DET.NMRECIBO=PI_NMRECIBO
+            AND DET.CDUNIECO=PI_CDUNIECO
+            AND DET.CDTIPCON IN ('PARES', 'PARES ME', 'PARES MI');
+      IF AUX_TEMP>=1                     AND
+         IS_TIPOAVISO_VALIDO('3E') = 'S' THEN
+        cRES := '3E';
+        DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+        RETURN CRES;
+      ELSIF IS_TIPOAVISO_VALIDO('1E') = 'S' THEN
+        cRES := '1E';
+        DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+        RETURN CRES;
+      ELSE
+        cRES := 'X';
+        DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+        RETURN CRES;
+      END IF;
+
+    ELSIF RW.TIPO_RECIBO = 94             AND
+          IS_TIPOAVISO_VALIDO('3E') = 'S' THEN
+      cRES := '3E';
+      DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+      RETURN CRES;
+/****************************************************
+-- Definição de Tipos de Facturas
+*****************************************************/
+    ELSIF RW.TIPO_RECIBO IN (95,91,88)       AND
+          RW.CDTIPRAM = 1          			 AND
+          IS_TIPOAVISO_VALIDO('FCAP1') = 'S' THEN
+      cRES := 'FCAP1';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (95,91,88)       AND
+          RW.CDTIPRAM = 2          			 AND
+          IS_TIPOAVISO_VALIDO('FCAP2') = 'S' THEN
+      cRES := 'FCAP2';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (95,91,88)       AND
+          RW.CDTIPRAM = 4          			 AND
+          IS_TIPOAVISO_VALIDO('FCAP3') = 'S' THEN
+      cRES := 'FCAP3';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (96,92,89)       AND
+          RW.CDTIPRAM = 1                    AND
+          IS_TIPOAVISO_VALIDO('FCAC1') = 'S' THEN
+      cRES := 'FCAC1';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (97,90,87)       AND
+          RW.CDTIPRAM = 1                    AND
+          IS_TIPOAVISO_VALIDO('FCVR1') = 'S' THEN
+      cRES := 'FCVR1';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (85,82,76)       AND
+          IS_TIPOAVISO_VALIDO('FAPC1') = 'S' THEN
+      cRES := 'FAPC1';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (86,83)          AND
+          IS_TIPOAVISO_VALIDO('FCDS1') = 'S' THEN
+      cRES := 'FCDS1';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (84,81)          AND
+          IS_TIPOAVISO_VALIDO('FSAC1') = 'S' THEN
+      cRES := 'FSAC1';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (79,80)          AND
+          IS_TIPOAVISO_VALIDO('FGER1') = 'S' THEN
+      cRES := 'FGER1';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (79,81,82,83,90,91,92,95,96,97) AND
+          IS_TIPOAVISO_VALIDO('FGEN1') = 'S'                THEN
+      cRES := 'FGEN1';
+      RETURN cRES;
+
+    ELSIF RW.TIPO_RECIBO IN (73,74,75) AND
+          IS_TIPOAVISO_VALIDO('FCPR1') = 'S'                THEN
+      cRES := 'FCPR1';
+      RETURN cRES;
+    /*ISSUE 737*/
+    ELSIF RW.TIPO_RECIBO IN (61,62)          AND
+          IS_TIPOAVISO_VALIDO('FDES1') = 'S' THEN
+      cRES := 'FDES1';
+      RETURN cRES;
+    ELSIF RW.TIPO_RECIBO IN (63,64)          AND
+          IS_TIPOAVISO_VALIDO('FREC1') = 'S' THEN
+      cRES := 'FREC1';
+      RETURN cRES;
+    ELSIF RW.TIPO_RECIBO IN (65,66)          AND
+          IS_TIPOAVISO_VALIDO('FVIM1') = 'S' THEN
+      cRES := 'FVIM1';
+      RETURN cRES;
+    ELSIF RW.TIPO_RECIBO IN (71,72)          AND
+          IS_TIPOAVISO_VALIDO('FRDC1') = 'S' THEN
+      cRES := 'FRDC1';
+      RETURN cRES;
+    ELSIF RW.TIPO_RECIBO IN (77,78)          AND
+          IS_TIPOAVISO_VALIDO('FLSF1') = 'S' THEN
+      cRES := 'FLSF1';
+      RETURN cRES;
+      /*Fim Issue 737*/
+      /*INICIO ISSUE 793*/
+    ELSIF RW.TIPO_RECIBO IN (67,68)          AND
+          IS_TIPOAVISO_VALIDO('FCRE1') = 'S' THEN
+      cRES := 'FCRE1';
+      RETURN cRES;
+    ELSIF RW.TIPO_RECIBO IN (69,70)          AND
+          IS_TIPOAVISO_VALIDO('FCRS1') = 'S' THEN
+      cRES := 'FCRS1';
+      RETURN cRES;
+      /*fim issue 793*/
+	 /*INICIO ISSUE 852*/
+    ELSIF RW.TIPO_RECIBO IN (56,57,58)          AND
+          IS_TIPOAVISO_VALIDO('FCEG') = 'S' THEN
+      cRES := 'FCEG';
+      RETURN cRES;
+      /*fim issue 852*/
+	 /*INICIO ISSUE 924*/
+    ELSIF RW.TIPO_RECIBO IN (47,48,49)          AND
+          IS_TIPOAVISO_VALIDO('FCAV1') = 'S' THEN
+      cRES := 'FCAV1';
+      RETURN cRES;
+      /*fim issue 924*/
+	 /*INICIO ISSUE 1251*/
+    ELSIF RW.TIPO_RECIBO IN (30,31,32)          AND
+          IS_TIPOAVISO_VALIDO('FCIF') = 'S' THEN
+      cRES := 'FCIF';
+      RETURN cRES;
+	ELSIF RW.TIPO_RECIBO IN (33,34,35)          AND
+          IS_TIPOAVISO_VALIDO('FCRD') = 'S' THEN
+      cRES := 'FCRD';
+      RETURN cRES;
+      /*fim issue 1251*/
+    ELSE
+      CRES := 'X';
+    END IF;
+  END LOOP;
+
+  IF CRES IS NULL THEN
+    CRES:='#';
+  END IF;
+
+  DBMS_OUTPUT.PUT_LINE('FIM :'||CRES);
+  RETURN CRES;
+END FUN_TIPOAVISO;
+
+
+FUNCTION FUN_TIPOAVISO_DIT( PI_CDUNIECO IN NUMBER
+                      , PI_NMRECIBO IN NUMBER) RETURN VARCHAR2 IS
+ cRES VARCHAR2(10);
+  CURSOR curDADOS_APOLICE IS
+	SELECT RECIBO.CDUNIECO
+		,RECIBO.CDRAMO
+		,NULL ESTADO_APOLICE
+		,RECIBO.NMPOLIZA
+		,NULL SUP_RECIBO
+		,RECIBO.FEINIVIG DATA_INICIO
+		,'N' TIPO_APOLICE
+		,RECIBO.FEFINVIG DATA_VENCIMENTO
+		,RECIBO.FEINIVIG DATA_EMISSAO
+		,ROUND(MONTHS_BETWEEN(RECIBO.FEINIVIG, RECIBO.FEFINVIG)) DURACAO
+		,'N' CDTIPCOA
+		,'N' SWTARIFI
+		,'N' SWABRIDO
+		,0 CDPERPAG
+		,0 CDTIPREN
+		,0 NMRENOVA
+		,RECIBO.TIPORECI TIPO_RECIBO
+		,RECIBO.PTIMPORT
+		,'N' MODPAG
+		,'N' TARIF_CONSORCIO
+		,'N' TIPOTARIF_CONSORCIO
+		,'N' CGA /* ISSUE 528 16/12/2009 */
+		,'N' CGA2 /* ISSUE 726 08/06/2011 */
+		,RAMO.CDTIPRAM
+	FROM CO_DIT_MRECIBO RECIBO
+		,TRAMOS RAMO
+	WHERE 1 = 1
+		AND RAMO.CDRAMO = RECIBO.CDRAMO
+		AND RECIBO.NMRECIBO = PI_NMRECIBO
+		AND RECIBO.CDUNIECO = PI_CDUNIECO;
+
+
+AUX_TEMP NUMBER;
+BEGIN
+  FOR RW IN curDADOS_APOLICE LOOP
+    IF   RW.CDRAMO IN (131,132,133,150,151,152,153,160,210)  AND
+         RW.TIPO_RECIBO IN (0,2,4,7)         AND
+     IS_TIPOAVISO_VALIDO('FDIT') = 'S' THEN
+
+         cRES := 'FDIT';
+         DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+         RETURN CRES;
+
+    ELSIF   RW.CDRAMO IN (151)  AND
+            RW.TIPO_RECIBO IN (99)         AND
+             IS_TIPOAVISO_VALIDO('FDIT') = 'S' THEN
+
+        cRES := 'FDIT';
+            DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+            RETURN CRES;
+
+
+
+/****************************************************
+-- Definição de Tipos de Aviso do Tipos de Estorno
+*****************************************************/
+    ELSIF RW.CDRAMO IN (131,132,133,150,151,152,153,160,210)  AND
+         RW.TIPO_RECIBO IN (6)         AND
+     IS_TIPOAVISO_VALIDO('FDIT') = 'S' THEN
+
+         cRES := 'FDIT';
+         DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+         RETURN CRES;
+
+ /****************************************************
+-- Definição de Tipos de Facturas/ NOTA crédito
+*****************************************************/
+   ELSIF RW.CDRAMO IN (131,132,133,150,151,152,153,160,210)  AND
+         RW.TIPO_RECIBO IN (59,91)         AND
+     IS_TIPOAVISO_VALIDO('FDIT') = 'S' THEN
+
+         cRES := 'FDIT';
+         DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+         RETURN CRES;
+
+   ELSIF RW.CDRAMO IN (131,132,133,150,151,152,153,160,210)  AND
+         RW.TIPO_RECIBO IN (60,88)         AND
+     IS_TIPOAVISO_VALIDO('FDIT') = 'S' THEN
+
+         cRES := 'FDIT';
+         DBMS_OUTPUT.PUT_LINE('-> :'||CRES);
+         RETURN CRES;
+    ELSE
+      CRES := 'X';
+    END IF;
+  END LOOP;
+
+  IF CRES IS NULL THEN
+    CRES:='#';
+  END IF;
+
+  DBMS_OUTPUT.PUT_LINE('FIM :'||CRES);
+  RETURN CRES;
+END FUN_TIPOAVISO_DIT;
+
+
+FUNCTION GET_PREMIO_MINIMO( PI_CDUNIECO IN NUMBER
+                          , PI_CDRAMO IN NUMBER
+                          , PI_ESTADO IN VARCHAR2
+                          , PI_NMPOLIZA IN NUMBER
+                          , PI_DATAREF IN DATE) RETURN NUMBER
+AS
+  nRES NUMBER;
+BEGIN
+	SELECT NMIMPORT
+	INTO nRES
+	FROM MPOLIREC VAL
+	WHERE NMSITUAC = 0
+		AND CDTIPCON IN (
+			'PSDPR'
+			,'PCP'
+			)
+		AND NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIREC X
+			WHERE X.NMSITUAC = VAL.NMSITUAC
+				AND NVL(X.CDGARANT, 0) = NVL(VAL.CDGARANT, 0)
+				AND X.CDCONTAR = VAL.CDCONTAR
+				AND X.NMSUPLEM <= TO_CHAR(PI_DATAREF, 'J') || '99999999999'
+				AND X.NMPOLIZA = VAL.NMPOLIZA
+				AND X.ESTADO = VAL.ESTADO
+				AND X.CDRAMO = VAL.CDRAMO
+				AND X.CDUNIECO = VAL.CDUNIECO
+			)
+		AND NMPOLIZA = PI_NMPOLIZA
+		AND ESTADO = PI_ESTADO
+		AND CDRAMO = PI_CDRAMO
+		AND CDUNIECO = PI_CDUNIECO;
+
+END GET_PREMIO_MINIMO;
+
+
+/*
+   NOME : GET_TIPO_MERCADO
+   *  OBJECTIVO : Obtêm tipo de mercado associado a uma apólice.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: JOSÉ VIEGAS
+*/
+FUNCTION GET_TIPO_MERCADO( PI_CDUNIECO IN NUMBER
+                         , PI_CDRAMO IN NUMBER
+                         , PI_ESTADO IN VARCHAR2
+                         , PI_NMPOLIZA IN NUMBER
+                         , PI_DATAREF IN DATE) RETURN VARCHAR2
+AS
+  cRES VARCHAR2(30);
+  nCALC NUMBER;
+BEGIN
+	IF PI_CDRAMO LIKE '1%' THEN
+		SELECT SUM(DECODE(CDATRIBU, 27, DECODE(OTVALOR, 0, 0, 10), DECODE(OTVALOR, 0, 0, 100)))
+		INTO nCALC
+		FROM TVALOPOL ATR
+		WHERE STATUS = 'V'
+			AND CDATRIBU IN (
+				26
+				,27
+				)
+			AND NMSUPLEM = (
+				SELECT MAX(NMSUPLEM)
+				FROM TVALOPOL X
+				WHERE X.CDATRIBU = ATR.CDATRIBU
+					AND X.NMSUPLEM <= TO_CHAR(PI_DATAREF, 'J') || '99999999999'
+					AND X.NMPOLIZA = ATR.NMPOLIZA
+					AND X.ESTADO = ATR.ESTADO
+					AND X.CDRAMO = ATR.CDRAMO
+					AND X.CDUNIECO = ATR.CDUNIECO
+				)
+			AND NMPOLIZA = PI_NMPOLIZA
+			AND ESTADO = PI_ESTADO
+			AND CDRAMO = PI_CDRAMO
+			AND CDUNIECO = PI_CDUNIECO;
+
+		IF nCALC = 100 THEN
+			cRES:='Mercado Interno';
+		ELSIF nCALC = 10 THEN
+			cRES:='Mercado Externo';
+		ELSE
+			cRES:='Mercado Misto';
+		END IF;
+	ELSE
+		cRES:= 'Mercado Interno';
+	END IF;
+  RETURN cRES;
+END GET_TIPO_MERCADO;
+
+
+FUNCTION GET_NUMDPR( PI_CDUNIECO IN NUMBER
+                   , PI_CDRAMO IN NUMBER
+                   , PI_ESTADO IN VARCHAR2
+                   , PI_NMPOLIZA IN NUMBER
+                   , PI_DATAREF IN DATE) RETURN NUMBER
+AS
+  nRet NUMBER;
+BEGIN
+	SELECT COUNT(DISTINCT DPR.FEPERDEC)
+	INTO nRet
+	FROM CO_DECVEN DPR
+		,MPOLIZAS APOLICE
+	WHERE TO_DATE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(DPR.feperdec, 'FEB', 'FEV'), 'APR', 'ABR'), 'MAY', 'MAI'), 'AUG', 'AGO'), 'SEP', 'SET'), 'OCT', 'OUT'), 'DEC', 'DEZ'), 'MON-RR', 'NLS_DATE_LANGUAGE=PORTUGUESE') - 0.00001 BETWEEN APOLICE.FEEFECTO
+			AND PI_DATAREF
+		AND DPR.NMPOLIZA = APOLICE.NMPOLIZA
+		AND DPR.CDRAMO = APOLICE.CDRAMO
+		AND DPR.CDUNIECO = APOLICE.CDUNIECO
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.NMSUPLEM <= TO_CHAR(PI_DATAREF, 'J') || '99999999999'
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.CDUNIECO = APOLICE.CDUNIECO
+			)
+		AND APOLICE.NMPOLIZA = PI_NMPOLIZA
+		AND APOLICE.ESTADO = PI_ESTADO
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.CDUNIECO = PI_CDUNIECO;
+
+  RETURN nRET;
+END GET_NUMDPR;
+
+
+FUNCTION FUN_TVALOPOL(PI_CDUNIECO IN NUMBER
+                     ,PI_NMRECIBO IN NUMBER
+                     ,PI_CDATRIBU IN NUMBER) RETURN NUMBER AS
+  aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT
+		--TO_NUMBER(REPLACE(otvalor,'.',','))
+		COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0)
+	INTO aux_ptimport
+	FROM MPOLIZAS P
+		,mrecibo r
+		,tvalopol t
+	WHERE T.STATUS = 'V'
+		AND t.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM tvalopol X
+			WHERE X.cdatribu = t.cdatribu
+				AND X.nmpoliza = t.nmpoliza
+				AND X.estado = t.estado
+				AND X.cdramo = t.cdramo
+				AND X.cdunieco = t.cdunieco
+			)
+		AND t.cdatribu = PI_CDATRIBU
+		AND t.nmpoliza = p.nmpoliza
+		AND t.estado = p.estado
+		AND t.cdramo = p.cdramo
+		AND t.cdunieco = p.cdunieco
+		AND P.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.nmpoliza = P.nmpoliza
+				AND X.estado = P.estado
+				AND X.cdramo = P.cdramo
+				AND X.cdunieco = P.cdunieco
+			)
+		AND DECODE(R.ESTADO, 'W', P.NMSOLICI, P.NMPOLIZA) = R.NMPOLIZA
+		AND P.estado = 'M'
+		AND P.cdramo = r.cdramo
+		AND P.cdunieco = r.cdunieco
+		AND r.nmrecibo = PI_NMRECIBO
+		AND r.cdunieco = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+EXCEPTION
+  WHEN OTHERS THEN RETURN 0;
+END;
+
+
+FUNCTION FUN_ZWORKCOM( PI_IDPROCESO IN VARCHAR2
+                    , PI_CDAGENTE  IN VARCHAR2
+                    , PI_CDUNIECO  IN NUMBER
+                    , PI_CDTIPCOM  IN VARCHAR2) RETURN NUMBER  AS
+  aux_n NUMBER(17,5);
+BEGIN
+  SELECT SUM(PTIMPORT) INTO aux_n
+  FROM zworkcom
+  WHERE  idproceso = PI_IDPROCESO
+     AND cdagente  = PI_CDAGENTE
+     AND cdunieco  = PI_CDUNIECO
+     AND cdtipcom  = PI_CDTIPCOM;
+  RETURN aux_n;
+EXCEPTION
+  WHEN OTHERS THEN
+     RETURN 0;
+END;
+
+
+FUNCTION FUN_COMAGEN_N(PI_IDPROCESO IN VARCHAR2
+                      , PI_CDAGENTE  IN VARCHAR2
+                      , PI_CDUNIECO  IN NUMBER )  RETURN NUMBER  AS
+BEGIN
+  RETURN FUN_ZWORKCOM(PI_IDPROCESO,PI_CDAGENTE,PI_CDUNIECO,'N');
+END;
+
+
+FUNCTION FUN_PREMIO_COMERCIAL(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+aux_count    number;
+BEGIN
+  SELECT count(*)
+  INTO aux_count
+  FROM CO_DIT_MRECIBO
+  WHERE 1=1
+  AND NMRECIBO = PI_NMRECIBO
+  AND CDUNIECO = PI_CDUNIECO;
+
+	IF aux_count > 0 THEN
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM CO_DIT_MRECIDET r
+		WHERE 1 = 1
+			AND r.CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				),'PPDIV')
+			AND r.cdunieco = PI_CDUNIECO
+			AND r.nmrecibo = PI_NMRECIBO;
+
+	ELSE
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM MRECIDET
+		WHERE 1 = 1
+			AND CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				),'PPDIV')
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+	END IF;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+FUNCTION FUN_PREMIO_COMERCIAL_MI(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+aux_count    number;
+BEGIN
+  SELECT count(*)
+  INTO aux_count
+  FROM CO_DIT_MRECIBO
+  WHERE 1=1
+  AND NMRECIBO = PI_NMRECIBO
+  AND CDUNIECO = PI_CDUNIECO;
+
+	IF aux_count > 0 THEN
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM CO_DIT_MRECIDET r
+		WHERE 1 = 1
+			AND r.CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					and INSTRC(CODIGO,'MI',1,1) > 0
+				),'PPDIV')
+			AND r.cdunieco = PI_CDUNIECO
+			AND r.nmrecibo = PI_NMRECIBO;
+
+	ELSE
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM MRECIDET
+		WHERE 1 = 1
+			AND CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					and INSTRC(CODIGO,'MI',1,1) > 0
+				),'PPDIV')
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+	END IF;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+FUNCTION FUN_PREMIO_COMERCIAL_ME(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+aux_count    number;
+BEGIN
+  SELECT count(*)
+  INTO aux_count
+  FROM CO_DIT_MRECIBO
+  WHERE 1=1
+  AND NMRECIBO = PI_NMRECIBO
+  AND CDUNIECO = PI_CDUNIECO;
+
+	IF aux_count > 0 THEN
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM CO_DIT_MRECIDET r
+		WHERE 1 = 1
+			AND r.CDTIPCON = (
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					and INSTRC(CODIGO,'ME',1,1) > 0
+				)
+			AND r.cdunieco = PI_CDUNIECO
+			AND r.nmrecibo = PI_NMRECIBO;
+
+	ELSE
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM MRECIDET
+		WHERE 1 = 1
+			AND CDTIPCON = (
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					and INSTRC(CODIGO,'ME',1,1) > 0
+				)
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+	END IF;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+FUNCTION FUN_PREM_COM_ME_isento(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+aux_count    number;
+vRAMO		number;
+vTABELA		number;
+BEGIN
+	SELECT NVL(rec.cdramo, crec.cdramo) ramo
+		,(
+			SELECT decode(cdtipram, 1, 1, 3, 1, 2)
+			FROM tramos
+			WHERE cdramo = NVL(rec.cdramo, crec.cdramo)
+			) tabela
+	INTO vRAMO
+		,vTABELA
+	FROM (
+		SELECT cdramo
+		FROM mrecibo
+		WHERE nmrecibo = PI_NMRECIBO
+			AND cdunieco = PI_CDUNIECO
+		) rec
+	FULL OUTER JOIN (
+		SELECT cdramo
+		FROM co_dit_mrecibo
+		WHERE nmrecibo = PI_NMRECIBO
+			AND cdunieco = PI_CDUNIECO
+		) crec ON rec.cdramo = crec.cdramo;
+
+
+
+	IF vTABELA = 2 THEN
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM trecselo r
+		WHERE 1 = 1
+			AND r.CDTIPCON = (
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				)
+			AND r.TAXAIMP = 0
+			AND r.cdunieco = PI_CDUNIECO
+			AND r.nmrecibo = PI_NMRECIBO;
+
+	ELSE
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM trecselo
+		WHERE 1 = 1
+			AND CDTIPCON = (
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					and INSTRC(CODIGO,'ME',1,1) > 0
+				)
+			AND TAXAIMP = 0
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+	END IF;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+FUNCTION FUN_PREM_COM_ME_Nisento(PI_CDUNIECO IN NUMBER
+                             ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+aux_count    number;
+vRAMO		number;
+vTABELA		number;
+BEGIN
+	SELECT NVL(rec.cdramo, crec.cdramo) ramo
+		,(
+			SELECT decode(cdtipram, 1, 1, 3, 1, 2)
+			FROM tramos
+			WHERE cdramo = NVL(rec.cdramo, crec.cdramo)
+			) tabela
+	INTO vRAMO
+		,vTABELA
+	FROM (
+		SELECT cdramo
+		FROM mrecibo
+		WHERE nmrecibo = PI_NMRECIBO
+			AND cdunieco = PI_CDUNIECO
+		) rec
+	FULL OUTER JOIN (
+		SELECT cdramo
+		FROM co_dit_mrecibo
+		WHERE nmrecibo = PI_NMRECIBO
+			AND cdunieco = PI_CDUNIECO
+		) crec ON rec.cdramo = crec.cdramo;
+
+
+
+	IF vTABELA = 2 THEN
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM trecselo r
+		WHERE 1 = 1
+			AND r.CDTIPCON = (
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				)
+			AND r.TAXAIMP != 0
+			AND r.cdunieco = PI_CDUNIECO
+			AND r.nmrecibo = PI_NMRECIBO;
+
+	ELSE
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM trecselo
+		WHERE 1 = 1
+			AND CDTIPCON = (
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					and INSTRC(CODIGO,'ME',1,1) > 0
+				)
+			AND TAXAIMP != 0
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+	END IF;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_CUSTO(PI_CDUNIECO IN NUMBER
+                  ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN ('CADM')
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_BRUTO(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE 1 = 1
+		AND CDTIPCON in ((
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				),'PPDIV','CADM')
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_SELO(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+aux_count    number;
+BEGIN
+  SELECT count(*)
+  INTO aux_count
+  FROM CO_DIT_MRECIBO
+  WHERE 1=1
+  AND NMRECIBO = PI_NMRECIBO
+  AND CDUNIECO = PI_CDUNIECO;
+
+	IF aux_count > 0 THEN
+
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM CO_DIT_MRECIDET
+		WHERE CDTIPCON IN (
+				'ISAPOL'
+				,'ISPCP'
+				,'ISCAD'
+				,'ISAPPD'
+				,'OUTIMP'
+				,'OUTIMPCP'
+				,'OUTIMPOL'
+				,'OUTIMCAD'
+				)
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+
+	ELSE
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM MRECIDET
+		WHERE CDTIPCON IN (
+				'ISAPOL'
+				,'ISPCP'
+				,'ISCAD'
+				,'ISAPPD'
+				,'OUTIMP'
+				,'OUTIMPCP'
+				,'OUTIMPOL'
+				,'OUTIMCAD'
+				)
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+
+	END IF;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+FUNCTION FUN_PREMIO_PPD(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+aux_count    number;
+BEGIN
+
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN ('PPDIV')
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+FUNCTION FUN_SELO_PPD(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+aux_count    number;
+BEGIN
+
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN ('ISAPPD')
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_TAXA_COMP(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM CO_DIT_MRECIDET
+	WHERE 1 = 1
+		AND CDTIPCON IN ('TCOMP')
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_TAXA_ESTUDO(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM CO_DIT_MRECIDET
+	WHERE 1 = 1
+		AND CDTIPCON IN ('TEPROJ')
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_PTA(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'PDPR ME'
+			,'PDPR MI'
+			,'PDPR PC'
+			,'PDPR PE'
+			,'PSDPR ME'
+			,'PSDPR MI'
+			,'PSDPR PC'
+			,'PSDPR'
+			,'PCP'
+			,'ISAPOL'
+			,'ISPCP'
+			,'ISCAD'
+			,'CADM'
+			,'PPDIV'
+			,'ISAPPD'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PTB(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+ /* aux_ptimport := FUN_PREMIO_COMERCIAL(PI_CDUNIECO,PI_NMRECIBO) +
+ FUN_SELO(PI_CDUNIECO,PI_NMRECIBO); */
+
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'ISAPOL'
+			,'ISPCP'
+			,'ISCAD'
+			,'ISAPPD'
+			,'PDPR ME'
+			,'PDPR MI'
+			,'PDPR PC'
+			,'PDPR PE'
+			,'PSDPR'
+			,'PSDPR ME'
+			,'PSDPR MI'
+			,'PSDPR PC'
+			,'PCP'
+			,'PPDIV'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PREMIO_COMERCIAL_RC(PI_CDUNIECO IN NUMBER
+                                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'PSDPR ME'
+			,'PSDPR MI'
+			,'PSDPR'
+			,'PCP'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_PREMIO_COMERCIAL_RP(PI_CDUNIECO IN NUMBER
+                                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'PDPR PC'
+			,'PDPR PE'
+			,'PSDPR PC'
+			,'PCP'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_PTC(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+/*  aux_ptimport := nvl(FUN_PREMIO_COMERCIAL_RC(PI_CDUNIECO,PI_NMRECIBO),0) +
+                  nvl(FUN_PREMIO_COMERCIAL_RP(PI_CDUNIECO,PI_NMRECIBO),0) +
+                  nvl(FUN_SELO(PI_CDUNIECO,PI_NMRECIBO),0);*/
+
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'PDPR PC'
+			,'PDPR PE'
+			,'PDPR ME'
+			,'PDPR MI'
+			,'PSDPR'
+			,'PCP'
+			,'PPDIV'
+			,'ISAPOL'
+			,'ISPCP'
+			,'ISCAD'
+			,'ISAPPD'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_CAPITAL_COMERCIAL(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport
+	FROM mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu IN (
+			26
+			,27
+			)
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= r.nmsuplem
+			);
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_CAPITAL_POLITICO(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+--   aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,29);
+		SELECT
+			--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+			SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+		INTO aux_ptimport
+		FROM mrecibo r
+			,tvalopol t
+		WHERE r.cdunieco = PI_CDUNIECO
+			AND r.nmrecibo = PI_NMRECIBO
+			AND t.cdunieco = r.cdunieco
+			AND t.cdramo = r.cdramo
+			AND t.estado = r.estado
+			AND t.nmpoliza = r.nmpoliza
+			AND t.cdatribu = 29
+			AND t.nmsuplem = (
+				SELECT MAX(tt.nmsuplem)
+				FROM tvalopol tt
+				WHERE tt.cdunieco = t.cdunieco
+					AND tt.cdramo = t.cdramo
+					AND tt.estado = t.estado
+					AND tt.nmpoliza = t.nmpoliza
+					AND tt.cdatribu = t.cdatribu
+					AND tt.nmsuplem <= r.nmsuplem
+				);
+
+ RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_TAXA_CC(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+aux_atr   NUMBER(2);
+BEGIN
+/*   select b.nmtascom into aux_atr
+   from mrecibo a, co_mparapro b
+   where
+          b.cdramo   = a.cdramo
+      and a.cdunieco = PI_CDUNIECO
+      and a.nmrecibo = PI_NMRECIBO;
+   aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,aux_atr);*/
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport
+	FROM co_mparapro b
+		,mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND b.cdramo = r.cdramo
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = b.nmtascom
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= r.nmsuplem
+			);
+
+   RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_TAXA_CP(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+aux_atr   NUMBER(2);
+BEGIN
+/*   select b.nmtaspol into aux_atr
+   from mrecibo a, co_mparapro b
+   where
+          b.cdramo   = a.cdramo
+      and a.cdunieco = PI_CDUNIECO
+      and a.nmrecibo = PI_NMRECIBO;
+   aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,aux_atr);*/
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport
+	FROM co_mparapro b
+		,mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND b.cdramo = r.cdramo
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = b.nmtaspol
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= r.nmsuplem
+			);
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PAMI(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+--   aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,32);
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport
+	FROM mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = 32
+		AND t.STATUS = 'V'
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= r.nmsuplem
+			);
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PAMA(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+--   aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,33);
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport
+	FROM mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = 33
+		AND t.STATUS = 'V'
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= r.nmsuplem
+			);
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PREMIOS_PROC(PI_CDUNIECO IN NUMBER
+                         ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT NVL(SUM(PREMIOS_APOLICE.ptimport), 0)
+	INTO AUX_PTIMPORT
+	FROM mrecibo RECIBO_INICIAL
+		,mrecibo RECIBOS_APOLICE
+		,MRECIDET PREMIOS_APOLICE
+		,MPOLIZAS APOLICE_MAX
+	WHERE 1 = 1
+		AND PREMIOS_APOLICE.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+				AND CODIGO NOT IN (
+					'BONIF'
+					,'BONIF MI'
+					,'BONIF ME'
+					,'PACER'
+					,'PACER ME'
+					,'PACER MI'
+					)
+			),'PPDIV')
+		AND PREMIOS_APOLICE.NMRECIBO = RECIBOS_APOLICE.NMRECIBO
+		AND PREMIOS_APOLICE.CDUNIECO = RECIBOS_APOLICE.CDUNIECO
+		--
+		AND RECIBOS_APOLICE.fEinicio >= APOLICE_MAX.feefecto
+		AND RECIBOS_APOLICE.fEinicio < DECODE(APOLICE_MAX.ottempot, 'T', APOLICE_MAX.FEVENCIM, APOLICE_MAX.FEPROREN)
+		--  AND RECIBOS_APOLICE.TIPORECI IN (0,1,2,3,4,5,6,7,8,93,94)
+		AND RECIBOS_APOLICE.NMRECIBO != RECIBO_INICIAL.NMRECIBO
+		AND RECIBOS_APOLICE.cdestado NOT IN (
+			2
+			,8
+			,12
+			)
+		AND RECIBOS_APOLICE.nmpoliza = RECIBO_INICIAL.nmpoliza
+		AND RECIBOS_APOLICE.estado = RECIBO_INICIAL.estado
+		AND RECIBOS_APOLICE.cdramo = RECIBO_INICIAL.cdramo
+		AND RECIBOS_APOLICE.cdunieco = RECIBO_INICIAL.cdunieco
+		--
+		AND APOLICE_MAX.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM mpolizas X
+			WHERE X.nmpoliza = APOLICE_MAX.nmpoliza
+				AND X.estado = APOLICE_MAX.estado
+				AND X.cdramo = APOLICE_MAX.cdramo
+				AND X.cdunieco = APOLICE_MAX.cdunieco
+				AND X.nmsuplem <= TO_CHAR(RECIBO_INICIAL.FEINICIO, 'J') || '99999999999'
+			)
+		AND APOLICE_MAX.nmpoliza = RECIBO_INICIAL.nmpoliza
+		AND APOLICE_MAX.estado = RECIBO_INICIAL.estado
+		AND APOLICE_MAX.cdramo = RECIBO_INICIAL.cdramo
+		AND APOLICE_MAX.cdunieco = RECIBO_INICIAL.cdunieco
+		--
+		AND RECIBO_INICIAL.cdunieco = PI_CDUNIECO
+		AND RECIBO_INICIAL.nmrecibo = PI_NMRECIBO;
+
+   RETURN NVL(aux_ptimport,0);
+EXCEPTION
+    WHEN OTHERS THEN RETURN 0;
+END FUN_PREMIOS_PROC;
+
+
+FUNCTION FUN_TODOS_PREMIOS_PROC(PI_CDUNIECO IN NUMBER
+                               ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIBO.PTIMPORT%TYPE;
+BEGIN
+	SELECT NVL(SUM(PREMIOS_APOLICE.ptimport), 0)
+	INTO AUX_PTIMPORT
+	FROM mrecibo RECIBO_INICIAL
+		,mrecibo RECIBOS_APOLICE
+		,MRECIDET PREMIOS_APOLICE
+		,mpolizas APOLICE_MIN
+		,MPOLIZAS APOLICE_MAX
+	WHERE 1 = 1
+		AND PREMIOS_APOLICE.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+				AND CODIGO NOT IN (
+					'BONIF'
+					,'BONIF ME'
+					,'BONIF MI'
+					,'PACER'
+					,'PACER MI'
+					,'PACER ME'
+					)
+			),'PPDIV')
+		AND PREMIOS_APOLICE.NMRECIBO = RECIBOS_APOLICE.NMRECIBO
+		AND PREMIOS_APOLICE.CDUNIECO = RECIBOS_APOLICE.CDUNIECO
+		--
+		AND RECIBOS_APOLICE.fEEMISIO BETWEEN APOLICE_MIN.feefecto
+			AND DECODE(APOLICE_MAX.ottempot, 'T', APOLICE_MAX.FEVENCIM, APOLICE_MAX.FEPROREN)
+				--  AND RECIBOS_APOLICE.TIPORECI IN (0,1,2,3,4,5,6,7,8,93,94)
+		AND RECIBOS_APOLICE.NMRECIBO != RECIBO_INICIAL.NMRECIBO
+		AND RECIBOS_APOLICE.nmpoliza = RECIBO_INICIAL.nmpoliza
+		AND RECIBOS_APOLICE.estado = RECIBO_INICIAL.estado
+		AND RECIBOS_APOLICE.cdramo = RECIBO_INICIAL.cdramo
+		AND RECIBOS_APOLICE.cdunieco = RECIBO_INICIAL.cdunieco
+		--
+		AND APOLICE_MAX.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM mpolizas X
+			WHERE X.nmpoliza = APOLICE_MAX.nmpoliza
+				AND X.estado = APOLICE_MAX.estado
+				AND X.cdramo = APOLICE_MAX.cdramo
+				AND X.cdunieco = APOLICE_MAX.cdunieco
+			)
+		AND APOLICE_MAX.nmpoliza = RECIBO_INICIAL.nmpoliza
+		AND APOLICE_MAX.estado = RECIBO_INICIAL.estado
+		AND APOLICE_MAX.cdramo = RECIBO_INICIAL.cdramo
+		AND APOLICE_MAX.cdunieco = RECIBO_INICIAL.cdunieco
+		--
+		AND APOLICE_MIN.nmsuplem = (
+			SELECT MIN(X.nmsuplem)
+			FROM mpolizas X
+			WHERE X.nmpoliza = APOLICE_MIN.nmpoliza
+				AND X.estado = APOLICE_MIN.estado
+				AND X.cdramo = APOLICE_MIN.cdramo
+				AND X.cdunieco = APOLICE_MIN.cdunieco
+			)
+		AND APOLICE_MIN.nmpoliza = RECIBO_INICIAL.nmpoliza
+		AND APOLICE_MIN.estado = RECIBO_INICIAL.estado
+		AND APOLICE_MIN.cdramo = RECIBO_INICIAL.cdramo
+		AND APOLICE_MIN.cdunieco = RECIBO_INICIAL.cdunieco
+		--
+		AND RECIBO_INICIAL.cdunieco = PI_CDUNIECO
+		AND RECIBO_INICIAL.nmrecibo = PI_NMRECIBO;
+
+   RETURN NVL(aux_ptimport,0);
+EXCEPTION
+    WHEN OTHERS THEN RETURN 0;
+END FUN_TODOS_PREMIOS_PROC;
+
+
+FUNCTION FUN_PREMIO_COM_ANU( PI_CDUNIECO IN NUMBER
+                           , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+  aux_ptimport MRECIDET.PTIMPORT%TYPE;
+  NPREMMIN   NUMBER;
+  NPREMMAX   NUMBER;
+BEGIN
+	SELECT NVL(SUM(DECLARACOES.impREAL), 0)
+	INTO AUX_PTIMPORT
+	FROM mpolizas APOLICE
+		,CO_DECVEN DECLARACOES
+		,mrecibo RECIBO_INICIAL
+	WHERE ADD_MONTHS(TO_DATE(DECLARACOES.fEPERDEC, 'MON-RR', 'NLS_DATE_LANGUAGE=PORTUGUESE'), - 1) BETWEEN APOLICE.feefecto
+			AND DECODE(APOLICE.ottempot, 'T', APOLICE.FEVENCIM, APOLICE.FEPROREN - 1)
+		AND DECLARACOES.nmpoliza = RECIBO_INICIAL.nmpoliza
+		AND DECLARACOES.cdramo = RECIBO_INICIAL.cdramo
+		AND DECLARACOES.cdunieco = RECIBO_INICIAL.cdunieco
+		--
+		AND APOLICE.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM mpolizas X
+			WHERE X.nmpoliza = APOLICE.nmpoliza
+				AND X.estado = APOLICE.estado
+				AND X.cdramo = APOLICE.cdramo
+				AND X.cdunieco = APOLICE.cdunieco
+				AND X.nmsuplem <= TO_CHAR(RECIBO_INICIAL.FEINICIO, 'J') || '99999999999'
+			)
+		AND APOLICE.nmpoliza = RECIBO_INICIAL.nmpoliza
+		AND APOLICE.estado = RECIBO_INICIAL.estado
+		AND APOLICE.cdramo = RECIBO_INICIAL.cdramo
+		AND APOLICE.cdunieco = RECIBO_INICIAL.cdunieco
+		--
+		AND RECIBO_INICIAL.nmrecibo = PI_NMRECIBO
+		AND RECIBO_INICIAL.cdunieco = PI_CDUNIECO;
+
+  NPREMMIN := FUN_PAMI(PI_CDUNIECO, PI_NMRECIBO);
+  NPREMMAX := FUN_PAMA(PI_CDUNIECO, PI_NMRECIBO);
+  IF NPREMMAX = 0 THEN
+    RETURN NVL(aux_ptimport,0);
+  ELSIF AUX_PTIMPORT <= NPREMMAX AND
+        AUX_PTIMPORT >= NPREMMIN THEN
+    RETURN NVL(aux_ptimport,0);
+  ELSIF AUX_ptIMPORT >= NPREMMAX THEN
+    RETURN NPREMMAX;
+  ELSE
+    RETURN  NPREMMIN;
+  END IF;
+END;
+
+
+FUNCTION FUN_BONIFICACAO( PI_CDUNIECO IN NUMBER
+                        , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+--   aux_ptimport := nvl(FUN_MRECIDET(PI_CDUNIECO,PI_NMRECIBO,'BONIF',''),0);
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'BONIF'
+			,'BONIF ME'
+			,'BONIF MI'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END FUN_BONIFICACAO;
+
+
+FUNCTION FUN_PREMIO_TOTAL( PI_CDUNIECO IN NUMBER
+                         , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+aux_count number;
+BEGIN
+
+  SELECT count(*)
+  INTO aux_count
+  FROM CO_DIT_MRECIBO
+  WHERE 1=1
+  AND NMRECIBO = PI_NMRECIBO
+  AND CDUNIECO = PI_CDUNIECO;
+
+	IF aux_count > 0 THEN
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM CO_DIT_MRECIDET
+		WHERE NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+
+	ELSE
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM MRECIDET
+		WHERE NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+
+	END IF;
+
+  RETURN NVL(aux_ptimport,0);
+END FUN_PREMIO_TOTAL;
+
+
+FUNCTION FUN_BONIFICACION(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+--   aux_ptimport := nvl(FUN_MRECIDET(PI_CDUNIECO,PI_NMRECIBO,'BONIF',''),0);
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'BONIF'
+			,'BONIF MI'
+			,'BONIF ME'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_AJUSTE(PI_CDUNIECO IN NUMBER
+                   ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+/*  SELECT
+    PTIMPORT
+  into
+    aux_ptimport
+  FROM
+    MRECIBO
+  WHERE
+      cdunieco = PI_CDUNIECO
+  and nmrecibo = PI_NMRECIBO
+  and tiporeci = 93;*/
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'PACER'
+			,'PACER MI'
+			,'PACER ME'
+			,'BONIF'
+			,'BONIF MI'
+			,'BONIF ME'
+			,'MALUS MI'
+			,'MALUS ME'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+FUNCTION FUN_AJUSTE_MI(PI_CDUNIECO IN NUMBER
+                   ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+/*  SELECT
+    PTIMPORT
+  into
+    aux_ptimport
+  FROM
+    MRECIBO
+  WHERE
+      cdunieco = PI_CDUNIECO
+  and nmrecibo = PI_NMRECIBO
+  and tiporeci = 93;*/
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			--'PACER'
+			'PACER MI'
+			--,'PACER ME'
+			--,'BONIF'
+			,'BONIF MI'
+			--,'BONIF ME'
+			,'MALUS MI'
+			--,'MALUS ME'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+FUNCTION FUN_AJUSTE_ME(PI_CDUNIECO IN NUMBER
+                   ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+/*  SELECT
+    PTIMPORT
+  into
+    aux_ptimport
+  FROM
+    MRECIBO
+  WHERE
+      cdunieco = PI_CDUNIECO
+  and nmrecibo = PI_NMRECIBO
+  and tiporeci = 93;*/
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			--'PACER'
+			--,'PACER MI'
+			'PACER ME'
+			--,'BONIF'
+			--,'BONIF MI'
+			,'BONIF ME'
+			--,'MALUS MI'
+			,'MALUS ME'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_TAXA_COMPROMISSO(PI_CDUNIECO IN NUMBER
+                            ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport NUMBER;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN ('TXCOMP')
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(AUX_PTIMPORT,0);
+END;
+
+
+FUNCTION FUN_ACERTO(PI_CDUNIECO IN NUMBER
+                   ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'PACER'
+			,'PACER ME'
+			,'PACER MI'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PARTICIPACAO( PI_CDUNIECO IN NUMBER
+                         , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'PARES'
+			,'PARES ME'
+			,'PARES MI'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_IVA(PI_CDUNIECO IN NUMBER
+                   ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON = 'IVA'
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_VALOR_FACTURA( PI_CDUNIECO IN NUMBER
+                          , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'CAC'
+			,'CAP'
+			,'CDS'
+			,'CVR'
+			,'SAC'
+			,'GER'
+			,'APC'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_TOTAL_IMPOSTO( PI_CDUNIECO IN NUMBER
+                          , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'ISAPOL'
+			,'ISCAD'
+			,'ISGAR'
+			,'ISAPPD'
+			,'OUTIMP'
+			,'OUTIMPCP'
+			,'ISPCP'
+			,'IVA'
+			,'OUTIMPOL'
+			,'OUTIMCAD'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+/* */
+FUNCTION FUN_CAP_SEG_FORA_OCDE(PI_CDUNIECO IN NUMBER
+                    ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport13 MRECIDET.PTIMPORT%TYPE;
+aux_ptimport15 MRECIDET.PTIMPORT%TYPE;
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+
+BEGIN
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		--SUM(to_number(otvalor,'99999999999D99','NLS_NUMERIC_CHARACTERS = ''.,'''))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport13
+	FROM mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = 13
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= TO_CHAR(r.feinicio, 'J') || '99999999999'
+			);
+
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		--SUM(to_number(otvalor,'99999999999D99','NLS_NUMERIC_CHARACTERS = ''.,'''))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport15
+	FROM mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = 15
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= TO_CHAR(r.feinicio, 'J') || '99999999999'
+			);
+
+  IF NVL(aux_ptimport13,0) > NVL(aux_ptimport15,0) THEN
+    aux_ptimport := NVL(aux_ptimport13,0) ;
+  ELSE
+    aux_ptimport := NVL(aux_ptimport15,0) ;
+  END IF;
+
+  RETURN aux_ptimport;
+END;
+
+
+FUNCTION FUN_CAP_SEG( PI_CDUNIECO IN NUMBER
+                    , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+aux_cdramo   MRECIBO.CDRAMO%TYPE;
+aux_cdtipram TRAMOS.CDTIPRAM%TYPE;
+aux_count    number;
+BEGIN
+/*   select t.cdtipram,t.cdramo into aux_cdtipram,aux_cdramo
+   from mrecibo m,tramos t
+   where t.cdramo = m.cdramo
+     and m.cdunieco = PI_CDUNIECO
+     and m.nmrecibo = PI_NMRECIBO;
+   if aux_cdtipram = '1' then
+      aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,16);
+   elsif aux_cdtipram = '2' then
+      aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,24);
+   end if;*/
+
+  SELECT COUNT(*)
+  INTO aux_count
+  FROM CO_DIT_MRECIBO r
+  WHERE 1=1
+  AND r.cdunieco = PI_CDUNIECO
+  AND r.nmrecibo = PI_NMRECIBO ;
+
+	IF aux_count > 0 THEN
+		SELECT
+			-- SUM(TO_NUMBER(NVL(REPLACE(PTIMPDE1,'.',','),'0')) +
+			--    TO_NUMBER(NVL(REPLACE(PTIMPDE2,'.',','),'0')))
+			SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(PTIMPDE1, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0) + COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(PTIMPDE2, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+		INTO aux_ptimport
+		FROM CO_DIT_MRECIBO r
+		WHERE r.cdunieco = PI_CDUNIECO
+			AND r.nmrecibo = PI_NMRECIBO;
+
+	ELSE
+
+		SELECT
+			--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+			SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(otvalor, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+		INTO aux_ptimport
+		FROM mrecibo r
+			,tvalopol t
+		WHERE r.cdunieco = PI_CDUNIECO
+			AND r.nmrecibo = PI_NMRECIBO
+			AND t.cdunieco = r.cdunieco
+			AND t.cdramo = r.cdramo
+			AND t.estado = r.estado
+			AND t.nmpoliza = r.nmpoliza
+			AND t.cdatribu = DECODE(SUBSTR(R.CDRAMO, 1, 1), '1', 16, 24)
+			AND t.nmsuplem = (
+				SELECT MAX(tt.nmsuplem)
+				FROM tvalopol tt
+				WHERE tt.cdunieco = t.cdunieco
+					AND tt.cdramo = t.cdramo
+					AND tt.estado = t.estado
+					AND tt.nmpoliza = t.nmpoliza
+					AND tt.cdatribu = t.cdatribu
+					AND tt.nmsuplem <= r.nmsuplem
+				);
+
+	END IF;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_CAP_SEG_CRE( PI_CDUNIECO IN NUMBER
+						, PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport CO_DIT_MRECIBO.PTIMPDE1%TYPE;
+aux_ptimport15 mrecibo.PTIMPORT%TYPE;
+aux_ptimport2 mrecibo.PTIMPORT%TYPE;
+BEGIN
+
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(PTIMPDE1,'.',','),'0')))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(PTIMPDE1, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport
+	FROM CO_DIT_MRECIBO r
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO;
+
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		--SUM(to_number(otvalor,'99999999999D99','NLS_NUMERIC_CHARACTERS = ''.,'''))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(otvalor, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport15
+	FROM mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = 15
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= TO_CHAR(r.feinicio, 'J') || '99999999999'
+			);
+
+	IF NVL(aux_ptimport,0)>0 and NVL(aux_ptimport15,0)=0 THEN
+		aux_ptimport2 := NVL(aux_ptimport,0);
+	ELSIF NVL(aux_ptimport,0)=0 and NVL(aux_ptimport15,0)>0 THEN
+		aux_ptimport2 := NVL(aux_ptimport15,0);
+	ELSE
+		aux_ptimport2 := 0;
+	END IF;
+
+	RETURN NVL(aux_ptimport2,0);
+END;
+
+
+FUNCTION FUN_CAP_SEG_FAB( PI_CDUNIECO IN NUMBER
+						, PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport CO_DIT_MRECIBO.PTIMPDE2%TYPE;
+aux_ptimport13 mrecibo.PTIMPORT%TYPE;
+aux_ptimport2 mrecibo.PTIMPORT%TYPE;
+BEGIN
+
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(PTIMPDE2,'.',','),'0')))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(PTIMPDE2, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport
+	FROM CO_DIT_MRECIBO r
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO;
+
+	SELECT
+		--SUM(TO_NUMBER(NVL(REPLACE(otvalor,'.',','),'0')))
+		--SUM(to_number(otvalor,'99999999999D99','NLS_NUMERIC_CHARACTERS = ''.,'''))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(otvalor, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport13
+	FROM mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = 13
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= TO_CHAR(r.feinicio, 'J') || '99999999999'
+			);
+
+	IF NVL(aux_ptimport,0)>0 and NVL(aux_ptimport13,0)=0 THEN
+		aux_ptimport2 := NVL(aux_ptimport,0);
+	ELSIF NVL(aux_ptimport,0)=0 and NVL(aux_ptimport13,0)>0 THEN
+		aux_ptimport2 := NVL(aux_ptimport13,0);
+	ELSE
+		aux_ptimport2 := 0;
+	END IF;
+
+	RETURN NVL(aux_ptimport2,0);
+END;
+
+
+/*
+-* NOME      : FUN_TAXA_PAP
+-* OBJECTIVO : OBTER INFORMAÇÃO DA TAXA DE PRÉMIO DA APÓLICE A QUE DIZ RESPEITO O RECIBO
+-* UTILIZACAO: PKG_FORMULAS_COSEC.TAXA_PAP(1,2240080583);
+-* VERSÃO    : 2.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   21-01-2005 José Viegas    Alteração da forma de conversão de valores numéricos
+-*/
+FUNCTION FUN_TAXA_PAP( PI_CDUNIECO IN NUMBER
+                     , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+--   aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,23);
+	SELECT
+		--SUM(TO_NUMBER(otvalor,'9G999D9999', 'NLS_NUMERIC_CHARACTERS = ''.,'''))
+		SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(otvalor, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0))
+	INTO aux_ptimport
+	FROM mrecibo r
+		,tvalopol t
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND t.cdunieco = r.cdunieco
+		AND t.cdramo = r.cdramo
+		AND t.estado = r.estado
+		AND t.nmpoliza = r.nmpoliza
+		AND t.cdatribu = 23
+		AND t.nmsuplem = (
+			SELECT MAX(tt.nmsuplem)
+			FROM tvalopol tt
+			WHERE tt.cdunieco = t.cdunieco
+				AND tt.cdramo = t.cdramo
+				AND tt.estado = t.estado
+				AND tt.nmpoliza = t.nmpoliza
+				AND tt.cdatribu = t.cdatribu
+				AND tt.nmsuplem <= r.nmsuplem
+			);
+
+  RETURN NVL(aux_ptimport,0);
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 0;
+END;
+
+
+FUNCTION FUN_PTD1(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+   aux_ptimport :=   FUN_PREMIO_COM_ANU(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_PREMIOS_PROC(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_AJUSTE(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO(PI_CDUNIECO,PI_NMRECIBO);
+   RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_SELO_GAR(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+aux_count    number;
+BEGIN
+	SELECT count(*)
+	INTO aux_count
+	FROM CO_DIT_MRECIBO
+	WHERE 1 = 1
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+	IF aux_count > 0 THEN
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM CO_DIT_MRECIDET
+		WHERE CDTIPCON IN ('ISGAR')
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+
+	ELSE
+		SELECT SUM(PTIMPORT)
+		INTO aux_ptimport
+		FROM MRECIDET
+		WHERE CDTIPCON IN ('ISGAR')
+			AND NMRECIBO = PI_NMRECIBO
+			AND CDUNIECO = PI_CDUNIECO;
+
+	END IF;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_OUTROS_IMP( PI_CDUNIECO IN NUMBER
+                       , PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+--  aux_ptimport := nvl(FUN_MRECIDET(PI_CDUNIECO,PI_NMRECIBO,'OTROS',''),0);
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'OUTIMP'
+			,'OUTIMPCP'
+			,'OUTIMPOL'
+			,'OUTIMCAD'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END FUN_OUTROS_IMP;
+
+
+FUNCTION FUN_OTROS(PI_CDUNIECO IN NUMBER
+                 ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+--  aux_ptimport := nvl(FUN_MRECIDET(PI_CDUNIECO,PI_NMRECIBO,'OTROS',''),0);
+	SELECT SUM(PTIMPORT)
+	INTO aux_ptimport
+	FROM MRECIDET
+	WHERE CDTIPCON IN (
+			'OUTIMP'
+			,'OUTIMPCP'
+			,'OUTIMPOL'
+			,'OUTIMCAD'
+			)
+		AND NMRECIBO = PI_NMRECIBO
+		AND CDUNIECO = PI_CDUNIECO;
+
+  RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PTE(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+   aux_ptimport :=   FUN_BRUTO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO_GAR(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_OTROS(PI_CDUNIECO,PI_NMRECIBO);
+   RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PTF(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+   aux_ptimport :=   FUN_BRUTO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO_GAR(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_OTROS(PI_CDUNIECO,PI_NMRECIBO);
+   RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PTG(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+   aux_ptimport :=   FUN_BRUTO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO_GAR(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_OTROS(PI_CDUNIECO,PI_NMRECIBO);
+   RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_VALOR_LIQ(PI_CDUNIECO IN NUMBER
+                      ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+   aux_ptimport := FUN_TVALOPOL(PI_CDUNIECO,PI_NMRECIBO,18);
+-- Habra que poner el cdatribu correspondiente
+RETURN NVL(aux_ptimport,0);
+END;
+
+
+FUNCTION FUN_PTH(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+   aux_ptimport :=   FUN_VALOR_LIQ(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_OTROS(PI_CDUNIECO,PI_NMRECIBO);
+   RETURN NVL(aux_ptimport,0);
+END;
+
+
+/*
+   NOME : GET_PRIM_ANO_VIGENCIA
+   *  OBJECTIVO : OBTEM A DATA DE INICIO DO PRIMEIRO ANO DE VIGÊNCIA DA APÓLICE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: JOSÉ VIEGAS
+*/
+FUNCTION GET_PRIM_ANO_VIGENCIA( PI_CDUNIECO IN NUMBER
+                              , PI_CDRAMO   IN NUMBER
+                              , PI_NMPOLIZA IN NUMBER) RETURN DATE AS
+ RES DATE;
+BEGIN
+	SELECT m.feefecto
+	INTO RES
+	FROM mpolizas m
+	WHERE m.cdunieco = PI_CDUNIECO
+		AND m.cdramo = PI_CDRAMO
+		AND m.estado = 'M'
+		AND m.nmpoliza = PI_NMPOLIZA
+		AND m.nmsuplem = (
+			SELECT MIN(mm.nmsuplem)
+			FROM mpolizas mm
+			WHERE mm.cdunieco = m.cdunieco
+				AND mm.cdramo = m.cdramo
+				AND mm.estado = m.estado
+				AND mm.nmpoliza = m.nmpoliza
+			);
+
+  RETURN RES;
+END GET_PRIM_ANO_VIGENCIA;
+
+
+FUNCTION FUN_ANO_VIG(PI_CDUNIECO IN NUMBER
+                    ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_anovig NUMBER(2);
+BEGIN
+	SELECT TO_NUMBER(TO_CHAR(m.feefecto, 'yyyy'))
+	INTO aux_anovig
+	FROM mpolizas m
+		,mrecibo r
+	WHERE r.cdunieco = PI_CDUNIECO
+		AND r.nmrecibo = PI_NMRECIBO
+		AND m.cdunieco = r.cdunieco
+		AND m.cdramo = r.cdramo
+		AND m.estado = r.estado
+		AND m.nmpoliza = r.nmpoliza
+		AND m.nmsuplem = (
+			SELECT MAX(mm.nmsuplem)
+			FROM mpolizas mm
+			WHERE mm.cdunieco = m.cdunieco
+				AND mm.cdramo = m.cdramo
+				AND mm.estado = m.estado
+				AND mm.nmpoliza = m.nmpoliza
+				AND mm.nmsuplem <= r.nmsuplem
+			);
+
+  RETURN aux_anovig;
+END;
+
+
+FUNCTION FUN_PTI(PI_CDUNIECO IN NUMBER
+                ,PI_NMRECIBO IN NUMBER) RETURN NUMBER AS
+aux_ptimport MRECIDET.PTIMPORT%TYPE;
+BEGIN
+   aux_ptimport :=   FUN_PREMIO_COMERCIAL(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_CUSTO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_BRUTO(PI_CDUNIECO,PI_NMRECIBO)
+                   + FUN_SELO(PI_CDUNIECO,PI_NMRECIBO);
+   RETURN NVL(aux_ptimport,0);
+END;
+
+
+/*
+   NOME : FUN_RIE_ACU
+   *  OBJECTIVO : OBTEM RISCO ACUMULADO PARA UMA DADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR:
+*/
+FUNCTION FUN_RIE_ACU( PI_CDPERSON IN NUMBER
+                    , PI_CDTIPRAM IN VARCHAR2
+                    , PI_FECHA IN DATE ) RETURN NUMBER AS
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_GAR      NUMBER;
+   NUM_POL      NUMBER;
+
+BEGIN
+     PRO_GARAN_VIG(PI_CDPERSON,'','C',PI_CDTIPRAM,PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL);
+     RETURN WIMPORTE;
+END FUN_RIE_ACU;
+
+
+/*
+   NOME : FUN_RIE_ACU_POT
+   *  OBJECTIVO : OBTEM RISCO ACUMULADO PARA UMA DADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR:
+*/
+FUNCTION FUN_RIE_ACU_POT( PI_CDPERSON IN NUMBER
+                    , PI_CDTIPRAM IN VARCHAR2
+                    , PI_FECHA IN DATE ) RETURN NUMBER AS
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_GAR      NUMBER;
+   NUM_POL      NUMBER;
+
+BEGIN
+     PRO_GARAN_VIG(PI_CDPERSON,'D','C',PI_CDTIPRAM,PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL);
+     RETURN WIMPORTE;
+END FUN_RIE_ACU_POT;
+
+
+/*
+   NOME : FUN_RIE_ACU_EFE
+   *  OBJECTIVO : OBTEM RISCO ACUMULADO PARA UMA DADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR:
+*/
+FUNCTION FUN_RIE_ACU_EFE( PI_CDPERSON IN NUMBER
+                    , PI_CDTIPRAM IN VARCHAR2
+                    , PI_FECHA IN DATE ) RETURN NUMBER AS
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_GAR      NUMBER;
+   NUM_POL      NUMBER;
+   WIMPORTE2     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_GAR2      NUMBER;
+   NUM_POL2      NUMBER;
+
+BEGIN
+     PRO_GARAN_VIG(PI_CDPERSON,'M','C',PI_CDTIPRAM,PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL) ;
+     PRO_GARAN_VIG(PI_CDPERSON,'PR','C',PI_CDTIPRAM,PI_FECHA,NUM_GAR2,WIMPORTE2,NUM_POL2);
+     RETURN WIMPORTE + WIMPORTE2;
+END FUN_RIE_ACU_EFE;
+
+
+/*
+   NOME : FUN_RIE_ACU_EFE
+   *  OBJECTIVO : OBTEM RISCO ACUMULADO PARA UMA DADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR:
+*/
+FUNCTION FUN_RIE_ACU_MAIS( PI_CDPERSON IN NUMBER
+                    , PI_CDTIPRAM IN VARCHAR2
+					, PI_CDRAMO IN NUMBER
+                    , PI_FECHA IN DATE ) RETURN NUMBER AS
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_GAR      NUMBER;
+   NUM_POL      NUMBER;
+
+BEGIN
+     PRO_GARAN_VIG_RAMO(PI_CDPERSON,'','C',PI_CDTIPRAM,PI_CDRAMO, PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL) ;
+     RETURN WIMPORTE;
+END FUN_RIE_ACU_MAIS;
+
+
+/*
+   NOME : FUN_NUM_GAR
+   *  OBJECTIVO : OBTEM NUMERO DE GARANTIAS PARA UMA DADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR:
+*/
+FUNCTION FUN_NUM_GAR(PI_CDPERSON IN NUMBER
+             ,PI_CDTIPRAM IN VARCHAR2
+                         ,PI_FECHA IN DATE ) RETURN NUMBER AS
+   NUM_GAR      NUMBER;
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_POL      NUMBER;
+BEGIN
+     PRO_GARAN_VIG(PI_CDPERSON,'','',PI_CDTIPRAM,PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL);
+     RETURN NUM_GAR;
+END FUN_NUM_GAR;
+
+
+/*
+   NOME : FUN_NUM_GAR_EFE
+   *  OBJECTIVO : OBTEM NUMERO DE GARANTIAS PARA UMA DADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR:
+*/
+FUNCTION FUN_NUM_GAR_EFE(PI_CDPERSON IN NUMBER
+             ,PI_CDTIPRAM IN VARCHAR2
+                         ,PI_FECHA IN DATE ) RETURN NUMBER AS
+   NUM_GAR      NUMBER;
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_POL      NUMBER;
+   NUM_GAR2      NUMBER;
+   WIMPORTE2     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_POL2      NUMBER;
+BEGIN
+     PRO_GARAN_VIG(PI_CDPERSON,'M','',PI_CDTIPRAM,PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL);
+     PRO_GARAN_VIG(PI_CDPERSON,'PR','',PI_CDTIPRAM,PI_FECHA,NUM_GAR2,WIMPORTE2,NUM_POL2);
+     RETURN NUM_GAR + NUM_GAR2;
+END FUN_NUM_GAR_EFE;
+
+
+/*
+   NOME : FUN_NUM_GAR_POT
+   *  OBJECTIVO : OBTEM NUMERO DE GARANTIAS PARA UMA DADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR:
+*/
+FUNCTION FUN_NUM_GAR_POT(PI_CDPERSON IN NUMBER
+             ,PI_CDTIPRAM IN VARCHAR2
+                         ,PI_FECHA IN DATE ) RETURN NUMBER AS
+   NUM_GAR      NUMBER;
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_POL      NUMBER;
+BEGIN
+     PRO_GARAN_VIG(PI_CDPERSON,'D','',PI_CDTIPRAM,PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL);
+     RETURN NUM_GAR;
+END FUN_NUM_GAR_POT;
+
+
+/*
+   NOME : FUN_NUM_GAR_MAIS
+   *  OBJECTIVO : OBTEM NUMERO DE GARANTIAS PARA UMA DADA ENTIDADE PARA O PRODUTO 120 ( GARANTIA +)
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR:
+*/
+FUNCTION FUN_NUM_GAR_MAIS( PI_CDPERSON IN NUMBER
+                          ,PI_CDTIPRAM IN VARCHAR2
+                          , PI_CDRAMO IN NUMBER
+                          ,PI_FECHA IN DATE ) RETURN NUMBER AS
+   NUM_GAR      NUMBER;
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_POL      NUMBER;
+BEGIN
+     PRO_GARAN_VIG_RAMO(PI_CDPERSON,'','C',PI_CDTIPRAM,PI_CDRAMO, PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL) ;
+     RETURN NUM_GAR;
+END FUN_NUM_GAR_MAIS;
+
+
+/*
+   NOME : FUN_NUM_pol
+   *  OBJECTIVO : OBTEM NUMERO DE apólices PARA UMA DADA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: Aitor Garrido
+*/
+FUNCTION FUN_NUM_POL(PI_CDPERSON IN NUMBER
+					,PI_CDTIPRAM IN VARCHAR2
+					,PI_FECHA IN DATE ) RETURN NUMBER AS
+   NUM_GAR      NUMBER;
+   WIMPORTE     CO_PROGAR.IMPCONCO%TYPE;
+   NUM_POL      NUMBER;
+BEGIN
+     PRO_GARAN_VIG(PI_CDPERSON,'','',PI_CDTIPRAM,PI_FECHA,NUM_GAR,WIMPORTE,NUM_POL);
+     RETURN NUM_POL;
+END;
+
+
+/*
+   NOME : FUN_PLAF_ENT_IND_CRE
+   *  OBJECTIVO : Obtêm o plafond individual de crédito atribuido a uma dada entidade.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: AITOR GARRIDO
+*/
+FUNCTION FUN_PLAF_ENT_IND_CRE( p_cdperson IN NUMBER,
+                               p_fecha1 IN DATE,
+                               p_fecha2 IN DATE) RETURN NUMBER
+AS
+  V_PTIND NUMBER(17,5);
+  V_PTGLO NUMBER(17,5);
+  V_VIGOR DATE;
+  V_ERROR NUMBER;
+
+BEGIN
+  PL_PLAF_ENT_CRE(P_CDPERSON,P_FECHA1,P_FECHA2,V_PTIND,V_PTGLO,V_VIGOR,V_ERROR);
+  RETURN(V_PTIND);
+END FUN_PLAF_ENT_IND_CRE;
+
+
+/*
+   NOME : FUN_PLAF_ENT_GLOB_CRE
+   *  OBJECTIVO : Obtêm o plafond global de crédito atribuido a uma dada entidade.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: AITOR GARRIDO
+*/
+FUNCTION FUN_PLAF_ENT_GLOB_CRE( p_cdperson IN NUMBER
+                              , p_fecha1 IN DATE
+                              , p_fecha2 IN DATE) RETURN NUMBER
+AS
+  V_PTIND NUMBER(17,5);
+  V_PTGLO NUMBER(17,5);
+  V_VIGOR DATE;
+  V_ERROR  NUMBER;
+
+BEGIN
+  PL_PLAF_ENT_CRE(P_CDPERSON,P_FECHA1,P_FECHA2,V_PTIND,V_PTGLO,V_VIGOR,V_ERROR);
+  RETURN(V_PTGLO);
+END FUN_PLAF_ENT_GLOB_CRE;
+
+
+/*
+   NOME : FUN_PLAF_ENT_VIG_CRE
+   *  OBJECTIVO : Obtêm a vigência do plafond de crédito atribuido a uma dada entidade.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: AITOR GARRIDO
+*/
+FUNCTION FUN_PLAF_ENT_VIG_CRE ( p_cdperson IN NUMBER
+                              , p_fecha1 IN DATE
+                              , p_fecha2 IN DATE) RETURN DATE AS
+  V_PTIND NUMBER(17,5);
+  V_PTGLO NUMBER(17,5);
+  V_VIGOR DATE;
+  V_ERROR  NUMBER;
+
+BEGIN
+  PL_PLAF_ENT_CRE(P_CDPERSON,P_FECHA1,P_FECHA2,V_PTIND,V_PTGLO,V_VIGOR,V_ERROR);
+  RETURN(V_VIGOR);
+END FUN_PLAF_ENT_VIG_CRE;
+
+
+/*
+   NOME : FUN_PLAF_ENT_CAU
+   *  OBJECTIVO : OTEM PLAFOND CAUÇÃO ATRIBUIDO A UMA ENTIDADE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: AITOR GARRIDO
+*/
+FUNCTION FUN_PLAF_ENT_CAU ( p_cdperson IN NUMBER
+                          , p_fecha1   IN DATE
+                          , p_fecha2   IN DATE) RETURN NUMBER AS
+  V_PTIND NUMBER(17,5);
+  V_ERROR  NUMBER;
+  V_VIGOR DATE;
+
+BEGIN
+  PL_PLAF_ENT_CAU(P_CDPERSON,P_FECHA1,P_FECHA2,V_PTIND,V_VIGOR,V_ERROR);
+  RETURN(V_PTIND);
+END FUN_PLAF_ENT_CAU;
+
+
+/*
+   NOME : FUN_PLAF_VIG_CAU
+   *  OBJECTIVO : Obtêm a data de vigência do plafond de caução atribuido a uma dada entidade.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: AITOR GARRIDO
+*/
+FUNCTION FUN_PLAF_VIG_CAU ( p_cdperson IN NUMBER
+                          , p_fecha1 IN DATE
+                          , p_fecha2 IN DATE) RETURN DATE AS
+  V_PTIND NUMBER(17,5);
+  V_ERROR NUMBER;
+  V_VIGOR DATE;
+
+BEGIN
+  PL_PLAF_ENT_CAU(P_CDPERSON,P_FECHA1,P_FECHA2,V_PTIND,V_VIGOR,V_ERROR);
+  RETURN(V_VIGOR);
+END FUN_PLAF_VIG_CAU;
+
+
+/*
+   NOME : FUN_NUM_ENT_GRUPO
+   *  OBJECTIVO : Obtêm o Número de entidades pertencentes a um dado grupo.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 2.0
+   *  CRIADO POR: JOSÉ VIEGAS
+*/
+FUNCTION FUN_NUM_ENT_GRUPO( PI_CDGRUENT IN VARCHAR2
+                          , PI_DOMINA VARCHAR2 DEFAULT 'S') RETURN NUMBER AS
+  TOTAL      NUMBER;
+BEGIN
+  SELECT
+    COUNT (*)
+  INTO
+    TOTAL
+  FROM
+    CO_ENTIREL  CE
+  WHERE
+      CE.CDGRUENT = PI_CDGRUENT
+  AND FUN_COEFI_REAL(CE.CDPERFIL, CE.CDGRUENT, CE.CDPERPAI) > DECODE(PI_DOMINA, 'S', 0, -1);
+--  AND CE.SWDOMINA = DECODE(PI_DOMINA, 'S', PI_DOMINA, CE.SWDOMINA);
+  RETURN TOTAL;
+END FUN_NUM_ENT_GRUPO;
+
+
+FUNCTION FUN_NUM_ENT_GRUPO( PI_CDGRUPO IN VARCHAR2
+                          , PI_SWESTADO IN VARCHAR2
+              , PI_CDTIPRAM IN VARCHAR2
+              , PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER AS
+      WIMPORTE         CO_PROGAR.IMPCONCO%TYPE;
+      WNUMGARAN        NUMBER;
+      TOTALNUMGARAN    NUMBER;
+      NUM_POL          NUMBER;
+      NUM_ENT          NUMBER;
+
+      CURSOR GRUPO IS
+        SELECT
+          cdperfil
+        FROM
+          co_entirel
+        WHERE
+          cdgruent = PI_CDGRUPO
+        AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(PI_DOMINA,'S', 0, -1); -- ALTERADO A 12/SET/2002 (JLB)
+
+    BEGIN
+    WNUMGARAN  :=0;
+    TOTALNUMGARAN :=0;
+    NUM_ENT := 0;
+    FOR PERFIL IN GRUPO LOOP
+         PRO_GARAN_VIG(PERFIL.CDPERFIL,PI_SWESTADO,'',PI_CDTIPRAM,SYSDATE,WNUMGARAN,WIMPORTE,NUM_POL);
+         IF  WNUMGARAN > 0 THEN
+          NUM_ENT := NUM_ENT + 1;
+         END IF;
+    END LOOP;
+    RETURN NUM_ENT;
+END FUN_NUM_ENT_GRUPO;
+
+
+FUNCTION FUN_NUM_ENT_GRUPO_TIPO( PI_CDGRUPO IN VARCHAR2
+							, PI_SWESTADO IN VARCHAR2
+							, PI_CDTIPRAM IN VARCHAR2
+							, PI_TIPO IN VARCHAR2
+							, PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER AS
+      WIMPORTE         CO_PROGAR.IMPCONCO%TYPE;
+      WNUMGARAN        NUMBER;
+      TOTALNUMGARAN    NUMBER;
+      NUM_POL          NUMBER;
+      NUM_ENT          NUMBER;
+
+      CURSOR GRUPO IS
+		SELECT cdperfil
+		FROM co_entirel
+		WHERE cdgruent = PI_CDGRUPO
+			AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(PI_DOMINA, 'S', 0, - 1);-- ALTERADO A 12/SET/2002 (JLB)
+
+    BEGIN
+    WNUMGARAN  :=0;
+    TOTALNUMGARAN :=0;
+    NUM_ENT := 0;
+    FOR PERFIL IN GRUPO LOOP
+         PRO_GARAN_VIG(PERFIL.CDPERFIL,PI_SWESTADO,PI_TIPO,PI_CDTIPRAM,SYSDATE,WNUMGARAN,WIMPORTE,NUM_POL);
+         IF  WNUMGARAN > 0 THEN
+          NUM_ENT := NUM_ENT + 1;
+         END IF;
+    END LOOP;
+    RETURN NUM_ENT;
+END FUN_NUM_ENT_GRUPO_TIPO;
+
+/*
+   NOME : FUN_PLAFCRE_GRUPO
+   *  OBJECTIVO : Obtêm o plafond global de crédito atribuido a uma dado grupo.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: AITOR GARRIDO
+*/
+FUNCTION FUN_PLAFCRE_GRUPO( p_cdperson IN NUMBER
+						, p_fecha1 IN DATE
+						, p_fecha2  IN DATE
+						, p_ind_tippla IN VARCHAR2
+						, P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER AS
+  V_MONCRE NUMBER (17,5);
+  V_REACRE NUMBER(17,5);
+  V_MONCAU NUMBER(17,5);
+  V_REACAU NUMBER(17,5);
+  V_ERROR  NUMBER;
+BEGIN
+
+PL_PLAFOND_GRUPO(P_CDPERSON,p_fecha1,p_fecha2,P_IND_TIPPLA,P_DOMINA,V_MONCRE,V_REACRE,V_MONCAU,V_REACAU,
+
+V_ERROR);
+  RETURN (V_MONCRE);
+END;
+
+
+/*
+   NOME : FUN_PLAFCRE_VIG_GRUPO
+   *  OBJECTIVO : Obtêm a menor vigência do plafond de crédito atribuido a um grupo
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 2.0
+   *  CRIADO POR: JOSÉ VIEGAS
+*/
+FUNCTION FUN_PLAFCRE_VIG_GRUPO( p_cDGRUPO IN VARCHAR2
+							, p_fecha1 IN DATE
+                            , p_fecha2  IN DATE
+                            , P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN DATE AS
+  V_MONCRE NUMBER;
+  V_REACRE NUMBER;
+  V_ERROR  NUMBER;
+  CURSOR GRUPO IS
+    SELECT
+      cdperfil
+    FROM
+      co_entirel
+    WHERE
+        cdgruent = P_CDGRUPO
+    AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(P_DOMINA, 'S', 0, -1);
+--    AND SWDOMINA = DECODE(P_DOMINA,'S', P_DOMINA, SWDOMINA);
+  V_RESVIG  DATE:=TO_DATE('01-01-9999','DD-MM-YYYY');
+  V_DATAVIG DATE;
+BEGIN
+  FOR RW IN GRUPO LOOP
+    PL_PLAF_ENT_CRE(RW.CDPERFIL, P_FECHA1, P_FECHA2, V_MONCRE, V_REACRE, V_DATAVIG, V_ERROR);
+    IF V_DATAVIG < V_RESVIG THEN
+      V_RESVIG:=V_DATAVIG;
+    END IF;
+  END LOOP;
+  RETURN (V_RESVIG);
+END FUN_PLAFCRE_VIG_GRUPO;
+
+
+/*
+   NOME : FUN_PLAFCRE_VIG_GRUPO
+   *  OBJECTIVO : Obtêm a menor vigência do plafond de caução atribuido a um grupo
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 2.0
+   *  CRIADO POR: JOSÉ VIEGAS
+*/
+FUNCTION FUN_PLAFCAU_VIG_GRUPO( p_cDGRUPO IN VARCHAR2
+                          , p_fecha1 IN DATE
+                              , p_fecha2  IN DATE
+                              , P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN DATE AS
+  V_MONCRE NUMBER;
+  V_REACRE NUMBER;
+  V_ERROR  NUMBER;
+  CURSOR GRUPO IS
+	SELECT cdperfil
+	FROM co_entirel
+	WHERE cdgruent = P_CDGRUPO
+		AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(P_DOMINA, 'S', 0, - 1);
+
+--    AND SWDOMINA = DECODE(P_DOMINA,'S', P_DOMINA, SWDOMINA);
+  V_RESVIG  DATE:=TO_DATE('01-01-9999','DD-MM-YYYY');
+  V_DATAVIG DATE;
+BEGIN
+  FOR RW IN GRUPO LOOP
+    PL_PLAF_ENT_CAU(RW.CDPERFIL, P_FECHA1, P_FECHA2, V_MONCRE, V_DATAVIG, V_ERROR);
+    IF V_DATAVIG < V_RESVIG THEN
+      V_RESVIG:=V_DATAVIG;
+    END IF;
+  END LOOP;
+  RETURN (V_RESVIG);
+END FUN_PLAFCAU_VIG_GRUPO;
+
+
+/*
+   NOME : FUN_PLAFCRE_GRUPO
+   *  OBJECTIVO : Obtêm o plafond global de caução atribuido a uma dado grupo.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: AITOR GARRIDO
+*/
+FUNCTION FUN_PLAFCAU_GRUPO (p_cdperson IN NUMBER,
+                        p_fecha1 IN DATE,
+                            p_fecha2 IN DATE,
+                            p_ind_tippla IN VARCHAR2 ) RETURN NUMBER AS
+      V_MONCRE NUMBER (17,5);
+      V_REACRE NUMBER(17,5);
+      V_MONCAU NUMBER(17,5);
+      V_REACAU NUMBER(17,5);
+      V_ERROR  NUMBER;
+BEGIN
+
+PL_PLAFOND_GRUPO(P_CDPERSON,p_fecha1,p_fecha2,P_IND_TIPPLA,'',V_MONCRE,V_REACRE,V_MONCAU,V_REACAU,V_ERROR);
+  RETURN (V_MONCAU);
+END;
+
+
+/*
+   NOME : FUN_PLAFCRE_GRUPO_REAL
+   *  OBJECTIVO : Obtêm o plafond global de crédito real atribuido a uma dado grupo.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: AITOR GARRIDO
+*/
+FUNCTION FUN_PLAFCRE_GRUPO_REAL( p_cdperson IN NUMBER
+							, p_fecha1 IN DATE
+                            , p_fecha2  IN DATE
+                            , p_ind_tippla IN VARCHAR2
+                            , P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER AS
+   V_MONCRE NUMBER (17,5);
+   V_REACRE NUMBER(17,5);
+   V_MONCAU NUMBER(17,5);
+   V_REACAU NUMBER(17,5);
+   V_ERROR  NUMBER;
+BEGIN
+
+PL_PLAFOND_GRUPO(P_CDPERSON,p_fecha1,p_fecha2,P_IND_TIPPLA,P_DOMINA,V_MONCRE,V_REACRE,V_MONCAU,V_REACAU,
+
+V_ERROR);
+  RETURN (V_REACRE);
+END FUN_PLAFCRE_GRUPO_REAL;
+
+
+FUNCTION FUN_PLAFCAU_GRUPO_REAL ( p_cdperson IN NUMBER
+                                , p_fecha1 IN DATE
+                                , p_fecha2 IN DATE
+                                , p_ind_tippla IN VARCHAR2
+                                , P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER AS
+      V_MONCRE NUMBER (17,5);
+      V_REACRE NUMBER(17,5);
+      V_MONCAU NUMBER(17,5);
+      V_REACAU NUMBER(17,5);
+      V_ERROR  NUMBER;
+BEGIN
+
+	PL_PLAFOND_GRUPO(P_CDPERSON,p_fecha1,p_fecha2,P_IND_TIPPLA,P_DOMINA,V_MONCRE,V_REACRE,V_MONCAU,V_REACAU,V_ERROR);
+
+  RETURN (V_REACAU);
+END;
+
+
+ FUNCTION FUN_AMENAZA_NUM (PI_CDPERSON NUMBER,
+                           PI_CDTIPRAM VARCHAR2) RETURN NUMBER AS
+   V_NUMERO    NUMBER(6);
+   V_MONTANTE  NUMBER(17,5);
+ BEGIN
+    PL_AMENAZA(PI_CDPERSON,PI_CDTIPRAM,V_NUMERO,V_MONTANTE);
+   RETURN(V_NUMERO);
+ END;
+
+
+FUNCTION FUN_AMENAZA_MON (PI_CDPERSON NUMBER,
+                          PI_CDTIPRAM VARCHAR2) RETURN NUMBER AS
+   V_NUMERO    NUMBER(6);
+   V_MONTANTE  NUMBER(17,5);
+ BEGIN
+    PL_AMENAZA(PI_CDPERSON,PI_CDTIPRAM,V_NUMERO,V_MONTANTE);
+   RETURN(V_MONTANTE);
+ END;
+
+
+--
+FUNCTION FUN_SINIESTRO_NUM (PI_CDPERSON NUMBER,
+                           PI_CDTIPRAM VARCHAR2) RETURN NUMBER AS
+   V_NUMERO    NUMBER(6);
+   V_MONTANTE  NUMBER(17,5);
+ BEGIN
+    PL_SINIESTRO(PI_CDPERSON,PI_CDTIPRAM,V_NUMERO,V_MONTANTE);
+   RETURN(V_NUMERO);
+ END;
+
+
+FUNCTION FUN_SINIESTRO_MON (PI_CDPERSON NUMBER,
+                          PI_CDTIPRAM VARCHAR2) RETURN NUMBER AS
+   V_NUMERO    NUMBER(6);
+   V_MONTANTE  NUMBER(17,5);
+ BEGIN
+    PL_SINIESTRO(PI_CDPERSON,PI_CDTIPRAM,V_NUMERO,V_MONTANTE);
+   RETURN(V_MONTANTE);
+ END;
+
+
+/*FUNCION QUE NOS DA EL OTVALOR ASOCIADO A UN CÉDIGO DE DEPARTAMENTO EN FUNCION DE UN ATRIBUTO DE LA PÉLIZA:
+    SI OTVALOR ='1' => 'DCN';'DIRECCION COMERCIAL NORTE'
+    SI OTVALOR ='2' => 'DCS';'DIRECCION COMERCIAL SUR'
+    SI OTVALOR ='3' => 'DIT';'DIRECCION INTERNACIONAL'
+    (ESTO ESTÁ PARAMETRIZADO EN LA TABLA DE APOYO 'TCESDIR'*/
+FUNCTION FUN_CF_ORGAO (PI_CDUNIECO IN NUMBER,
+                       PI_CDRAMO   IN NUMBER,
+                       PI_ESTADO   IN VARCHAR2,
+                       PI_NMPOLIZA IN NUMBER,
+                       PI_DATAREF  IN DATE DEFAULT SYSDATE) RETURN VARCHAR2 AS
+V_OTVALOR VARCHAR2(100);
+BEGIN
+	SELECT OTVALOR
+	INTO V_OTVALOR
+	FROM TVALOPOL A
+	WHERE A.CDUNIECO = PI_CDUNIECO
+		AND A.CDRAMO = PI_CDRAMO
+		AND A.ESTADO = PI_ESTADO
+		AND A.NMPOLIZA = PI_NMPOLIZA
+		AND A.CDATRIBU = 2
+		AND A.NMSUPLEM = (
+			SELECT MAX(AA.NMSUPLEM)
+			FROM TVALOPOL AA
+			WHERE AA.CDUNIECO = A.CDUNIECO
+				AND AA.CDRAMO = A.CDRAMO
+				AND AA.ESTADO = A.ESTADO
+				AND AA.NMPOLIZA = A.NMPOLIZA
+				AND AA.CDATRIBU = A.CDATRIBU
+				AND AA.NMSUPLEM <= TO_CHAR(PI_DATAREF, 'J') || '99999999999'
+			);
+
+  RETURN (V_OTVALOR);
+ EXCEPTION WHEN NO_DATA_FOUND THEN
+      V_OTVALOR :='-1';
+       RETURN (V_OTVALOR);
+ END;
+
+
+/*FUNCION QUE NOS DA EL OTVALOR ASOCIADO A UN CÉDIGO DE DEPARTAMENTO EN FUNCION DE UN ATRIBUTO DE PROPUESTA:
+    SI OTVALOR ='1' => 'DCN';'DIRECCION COMERCIAL NORTE'
+    SI OTVALOR ='2' => 'DCS';'DIRECCION COMERCIAL SUR'
+    SI OTVALOR ='3' => 'DIT';'DIRECCION INTERNACIONAL'
+    (ESTO ESTÁ PARAMETRIZADO EN LA TABLA DE APOYO 'TCESDIR'*/
+FUNCTION FUN_CF_ORGAO_PROPOSTA (PI_CDUNIECO IN NUMBER,
+                                 PI_CDRAMO   IN NUMBER,
+                                 PI_NMPROPUE IN NUMBER) RETURN VARCHAR2 AS
+V_OTVALOR VARCHAR2(100);
+BEGIN
+	SELECT OTVALOR
+	INTO V_OTVALOR
+	FROM CO_TVALOPRO A
+	WHERE A.CDUNIECO = PI_CDUNIECO
+		AND A.CDRAMO = PI_CDRAMO
+		AND A.NMPROPUE = PI_NMPROPUE
+		AND A.CDATRIBU = 2
+		AND A.FEMODIF = (
+			SELECT MAX(AA.FEMODIF)
+			FROM CO_TVALOPRO AA
+			WHERE AA.CDUNIECO = A.CDUNIECO
+				AND AA.CDRAMO = A.CDRAMO
+				AND AA.NMPROPUE = A.NMPROPUE
+				AND AA.CDATRIBU = A.CDATRIBU
+				AND AA.FEMODIF <= SYSDATE
+			);
+
+  RETURN (V_OTVALOR);
+ EXCEPTION WHEN NO_DATA_FOUND THEN
+      V_OTVALOR :='-1';
+       RETURN (V_OTVALOR);
+ END;
+
+
+/*PROCEDIMIENTO QUE CALCULA EL NÚMERO DE GARANTIAS EN VIGOR ASOCIADAS A LA ENTIDAD,
+  SUMA LOS MONTANTES COMERCIALES O POLÍTICOS CONCEDIDOS,Y EL NÚMERO DE PÓLIZAS IMPLICADAS*/
+/*Parâmetros de entrada:
+-1.el cdperson de la entidad
+-2 el estado de la propuesta :'D',sin póliza asociada,'M',con póliza asociada
+-3 el tipo,que puede ser 'C',comercial o 'P',político
+-4 tipora '1' crédito, '2' caucion
+-5 FECHA DE ENTRADA*/
+  PROCEDURE PRO_GARAN_VIG(  PI_CDPERSON IN NUMBER
+                          , PI_SWESTADO IN VARCHAR2
+                          , PI_TIPO IN VARCHAR2
+                          , PI_TIPRAM IN VARCHAR2
+                          , PI_FECHA IN DATE
+                          , POUT_NMGARANT  OUT NUMBER
+                          , POUT_MONTANTE  OUT NUMBER
+                          , POUT_NMPOLIZAS OUT NUMBER)
+  AS
+    WIMPORTE      NUMBER(17,5);
+    CAMPO         VARCHAR2(15);
+    WCDROL        VARCHAR2(2);
+    WCDRAMO       CO_PROGAR.CDRAMO%TYPE;
+    V_CDMONEDA    CO_PROPOL.CDMOEDA%TYPE;
+    V_cdeuro      tkrnlpar.cdeuro%TYPE;
+    V_PTCAMBIO    TCAMBIOS.PTCAMBIO%TYPE;
+    IMPORTE       CO_PROGAR.IMPCONCO%TYPE;
+    V_NMGARANT    NUMBER(6):=0;
+    V_NMPOLIZAS   NUMBER(6):=0;
+    V_TIPO        VARCHAR2(1);
+
+/* CAUÇÃO */
+  CURSOR CAUCAO_VIG IS
+    SELECT /*+ ordered */
+		NVL(SUM(CAPITAL.PTCAPITA * FUN_TAXA_CAMBIO(APOLICE.CDMONEDA) * DECODE(APOLICE.CDTIPCOA, 'N', 1, 1 - (FUN_PERCENTAGEM_TOTAL_COAS(APOLICE.CDUNIECO, APOLICE.CDRAMO, APOLICE.ESTADO, APOLICE.NMPOLIZA, DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)) / 100))), 0) CAPITAL
+		,NVL(COUNT(SIT_RISCO.nmsituac), 0) N_GARANTIAS
+		,NVL(COUNT(DISTINCT APOLICE.NMPOLIZA), 0) N_APOLICES
+	FROM MPOLIPER ENTIDADE_RISCO
+		,MPOLICAP CAPITAL
+		,MPOLISIT SIT_RISCO
+		,MPOLIZAS APOLICE
+	--, TRAMOS RAMOS
+	WHERE 1 = 1
+		--AND RAMOS.CDRAMO      = APOLICE.CDRAMO
+		--AND RAMOS.CDTIPORA = NVL(PI_TIPRAM,RAMOS.CDTIPORA)
+		AND APOLICE.ESTADO = 'M'
+		AND APOLICE.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND APOLICE.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND APOLICE.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND APOLICE.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.STATUS = 'V'
+				--                          AND X.NMSUPLEM <= TO_CHAR(PI_FECHA,'J')||'99999999999'
+			)
+		AND IS_APOLICE_VALIDA(APOLICE.CDUNIECO, APOLICE.CDRAMO, APOLICE.ESTADO, APOLICE.NMPOLIZA) = 'S'
+		AND SIT_RISCO.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND SIT_RISCO.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND SIT_RISCO.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND SIT_RISCO.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND SIT_RISCO.NMSITUAC = ENTIDADE_RISCO.NMSITUAC
+		AND SIT_RISCO.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLISIT X
+			WHERE X.CDUNIECO = SIT_RISCO.CDUNIECO
+				AND X.CDRAMO = SIT_RISCO.CDRAMO
+				AND X.ESTADO = SIT_RISCO.ESTADO
+				AND X.NMPOLIZA = SIT_RISCO.NMPOLIZA
+				AND X.NMSITUAC = SIT_RISCO.NMSITUAC
+				AND X.NMSUPLEM <= TO_CHAR(PI_FECHA, 'J') || '99999999999'
+			)
+		AND SIT_RISCO.STATUS = 'V'
+		AND CAPITAL.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND CAPITAL.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND CAPITAL.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND CAPITAL.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND CAPITAL.NMSITUAC = ENTIDADE_RISCO.NMSITUAC /* NÃO FAZ SENTIDO...TEM DE SER VALIDADO */
+		AND CAPITAL.CDCAPITA = 1
+		AND CAPITAL.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLICAP X
+			WHERE X.CDUNIECO = CAPITAL.CDUNIECO
+				AND X.CDRAMO = CAPITAL.CDRAMO
+				AND X.ESTADO = CAPITAL.ESTADO
+				AND X.NMPOLIZA = CAPITAL.NMPOLIZA
+				AND X.NMSITUAC = CAPITAL.NMSITUAC
+				AND X.CDCAPITA = CAPITAL.CDCAPITA
+				AND X.NMSUPLEM <= TO_CHAR(PI_FECHA, 'J') || '99999999999'
+			)
+		AND CAPITAL.STATUS = 'V'
+		AND EXISTS (
+			SELECT '1'
+			FROM tramos z
+			WHERE z.cdtipora = '2'
+				AND z.cdramo = ENTIDADE_RISCO.CDRAMO
+			)
+		AND ENTIDADE_RISCO.STATUS = 'V'
+		AND ENTIDADE_RISCO.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE X.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+				AND X.CDRAMO = ENTIDADE_RISCO.CDRAMO
+				AND X.ESTADO = ENTIDADE_RISCO.ESTADO
+				AND X.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+				AND X.CDPERSON = ENTIDADE_RISCO.CDPERSON
+				AND X.NMSITUAC = ENTIDADE_RISCO.NMSITUAC
+				AND X.CDROL = ENTIDADE_RISCO.CDROL
+				AND X.NMSUPLEM <= TO_CHAR(PI_FECHA, 'J') || '99999999999'
+			)
+		AND ENTIDADE_RISCO.CDPERSON = PI_CDPERSON
+		AND ENTIDADE_RISCO.CDROL = 'RC'
+		AND ENTIDADE_RISCO.ESTADO = 'M'
+		--AND ENTIDADE_RISCO.CDRAMO LIKE '2%'
+		AND ENTIDADE_RISCO.CDUNIECO NOT IN (
+			SELECT CHAVE
+			FROM CFG_VALORES_DOMINIO
+			WHERE DOMINIO_ID = 'EXCLUSAO_RISCO'
+			);
+
+
+/* CRÉDITO */
+  CURSOR CREDITO_VIG IS
+	SELECT /*+ ordered */
+		NVL(SUM(DECODE(PI_TIPO, 'C', GARANTIA.IMPCONCO, 'P', GARANTIA.IMPCONPO, GARANTIA.IMPCONCO + GARANTIA.IMPCONPO) * FUN_TAXA_CAMBIO(PROPOSTA.CDMOEDA) * DECODE(PROPOSTA.INDCOASEG, 'N', 1, 1 - (FUN_PERCENTAGEM_TOTAL_COAS(PROPOSTA.CDUNIECO, PROPOSTA.CDRAMO, PROPOSTA.SWESTADO, PROPOSTA.NMPOLIZA, SYSDATE) / 100))), 0) CAPITAL
+		,NVL(SUM(DECODE(PI_TIPO, 'C', DECODE(GARANTIA.IMPSOLCO, 0, 0, 1), 'P', DECODE(GARANTIA.IMPSOLPO, 0, 0, 1), 1)), 0) N_GARANTIAS
+		,NVL(COUNT(DISTINCT PROPOSTA.NMPOLIZA), 0) N_APOLICES
+	FROM CO_PROROL ENTIDADE_RISCO
+		,TRAMOS RAMOS
+		,CO_PROGAR GARANTIA
+		,CO_PROPOL PROPOSTA		
+	WHERE 1 = 1
+		AND PROPOSTA.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND PROPOSTA.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND PROPOSTA.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+		AND PROPOSTA.FEMODIF = (
+			SELECT MAX(FEMODIF)
+			FROM CO_PROPOL X
+			WHERE X.CDUNIECO = PROPOSTA.CDUNIECO
+				AND X.CDRAMO = PROPOSTA.CDRAMO
+				AND X.NMPROPUE = PROPOSTA.NMPROPUE
+			)
+		AND GARANTIA.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND GARANTIA.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND GARANTIA.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+		AND GARANTIA.NMGARANT = ENTIDADE_RISCO.NMGARANT
+		AND GARANTIA.CDTIPGAR != 'A'		
+		AND GARANTIA.SWESTADO = NVL(PI_SWESTADO, GARANTIA.SWESTADO)
+		AND GARANTIA.SWESTADO IN (
+			'D'
+			,'M'
+			,'PR'
+			)
+		/* LINHAS INSERIDAS ISSUE 602 - ALTERAR GET_ATRIBUTO_APOLICE_DATA PARA PARAMETRO DATA A MAIOR DE SYSDATE OU DATA INICIO VIGOR APOLICE */
+		AND (
+			GARANTIA.CDRAMO != '100'
+			OR
+			--  PKG_FORMULAS_COSEC.GET_ATRIBUTO_APOLICE_DATA(GARANTIA.CDUNIECO,GARANTIA.CDRAMO,GARANTIA.SWESTADO,GARANTIA.NMPOLIZA,11) NOT IN (11,12) OR
+			PKG_FORMULAS_COSEC.GET_ATRIBUTO_APOLICE_DATA(GARANTIA.CDUNIECO, GARANTIA.CDRAMO, 'M', GARANTIA.NMPOLIZA, 11, GREATEST(GET_DT_VIGENCIA_APOLICE(PROPOSTA.CDUNIECO, PROPOSTA.CDRAMO, PROPOSTA.NMPOLIZA, 0, 'I'), SYSDATE), '-1') NOT IN (
+				11
+				,12
+				,16
+				,17
+				,19
+				)
+			)
+		/* FIM LINHAS INSERIDAS ISSUE 602 */
+		AND RAMOS.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND RAMOS.CDTIPRAM = NVL(PI_TIPRAM, RAMOS.CDTIPRAM)
+		AND ENTIDADE_RISCO.CDRAMO not in (125)
+		AND ENTIDADE_RISCO.STATUS = 'V'
+		AND ENTIDADE_RISCO.NMORDINA = (
+			SELECT MAX(NMORDINA)
+			FROM CO_PROROL X
+			WHERE X.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+				AND X.CDRAMO = ENTIDADE_RISCO.CDRAMO
+				AND X.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+				AND X.CDPERSON = ENTIDADE_RISCO.CDPERSON
+				AND X.NMGARANT = ENTIDADE_RISCO.NMGARANT
+				AND X.CDROL = ENTIDADE_RISCO.CDROL
+			)
+		AND ENTIDADE_RISCO.CDPERSON = PI_CDPERSON
+		AND ENTIDADE_RISCO.CDROL = 'ER'
+		--AND ENTIDADE_RISCO.CDRAMO LIKE '1%'
+		AND ENTIDADE_RISCO.CDUNIECO NOT IN (
+			SELECT CHAVE
+			FROM CFG_VALORES_DOMINIO
+			WHERE DOMINIO_ID = 'EXCLUSAO_RISCO'
+			);
+
+
+/* PROPOSTA */
+  CURSOR NMPROPUE IS                    -- sacamos todas las propuestas asociadas a esa entidad
+	SELECT *
+	FROM CO_PROROL A
+	WHERE A.CDPERSON = PI_CDPERSON
+		AND A.STATUS = 'V'
+		AND A.CDROL = WCDROL
+		AND A.CDRAMO = WCDRAMO
+		AND A.NMORDINA = (
+			SELECT MAX(B.NMORDINA)
+			FROM CO_PROROL B
+			WHERE B.CDPERSON = A.CDPERSON
+				AND B.CDROL = A.CDROL
+				AND B.NMPROPUE = A.NMPROPUE
+				AND B.FEMODIF <= PI_FECHA
+			)
+		AND A.CDUNIECO NOT IN (
+			SELECT CHAVE
+			FROM CFG_VALORES_DOMINIO
+			WHERE DOMINIO_ID = 'EXCLUSAO_RISCO'
+			);
+
+
+/* PRODUCTO */
+  CURSOR PRODUCTO IS
+      SELECT
+        *
+      FROM
+        TRAMOS
+      WHERE
+        CDTIPORA = PI_TIPRAM;   --VAMOS POR CRÉDITO
+
+  BEGIN
+
+  IF PI_TIPRAM = '2' THEN
+    FOR RW IN CAUCAO_VIG LOOP
+       POUT_NMGARANT := RW.N_GARANTIAS;
+       POUT_MONTANTE := RW.CAPITAL;
+       POUT_NMPOLIZAS:= RW.N_APOLICES;
+    END LOOP;
+  ELSE
+    FOR RW IN CREDITO_VIG LOOP
+       POUT_NMGARANT := RW.N_GARANTIAS;
+       POUT_MONTANTE := RW.CAPITAL;
+       POUT_NMPOLIZAS:= RW.N_APOLICES;
+    END LOOP;
+
+  END IF;
+END;
+
+
+/*PROCEDIMIENTO QUE CALCULA EL NÚMERO DE GARANTIAS EN VIGOR ASOCIADAS A LA ENTIDAD E RAMO
+  SUMA LOS MONTANTES COMERCIALES O POLÍTICOS CONCEDIDOS,Y EL NÚMERO DE PÓLIZAS IMPLICADAS*/
+/*Parâmetros de entrada:
+-1.el cdperson de la entidad
+-2 el tipo,que puede ser 'C',comercial o 'P',político
+-3 tipram '1' crédito, '2' caucion, '3' top up
+-4 o ramo da apólice
+-5 FECHA DE ENTRADA*/
+ PROCEDURE PRO_GARAN_VIG_RAMO(  PI_CDPERSON IN NUMBER
+                          , PI_SWESTADO IN VARCHAR2
+                          , PI_TIPO IN VARCHAR2
+                          , PI_TIPRAM IN VARCHAR2
+						  , PI_CDRAMO IN NUMBER
+                          , PI_FECHA IN DATE
+                          , POUT_NMGARANT  OUT NUMBER
+                          , POUT_MONTANTE  OUT NUMBER
+                          , POUT_NMPOLIZAS OUT NUMBER)
+  AS
+    WIMPORTE      NUMBER(17,5);
+    CAMPO         VARCHAR2(15);
+    WCDROL        VARCHAR2(2);
+    WCDRAMO       CO_PROGAR.CDRAMO%TYPE;
+    V_CDMONEDA    CO_PROPOL.CDMOEDA%TYPE;
+    V_cdeuro      tkrnlpar.cdeuro%TYPE;
+    V_PTCAMBIO    TCAMBIOS.PTCAMBIO%TYPE;
+    IMPORTE       CO_PROGAR.IMPCONCO%TYPE;
+    V_NMGARANT    NUMBER(6):=0;
+    V_NMPOLIZAS   NUMBER(6):=0;
+    V_TIPO        VARCHAR2(1);
+
+/* CAUÇÃO */
+  CURSOR CAUCAO_VIG IS
+	SELECT /*+ ordered */
+		NVL(SUM(CAPITAL.PTCAPITA * FUN_TAXA_CAMBIO(APOLICE.CDMONEDA) * DECODE(APOLICE.CDTIPCOA, 'N', 1, 1 - (FUN_PERCENTAGEM_TOTAL_COAS(APOLICE.CDUNIECO, APOLICE.CDRAMO, APOLICE.ESTADO, APOLICE.NMPOLIZA, DECODE(APOLICE.OTTEMPOT, 'R', APOLICE.FEPROREN, APOLICE.FEVENCIM)) / 100))), 0) CAPITAL
+		,NVL(COUNT(SIT_RISCO.nmsituac), 0) N_GARANTIAS
+		,NVL(COUNT(DISTINCT APOLICE.NMPOLIZA), 0) N_APOLICES
+	FROM MPOLIPER ENTIDADE_RISCO
+		,TRAMOS RAMOS
+		,MPOLICAP CAPITAL
+		,MPOLISIT SIT_RISCO
+		,MPOLIZAS APOLICE		
+	WHERE 1 = 1		
+		AND APOLICE.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND APOLICE.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND APOLICE.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND APOLICE.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+				AND X.STATUS = 'V'
+				--                          AND X.NMSUPLEM <= TO_CHAR(PI_FECHA,'J')||'99999999999'
+			)
+		AND IS_APOLICE_VALIDA(APOLICE.CDUNIECO, APOLICE.CDRAMO, APOLICE.ESTADO, APOLICE.NMPOLIZA) = 'S'
+		AND SIT_RISCO.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND SIT_RISCO.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND SIT_RISCO.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND SIT_RISCO.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND SIT_RISCO.NMSITUAC = ENTIDADE_RISCO.NMSITUAC
+		AND SIT_RISCO.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLISIT X
+			WHERE X.CDUNIECO = SIT_RISCO.CDUNIECO
+				AND X.CDRAMO = SIT_RISCO.CDRAMO
+				AND X.ESTADO = SIT_RISCO.ESTADO
+				AND X.NMPOLIZA = SIT_RISCO.NMPOLIZA
+				AND X.NMSITUAC = SIT_RISCO.NMSITUAC
+				AND X.NMSUPLEM <= TO_CHAR(PI_FECHA, 'J') || '99999999999'
+			)
+		AND SIT_RISCO.STATUS = 'V'
+		AND CAPITAL.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND CAPITAL.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND CAPITAL.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND CAPITAL.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND CAPITAL.NMSITUAC = ENTIDADE_RISCO.NMSITUAC /* NÃO FAZ SENTIDO...TEM DE SER VALIDADO */
+		AND CAPITAL.CDCAPITA = 1
+		AND CAPITAL.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLICAP X
+			WHERE X.CDUNIECO = CAPITAL.CDUNIECO
+				AND X.CDRAMO = CAPITAL.CDRAMO
+				AND X.ESTADO = CAPITAL.ESTADO
+				AND X.NMPOLIZA = CAPITAL.NMPOLIZA
+				AND X.NMSUPLEM <= TO_CHAR(PI_FECHA, 'J') || '99999999999'
+			)
+		AND CAPITAL.STATUS = 'V'
+		AND RAMOS.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND RAMOS.CDTIPRAM = NVL(PI_TIPRAM, RAMOS.CDTIPRAM)
+		AND ENTIDADE_RISCO.STATUS = 'V'
+		AND ENTIDADE_RISCO.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE X.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+				AND X.CDRAMO = ENTIDADE_RISCO.CDRAMO
+				AND X.ESTADO = ENTIDADE_RISCO.ESTADO
+				AND X.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+				AND X.CDPERSON = ENTIDADE_RISCO.CDPERSON
+				AND X.NMSITUAC = ENTIDADE_RISCO.NMSITUAC
+				AND X.CDROL = ENTIDADE_RISCO.CDROL
+				AND X.NMSUPLEM <= TO_CHAR(PI_FECHA, 'J') || '99999999999'
+			)
+		AND ENTIDADE_RISCO.CDPERSON = PI_CDPERSON
+		AND ENTIDADE_RISCO.CDROL = 'RC'
+		AND ENTIDADE_RISCO.ESTADO = 'M'
+		--AND ENTIDADE_RISCO.CDRAMO LIKE '2%'
+		AND ENTIDADE_RISCO.CDRAMO = NVL(PI_CDRAMO, ENTIDADE_RISCO.CDRAMO)
+		AND ENTIDADE_RISCO.CDUNIECO NOT IN (
+			SELECT CHAVE
+			FROM CFG_VALORES_DOMINIO
+			WHERE DOMINIO_ID = 'EXCLUSAO_RISCO'
+			);
+
+
+/* CRÉDITO */
+  CURSOR CREDITO_VIG IS
+	SELECT /*+ ordered */
+		NVL(SUM(DECODE(PI_TIPO, 'C', GARANTIA.IMPCONCO, 'P', GARANTIA.IMPCONPO, GARANTIA.IMPCONCO + GARANTIA.IMPCONPO) * FUN_TAXA_CAMBIO(PROPOSTA.CDMOEDA) * DECODE(PROPOSTA.INDCOASEG, 'N', 1, 1 - (FUN_PERCENTAGEM_TOTAL_COAS(PROPOSTA.CDUNIECO, PROPOSTA.CDRAMO, PROPOSTA.SWESTADO, PROPOSTA.NMPOLIZA, SYSDATE) / 100))), 0) CAPITAL
+		,NVL(SUM(DECODE(PI_TIPO, 'C', DECODE(GARANTIA.IMPSOLCO, 0, 0, 1), 'P', DECODE(GARANTIA.IMPSOLPO, 0, 0, 1), 1)), 0) N_GARANTIAS
+		,NVL(COUNT(DISTINCT PROPOSTA.NMPOLIZA), 0) N_APOLICES
+	FROM CO_PROROL ENTIDADE_RISCO
+		,TRAMOS RAMOS
+		,CO_PROGAR GARANTIA
+		,CO_PROPOL PROPOSTA		
+	WHERE 1 = 1		
+		AND PROPOSTA.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND PROPOSTA.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND PROPOSTA.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+		AND PROPOSTA.FEMODIF = (
+			SELECT MAX(FEMODIF)
+			FROM CO_PROPOL X
+			WHERE X.CDUNIECO = PROPOSTA.CDUNIECO
+				AND X.CDRAMO = PROPOSTA.CDRAMO
+				AND X.NMPROPUE = PROPOSTA.NMPROPUE
+			)
+		AND GARANTIA.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND GARANTIA.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND GARANTIA.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+		AND GARANTIA.NMGARANT = ENTIDADE_RISCO.NMGARANT
+		AND GARANTIA.CDTIPGAR != 'A'
+		AND GARANTIA.SWESTADO = NVL(PI_SWESTADO, GARANTIA.SWESTADO)
+		AND GARANTIA.SWESTADO IN (
+			'D'
+			,'M'
+			,'PR'
+			)
+		/* LINHAS INSERIDAS ISSUE 602 - ALTERAR GET_ATRIBUTO_APOLICE_DATA PARA PARAMETRO DATA A MAIOR DE SYSDATE OU DATA INICIO VIGOR APOLICE */
+		AND (
+			GARANTIA.CDRAMO != '100'
+			OR
+			--  PKG_FORMULAS_COSEC.GET_ATRIBUTO_APOLICE_DATA(GARANTIA.CDUNIECO,GARANTIA.CDRAMO,GARANTIA.SWESTADO,GARANTIA.NMPOLIZA,11) NOT IN (11,12) OR
+			PKG_FORMULAS_COSEC.GET_ATRIBUTO_APOLICE_DATA(GARANTIA.CDUNIECO, GARANTIA.CDRAMO, 'M', GARANTIA.NMPOLIZA, 11, GREATEST(GET_DT_VIGENCIA_APOLICE(PROPOSTA.CDUNIECO, PROPOSTA.CDRAMO, PROPOSTA.NMPOLIZA, 0, 'I'), SYSDATE), '-1') NOT IN (
+				11
+				,12
+				,16
+				,17
+				,19
+				)
+			)
+		/* FIM LINHAS INSERIDAS ISSUE 602 */
+		AND RAMOS.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND RAMOS.CDTIPRAM = NVL(PI_TIPRAM, RAMOS.CDTIPRAM)
+		AND ENTIDADE_RISCO.STATUS = 'V'
+		AND ENTIDADE_RISCO.NMORDINA = (
+			SELECT MAX(NMORDINA)
+			FROM CO_PROROL X
+			WHERE X.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+				AND X.CDRAMO = ENTIDADE_RISCO.CDRAMO
+				AND X.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+				AND X.CDPERSON = ENTIDADE_RISCO.CDPERSON
+				AND X.NMGARANT = ENTIDADE_RISCO.NMGARANT
+				AND X.CDROL = ENTIDADE_RISCO.CDROL
+			)
+		AND ENTIDADE_RISCO.CDPERSON = PI_CDPERSON
+		AND ENTIDADE_RISCO.CDROL = 'ER'
+		AND ENTIDADE_RISCO.CDRAMO LIKE '1%'
+		AND ENTIDADE_RISCO.CDRAMO = NVL(PI_CDRAMO, ENTIDADE_RISCO.CDRAMO)
+		AND ENTIDADE_RISCO.CDUNIECO NOT IN (
+			SELECT CHAVE
+			FROM CFG_VALORES_DOMINIO
+			WHERE DOMINIO_ID = 'EXCLUSAO_RISCO'
+			);
+
+
+/* PROPOSTA */
+  CURSOR NMPROPUE IS                    -- sacamos todas las propuestas asociadas a esa entidad
+	SELECT *
+	FROM CO_PROROL A
+	WHERE A.CDPERSON = PI_CDPERSON
+		AND A.STATUS = 'V'
+		AND A.CDROL = WCDROL
+		AND A.CDRAMO = WCDRAMO
+		AND A.NMORDINA = (
+			SELECT MAX(B.NMORDINA)
+			FROM CO_PROROL B
+			WHERE B.CDPERSON = A.CDPERSON
+				AND B.CDROL = A.CDROL
+				AND B.NMPROPUE = A.NMPROPUE
+				AND B.FEMODIF <= PI_FECHA
+			)
+		AND A.CDUNIECO NOT IN (
+			SELECT CHAVE
+			FROM CFG_VALORES_DOMINIO
+			WHERE DOMINIO_ID = 'EXCLUSAO_RISCO'
+			);
+
+
+/* PRODUCTO */
+  CURSOR PRODUCTO IS
+      SELECT
+        *
+      FROM
+        TRAMOS
+      WHERE
+        CDTIPRAM = PI_TIPRAM;   --VAMOS POR CRÉDITO
+
+  BEGIN
+
+  IF PI_TIPRAM = '2' THEN
+    FOR RW IN CAUCAO_VIG LOOP
+       POUT_NMGARANT := RW.N_GARANTIAS;
+       POUT_MONTANTE := RW.CAPITAL;
+       POUT_NMPOLIZAS:= RW.N_APOLICES;
+    END LOOP;
+  ELSE
+    FOR RW IN CREDITO_VIG LOOP
+       POUT_NMGARANT := RW.N_GARANTIAS;
+       POUT_MONTANTE := RW.CAPITAL;
+       POUT_NMPOLIZAS:= RW.N_APOLICES;
+    END LOOP;
+
+  END IF;
+END;
+
+
+/*FUNCION QUE CALCULA EL COEFICIENTE REAL - ALTERADA A 01/JUL/2002 */
+/*Parâmetros de entrada:
+-1.el cdperson de la entidad (CO_ENTIREL.CDPERFIL)
+-2 el grupo al que está asociada (CO_ENTIREL.CDGRUENT)
+-3 el padre de la entidad (CO_ENTIREL.CDPERPAI)*/
+FUNCTION FUN_COEFI_REAL (p_cdperson IN NUMBER,
+                         p_cdgruent IN VARCHAR2,
+                         p_cdperpai IN NUMBER
+                 ) RETURN NUMBER IS
+  CURSOR c_entirel IS
+		SELECT RELACAO.PERCREL
+			,RELACAO.SWDOMINA
+			,PROPRIEDADE.CDNATJUR
+		FROM CO_ENTIREL RELACAO
+			,MPERSONA PROPRIEDADE
+		WHERE PROPRIEDADE.CDPERSON = RELACAO.CDPERFIL
+			AND RELACAO.CDPERFIL = P_CDPERSON
+			AND RELACAO.CDPERPAI = P_CDPERPAI
+			AND RELACAO.CDGRUENT = P_CDGRUENT;
+
+
+  v_cdnatjur     mpersona.cdnatjur%TYPE;
+  v_cdnatjace    co_entipar.cdnatjace%TYPE;
+  v_entirel      c_entirel%ROWTYPE;
+  p_coeficiente  NUMBER(3);
+  v_error        NUMBER(1);
+  final          EXCEPTION;
+
+ BEGIN
+/*
+   Si devuelve error 2, no existe parametrizacion de naturaleza juridica
+   si devuelve error 1, fallo la funcion
+*/
+  v_error := 0;
+
+  FOR rw IN C_entirel LOOP
+/*  begin
+     select cdnatjace
+       into v_cdnatjace
+       from co_entipar;
+    if v_cdnatjace is null then
+         raise final;
+    end if;
+  exception
+     when others then
+    raise final;
+  end;
+*/
+    IF RW.SWDOMINA= 'S' THEN
+      RETURN 1;
+    ELSIF RW.CDNATJUR = 39 THEN
+      RETURN RW.PERCREL/100;
+    ELSE
+      RETURN 0;
+    END IF;
+  END LOOP;
+
+  RETURN 0;
+
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    v_error  := 1;
+    RETURN -1;
+
+  WHEN OTHERS THEN
+    V_ERROR := 1;
+    RETURN -1;
+END;
+
+
+FUNCTION FUN_RIE_ACU_GRUPO( PI_CDGRUPO IN VARCHAR2
+                          , PI_SWESTADO IN VARCHAR2
+               , PI_CDTIPRAM IN VARCHAR2) RETURN NUMBER AS
+   WIMPORTE       CO_PROGAR.IMPCONCO%TYPE;
+   WNUMGARAN      NUMBER;
+   TOTALIMPORTE   CO_PROGAR.IMPCONCO%TYPE;
+   NUM_POL        NUMBER;
+  CURSOR GRUPO IS
+    SELECT
+      cdperfil
+    FROM
+      co_entirel
+    WHERE
+      cdgruent = PI_CDGRUPO
+    AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > 0;
+--    AND SWDOMINA = 'S';
+BEGIN
+  WIMPORTE := 0;
+  TOTALIMPORTE :=0;
+  FOR PERFIL IN GRUPO LOOP
+    PRO_GARAN_VIG(PERFIL.CDPERFIL,PI_SWESTADO,'',PI_CDTIPRAM,SYSDATE,WNUMGARAN,WIMPORTE,NUM_POL);
+    TOTALIMPORTE := TOTALIMPORTE + WIMPORTE;
+  END LOOP;
+  RETURN TOTALIMPORTE;
+END;
+
+
+FUNCTION FUN_RIE_ACU_GRUPO_REAL( PI_CDGRUPO IN VARCHAR2
+								, PI_SWESTADO IN VARCHAR2
+								, PI_CDTIPRAM IN VARCHAR2
+								, PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER
+AS
+  WIMPORTE           CO_PROGAR.IMPCONCO%TYPE;
+  WNUMGARAN          NUMBER;
+  TOTALIMPORTE_REAL  CO_PROGAR.IMPCONCO%TYPE;
+  NUM_POL            NUMBER;
+  V_ERROR            NUMBER(1)  := 0;
+  V_COEFIC           NUMBER(3,2):= 0;
+
+  CURSOR GRUPO IS
+    SELECT
+      cdperfil
+    , SWDOMINA
+    , PERCREL
+    , FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI)   COEFICIENTE
+    FROM
+      co_entirel
+    WHERE
+        cdgruent = PI_CDGRUPO
+    AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(PI_DOMINA,'S', 0, -1); -- ALTERADO A 01/JUL/2002
+
+BEGIN
+  WIMPORTE := 0;
+  TOTALIMPORTE_REAL :=0;
+
+  FOR PERFIL IN GRUPO LOOP
+      PRO_GARAN_VIG(PERFIL.CDPERFIL,PI_SWESTADO,'',PI_CDTIPRAM,SYSDATE,WNUMGARAN,WIMPORTE,NUM_POL);
+      DBMS_OUTPUT.PUT_LINE(PERFIL.CDPERFIL||'->>'||TO_CHAR(WIMPORTE,'999G999G990D00'));
+      V_COEFIC := PERFIL.COEFICIENTE;
+      TOTALIMPORTE_REAL:= TOTALIMPORTE_REAL + NVL(WIMPORTE,0)*V_COEFIC;
+  END LOOP;
+
+  RETURN TOTALIMPORTE_REAL;
+END;
+
+
+FUNCTION FUN_RIE_ACU_GRUPO_REAL_TIPO( PI_CDGRUPO IN VARCHAR2
+								, PI_SWESTADO IN VARCHAR2
+								, PI_CDTIPRAM IN VARCHAR2
+								, PI_TIPO IN VARCHAR2
+								, PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER
+AS
+  WIMPORTE           CO_PROGAR.IMPCONCO%TYPE;
+  WNUMGARAN          NUMBER;
+  TOTALIMPORTE_REAL  CO_PROGAR.IMPCONCO%TYPE;
+  NUM_POL            NUMBER;
+  V_ERROR            NUMBER(1)  := 0;
+  V_COEFIC           NUMBER(3,2):= 0;
+
+  CURSOR GRUPO IS
+    SELECT
+      cdperfil
+    , SWDOMINA
+    , PERCREL
+    , FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI)   COEFICIENTE
+    FROM
+      co_entirel
+    WHERE
+        cdgruent = PI_CDGRUPO
+    AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(PI_DOMINA,'S', 0, -1); -- ALTERADO A 01/JUL/2002
+
+BEGIN
+  WIMPORTE := 0;
+  TOTALIMPORTE_REAL :=0;
+
+  FOR PERFIL IN GRUPO LOOP
+      PRO_GARAN_VIG(PERFIL.CDPERFIL,PI_SWESTADO,PI_TIPO,PI_CDTIPRAM,SYSDATE,WNUMGARAN,WIMPORTE,NUM_POL);
+      DBMS_OUTPUT.PUT_LINE(PERFIL.CDPERFIL||'->>'||TO_CHAR(WIMPORTE,'999G999G990D00'));
+      V_COEFIC := PERFIL.COEFICIENTE;
+      TOTALIMPORTE_REAL:= TOTALIMPORTE_REAL + NVL(WIMPORTE,0)*V_COEFIC;
+  END LOOP;
+
+  RETURN TOTALIMPORTE_REAL;
+END;
+
+
+FUNCTION FUN_RIE_ACU_GRUPO_REAL_MAIS( PI_CDGRUPO IN VARCHAR2
+                                    , PI_SWESTADO IN VARCHAR2
+                                    , PI_CDTIPRAM IN VARCHAR2
+                                    , PI_CDRAMO IN NUMBER
+                                    , PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER
+AS
+  WIMPORTE           CO_PROGAR.IMPCONCO%TYPE;
+  WNUMGARAN          NUMBER;
+  TOTALIMPORTE_REAL  CO_PROGAR.IMPCONCO%TYPE;
+  NUM_POL            NUMBER;
+  V_ERROR            NUMBER(1)  := 0;
+  V_COEFIC           NUMBER(3,2):= 0;
+
+  CURSOR GRUPO IS
+    SELECT
+      cdperfil
+    , SWDOMINA
+    , PERCREL
+    , FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI)   COEFICIENTE
+    FROM
+      co_entirel
+    WHERE
+        cdgruent = PI_CDGRUPO
+    AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(PI_DOMINA,'S', 0, -1);
+
+BEGIN
+  WIMPORTE := 0;
+  TOTALIMPORTE_REAL :=0;
+
+  FOR PERFIL IN GRUPO LOOP
+      PRO_GARAN_VIG_RAMO(PERFIL.CDPERFIL,PI_SWESTADO,'',PI_CDTIPRAM,PI_CDRAMO,SYSDATE,WNUMGARAN,WIMPORTE,NUM_POL);
+      --DBMS_OUTPUT.PUT_LINE(PERFIL.CDPERFIL||'->>'||TO_CHAR(WIMPORTE,'999G999G990D00'));
+      V_COEFIC := PERFIL.COEFICIENTE;
+      TOTALIMPORTE_REAL:= TOTALIMPORTE_REAL + NVL(WIMPORTE,0)*V_COEFIC;
+  END LOOP;
+
+  RETURN TOTALIMPORTE_REAL;
+END;
+
+
+FUNCTION FUN_NUM_GAR_GRUPO( PI_CDGRUPO IN VARCHAR2
+                          , PI_SWESTADO VARCHAR2
+              , PI_CDTIPRAM IN VARCHAR2
+              , PI_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER AS
+  WIMPORTE         CO_PROGAR.IMPCONCO%TYPE;
+  WNUMGARAN        NUMBER;
+  TOTALNUMGARAN    NUMBER;
+  NUM_POL          NUMBER;
+
+  CURSOR GRUPO IS
+    SELECT
+      cdperfil
+    FROM
+      co_entirel
+    WHERE
+      cdgruent = PI_CDGRUPO
+    AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(PI_DOMINA,'S', 0, -1); -- ALTERADO A 12/SET/2002 (JLB)
+
+BEGIN
+WNUMGARAN  :=0;
+TOTALNUMGARAN :=0;
+FOR PERFIL IN GRUPO LOOP
+     PRO_GARAN_VIG(PERFIL.CDPERFIL,PI_SWESTADO,'',PI_CDTIPRAM,SYSDATE,WNUMGARAN,WIMPORTE,NUM_POL);
+     TOTALNUMGARAN := TOTALNUMGARAN + WNUMGARAN;
+END LOOP;
+RETURN TOTALNUMGARAN;
+END;
+
+
+FUNCTION FUN_NUM_POL_GRUPO(PI_CDGRUPO IN VARCHAR2,PI_SWESTADO VARCHAR2,PI_CDTIPRAM IN VARCHAR2)
+   RETURN NUMBER AS
+   WIMPORTE         CO_PROGAR.IMPCONCO%TYPE;
+   WNUMGARAN        NUMBER;
+   TOTALNUMPOL      NUMBER;
+   NUM_POL          NUMBER;
+
+CURSOR GRUPO IS
+    SELECT cdperfil
+      FROM co_entirel
+     WHERE cdgruent = PI_CDGRUPO;
+
+BEGIN
+
+NUM_POL  :=0;
+TOTALNUMPOL :=0;
+
+FOR PERFIL IN GRUPO LOOP
+     PRO_GARAN_VIG(PERFIL.CDPERFIL,PI_SWESTADO,'',PI_CDTIPRAM,SYSDATE,WNUMGARAN,WIMPORTE,NUM_POL);
+     TOTALNUMPOL:= TOTALNUMPOL + NUM_POL;
+END LOOP;
+RETURN TOTALNUMPOL;
+END;
+
+
+/*FUNCION QUE CALCULA EL VALOR DE LA PRIMA LIQUIDA DEL ANO ANTERIOR AL PASADO COMO PARÉMETRO,ASOCIADO A UNA PÉLIZA*/
+/*
+   NOME : FUN_ANO_ANTERIOR
+   *  OBJECTIVO : OBTEM PRÉMIOS BRUTOS EMITIDOS PARA APÓLICE NO ANO CIVIL ANTERIOR
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: JOSÉ VIEGAS
+*/
+FUNCTION FUN_ANO_ANTERIOR (PI_CDUNIECO     IN NUMBER,
+                           PI_CDRAMO       IN NUMBER,
+                           PI_ESTADO       IN VARCHAR2,
+                           PI_NMPOLIZA     IN NUMBER,
+                           PI_ANO_EMISSION IN VARCHAR2) RETURN NUMBER
+AS
+  V_PTIMPORT   NUMBER:=0;
+BEGIN
+	SELECT NVL(SUM(DECODE(A.tipoRECI, 5, DECODE(A.CDESTADO, 2, 0, - 1), DECODE(A.cdestado, 2, - 1, 8, - 1, 12, - 1, 1)) * B.PTIMPORT), 0)
+	INTO V_PTIMPORT
+	FROM MRECIBO A
+		,MRECIDET B
+	WHERE 1 = 1
+		AND B.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+				AND CODIGO NOT IN (
+					'BONIF'
+					,'BONIF ME'
+					,'BONIF MI'
+					,'PACER'
+					,'PACER ME'
+					,'PACER MI'
+					)
+			),'PPDIV')
+		AND B.NMRECIBO = A.NMRECIBO
+		AND B.CDUNIECO = A.CDUNIECO
+		AND TO_NUMBER(TO_CHAR(DECODE(SIGN(A.FEEMISIO - A.FEINICIO), - 1, A.FEINICIO, A.FEEMISIO), 'YYYY')) = TO_NUMBER(PI_ANO_EMISSION) - 1
+		AND DECODE(A.tipoRECI, 0, 'S', 1, 'S', 3, 'S', 5, 'S', 'N') = 'S'
+		AND A.NMPOLIZA = PI_NMPOLIZA
+		AND A.ESTADO = PI_ESTADO
+		AND A.CDRAMO = PI_CDRAMO
+		AND A.CDUNIECO = PI_CDUNIECO;
+
+  RETURN V_PTIMPORT;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN V_PTIMPORT;
+  WHEN OTHERS THEN
+    RETURN -1;
+END FUN_ANO_ANTERIOR;
+
+
+PROCEDURE PL_CALCULA_REAL ( p_cdperson IN NUMBER,
+                    p_ptnominal IN NUMBER,
+                            p_ptreal IN OUT NUMBER,
+                            p_error IN OUT NUMBER)IS
+  v_coefic NUMBER(3,2) := 0;
+BEGIN
+  p_error := 0;
+  p_ptreal := NULL;
+  pl_coeficiente_real(p_cdperson,v_coefic,p_error);
+  IF p_error = 0 THEN
+      p_ptreal :=  (NVL(p_ptnominal,0) * v_coefic);
+  END IF;
+ END;
+
+
+PROCEDURE PL_COEFICIENTE_REAL( p_cdperson IN NUMBER,
+                               p_coeficiente IN OUT NUMBER,
+                               p_error IN OUT NUMBER )
+IS
+  CURSOR c_entirel IS
+    SELECT
+      percrel
+    , swdomina
+    FROM
+      co_entirel
+    WHERE
+        cdperfil = p_cdperson;
+  v_cdnatjur  mpersona.cdnatjur%TYPE;
+  v_cdnatjace co_entipar.cdnatjace%TYPE;
+  v_entirel   c_entirel%ROWTYPE;
+  final       EXCEPTION;
+BEGIN
+/*
+     Si devuelve error 2, no existe parametrizacion de naturaleza juridica
+      si devuelve error 1, fallo el procedimiento
+*/
+  p_error := 0;
+  BEGIN
+     SELECT cdnatjace
+       INTO v_cdnatjace
+       FROM co_entipar;
+    IF v_cdnatjace IS NULL THEN
+         RAISE final;
+    END IF;
+  EXCEPTION
+     WHEN OTHERS THEN
+    RAISE final;
+  END;
+    SELECT cdnatjur
+      INTO v_cdnatjur
+      FROM mpersona
+     WHERE cdperson = p_cdperson;
+    IF v_cdnatjur IS NULL THEN
+       p_error := 1;
+    END IF;
+    OPEN c_entirel;
+    FETCH c_entirel INTO v_entirel;
+      IF c_entirel%NOTFOUND THEN
+             p_error := 1;
+      ELSE
+          IF v_cdnatjace = v_cdnatjur THEN
+               p_coeficiente := (v_entirel.percrel/100);
+           ELSE
+               IF v_entirel.swdomina = 'N' THEN
+                 p_coeficiente := 0;
+              ELSE
+                p_coeficiente := 1;
+              END IF;
+         END IF;
+      END IF;
+   CLOSE c_entirel;
+ EXCEPTION
+   WHEN final THEN
+   p_error := 2;
+   WHEN NO_DATA_FOUND THEN
+   p_error  := 1;
+ END;
+
+
+PROCEDURE PL_OBTENER_GRUPO (p_cdperson IN NUMBER
+                  ,p_cdgruent IN OUT VARCHAR2
+               ,p_error IN OUT NUMBER)
+IS
+  v_otvalor tvaloper.otvalor%TYPE;
+  final         EXCEPTION;
+
+BEGIN
+   p_error := 0;
+
+   BEGIN
+     SELECT otvalor
+          INTO v_otvalor
+          FROM tvaloper
+       WHERE cdperson = p_cdperson
+         AND cdatribu = 21;
+   EXCEPTION
+     WHEN NO_DATA_FOUND THEN
+     RAISE final;
+   END;
+     SELECT cdgruent
+       INTO p_cdgruent
+       FROM co_grupent
+      WHERE cdperpri = TO_NUMBER(SUBSTR(v_otvalor,1,9))
+        AND datafim IS NULL;
+ EXCEPTION
+   WHEN final THEN
+   p_error := 1;
+   WHEN NO_DATA_FOUND THEN
+   p_error  := 1;
+ END;
+
+
+/*Funcion que calcula el plafond (individual y global) de la entidad de crédito, filtrando por dos fechas*/
+/* NOME : PL_PLAF_ENT_CRE
+   *  OBJECTIVO : CÉLCULO DO PLAFOND INDIVIDUAL E GLOBAL DA ENTIDADE, NO INTERVALO DE DUAS DATAS
+   *  UTILIZAÇÃO:
+   *  VERSÃO    :
+   *  CRIADO POR:
+
+  Parâmetros de entrada:
+  1- p_cdperson :obligatorio;es el cdperson de la entidad en cuestion
+  2- p_fecha1 :puede ir a nulo;en caso contrario,se utiliza para filtrar por plafones vigentes a esa fecha
+  3- p_fecha2 :puede ir a nulo;en ese caso el programa toma por defecto una fecha ('12-12-999') para así
+               sacar el plafon  de max.dataini
+*/
+PROCEDURE PL_PLAF_ENT_CRE ( p_cdperson IN NUMBER
+						,p_fecha1 IN DATE
+						,p_fecha2 IN DATE
+						,p_ptind IN OUT NUMBER
+						,p_ptglo IN OUT NUMBER
+						,p_vigor IN OUT DATE
+						,p_error IN OUT NUMBER)
+IS
+  CURSOR c1_plafocre IS
+		SELECT NVL(ptimpind, 0) INDIVIDUAL
+			,NVL(ptimpglo, 0) GLOBAL
+			,datafin
+		FROM co_plafocre plafcre /* */
+		WHERE plafcre.cdperson = p_cdperson /* */
+			AND p_fecha1 BETWEEN plafcre.dataini
+				AND plafcre.datafin /* */
+			AND plafcre.dataini = (
+				/* */
+				SELECT MAX(cr.dataini)
+				FROM co_plafocre cr
+				WHERE cr.cdperson = plafcre.cdperson /* */
+					AND cr.dataini <= NVL(p_fecha2, TO_DATE('12-12-9999', 'dd-mm-rrrr'))
+				)
+			AND PLAFCRE.NMPLAFON = (
+				SELECT MAX(X.NMPLAFON) /* */
+				FROM CO_PLAFOCRE X /* */
+				WHERE /* */
+					PLAFCRE.CDPERSON = X.CDPERSON /* */
+					AND PLAFCRE.DATAINI = X.DATAINI /* */
+				)
+		ORDER BY dataini DESC;
+
+
+  CURSOR c2_plafocre IS
+		SELECT NVL(c.ptimpind, 0) INDIVIDUAL
+			,NVL(c.ptimpglo, 0) GLOBAL
+			,datafin
+		FROM co_plafocre c
+		WHERE c.cdperson = p_cdperson
+			AND c.dataini = (
+				SELECT MAX(cr.dataini)
+				FROM co_plafocre cr
+				WHERE cr.cdperson = c.cdperson
+				)
+			AND C.NMPLAFON = (
+				SELECT MAX(X.NMPLAFON) /* */
+				FROM CO_PLAFOCRE X /* */
+				WHERE /* */
+					C.CDPERSON = X.CDPERSON /* */
+					AND C.DATAINI = X.DATAINI /* */
+				)
+		ORDER BY c.dataini DESC;
+
+BEGIN
+  p_error := 0;
+
+  IF  p_fecha1 IS NOT NULL THEN
+    FOR RW IN C1_PLAFOCRE LOOP
+      P_PTIND:= RW.INDIVIDUAL;
+      P_PTGLO:= RW.GLOBAL;
+      P_VIGOR:= rw.DATAFIN;
+    END LOOP;
+  ELSE
+    FOR RW IN C2_PLAFOCRE LOOP
+      P_PTIND:= RW.INDIVIDUAL;
+      P_PTGLO:= RW.GLOBAL;
+      P_VIGOR:= rw.DATAFIN;
+    END LOOP;
+  END IF;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    p_error := 1;
+END PL_PLAF_ENT_CRE;
+
+
+/*Calcula el plafond de la entidad de caucion ,filtrando por dos fechas*/
+/*Parâmetros de entrada:
+  1- p_cdperson :obligatorio;es el cdperson de la entidad en cuestion
+  2- p_fecha1 :puede ir a nulo;en caso contrario,se utiliza para filtrar por plafones vigentes a esa fecha
+  3- p_fecha2 :puede ir a nulo;en ese caso el programa toma por defecto una fecha ('12-12-999') para así
+               sacar el plafon  de max.dataini */
+PROCEDURE PL_PLAF_ENT_CAU ( p_cdperson IN NUMBER,
+                            p_fecha1 IN DATE,
+                            p_fecha2 IN DATE,
+                            p_ptimport IN OUT NUMBER,
+                            p_vigor    IN OUT DATE,
+                            p_error IN OUT NUMBER)
+IS
+  CURSOR c1_plafonca IS
+		SELECT ptimport
+			,datafin
+		FROM co_plafonca
+		WHERE cdperson = p_cdperson
+			AND p_fecha1 BETWEEN dataini
+				AND datafin
+			AND dataini = (
+				SELECT MAX(cr.dataini)
+				FROM co_plafonca cr
+				WHERE cr.cdperson = cdperson
+					AND cr.dataini <= NVL(p_fecha2, TO_DATE('12-12-9999', 'dd-mm-rrrr'))
+				)
+			AND DATAINI != DATAFIN
+		ORDER BY dataini DESC;
+
+  CURSOR c2_plafonca IS
+		SELECT ptimport
+			,datafin
+		FROM co_plafonca c
+		WHERE c.cdperson = p_cdperson
+			AND c.dataini = (
+				SELECT MAX(cr.dataini)
+				FROM co_plafonca cr
+				WHERE cr.cdperson = c.cdperson
+				)
+			AND c.DATAINI != c.DATAFIN
+		ORDER BY c.dataini DESC;
+
+BEGIN
+  p_error := 0;
+  IF  p_fecha1 IS NOT NULL  THEN
+    FOR RW IN C1_PLAFONCA LOOP
+      P_PTIMPORT:= RW.PTIMPORT;
+      P_VIGOR:= RW.DATAFIN;
+    END LOOP;
+  ELSE
+    FOR RW IN C2_PLAFONCA LOOP
+      P_PTIMPORT:= RW.PTIMPORT;
+      P_VIGOR:= RW.DATAFIN;
+    END LOOP;
+  END IF;
+  IF P_PTIMPORT IS NULL THEN
+    P_PTIMPORT:=0;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+  p_error := 1;
+END PL_PLAF_ENT_CAU;
+
+
+/* Calcula los plafond's de las entidades que encuentren en un grupo, tanto para credito como para caucion */
+/*El P_IND_TIPPLA puede ser nulo, 'CR' para crédito o 'CA' para caucion*/
+/* p_fecha1 :puede ir a nulo;en caso contrario,se utiliza para filtrar por plafones vigentes a esa fecha*/
+/* p_fecha2 :puede ir a nulo;en ese caso el programa toma por defecto una fecha ('12-12-999') para así
+               sacar el plafon  de max.dataini*/
+PROCEDURE PL_PLAFOND_GRUPO ( p_cdperson IN NUMBER,
+                             p_fecha1 IN DATE,
+                             p_fecha2 IN DATE,
+                             p_ind_tippla IN VARCHAR2,
+                             p_ind_domina IN CHAR,
+                             p_ptnom_cre IN OUT NUMBER,
+                             p_ptreal_cre IN OUT NUMBER,
+                             p_ptnom_cau IN OUT NUMBER,
+                             p_ptreal_cau IN OUT NUMBER,
+                             p_error IN OUT NUMBER)
+IS
+  v_ptnom_cre  co_plafocre.ptimpind%TYPE := NULL;
+  v_ptnom_cau  co_plafonca.ptimport%TYPE := NULL;
+  v_cdgruent   co_grupent.cdgruent%TYPE;
+  v_error      NUMBER(1) := 0;
+  v_coefic     NUMBER := 0;
+  v_var           NUMBER;
+  v_dat           DATE := NULL;
+  v_vigor      DATE;
+  CURSOR c_plagrupo IS
+		SELECT cdperfil
+			,PERCREL
+			,swdomina
+			,FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) COEFICIENTE
+		FROM co_entirel
+		WHERE cdgruent = v_cdgruent
+			AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(P_IND_DOMINA, 'S', 0, - 1) -- ALTERADO A 01/JUL/2002
+			--    AND SWDOMINA = DECODE(P_IND_DOMINA, 'S', P_IND_DOMINA, SWDOMINA)
+		ORDER BY cdperfil;
+
+  j  c_plagrupo%ROWTYPE;
+BEGIN
+  pl_obtener_grupo(p_cdperson,v_cdgruent,v_error);
+  IF v_error = 0 THEN
+    p_error := 0;
+    FOR RW IN C_PLAGRUPO LOOP
+      IF P_IND_TIPPLA = 'CR' THEN
+        pl_plaf_ent_cre(RW.cdperfil,p_fecha1,p_fecha2,v_var,v_ptnom_cre,v_vigor,v_error);
+      ELSIF P_IND_TIPPLA = 'CA' THEN
+        pl_plaf_ent_cau(RW.cdperfil,p_fecha1,p_fecha2,v_ptnom_cau,v_vigor,v_error);
+        dbms_output.put_line(rw.cdperfil||'->'||TO_CHAR(v_ptnom_cau,'999G999G990D00'));
+      ELSE
+        pl_plaf_ent_cre(RW.cdperfil,p_fecha1,p_fecha2,v_var,v_ptnom_cre,v_vigor,v_error);
+        pl_plaf_ent_cau(RW.cdperfil,p_fecha1,p_fecha2,v_ptnom_cau,v_vigor,v_error);
+      END IF;
+      p_ptnom_cre := NVL(p_ptnom_cre,0) + NVL(v_ptnom_cre,0);
+      p_ptnom_cau := NVL(p_ptnom_cau,0) + NVL(v_ptnom_cau,0);
+      IF v_error = 0 THEN
+        V_COEFIC := RW.COEFICIENTE;
+        DBMS_OUTPUT.PUT_LINE('  :::::>'||TO_CHAR(V_COEFIC,'999D99')||' - '||RW.CDPERFIL||' - '||V_PTNOM_CRE||' - '||P_PTREAL_CRE);
+        p_ptreal_cre := NVL(p_ptreal_cre,0) + (NVL(v_ptnom_cre,0) * v_coefic);
+        p_ptreal_cau := NVL(p_ptreal_cau,0) + (NVL(v_ptnom_cau,0) * v_coefic);
+      END IF;
+      V_PTNOM_CRE:=0;
+      V_PTNOM_CAU:=0;
+      V_VIGOR:=NULL;
+      V_ERROR:=0;
+    END LOOP;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    p_error := 1;
+END;
+
+/*PROCEDIMIENTO QUE CALCULA TODAS LAS AMENAZAS (NÚMERO Y MONTANTE)
+ ASOCIADAS A UNA ENTIDAD,PARA CRÉDITO Y CAUCION,SIENDO ESTA LA QUE PROVOCA LA AMENAZA*/
+/* PARÉMETRO DE ENTRADA:
+   PI_CDPERSON :CDPERSON DE LA ENTIDAD ESTUDIADA
+   PI_CDTIPRAM :'1' CRÉDITO; '2' CAUCION */
+PROCEDURE PL_AMENAZA( PI_CDPERSON   IN  NUMBER
+                    , PI_CDTIPRAM   IN  VARCHAR2
+                    , POUT_NUMERO   OUT NUMBER
+                    , POUT_MONTANTE OUT NUMBER) AS
+  CURSOR AMEACAS IS
+	SELECT COUNT(AMEACA.NMCOMAME) N_AMEACAS
+		,SUM(AMEACA.NMIMPORT) TOTAL_AMEACA
+		,SUM(AMEACA.NMIMPORT) - NVL(SUM(PAGO.NMIMPPAG * NVL(PAGO.TASACAMB, 1)), 0) TOTAL_DIVIDA
+	FROM CO_COAME AMEACA
+		,CO_COPDE PAGO
+		,CO_PRAME PROCESSO
+	WHERE 1 = 1
+		AND PAGO.CDTIPORA(+) = AMEACA.CDTIPORA
+		AND PAGO.NMPROAME(+) = AMEACA.NMPROAME
+		AND PAGO.NMCOMAME(+) = AMEACA.NMCOMAME
+		AND AMEACA.NMPROAME = PROCESSO.NMPROAME
+		AND AMEACA.CDTIPORA = PROCESSO.CDTIPORA
+		AND AMEACA.CDUNIECO = PROCESSO.CDUNIECO
+		AND PROCESSO.CDPERSON = PI_CDPERSON
+		AND PROCESSO.CDTIPORA = NVL(PI_CDTIPRAM, PROCESSO.CDTIPORA);
+
+BEGIN
+  FOR RW IN AMEACAS LOOP
+    POUT_NUMERO := RW.N_AMEACAS;
+    POUT_MONTANTE := RW.TOTAL_DIVIDA;
+  END LOOP;
+END PL_AMENAZA;
+
+--
+/*PROCEDIMIENTO PARA CALCULAR LA PROPUESTA DE PLAFOND GLOBAL PARA UN GRUPO,PARA CRÉDITO O CAUCION*/
+/*PARÉMETRO DE ENTRADA:
+  PI_CDGRUENT: CÉDIGO DEL GRUPO DE ENTIDADES */
+PROCEDURE PL_PLAF_GRUP_PRO(PI_CDGRUENT IN VARCHAR2
+                            ,POUT_MON_CRE OUT NUMBER
+                            ,POUT_MON_CAU OUT NUMBER) AS
+--
+   V_MON_CRE    NUMBER(17,5) ;
+   V_MON_CAU    NUMBER(17,5) ;
+   V_MONTANTE1   NUMBER(17,5):=NULL;
+   V_MONTANTE2   NUMBER(17,5):=NULL;
+--
+CURSOR C_PLAGRUPO IS       --sacamos las entidades hijas del grupo
+	SELECT CDPERFIL
+	FROM CO_ENTIREL
+	WHERE CDGRUENT = PI_CDGRUENT
+	ORDER BY CDPERFIL;
+
+--
+BEGIN
+	FOR I IN C_PLAGRUPO LOOP
+		BEGIN
+			SELECT B.PTPLAGLOP --ultimo montante propuesto para plafonamiento,crédito global
+				,B.PTPLACAUP --ÚLTIMO montante propuesto para plafonamiento,caucion
+			INTO V_MONTANTE1
+				,V_MONTANTE2
+			FROM CO_PEDIANR A
+				,CO_PLAFANR B
+			WHERE A.CDPERSON = I.CDPERFIL
+				AND B.NMPEDIDO = A.NMPEDIDO
+				AND B.NMEVENTO = (
+					SELECT MAX(BB.NMEVENTO)
+					FROM CO_PLAFANR BB
+					WHERE BB.NMPEDIDO = B.NMPEDIDO
+					);
+
+			IF V_MONTANTE1 IS NOT NULL THEN
+				V_MON_CRE:= NVL(V_MON_CRE,0) + V_MONTANTE1;
+			END IF;
+			IF V_MONTANTE2 IS NOT NULL THEN
+				V_MON_CAU:=NVL(V_MON_CAU,0) + V_MONTANTE2;
+			END IF;
+		EXCEPTION WHEN NO_DATA_FOUND THEN
+			NULL;
+		END;
+	END LOOP;
+POUT_MON_CRE := V_MON_CRE; -- montante total crédito
+POUT_MON_CAU := V_MON_CAU; --montante total caucion
+END;
+
+--
+/*PROCEDIMIENTO QUE CALCULA TODAS LOS SINIESTROS (NÚMERO Y MONTANTE)
+ ASOCIADAS A UNA ENTIDAD,PARA CRÉDITO Y CAUCION,SIENDO ESTA PROVOCADORA DEL SINIESTRO*/
+/* PARÉMETRO DE ENTRADA:
+   PI_CDPERSON :CDPERSON DE LA ENTIDAD ESTUDIADA
+   PI_CDTIPRAM :'1' CRÉDITO; '2' CAUCION */
+PROCEDURE PL_SINIESTRO(PI_CDPERSON IN NUMBER
+                       ,PI_CDTIPRAM IN VARCHAR2
+                       ,POUT_NUMERO OUT NUMBER
+                       ,POUT_MONTANTE OUT NUMBER) AS
+BEGIN
+	SELECT COUNT(*)
+		,SUM(VALORES_SINISTRO.PTACTPAG)
+	INTO POUT_NUMERO -- numero de siniestros
+		,POUT_MONTANTE -- montante total
+	FROM TRAMOS RAMOS
+		,MPOLIPER APOLICES_ENTIDADES
+		,MSINIEST SINISTROS
+		,MVALOSIN VALORES_SINISTRO
+	WHERE APOLICES_ENTIDADES.CDRAMO = RAMOS.CDRAMO
+		AND RAMOS.CDTIPORA = PI_CDTIPRAM
+		AND APOLICES_ENTIDADES.ESTADO = 'M'
+		AND APOLICES_ENTIDADES.STATUS = 'V'
+		AND APOLICES_ENTIDADES.CDROL = DECODE(RAMOS.CDTIPORA, 1, 'ER', 2, 'TO')
+		AND APOLICES_ENTIDADES.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE X.NMSITUAC = APOLICES_ENTIDADES.NMSITUAC
+				AND X.CDROL = APOLICES_ENTIDADES.CDROL
+				AND X.NMSUPLEM < TO_CHAR(SYSDATE, 'J') || '99999999999'
+				AND X.NMPOLIZA = APOLICES_ENTIDADES.NMPOLIZA
+				AND X.ESTADO = APOLICES_ENTIDADES.ESTADO
+				AND X.CDRAMO = APOLICES_ENTIDADES.CDRAMO
+				AND X.CDUNIECO = APOLICES_ENTIDADES.CDUNIECO
+			)
+		AND APOLICES_ENTIDADES.CDUNIECO = SINISTROS.CDUNIECO
+		AND APOLICES_ENTIDADES.CDRAMO = SINISTROS.CDRAMO
+		AND APOLICES_ENTIDADES.NMPOLIZA = SINISTROS.NMPOLIZA
+		AND APOLICES_ENTIDADES.NMSITUAC = SINISTROS.NMSITUAC
+		AND SINISTROS.STATUS = 'M'
+		AND SINISTROS.CDUNIECO = VALORES_SINISTRO.CDUNIECO
+		AND SINISTROS.CDRAMO = VALORES_SINISTRO.CDRAMO
+		AND SINISTROS.STATUS = VALORES_SINISTRO.STATUS
+		AND SINISTROS.AAAPERTU = VALORES_SINISTRO.AAAPERTU
+		AND SINISTROS.NMSINIES = VALORES_SINISTRO.NMSINIES
+		AND APOLICES_ENTIDADES.CDPERSON = PI_CDPERSON
+	GROUP BY APOLICES_ENTIDADES.CDPERSON;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    POUT_NUMERO := NULL;   -- numero de siniestros
+    POUT_MONTANTE := NULL; -- montante total
+END;
+
+--
+/*PROCEDIMIENTO QUE ESTUDIA EL COMPORTAMIENTO DE LA ENTIDAD COMO TOMADOR */
+/* PARÉMETRO DE ENTRADA:
+   PI_CDPERSON :CDPERSON DE LA ENTIDAD ESTUDIADA
+   PI_CDTIPRAM :'1' CRÉDITO; '2' CAUCION */
+PROCEDURE PL_TOMADOR(  PI_CDPERSON      IN NUMBER
+                      ,PI_CDTIPRAM      IN VARCHAR2
+                      ,POUT_NUM_POL     OUT NUMBER
+                      ,POUT_ANTIGUIDADE OUT DATE
+                      ,POUT_PREEMI      OUT NUMBER
+                      ,POUT_NMSINIEST   OUT NUMBER
+                      ,POUT_PREDIVI     OUT NUMBER
+                      ,POUT_PMC         OUT NUMBER
+                      ,POUT_AMENAZAS    OUT NUMBER) AS
+--
+   CAMPO         VARCHAR2(15);
+   WCDROL        VARCHAR2(2);
+   WCDRAMO       NUMBER(3);
+   WCDUNIECO     NUMBER(3);
+   WNMPOLIZA     NUMBER(10);
+   WPREEMI       NUMBER(17,5):=0;   --para los premios procesados
+   WPREDIVI      NUMBER(17,5):=0;   --para los premios en divida
+   WSINIEST      NUMBER(17,5):=0;
+   WPMC          NUMBER(10):=0;
+   WPMCFINAL     NUMBER(10):=0;
+   WAMENAZAS     NUMBER(6):=0;
+   V_NUMERO      NUMBER(6):=0;
+   V_MONTANTE    NUMBER(17,5) :=0;
+   V_TIPO        VARCHAR2(1);
+   V_CONTADOR    NUMBER(17,5);
+   V_OTVALOR     VARCHAR2(40);
+   V_FECHA1      DATE;
+   V_FECHA2      DATE:= TO_DATE('12-12-9999','dd-mm-rrrr');
+   V_PREMIO1     NUMBER(17,5);   --para los premios procesados
+   V_PREMIO2     NUMBER(17,5);   --para los premios en divida
+   V_SINI        NUMBER(17,5);
+   V_PMC         NUMBER(10);
+   V_AMENAZAS    NUMBER(6);
+--
+  CURSOR PRODUCTO IS
+	SELECT *
+	FROM TRAMOS
+	WHERE CDTIPRAM = PI_CDTIPRAM;
+
+--
+  CURSOR POLIZA IS         --SACA TODAS LAS PÓLIZAS EN DONDE LA ENTIDAD ES TOMADOR
+		SELECT *
+		FROM MPOLIPER A
+		WHERE A.CDPERSON = PI_CDPERSON
+			AND A.CDROL = WCDROL
+			AND A.CDRAMO = WCDRAMO
+			AND A.ESTADO = 'M'
+			AND A.STATUS = 'V'
+			AND A.NMSUPLEM = (
+				SELECT MAX(X.NMSUPLEM)
+				FROM MPOLIPER X
+				WHERE X.CDPERSON = A.CDPERSON
+					AND X.NMSITUAC = A.NMSITUAC
+					AND X.CDROL = A.CDROL
+					AND X.NMSUPLEM <= TO_CHAR(SYSDATE, 'J') || '99999999999'
+					AND X.NMPOLIZA = A.NMPOLIZA
+					AND X.ESTADO = 'M'
+					AND X.CDRAMO = A.CDRAMO
+					AND X.CDUNIECO = A.CDUNIECO
+				);
+
+BEGIN
+  FOR RAMO IN PRODUCTO LOOP
+    CAMPO   :='CDROLTOM';
+    WCDROL  := Tipo_Rol(RAMO.CDRAMO,CAMPO);
+    WCDRAMO := RAMO.CDRAMO;
+    FOR I IN POLIZA LOOP
+      V_NUMERO := V_NUMERO +1;   --CUENTA LAS POLIZAS
+      BEGIN  --sacamos la antiguiedad de la póliza (fecha de la primera)
+		SELECT T.FEEFECTO
+		INTO V_FECHA1
+		FROM MPOLIZAS T
+		WHERE T.CDUNIECO = I.CDUNIECO
+			AND T.CDRAMO = I.CDRAMO
+			AND T.ESTADO = 'M'
+			AND T.NMPOLIZA = I.NMPOLIZA
+			AND T.STATUS = 'V'
+			AND T.NMSUPLEM = (
+				SELECT MIN(X.NMSUPLEM)
+				FROM MPOLIZAS X
+				WHERE X.NMSUPLEM <= TO_CHAR(SYSDATE, 'J') || '99999999999'
+					AND X.NMPOLIZA = T.NMPOLIZA
+					AND X.ESTADO = 'M'
+					AND X.CDRAMO = T.CDRAMO
+					AND X.CDUNIECO = T.CDUNIECO
+				);
+
+      EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+          NULL;
+      END;
+      IF V_FECHA1 < V_FECHA2 THEN
+        V_FECHA2 := V_FECHA1;
+      END IF;
+      --
+      BEGIN       --sacamos los premios procesados,suma de las primas de la póliza
+		SELECT SUM(NMIMPORT)
+		INTO V_PREMIO1
+		FROM MPOLIREC C
+		WHERE C.CDUNIECO = I.CDUNIECO
+			AND C.CDRAMO = I.CDRAMO
+			AND C.ESTADO = I.ESTADO
+			AND C.NMPOLIZA = I.NMPOLIZA
+			AND C.STATUS = 'V'
+			AND C.CDTIPCON IN (
+				'PSDPR'
+				,'PDPR PE'
+				,'PDPR PC'
+				,'PDPR MI'
+				,'PDPR ME'
+				,'PCP'
+				)
+			AND C.NMSUPLEM = (
+				SELECT MAX(X.NMSUPLEM)
+				FROM MPOLIREC X
+				WHERE X.CDTIPCON = C.CDTIPCON
+					AND X.NMSITUAC = C.NMSITUAC
+					AND X.NMSUPLEM <= TO_CHAR(SYSDATE, 'J') || '99999999999'
+					AND X.NMPOLIZA = C.NMPOLIZA
+					AND X.ESTADO = C.ESTADO
+					AND X.CDRAMO = C.CDRAMO
+					AND X.CDUNIECO = C.CDUNIECO
+				);
+
+        WPREEMI:= WPREEMI + NVL(V_PREMIO1,0);
+      EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+          NULL;
+      END;
+--
+      BEGIN       --sacamos los siniestros procesados liquidos de recuperaciones
+		SELECT NVL(SUM(B.PTACTPAG), 0) - NVL(SUM(B.PTACTREC), 0)
+		INTO V_SINI
+		FROM MSINIEST A
+			,MVALOSIN B
+		WHERE A.CDUNIECO = I.CDUNIECO
+			AND A.CDRAMO = I.CDRAMO
+			AND A.STATUS = 'M'
+			AND A.NMPOLIZA = I.NMPOLIZA
+			AND B.CDUNIECO = A.CDUNIECO
+			AND B.CDRAMO = A.CDRAMO
+			AND B.STATUS = 'M'
+			AND B.AAAPERTU = A.AAAPERTU
+			AND B.NMSINIES = A.NMSINIES;
+
+        WSINIEST:=WSINIEST + NVL(V_SINI,0);
+      EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+          NULL;
+      END;
+                   --
+      BEGIN    --sacamos los premios en divida :suma de la prima de los recibos que estén pendientes
+		SELECT SUM(PTIMPORT)
+		INTO V_PREMIO2
+		FROM MRECIBO A
+		WHERE A.CDUNIECO = I.CDUNIECO
+			AND A.CDRAMO = I.CDRAMO
+			AND A.ESTADO = I.ESTADO
+			AND A.NMPOLIZA = I.NMPOLIZA
+			AND A.CDESTADO = '1' --recibos pendientes de cobro
+			AND A.NMSUPLEM = (
+				SELECT MAX(B.NMSUPLEM)
+				FROM MRECIBO B
+				WHERE B.CDUNIECO = A.CDUNIECO
+					AND B.CDRAMO = A.CDRAMO
+					AND B.ESTADO = A.ESTADO
+					AND B.NMPOLIZA = A.NMPOLIZA
+					AND B.CDESTADO = A.CDESTADO
+					AND B.NMSUPLEM <= TO_CHAR(SYSDATE, 'J') || '99999999999'
+				);
+
+        WPREDIVI:= WPREDIVI + NVL(V_PREMIO2,0);
+      EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+          NULL;
+      END;
+	--	sacamos los plazos medios de cobranza
+      BEGIN
+		SELECT AVG(TRUNC(feestado) - TRUNC(feemisio))
+		INTO V_PMC
+		FROM MRECIBO A
+		WHERE A.CDUNIECO = I.CDUNIECO
+			AND A.CDRAMO = I.CDRAMO
+			AND A.ESTADO = I.ESTADO
+			AND A.NMPOLIZA = I.NMPOLIZA
+			AND A.CDESTADO = '3';
+	--	recibos COBRADOS
+        WPMC:= WPMC + NVL(V_PMC,0);
+      EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+          NULL;
+      END;
+	--	sacamos las amenazas de la póliza
+      BEGIN
+		SELECT COUNT(A.NMCOMAME)
+		INTO V_AMENAZAS
+		FROM CO_COAME A
+		WHERE A.CDUNIECO = I.CDUNIECO
+			AND A.CDTIPORA = PI_CDTIPRAM
+			AND A.CDRAMO = I.CDRAMO
+			AND A.NMPOLIZA = I.NMPOLIZA
+			AND A.ESTADO = I.ESTADO;
+
+        WAMENAZAS := WAMENAZAS + V_AMENAZAS;
+      END;
+                  --
+    END LOOP;
+  END LOOP;
+  IF v_numero <> 0 THEN
+    WPMCFINAL := WPMC/V_NUMERO;
+  END IF;
+  POUT_NUM_POL     := V_NUMERO;      -- numero de POLIZAS
+  POUT_ANTIGUIDADE := V_FECHA2;      -- antiguidade
+  POUT_PREEMI      := WPREEMI;       -- premios processados
+  POUT_NMSINIEST   := WSINIEST;      -- siniestros procesados
+  POUT_PREDIVI     := WPREDIVI;      -- premios em divida
+  POUT_PMC         := WPMCFINAL;     -- p.m.c.(plazo medio de cobranza)
+  POUT_AMENAZAS    := WAMENAZAS;     -- amenazas
+END;
+
+--
+/*PROCEDIMIENTO QUE CALCULA LA INFORMACION DE LA ENTIDAD*/
+/* PARÉMETRO DE ENTRADA:
+   PI_CDPERSON   --CDPERSON DE LA ENTIDAD
+  PI_NMPEDIDO --NMPEDIDO EN ESTUDIO*/
+PROCEDURE Pl_Entidad( PI_CDPERSON       IN  NUMBER
+                    , PI_NMPEDIDO       IN  VARCHAR2
+                    , POUT_DATACONS     OUT VARCHAR2
+                    , POUT_CAPSOC       OUT NUMBER
+                    , POUT_VOLVEN       OUT NUMBER
+                    , POUT_RESLIQ       OUT NUMBER
+                    , POUT_DATACRC      OUT DATE
+                    , POUT_TOTAL        OUT NUMBER
+                    , POUT_MORA         OUT NUMBER
+                    , POUT_CONTENCIOSO  OUT NUMBER
+                    , POUT_EXTRA        OUT NUMBER
+                    , POUT_RENEGOCI     OUT NUMBER
+                    , POUT_NUMBOLE      OUT NUMBER
+                    , POUT_TOTAL1       OUT NUMBER
+                    , POUT_DATABAN      OUT DATE
+                    , POUT_CONCEITO     OUT VARCHAR2
+                    , POUT_DATACOM      OUT DATE
+                    , POUT_PTLIMSOL     OUT NUMBER
+                    , POUT_PTLIMCRE     OUT NUMBER
+                    , POUT_SURVEILLANCE OUT VARCHAR2
+                    , POUT_OPRIPA       OUT VARCHAR2
+                    , POUT_JUDICIL      OUT NUMBER
+                    , POUT_BALAN        OUT NUMBER
+                    , POUT_DATAREF      OUT VARCHAR2)
+AS
+  V_DATACONS     VARCHAR2(20);
+  V_CAPSOC       NUMBER:=0;
+  V_VOLVEN       NUMBER:=0;
+  V_RESLIQ       NUMBER:=0;
+  V_DATACOM      DATE;
+  V_SURVEILLANCE VARCHAR2(5);
+  V_PTLIMCRE     NUMBER :=0;
+  V_PTLIMSOL     NUMBER :=0;
+  V_CDOPRIPA     VARCHAR2(5);
+--
+  V_DATACRC       DATE;
+  V_TOTAL         NUMBER;
+  V_MORA          NUMBER:=0;
+  V_CONTENCIOSO   NUMBER:=0;
+  V_EXTRA         NUMBER:=0;
+  V_RENEGOCI      NUMBER:=0;
+--
+  V_NUMBOLE    NUMBER(3);
+  V_TOTAL1     NUMBER:=0;
+--
+  V_DATABAN    DATE;
+  V_CONCEITO   VARCHAR2(60);
+--
+--
+  V_JUDICIL  NUMBER(5);
+--
+  V_BALAN    NUMBER;
+
+  CURSOR INFOS IS
+	SELECT DADOS_COM.DATACONS DATA_CONSTITUICAO
+		,DADOS_COM.PTCAPSOC CAPITAL_SOCIAL
+		,DADOS_COM.PTVENDTO VOLUME_VENDAS
+		,DECODE(DADOS_COM.SWLIQUIDEZ, 'P', - (DADOS_COM.PTRESLIQ), DADOS_COM.PTRESLIQ) RESULTADO_LIQUIDO
+		,DADOS_COM.DATACOM DT_INFO_COMERCIAL
+		,DADOS_COM.CDOPIPRA COD_OPINIAO_COM
+		,OPINIAO_PRACA.DESCRIPC OPINIAO_PRACA
+		,PEDIDO_INFO.PTLIMSOL CREDITO_SOLICITADO
+		,DADOS_COM.PTLIMCRE CREDITO_CONCEDIDO
+		,ENTIDADE.SWVAME EM_SURVEILLANCE
+		,DADOS_BAN.DATABAN DT_INFO_BANCARIA
+		,DADOS_BAN.CDOPICRE COD_OPINIAO_BAN
+		,OPINIAO_BANCO.DESCRIPC OPINIAO_BANCO
+		,CRC_ENTIDADE.DATACRC DT_ULTIMO_CRC
+		,SUM(PTCREDIT * CAMBIO.PTCAMBIO) CRC_TOTAL
+		,SUM(DECODE(TIPOCRED, '07', PTCREDIT, 0) * CAMBIO.PTCAMBIO) CRC_MORA
+		,SUM(DECODE(TIPOCRED, '08', PTCREDIT, 0) * CAMBIO.PTCAMBIO) CRC_CONTENCIOSO
+		,SUM(DECODE(TIPOCRED, '06', PTCREDIT, 0) * CAMBIO.PTCAMBIO) CRC_EXTRAPAT
+		,SUM(DECODE(TIPOCRED, '10', PTCREDIT, 0) * CAMBIO.PTCAMBIO) CRC_RENEGOCIADO
+		,DADOS_COM.DTECONFI DATA_REFERENCIA
+	FROM TCAMBIOS CAMBIO
+		,TMANTENI OPINIAO_PRACA
+		,TMANTENI OPINIAO_BANCO
+		,CO_ENTIDAD ENTIDADE
+		,CO_ENTICRC CRC_ENTIDADE
+		,CO_ENTIBAN DADOS_BAN
+		,CO_ENTICOM DADOS_COM
+		,CO_PEDIDOS PEDIDO_INFO
+	WHERE 1 = 1
+		AND OPINIAO_PRACA.CODIGO = DADOS_COM.CDOPIPRA
+		AND OPINIAO_PRACA.CDTABLA = 'CO_CREDCOM'
+		AND OPINIAO_BANCO.CODIGO = DADOS_BAN.CDOPICRE
+		AND OPINIAO_BANCO.CDTABLA = 'CO_TCREDOP'
+		AND CAMBIO.CDMONBAS = CRC_ENTIDADE.CDMONEDA
+		AND CAMBIO.CDMONEDA = (
+			SELECT CDEURO
+			FROM TKRNLPAR
+			)
+		AND CAMBIO.FEVALOR = (
+			SELECT MAX(X.FEVALOR)
+			FROM TCAMBIOS X
+			WHERE X.CDMONBAS = CRC_ENTIDADE.CDMONEDA
+				AND X.CDMONEDA = CAMBIO.CDMONEDA
+				AND X.FEVALOR < CRC_ENTIDADE.FEALTA
+			)
+		AND DADOS_BAN.DATABAN = (
+			SELECT MAX(X.DATABAN)
+			FROM CO_ENTIBAN X
+			WHERE X.CDPERSON = DADOS_BAN.CDPERSON
+			)
+		AND DADOS_BAN.CDPERSON = CRC_ENTIDADE.CDPERSON
+		AND PEDIDO_INFO.CDPERSON = DADOS_COM.CDPERSON
+		AND PEDIDO_INFO.NMPEDIDO = DADOS_COM.NMPEDIDO
+		AND DADOS_COM.DATACOM = (
+			SELECT MAX(X.DATACOM)
+			FROM CO_ENTICOM X
+			WHERE X.CDPERSON = DADOS_COM.CDPERSON
+			)
+		AND DADOS_COM.CDPERSON = CRC_ENTIDADE.CDPERSON
+		AND ENTIDADE.CDPERSON = CRC_ENTIDADE.CDPERSON
+		AND CRC_ENTIDADE.DATACRC = (
+			SELECT MAX(X.DATACRC)
+			FROM CO_ENTICRC X
+			WHERE X.CDPERSON = CRC_ENTIDADE.CDPERSON
+			)
+		AND CRC_ENTIDADE.CDPERSON = PI_CDPERSON
+	GROUP BY DADOS_COM.DATACONS
+		,DADOS_COM.PTCAPSOC
+		,DADOS_COM.PTVENDTO
+		,DECODE(DADOS_COM.SWLIQUIDEZ, 'P', - (DADOS_COM.PTRESLIQ), DADOS_COM.PTRESLIQ)
+		,DADOS_COM.DATACOM
+		,DADOS_COM.CDOPIPRA
+		,OPINIAO_PRACA.DESCRIPC
+		,PEDIDO_INFO.PTLIMSOL
+		,DADOS_COM.PTLIMCRE
+		,ENTIDADE.SWVAME
+		,DADOS_BAN.DATABAN
+		,DADOS_BAN.CDOPICRE
+		,OPINIAO_BANCO.DESCRIPC
+		,CRC_ENTIDADE.DATACRC
+		,DADOS_COM.DTECONFI;
+
+
+BEGIN
+  FOR RW IN INFOs LOOP
+    POUT_DATACONS := RW.DATA_CONSTITUICAO;
+    POUT_CAPSOC   := RW.CAPITAL_SOCIAL;
+    POUT_VOLVEN   := RW.VOLUME_VENDAS;
+    POUT_RESLIQ   := RW.RESULTADO_LIQUIDO;
+    POUT_DATACRC  := RW.DT_ULTIMO_CRC;
+    POUT_TOTAL    := RW.CRC_TOTAL;
+    POUT_MORA     := RW.CRC_MORA;
+    POUT_CONTENCIOSO := RW.CRC_CONTENCIOSO;
+    POUT_EXTRA       := RW.CRC_EXTRAPAT;
+    POUT_RENEGOCI    := RW.CRC_RENEGOCIADO;
+    POUT_DATABAN     := RW.DT_INFO_BANCARIA;
+    POUT_CONCEITO    := RW.OPINIAO_BANCO;
+    POUT_DATACOM     := RW.DT_INFO_COMERCIAL;
+    POUT_OPRIPA      := RW.OPINIAO_PRACA;
+    POUT_PTLIMSOL    := RW.CREDITO_SOLICITADO;
+    POUT_PTLIMCRE    := RW.CREDITO_CONCEDIDO;
+    POUT_SURVEILLANCE := RW.EM_SURVEILLANCE;
+    POUT_DATAREF       := RW.DATA_REFERENCIA;
+  END LOOP;
+ --apontes e protestos (saldo)
+  BEGIN
+	SELECT COUNT(DISTINCT (NMBOLETO))
+		,SUM(PTIMPORT)
+	INTO POUT_NUMBOLE
+		,POUT_TOTAL1
+	FROM CO_ENTIAYP
+	WHERE CDPERSON = PI_CDPERSON
+		AND SWJUSTIF IS NULL --sacamos montantes sin justificar
+		AND SWIMPORT IN (
+			'A'
+			,'P'
+			);--sacamos importes de apontes e protestos
+
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			NULL;
+	END;
+-- acciones judiciales
+	SELECT COUNT(*)
+	INTO POUT_JUDICIL --si vale 1,quedan acciones judiciales por resolver
+	FROM CO_ENTIJUD
+	WHERE CDPERSON = PI_CDPERSON
+		--       AND CDRESOLU IS NULL  --Acciones judiciales por resolver.algun registro en CO_ENTIJUD con CDRESOLU a NULL
+		--       AND ROWNUM <=1;
+		AND NVL(CDRESOLU, 'ER') = 'ER';
+
+-- anexox das contabilísticas  -- "Sim/NÃO Serão SI si existen los balances (tanto sintético como analítico)
+
+	SELECT COUNT(*)
+	INTO POUT_BALAN --si vale 1,hay anexos das contabilísticas
+	FROM CO_ICCONTROL
+	WHERE CDPERSON = PI_CDPERSON
+		AND (
+			SWBALSIN = 'S'
+			OR ESBALANA = 'A'
+			)
+		AND ROWNUM <= 1;
+
+END Pl_Entidad;
+
+--
+PROCEDURE PL_SEC3_TOMADOR (PI_NMPEDIDO IN VARCHAR2
+						,PI_NMEVENTO IN NUMBER
+						,POUT_CDUNIECO  OUT NUMBER
+						,POUT_CDRAMO   OUT NUMBER
+						,POUT_NMPROPUE OUT NUMBER
+						,POUT_NMPOLIZA OUT NUMBER
+						,POUT_NOME OUT VARCHAR2
+						,POUT_NUC  OUT NUMBER
+						,POUT_NIPC OUT VARCHAR2
+						,POUT_CDCAE OUT VARCHAR2
+						,POUT_CONPAG OUT VARCHAR2
+						,POUT_RIEG OUT VARCHAR2
+						,POUT_TAXA OUT VARCHAR2
+						,POUT_SISTAR OUT VARCHAR2
+						,POUT_GESTOR OUT VARCHAR2)
+AS
+V_CDUNIECO  NUMBER(3):=NULL;
+V_CDRAMO    NUMBER(3):=NULL;
+V_NMPROPUE  NUMBER(10):=NULL;
+V_NMPOLIZA  NUMBER(10):=NULL;
+V_DSNOMBRE  VARCHAR2(160):= NULL;
+V_NUC       NUMBER(9) := NULL;
+V_NIPC      VARCHAR2(20):= NULL;
+V_CDCAE     VARCHAR2(5) := NULL;
+V_CONPAG    VARCHAR2(40):=NULL;
+V_RIESG     VARCHAR2(40):=NULL;
+V_TAXA      VARCHAR2(40):=NULL;
+V_SISTAR    VARCHAR2(40):=NULL;
+V_GESTOR    VARCHAR2(40):=NULL;
+BEGIN
+    BEGIN
+		SELECT CDUNIECO
+			,CDRAMO
+			,NMPROPUE
+			,NMPOLIZA
+		INTO V_CDUNIECO
+			,V_CDRAMO
+			,V_NMPROPUE
+			,V_NMPOLIZA
+		FROM CO_PGARANR
+		WHERE NMPEDIDO = PI_NMPEDIDO
+			AND NMEVENTO = PI_NMEVENTO;
+
+	EXCEPTION WHEN NO_DATA_FOUND THEN
+		NULL;
+	END;
+	--recuperamos datos generales
+    BEGIN
+		SELECT MPERSONA.DSNOMBRE
+			,MPERSONA.CDPERSON
+			,DECODE(MPERSONA.CDTIPIDE, 1, MPERSONA.CDTIPIDE, 2, MPERSONA.CDIDEPER, NULL)
+			,CO_ENTIDAD.CDCAE
+		INTO V_DSNOMBRE
+			,V_NUC
+			,V_NIPC
+			,V_CDCAE
+		FROM CO_PROROL
+			,MPERSONA
+			,MPARAPRO
+			,CO_ENTIDAD
+		WHERE CO_PROROL.CDUNIECO = V_CDUNIECO
+			AND CO_PROROL.CDRAMO = V_CDRAMO
+			AND CO_PROROL.NMPROPUE = V_NMPROPUE
+			AND CO_PROROL.STATUS = 'V'
+			AND CO_PROROL.NMGARANT = 0 --tomador
+			AND MPARAPRO.CDRAMO = V_CDRAMO
+			AND CO_PROROL.CDROL = MPARAPRO.CDROLTOM
+			AND CO_PROROL.NMORDINA = (
+				SELECT MAX(B.NMORDINA)
+				FROM CO_PROROL B
+				WHERE B.CDUNIECO = CO_PROROL.CDUNIECO
+					AND B.CDRAMO = CO_PROROL.CDRAMO
+					AND B.NMPROPUE = CO_PROROL.NMPROPUE
+					AND B.NMGARANT = CO_PROROL.NMGARANT
+					AND B.CDROL = CO_PROROL.CDROL
+				)
+			AND MPERSONA.CDPERSON(+) = CO_PROROL.CDPERSON
+			AND CO_ENTIDAD.CDPERSON(+) = CO_PROROL.CDPERSON;
+
+	EXCEPTION WHEN NO_DATA_FOUND THEN
+		NULL;
+	END;
+	-- condiciones de pagamento
+	BEGIN
+		SELECT OTVALOR26
+		INTO V_CONPAG
+		FROM TTAPVAAT
+		WHERE NMTABLA = (
+				SELECT NMTABLA
+				FROM TTAPTABL
+				WHERE CDTABLA = 'TCONDPAG'
+				)
+			AND OTCLAVE1 = (
+				SELECT OTVALOR
+				FROM TVALOPOL T
+				WHERE T.CDUNIECO = V_CDUNIECO
+					AND T.CDRAMO = V_CDRAMO
+					AND T.ESTADO = 'M'
+					AND T.NMPOLIZA = V_NMPOLIZA
+					AND T.STATUS = 'V'
+					AND T.CDATRIBU = 17
+					AND T.NMSUPLEM = (
+						SELECT MAX(NMSUPLEM)
+						FROM TVALOPOL T1
+						WHERE T1.CDUNIECO = T.CDUNIECO
+							AND T1.CDRAMO = T.CDRAMO
+							AND T1.ESTADO = 'M'
+							AND T1.CDATRIBU = T.CDATRIBU
+							AND T1.NMSUPLEM <= (
+								SELECT MAX(NMSUPLEM)
+								FROM MSUPLEME
+								WHERE CDUNIECO = T.CDUNIECO
+									AND CDRAMO = T.CDRAMO
+									AND NMPOLIZA = T.NMPOLIZA
+									AND ESTADO = 'M'
+									AND FEINIVAL <= SYSDATE
+								)
+						)
+				);
+
+	EXCEPTION WHEN NO_DATA_FOUND THEN
+		NULL;
+	END;
+	--riesgos cubiertos
+	BEGIN
+		SELECT OTVALOR26
+		INTO V_RIESG
+		FROM TTAPVAAT
+		WHERE NMTABLA = (
+				SELECT NMTABLA
+				FROM TTAPTABL
+				WHERE CDTABLA = 'TCOCREC'
+				)
+			AND OTCLAVE1 = (
+				SELECT OTVALOR
+				FROM TVALOPOL T
+				WHERE T.CDUNIECO = V_CDUNIECO
+					AND T.CDRAMO = V_CDRAMO
+					AND T.ESTADO = 'M'
+					AND T.NMPOLIZA = V_NMPOLIZA
+					AND T.STATUS = 'V'
+					AND T.CDATRIBU = (
+						SELECT NMCOBERT
+						FROM CO_MPARAPRO
+						WHERE CDRAMO = V_CDRAMO
+						)
+					AND T.NMSUPLEM = (
+						SELECT MAX(NMSUPLEM)
+						FROM TVALOPOL T1
+						WHERE T1.CDUNIECO = T.CDUNIECO
+							AND T1.CDRAMO = T.CDRAMO
+							AND T1.ESTADO = 'M'
+							AND T1.CDATRIBU = T.CDATRIBU
+							AND T1.NMSUPLEM <= (
+								SELECT MAX(NMSUPLEM)
+								FROM MSUPLEME
+								WHERE CDUNIECO = T.CDUNIECO
+									AND CDRAMO = T.CDRAMO
+									AND NMPOLIZA = T.NMPOLIZA
+									AND ESTADO = 'M'
+									AND FEINIVAL <= SYSDATE
+								)
+						)
+				);
+
+	EXCEPTION WHEN NO_DATA_FOUND THEN
+		NULL;
+	END;
+--  Taxa:(efectiva de la póliza;es el capital comercial contratado
+	BEGIN
+		SELECT OTVALOR
+		INTO V_TAXA
+		FROM TVALOPOL T
+		WHERE T.CDUNIECO = V_CDUNIECO
+			AND T.CDRAMO = V_CDRAMO
+			AND T.ESTADO = 'M'
+			AND T.NMPOLIZA = V_NMPOLIZA
+			AND T.STATUS = 'V'
+			AND T.CDATRIBU = (
+				SELECT NMTASCOM
+				FROM CO_MPARAPRO
+				WHERE CDRAMO = V_CDRAMO
+				)
+			AND T.NMSUPLEM = (
+				SELECT MAX(NMSUPLEM)
+				FROM TVALOPOL T1
+				WHERE T1.CDUNIECO = T.CDUNIECO
+					AND T1.CDRAMO = T.CDRAMO
+					AND T1.ESTADO = 'M'
+					AND T1.CDATRIBU = T.CDATRIBU
+					AND T1.NMSUPLEM <= (
+						SELECT MAX(NMSUPLEM)
+						FROM MSUPLEME
+						WHERE CDUNIECO = T.CDUNIECO
+							AND CDRAMO = T.CDRAMO
+							AND NMPOLIZA = T.NMPOLIZA
+							AND ESTADO = 'M'
+							AND FEINIVAL <= SYSDATE
+						)
+				);
+
+	EXCEPTION WHEN NO_DATA_FOUND THEN
+		NULL;
+	END;
+	-- sistema de tarificacion
+	BEGIN
+		SELECT OTVALOR26
+		INTO V_SISTAR
+		FROM TTAPVAAT
+		WHERE NMTABLA = (
+				SELECT NMTABLA
+				FROM TTAPTABL
+				WHERE CDTABLA = 'TSTARIF'
+				)
+			AND OTCLAVE1 = (
+				SELECT OTVALOR
+				FROM TVALOPOL T
+				WHERE T.CDUNIECO = V_CDUNIECO
+					AND T.CDRAMO = V_CDRAMO
+					AND T.ESTADO = 'M'
+					AND T.NMPOLIZA = V_NMPOLIZA
+					AND T.STATUS = 'V'
+					AND T.CDATRIBU = (
+						SELECT NMSISTAR
+						FROM CO_MPARAPRO
+						WHERE CDRAMO = V_CDRAMO
+						)
+					AND T.NMSUPLEM = (
+						SELECT MAX(NMSUPLEM)
+						FROM TVALOPOL T1
+						WHERE T1.CDUNIECO = T.CDUNIECO
+							AND T1.CDRAMO = T.CDRAMO
+							AND T1.ESTADO = 'M'
+							AND T1.CDATRIBU = T.CDATRIBU
+							AND T1.NMSUPLEM <= (
+								SELECT MAX(NMSUPLEM)
+								FROM MSUPLEME
+								WHERE CDUNIECO = T.CDUNIECO
+									AND CDRAMO = T.CDRAMO
+									AND NMPOLIZA = T.NMPOLIZA
+									AND ESTADO = 'M'
+									AND FEINIVAL <= SYSDATE
+								)
+						)
+				);
+
+	EXCEPTION WHEN NO_DATA_FOUND THEN
+		NULL;
+	END;
+      --
+	-- Gestor
+	BEGIN
+		SELECT OTVALOR26
+		INTO V_GESTOR
+		FROM TTAPVAAT
+		WHERE NMTABLA = (
+				SELECT NMTABLA
+				FROM TTAPTABL
+				WHERE CDTABLA = 'TGESCONT'
+				)
+			AND OTCLAVE1 = (
+				SELECT OTVALOR
+				FROM TVALOPOL T
+				WHERE T.CDUNIECO = V_CDUNIECO
+					AND T.CDRAMO = V_CDRAMO
+					AND T.ESTADO = 'M'
+					AND T.NMPOLIZA = V_NMPOLIZA
+					AND T.STATUS = 'V'
+					AND T.CDATRIBU = 4
+					AND T.NMSUPLEM = (
+						SELECT MAX(NMSUPLEM)
+						FROM TVALOPOL T1
+						WHERE T1.CDUNIECO = T.CDUNIECO
+							AND T1.CDRAMO = T.CDRAMO
+							AND T1.ESTADO = 'M'
+							AND T1.CDATRIBU = T.CDATRIBU
+							AND T1.NMSUPLEM <= (
+								SELECT MAX(NMSUPLEM)
+								FROM MSUPLEME
+								WHERE CDUNIECO = T.CDUNIECO
+									AND CDRAMO = T.CDRAMO
+									AND NMPOLIZA = T.NMPOLIZA
+									AND ESTADO = 'M'
+									AND FEINIVAL <= SYSDATE
+								)
+						)
+				);
+
+	EXCEPTION WHEN NO_DATA_FOUND THEN
+		NULL;
+	END;
+--
+		POUT_CDUNIECO := V_CDUNIECO;
+		POUT_CDRAMO := V_CDRAMO;
+		POUT_NMPROPUE := V_NMPROPUE;
+		POUT_NMPOLIZA := V_NMPOLIZA;
+		POUT_NOME  := V_DSNOMBRE;
+		POUT_NUC   := V_NUC;
+		POUT_NIPC  := V_NIPC;
+		POUT_CDCAE := V_CDCAE;
+		POUT_CONPAG:= V_CONPAG;
+		POUT_RIEG  :=V_RIESG;
+		POUT_TAXA  :=V_TAXA;
+		POUT_SISTAR:= V_SISTAR;
+		POUT_GESTOR:= V_GESTOR;
+END;
+
+--
+/**PROCEDIMIENTO QUE ESTUDIA TODAS LAS PÓLIZAS ASOCIADAS AL TOMADOR QUE LE PASAMOS **/
+/** PARÉMETRO DE ENTRADA:
+   PI_CDPERSON :CDPERSON DE LA ENTIDAD ESTUDIADA
+   PI_CDRAMO : TIPO DE PRODUCTO **/
+PROCEDURE PL_GLOBAL_TOMADOR( PI_CDPERSON       IN  NUMBER
+                           , PI_CDRAMO         IN  NUMBER
+                           , POUT_VENDAS       OUT NUMBER
+                           , POUT_PREMIOS      OUT NUMBER
+                           , POUT_AMENAZAS     OUT NUMBER
+                           , POUT_SINIEST      OUT NUMBER
+                           , POUT_RECUPERACOES OUT NUMBER
+                           , POUT_PMP          OUT NUMBER)
+AS
+  WVENDAS       NUMBER(22,5):=0;      --para las vendas
+  WCOBRADO      NUMBER(17,5):=0;
+  WEXTORNO      NUMBER(17,5):=0;
+  WSINIEST      NUMBER(17,5):=0;   --pagos de siniestros
+  WRECUPERA     NUMBER(17,5):=0;   --recuperaciones
+  WPMP          NUMBER(10):=0;
+  WPMPFINAL     NUMBER(10):=0;
+  WIMPORTE      NUMBER(17,5):=0;
+  WAMENAZAS     NUMBER(17,5):=0;
+  WNUMERO       NUMBER(17,5):=0;
+  V_NUMERO      NUMBER(6):=0;
+  V_MONTANTE    NUMBER(17,5) :=0;
+  V_TIPO        VARCHAR2(1);
+  V_CONTADOR    NUMBER(17,5);
+  V_OTVALOR     VARCHAR2(40);
+  V_VENDAS      NUMBER(22,5);
+  V_IMPORTE     NUMBER(17,5);
+  V_COBRADO     NUMBER(17,5);
+  V_EXTORNO     NUMBER(17,5);
+  V_SINI        NUMBER(17,5);
+  V_RECUP       NUMBER(17,5);
+  V_NMIMPFAC    NUMBER(17,5);
+  V_NMIMPNET    NUMBER(17,5);
+  V_PMP         NUMBER(10);
+  V_AMENAZAS    NUMBER(6);
+--
+  CURSOR POLIZA IS         --SACA TODAS LAS PÓLIZAS EN DONDE LA ENTIDAD ES TOMADOR
+	SELECT *
+	FROM MPOLIPER A
+	WHERE A.CDPERSON = PI_CDPERSON
+		AND A.CDROL = Tipo_Rol(PI_CDRAMO, 'CDROLTOM')
+		AND A.CDRAMO = PI_CDRAMO
+		AND A.ESTADO = 'M'
+		AND A.STATUS = 'V'
+		AND A.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE X.CDUNIECO = A.CDUNIECO
+				AND X.CDRAMO = A.CDRAMO
+				AND X.ESTADO = 'M'
+				AND X.NMPOLIZA = A.NMPOLIZA
+				AND X.CDROL = A.CDROL
+				AND X.NMSITUAC = A.NMSITUAC
+				AND X.CDPERSON = A.CDPERSON
+				AND X.NMSUPLEM <= TO_CHAR(SYSDATE, 'J') || '99999999999'
+			);
+
+BEGIN
+  FOR I IN POLIZA LOOP
+    V_NUMERO := V_NUMERO+1; --cuenta las pólizas
+    -- sacamos las vendas
+		SELECT NVL(SUM(PTVENDTO), 0)
+		INTO V_VENDAS
+		FROM CO_ENTICOM
+		WHERE CDPERSON = I.CDPERSON;
+
+    WVENDAS := WVENDAS + V_VENDAS;
+    --sacamos los premios procesados:Primas cobradas menos extornos pagados del tomador.
+		SELECT NVL(SUM(DETALHES.PTIMPORT), 0)
+		INTO V_COBRADO
+		FROM MRECIBO RECIBO
+			,MRECIDET DETALHES
+		WHERE DECODE(DETALHES.CDTIPCON, 'PDPR ME', 'S', 'PDPR MI', 'S', 'PDPR PC', 'S', 'PDPR PE', 'S', 'PSDPR ME', 'S', 'PSDPR MI', 'S', 'PSDPR PC', 'S', 'PSDPR', 'S', 'PCP', 'S', 'N') = 'S'
+			AND DETALHES.CDUNIECO = RECIBO.CDUNIECO
+			AND DETALHES.NMRECIBO = RECIBO.NMRECIBO
+			AND RECIBO.CDESTADO = 3
+			AND RECIBO.NMSUPLEM <= TO_CHAR(SYSDATE, 'J') || '99999999999'
+			AND RECIBO.NMPOLIZA = I.NMPOLIZA
+			AND RECIBO.ESTADO = I.ESTADO
+			AND RECIBO.CDRAMO = I.CDRAMO
+			AND RECIBO.CDUNIECO = I.CDUNIECO;
+
+    WCOBRADO:= WCOBRADO + V_COBRADO;
+    --ahora calculo los extornos
+		SELECT NVL(SUM(DETALHES.PTIMPORT), 0)
+		INTO V_COBRADO
+		FROM MRECIBO RECIBO
+			,MRECIDET DETALHES
+		WHERE 1 = 1
+			AND DETALHES.CDTIPCON = (
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+					AND CODIGO NOT IN (
+						'BONIF'
+						,'BONIF MI'
+						,'BONIF ME'
+						,'PACER'
+						,'PACER MI'
+						,'PACER ME'
+						)
+				)
+			AND DETALHES.CDUNIECO = RECIBO.CDUNIECO
+			AND DETALHES.NMRECIBO = RECIBO.NMRECIBO
+			AND RECIBO.CDESTADO = 7
+			AND RECIBO.NMSUPLEM <= TO_CHAR(SYSDATE, 'J') || '99999999999'
+			AND RECIBO.NMPOLIZA = I.NMPOLIZA
+			AND RECIBO.ESTADO = I.ESTADO
+			AND RECIBO.CDRAMO = I.CDRAMO
+			AND DECODE(RECIBO.TIPORECI, 93, SIGN(RECIBO.PTIMPORT), - 1) = - 1
+			AND RECIBO.TIPORECI IN (
+				5
+				,6
+				,93
+				)
+			AND RECIBO.CDUNIECO = I.CDUNIECO;
+
+    WEXTORNO:= WEXTORNO + NVL(V_EXTORNO,0);
+    --sacamos los siniestros procesados y las recuperaciones
+		SELECT NVL(SUM(B.PTACTPAG), 0)
+			,NVL(SUM(B.PTACTREC), 0)
+		INTO V_SINI
+			,V_RECUP
+		FROM MSINIEST A
+			,MVALOSIN B
+		WHERE A.CDUNIECO = I.CDUNIECO
+			AND A.CDRAMO = I.CDRAMO
+			AND A.STATUS = 'M'
+			AND A.NMPOLIZA = I.NMPOLIZA
+			AND B.STATUS = A.STATUS
+			AND B.AAAPERTU = A.AAAPERTU
+			AND B.NMSINIES = A.NMSINIES
+			AND B.CDRAMO = A.CDRAMO
+			AND B.CDUNIECO = A.CDUNIECO;
+
+    WSINIEST  := WSINIEST  + NVL(V_SINI,0);
+    WRECUPERA := WRECUPERA + NVL(V_RECUP,0);
+    -- sacamos los plazos medios de pagos (MEDIA PONDERADA)
+		SELECT NVL(AVG(TRUNC(feestado) - TRUNC(feemisio)), 0)
+			,NVL(SUM(ptimport), 0)
+		INTO V_PMP
+			,V_IMPORTE
+		FROM MRECIBO A
+		WHERE A.CDUNIECO = I.CDUNIECO
+			AND A.CDRAMO = I.CDRAMO
+			AND A.ESTADO = I.ESTADO
+			AND A.NMPOLIZA = I.NMPOLIZA
+			AND A.CDESTADO = '7' --recibos PAGADOS
+			AND A.NMSUPLEM < TO_CHAR(SYSDATE, 'J') || '99999999999';
+
+    WPMP    := WPMP + V_PMP;
+    WNUMERO := WNUMERO + V_IMPORTE;
+    -- sacamos las amenazas de la póliza (facturas menos comunicaciones de pagos)
+		SELECT SUM(B.NMIMPFAC * NVL(B.TASACAMB, 1))
+			,SUM(B.NMIMPNET * NVL(B.TASACAMB, 1))
+		INTO V_NMIMPFAC
+			,V_NMIMPNET
+		FROM CO_COAME A
+			,CO_FAAME B
+		WHERE A.CDUNIECO = I.CDUNIECO
+			AND A.CDTIPORA = SUBSTR(PI_CDRAMO, 1, 1)
+			AND A.CDRAMO = I.CDRAMO
+			AND A.NMPOLIZA = I.NMPOLIZA
+			AND A.ESTADO = I.ESTADO
+			AND B.CDUNIECO = A.CDUNIECO
+			AND B.CDTIPORA = A.CDTIPORA
+			AND B.NMPROAME = A.NMPROAME
+			AND B.NMCOMAME = A.NMCOMAME;
+
+    -- MIRAMOS A VER SI TIENE O NO IVA
+    BEGIN
+		SELECT DECODE(T.OTVALOR26, 0, 'N', 'S')
+		INTO V_OTVALOR
+		FROM TVALOPER V
+			,TTAPVAAT T
+		WHERE T.NMTABLA = 40
+			AND T.OTCLAVE1 = V.OTVALOR
+			AND V.CDPERSON = I.CDPERSON
+			AND V.CDATRIBU = 22;
+
+    EXCEPTION
+      WHEN OTHERS THEN
+         V_OTVALOR:='N';
+    END;
+    IF V_OTVALOR ='S' THEN
+      WIMPORTE :=WIMPORTE +NVL(V_NMIMPNET,0);
+    ELSE
+      WIMPORTE   :=WIMPORTE + NVL(V_NMIMPFAC,0);
+    END IF;
+     --AHORA SACAMOS LOS PAGOS
+		SELECT NVL(SUM(C.NMIMPPAG * NVL(C.TASACAMB, 1)), 0)
+		INTO V_CONTADOR
+		FROM CO_COAME A
+			,CO_COPDE C
+		WHERE A.CDUNIECO = I.CDUNIECO
+			AND A.CDTIPORA = (
+				SELECT CDTIPORA
+				FROM TRAMOS
+				WHERE CDRAMO = PI_CDRAMO
+				)
+			AND A.CDRAMO = I.CDRAMO
+			AND A.NMPOLIZA = I.NMPOLIZA
+			AND C.CDUNIECO = A.CDUNIECO
+			AND C.CDTIPORA = A.CDTIPORA
+			AND C.NMPROAME = A.NMPROAME
+			AND C.NMCOMAME = A.NMCOMAME;
+
+      V_MONTANTE:= V_MONTANTE + V_CONTADOR;
+  END LOOP;
+  WAMENAZAS := WIMPORTE - V_MONTANTE; --montante total
+  IF V_NUMERO <> 0 AND
+      WNUMERO <> 0 THEN
+    WPMPFINAL := WPMP/WNUMERO;
+  END IF;
+  POUT_VENDAS       := WVENDAS  ;       --Vendas
+  POUT_PREMIOS      := WCOBRADO-WEXTORNO;       -- premios
+  POUT_AMENAZAS     := WAMENAZAS;      -- amenazas
+  POUT_SINIEST      := WSINIEST;       --siniestros procesados
+  POUT_RECUPERACOES := WRECUPERA;
+  POUT_PMP          := WPMPFINAL;      -- p.m.p.(plazo medio de pagos)
+END;
+
+---
+/* PROCEDIMIENTO QUE CALCULA DISTINTOS VALORES DE ATRIBUTOS VARIABLES DE POLIZA PARA UN RAMO DADO
+ EL PARAMETRO DE ENTRADA EN EL CDUNIECO,CDRAMO Y EL NMPOLIZA, Y DE SALIDA LOS DISTINTOS VALORES DE LOS
+
+ATRIBUTOS*/
+PROCEDURE PL_ATRIBUTO_POLIZA(  PI_CDUNIECO         IN NUMBER
+                              ,PI_CDRAMO           IN NUMBER
+                              ,PI_NMPOLIZA         IN NUMBER
+                              ,POUT_BONIFICACION       OUT VARCHAR2
+                              ,POUT_PARTICIPACION_RESULT OUT VARCHAR2
+                              ,POUT_TAXA_PREMIO_COMERCIAL OUT VARCHAR2
+                              ,POUT_TAXA_PREMIO_POLITICO  OUT VARCHAR2
+                              ,POUT_PREMIO_MINIMO OUT VARCHAR2
+                              ,POUT_PREMIO_MAXIMO OUT VARCHAR2
+							  ,PORCENTAJE_BONIFICION OUT VARCHAR2
+							  ,PORCENTAJE_ENCARGO OUT VARCHAR2
+							  ,SALDO_NEGATIVO OUT VARCHAR2
+							  ,PORCENTAJE_PARTICIPACION OUT VARCHAR2) AS
+BEGIN
+-- Bonificacion.
+   BEGIN
+	SELECT OTVALOR
+	INTO POUT_BONIFICACION
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = (
+			SELECT CDAJBON
+			FROM CO_MPARAPRO
+			WHERE CDRAMO = PI_CDRAMO
+			)
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+EXCEPTION
+  WHEN OTHERS THEN POUT_BONIFICACION:=NULL;
+ END;
+--Participacion de resultados
+   BEGIN
+	SELECT OTVALOR
+	INTO POUT_PARTICIPACION_RESULT
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = (
+			SELECT CDAJCTA
+			FROM CO_MPARAPRO
+			WHERE CDRAMO = PI_CDRAMO
+			)
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN POUT_PARTICIPACION_RESULT:=NULL;
+ END;
+--Taxa premio comercial
+   BEGIN
+	SELECT OTVALOR
+	INTO POUT_TAXA_PREMIO_COMERCIAL
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = (
+			SELECT NMTASCOM
+			FROM CO_MPARAPRO
+			WHERE CDRAMO = PI_CDRAMO
+			)
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN POUT_TAXA_PREMIO_COMERCIAL := NULL;
+ END;
+--Taxa premio politico
+   BEGIN
+	SELECT OTVALOR
+	INTO POUT_TAXA_PREMIO_POLITICO
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = (
+			SELECT NMTASPOL
+			FROM CO_MPARAPRO
+			WHERE CDRAMO = PI_CDRAMO
+			)
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN POUT_TAXA_PREMIO_POLITICO := NULL;
+ END;
+--Premio minimo
+   BEGIN
+	SELECT OTVALOR
+	INTO POUT_PREMIO_MINIMO
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = DECODE(PI_CDRAMO, 100, '32', 101, '32', 102, '34', 103, '34')
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN POUT_PREMIO_MINIMO:= NULL;
+ END;
+--Premio maximo
+   BEGIN
+	SELECT OTVALOR
+	INTO POUT_PREMIO_MAXIMO
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = DECODE(PI_CDRAMO, 100, '33', 101, '33', 102, '35', 103, '35')
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN POUT_PREMIO_MAXIMO:= NULL;
+ END;
+--Porcentaje de bonificacion
+   BEGIN
+	SELECT OTVALOR
+	INTO PORCENTAJE_BONIFICION
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = (
+			SELECT CDPORBON
+			FROM CO_MPARAPRO
+			WHERE CDRAMO = PI_CDRAMO
+			)
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN PORCENTAJE_BONIFICION:= NULL;
+ END;
+--Porcentaje de encargo
+   BEGIN
+	SELECT OTVALOR
+	INTO PORCENTAJE_ENCARGO
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = '60'
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN PORCENTAJE_ENCARGO := NULL;
+ END;
+--Saldo negativo
+   BEGIN
+	SELECT OTVALOR
+	INTO SALDO_NEGATIVO
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = '62'
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN SALDO_NEGATIVO:= NULL;
+ END;
+--Porcentaje participacion de resultados
+   BEGIN
+	SELECT OTVALOR
+	INTO PORCENTAJE_PARTICIPACION
+	FROM TVALOPOL ATRIBUTO
+	WHERE ATRIBUTO.CDUNIECO = PI_CDUNIECO
+		AND ATRIBUTO.CDRAMO = PI_CDRAMO
+		AND ATRIBUTO.NMPOLIZA = PI_NMPOLIZA
+		AND ATRIBUTO.ESTADO = 'M'
+		AND ATRIBUTO.STATUS = 'V'
+		AND ATRIBUTO.CDATRIBU = '61'
+		AND ATRIBUTO.NMSUPLEM = (
+			SELECT MAX(ATRIBUTO1.NMSUPLEM)
+			FROM TVALOPOL ATRIBUTO1
+			WHERE ATRIBUTO1.CDUNIECO = ATRIBUTO.CDUNIECO
+				AND ATRIBUTO1.CDRAMO = ATRIBUTO.CDRAMO
+				AND ATRIBUTO1.NMPOLIZA = ATRIBUTO.NMPOLIZA
+				AND ATRIBUTO1.ESTADO = ATRIBUTO.ESTADO
+				AND ATRIBUTO1.CDATRIBU = ATRIBUTO.CDATRIBU
+				AND ATRIBUTO1.NMSUPLEM <= (
+					SELECT MAX(ATRIBUTO2.NMSUPLEM)
+					FROM MSUPLEME ATRIBUTO2
+					WHERE ATRIBUTO2.CDUNIECO = ATRIBUTO1.CDUNIECO
+						AND ATRIBUTO2.CDRAMO = ATRIBUTO1.CDRAMO
+						AND ATRIBUTO2.NMPOLIZA = ATRIBUTO1.NMPOLIZA
+						AND ATRIBUTO2.ESTADO = ATRIBUTO1.ESTADO
+						AND SYSDATE BETWEEN ATRIBUTO2.FEINIVAL
+							AND ATRIBUTO2.FEFINVAL
+					)
+			);
+
+ EXCEPTION
+  WHEN OTHERS THEN PORCENTAJE_PARTICIPACION:= NULL;
+ END;
+END;
+
+--
+/*PROCEDIMIENTO QUE CALCULA EL NÚMERO DE GARANTIAS EN VIGOR ASOCIADAS A LA ENTIDAD(
+pólizas en las que la entidad forma parte de un consorcio)
+  SUMA LOS MONTANTES COMERCIALES O POLÍTICOS CONCEDIDOS,Y EL NÚMERO DE PÓLIZAS IMPLICADAS*/
+/*Parâmetros de entrada:
+-1.el cdperson de la entidad
+-2 el estado de la propuesta :'D',sin póliza asociada,'M',con póliza asociada
+-3 el tipo,que puede ser 'C',comercial o 'P',político
+-4 tiporam '1' crédito, '2' caucion
+-5 FECHA DE ENTRADA*/
+PROCEDURE Pl_CONSORCIO(PI_CDPERSON IN NUMBER
+                                          ,PI_SWESTADO IN VARCHAR2
+                                          ,PI_TIPO IN VARCHAR2
+                                          ,PI_TIPRAM IN VARCHAR2
+                                          ,PI_FECHA IN DATE
+                                          ,POUT_NMGARANT  OUT NUMBER
+                                          ,POUT_MONTANTE  OUT NUMBER
+                                          ,POUT_NMPOLIZAS OUT NUMBER) AS
+   WIMPORTE      NUMBER(17,5);
+   CAMPO         VARCHAR2(15);
+   WCDROL        VARCHAR2(2);
+   WCDRAMO       CO_PROGAR.CDRAMO%TYPE;
+   WCDPERSON     NUMBER(9);
+   WPERCREL     NUMBER(5,2);
+   V_CDMONEDA    CO_PROPOL.CDMOEDA%TYPE;
+   V_cdeuro      tkrnlpar.cdeuro%TYPE;
+   V_PTCAMBIO      TCAMBIOS.PTCAMBIO%TYPE;
+   IMPORTE       CO_PROGAR.IMPCONCO%TYPE;
+   V_NMGARANT  NUMBER(6):=0;
+   V_NMPOLIZAS NUMBER(6) :=0;
+   V_TIPO        VARCHAR2(1);
+
+CURSOR CONSORCIO IS        --sacamos todas las entidades de tipo consorcio,que tienen como hija a nuestra entidad en estudio
+	SELECT B.CDPERPRI
+		,A.PERCREL
+	FROM CO_ENTIREL A
+		,CO_GRUPENT B
+	WHERE A.CDPERFIL = PI_CDPERSON
+		AND B.CDGRUENT = A.CDGRUENT
+		AND B.CDTIPARV = 'C';-- tipo consorcio
+
+
+CURSOR NMPROPUE IS                    --sacamos todas las propuestas asociadas a esa entidad
+	SELECT *
+	FROM CO_PROROL A
+	WHERE A.CDPERSON = WCDPERSON
+		AND A.STATUS = 'V'
+		AND A.CDROL = WCDROL
+		AND A.CDRAMO = WCDRAMO
+		AND A.NMORDINA = (
+			SELECT MAX(B.NMORDINA)
+			FROM CO_PROROL B
+			WHERE B.CDPERSON = A.CDPERSON
+				AND B.CDROL = A.CDROL
+				AND B.NMPROPUE = A.NMPROPUE
+				AND B.FEMODIF <= PI_FECHA
+			);
+
+CURSOR PRODUCTO IS
+  SELECT *
+    FROM TRAMOS
+    WHERE CDTIPRAM = PI_TIPRAM;   --VAMOS POR CRÉDITO
+
+BEGIN
+    WIMPORTE :=0;
+   SELECT CDEURO INTO V_CDEURO
+          FROM TKRNLPAR;
+  FOR RAMO IN PRODUCTO LOOP
+       CAMPO :='CDROLRIE';
+       WCDROL := Tipo_Rol(RAMO.CDRAMO,CAMPO);
+       WCDRAMO := RAMO.CDRAMO;
+  FOR ENTIDAD IN CONSORCIO LOOP
+       WCDPERSON := ENTIDAD.CDPERPRI;
+       WPERCREL  := ENTIDAD.PERCREL;
+     FOR PERS IN NMPROPUE LOOP
+        BEGIN
+          V_TIPO := PI_TIPO;
+			SELECT DECODE(V_TIPO, 'C', IMPCONCO, 'P', IMPCONPO, IMPCONCO) -- para cada importe y garantia vamos sacando los importes
+				-- comeciales o políticos concedidos
+			INTO IMPORTE
+			FROM CO_PROGAR
+			WHERE CDUNIECO = PERS.CDUNIECO
+				AND CDRAMO = PERS.CDRAMO
+				AND NMPROPUE = PERS.NMPROPUE
+				AND NMGARANT = PERS.NMGARANT
+				AND (
+					SWESTADO = PI_SWESTADO
+					OR PI_SWESTADO IS NULL
+					AND SWESTADO IN (
+						'D'
+						,'M'
+						,'PR'
+						)
+					);
+
+--
+                IF V_TIPO ='C' AND IMPORTE IS NOT NULL THEN
+					V_NMGARANT := V_NMGARANT +1;--pra contar las garantias
+					V_NMPOLIZAS := V_NMPOLIZAS +1;  --para contar las pólizas
+                ELSIF V_TIPO ='P' AND IMPORTE  IS NOT NULL THEN
+					V_NMGARANT := V_NMGARANT +1; --pra contar las garantias
+					V_NMPOLIZAS := V_NMPOLIZAS +1;  --para contar las pólizas
+                ELSIF V_TIPO IS NULL AND IMPORTE IS NOT NULL THEN
+					V_NMGARANT := V_NMGARANT +1; --pra contar las garantias
+                    V_NMPOLIZAS := V_NMPOLIZAS +1;  --para contar las pólizas
+                END IF;
+--
+       EXCEPTION WHEN NO_DATA_FOUND THEN
+             IMPORTE :=NULL;
+         END;
+         BEGIN
+			SELECT A.CDMOEDA
+			INTO V_CDMONEDA
+			FROM CO_PROPOL A
+			WHERE A.CDUNIECO = PERS.CDUNIECO
+				AND A.CDRAMO = PERS.CDRAMO
+				AND A.NMPROPUE = PERS.NMPROPUE
+				AND A.FEMODIF = (
+					SELECT MAX(B.FEMODIF)
+					FROM CO_PROPOL B
+					WHERE B.CDUNIECO = A.CDUNIECO
+						AND B.CDRAMO = A.CDRAMO
+						AND B.NMPROPUE = A.NMPROPUE
+						AND B.FEMODIF <= PI_FECHA
+					);
+
+         EXCEPTION WHEN NO_DATA_FOUND THEN
+               V_CDMONEDA := 'EUR';
+          END;
+          BEGIN
+			SELECT PTCAMBIO
+			INTO V_PTCAMBIO
+			FROM TCAMBIOS TCA
+			WHERE TCA.CDMONEDA = V_CDEURO
+				AND TCA.CDMONBAS = V_CDMONEDA
+				AND TCA.FEVALOR = (
+					SELECT MAX(FEVALOR)
+					FROM TCAMBIOS TCA1
+					WHERE TCA1.CDMONEDA = TCA.CDMONEDA
+						AND TCA1.CDMONBAS = TCA.CDMONBAS
+						AND FEVALOR <= LAST_DAY(ADD_MONTHS(PI_FECHA, - 1))
+					);
+
+            EXCEPTION WHEN NO_DATA_FOUND THEN
+                V_PTCAMBIO := 1;
+            END;
+            WIMPORTE := (NVL(WIMPORTE,0) + (NVL(IMPORTE,0) * V_PTCAMBIO)*(WPERCREL/100));
+           END LOOP;
+           END LOOP;
+           END LOOP;
+            POUT_NMGARANT := V_NMGARANT;
+            POUT_MONTANTE := WIMPORTE;
+            POUT_NMPOLIZAS:= V_NMPOLIZAS;
+       END;
+
+/*
+   NOME : FUN_VALORES_DIVIDA
+   *  OBJECTIVO : CALCULO DOS PRÉMIOS PENDENTES DE PAGAMENTO PARA UMA APÓLICE
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: JOSÉ VIEGAS
+*/
+FUNCTION FUN_VALORES_DIVIDA( P_CDUNIECO IN NUMBER
+                           , P_CDRAMO IN NUMBER
+                           , P_ESTADO IN VARCHAR2
+                           , P_NMPOLIZA IN NUMBER) RETURN NUMBER AS
+   AUX_SUMA NUMBER(17,5);
+BEGIN
+	SELECT SUM(RECIBO.PTIMPORT)
+	INTO AUX_SUMA
+	FROM MRECIBO RECIBO
+	WHERE RECIBO.CDUNIECO = P_CDUNIECO
+		AND RECIBO.CDRAMO = P_CDRAMO
+		AND RECIBO.ESTADO = P_ESTADO
+		AND RECIBO.NMPOLIZA = P_NMPOLIZA
+		AND DECODE(RECIBO.CDESTADO, 1, 'S', 5, 'S', 14, 'S', 15, 'S', 16, 'S', 17, 'S' /* ACRESCIMO ESTADOS 16 E 17 2006/04/04 */
+			, 'N') = 'S';
+
+  RETURN AUX_SUMA;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 0;
+END FUN_VALORES_DIVIDA;
+
+FUNCTION FUN_ULTIMA_DPR( P_CDUNIECO IN NUMBER
+                       , P_CDRAMO IN NUMBER
+                       , P_ESTADO IN VARCHAR2
+                       , P_NMPOLIZA IN NUMBER) RETURN DATE AS
+   AUX_FEPERDEC DATE;
+BEGIN
+	SELECT ADD_MONTHS(MAX(TO_DATE(DECVEN.FEPERDEC, 'MON-RR', 'NLS_DATE_LANGUAGE=PORTUGUESE')), - 1)
+	INTO AUX_FEPERDEC
+	FROM CO_DECVEN DECVEN
+	WHERE 1 = 1
+		AND DECVEN.cdunieco = P_CDUNIECO
+		AND DECVEN.cdramo = P_CDRAMO
+		AND DECVEN.nmpoliza = P_NMPOLIZA;
+
+/*
+  if AUX_FEPERDEC is null then
+    SELECT APOLICE.FEEFECTO
+    INTO AUX_FEPERDEC
+    FROM MPOLIZAS APOLICE
+    WHERE
+        APOLICE.CDUNIECO = P_CDUNIECO
+    AND APOLICE.CDRAMO   = P_CDRAMO
+    AND APOLICE.NMPOLIZA = P_NMPOLIZA
+    AND APOLICE.NMSUPLEM =( SELECT MAX(A.NMSUPLEM )
+                           FROM MPOLIZAS A
+                           WHERE
+                              A.CDUNIECO=APOLICE.CDUNIECO
+                           AND A.CDRAMO=APOLICE.CDRAMO
+                           AND A.FEEFECTO<=SYSDATE
+                           AND A.NMPOLIZA=APOLICE.NMPOLIZA
+                          );
+  end if;
+  */
+RETURN AUX_FEPERDEC;
+/*
+EXCEPTION
+WHEN OTHERS THEN
+    RETURN TO_DATE('01/01/1900','DD/MM/YYYY');
+*/
+END ;
+
+/*
+   NOME : FUN_DT_ESTADO_ANALISE
+   *  OBJECTIVO : Obtêm a data a que foi atribuido o estado de um dado evento de análise de risco.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_DT_ESTADO_ANALISE( PI_NMPEDIDO IN NUMBER
+                              , PI_NMEVENTO IN NUMBER)RETURN DATE
+AS
+  DT_ESTADO DATE;
+BEGIN
+  SELECT
+    FEULTEST
+  INTO
+    DT_ESTADO
+  FROM
+    CO_DETAANR
+  WHERE
+      NMPEDIDO = PI_NMPEDIDO
+  AND NMEVENTO = PI_NMEVENTO;
+  RETURN DT_ESTADO;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN '';
+END FUN_DT_ESTADO_ANALISE;
+
+/*
+   NOME : FUN_COD_ESTADO_ANALISE
+   *  OBJECTIVO : Obtêm o estado de um dado evento de análise de risco.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_COD_ESTADO_ANALISE( PI_NMPEDIDO IN NUMBER
+                               , PI_NMEVENTO IN NUMBER)RETURN VARCHAR2
+AS
+  ESTADO CO_DETAANR.CDESTADO%TYPE;
+BEGIN
+  SELECT
+    CDESTADO
+  INTO
+    ESTADO
+  FROM
+    CO_DETAANR
+  WHERE
+      NMPEDIDO = PI_NMPEDIDO
+  AND NMEVENTO = PI_NMEVENTO;
+  RETURN ESTADO;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN '';
+END FUN_COD_ESTADO_ANALISE;
+
+/*
+   NOME : FUN_DES_ESTADO_ANALISE
+   *  OBJECTIVO : Obtêm o descritivo do estado de um dado evento de análise de risco.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_DES_ESTADO_ANALISE( PI_NMPEDIDO IN NUMBER
+                               , PI_NMEVENTO IN NUMBER)RETURN VARCHAR2
+AS
+  D_ESTADO TMANTENI.DESCRIPL%TYPE;
+BEGIN
+	SELECT ESTADO.DESCRIPL
+	INTO D_ESTADO
+	FROM CO_DETAANR PEDIDO
+		,TMANTENI ESTADO
+	WHERE PEDIDO.NMPEDIDO = PI_NMPEDIDO
+		AND PEDIDO.NMEVENTO = PI_NMEVENTO
+		AND ESTADO.CDTABLA = 'CO_ESTANR'
+		AND ESTADO.CODIGO = PEDIDO.CDESTADO;
+
+  RETURN D_ESTADO;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN '';
+END FUN_DES_ESTADO_ANALISE;
+
+/*
+   NOME : FUN_ANALISTA_ANALISE
+   *  OBJECTIVO : Obtêm analista responsável pela análise de um evento de um pedido.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_ANALISTA_ANALISE( PI_NMPEDIDO IN NUMBER
+                             , PI_NMEVENTO IN NUMBER)RETURN VARCHAR2
+AS
+  ESTADO CO_DETAANR.CDANAEST%TYPE;
+BEGIN
+  SELECT
+    CDANAEST
+  INTO
+    ESTADO
+  FROM
+    CO_DETAANR
+  WHERE
+      NMPEDIDO = PI_NMPEDIDO
+  AND NMEVENTO = PI_NMEVENTO;
+  RETURN ESTADO;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN '';
+END FUN_ANALISTA_ANALISE;
+
+/*
+   NOME : FUN_ANALISTA_ANALISE
+   *  OBJECTIVO : Obtêm plafond atribuido a um país.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_PLAF_PAIS(PI_PAIS IN VARCHAR2) RETURN NUMBER
+AS
+  PLAF CO_PAISRIES.PTPLAFCO%TYPE;
+BEGIN
+  SELECT
+    PTPLAFCO
+  INTO
+    PLAF
+  FROM
+    CO_PAISRIES
+  WHERE
+    CDPAIS =PI_PAIS;
+  RETURN PLAF;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN NULL;
+END FUN_PLAF_PAIS;
+
+/*
+   NOME : FUN_DES_GRUPCOBERT
+   *  OBJECTIVO : Obtêm descritivo do grupo de cobertura de uma proposta.
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_DES_GRUPCOBERT( PI_CDUNIECO IN NUMBER
+                           , PI_CDRAMO   IN NUMBER
+                           , PI_NMPROPUE IN VARCHAR2)RETURN VARCHAR2 AS
+  D_GCoBERT VARCHAR2(40);
+BEGIN
+  IF PI_CDRAMO LIKE '1%' THEN
+	SELECT (B.OTCLAVE1 || ' - ' || B.OTVALOR26) grupo
+	INTO D_GCOBERT
+	FROM (
+		SELECT c.otclave1
+			,c.fedesde
+			,c.fehasta
+			,c.OTVALOR26
+			,b.CDATRIBU
+			,b.cdramo
+		FROM TTAPTABL a
+			,CO_TATRIPRO b
+			,TTAPVAAT c
+		WHERE 1 = 1
+			AND b.DSATRIBU = 'GRUPO COBERTURA'
+			AND b.CDRAMO = PI_CDRAMO
+			AND a.cdtabla = b.ottabval
+			AND a.nmtabla = c.nmtabla
+		) B
+		,CO_TVALOPRO A
+	WHERE B.OTCLAVE1 = A.OTVALOR
+		AND B.cdramo = A.cdramo
+		AND A.FEMODIF = (
+			SELECT MAX(X.FEMODIF)
+			FROM CO_TVALOPRO X
+			WHERE X.CDATRIBU = A.CDATRIBU
+				AND X.NMPROPUE = A.NMPROPUE
+				AND X.CDUNIECO = A.CDUNIECO
+				AND X.CDRAMO = A.CDRAMO
+			)
+		AND A.CDATRIBU = b.CDATRIBU
+		AND A.NMPROPUE = PI_NMPROPUE
+		AND A.CDRAMO = PI_CDRAMO
+		AND A.CDUNIECO = PI_CDUNIECO;
+
+  ELSE
+	SELECT (COBERTURA.OTCLAVE1 || ' - ' || COBERTURA.OTVALOR26)
+	INTO D_GCOBERT
+	FROM MPOLIZAS APOLICE
+		,(
+			SELECT c.otclave1
+				,c.fedesde
+				,c.fehasta
+				,c.OTVALOR26
+				,b.CDATRIBU
+				,b.cdramo
+			FROM TTAPTABL a
+				,TATRIPOL b
+				,TTAPVAAT c
+			WHERE 1 = 1
+				AND b.DSATRIBU = 'GRUPO COBERTURA'
+				AND b.CDRAMO = PI_CDRAMO
+				AND a.cdtabla = b.ottabval
+				AND a.nmtabla = c.nmtabla
+			) COBERTURA
+		,GD_ATRIBUTOS_APOLICE_MV ATRIBUTO
+	WHERE APOLICE.CDUNIECO = PI_CDUNIECO
+		AND APOLICE.CDRAMO = PI_CDRAMO
+		AND APOLICE.NMSOLICI = PI_NMPROPUE
+		AND APOLICE.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLIZAS X
+			WHERE X.CDUNIECO = APOLICE.CDUNIECO
+				AND X.CDRAMO = APOLICE.CDRAMO
+				AND X.ESTADO = APOLICE.ESTADO
+				AND X.NMPOLIZA = APOLICE.NMPOLIZA
+			)
+		AND ATRIBUTO.CDUNIECO = APOLICE.CDUNIECO
+		AND ATRIBUTO.CDRAMO = APOLICE.CDRAMO
+		AND ATRIBUTO.ESTADO = APOLICE.ESTADO
+		AND ATRIBUTO.NMPOLIZA = APOLICE.NMPOLIZA
+		AND COBERTURA.CDRAMO = APOLICE.CDRAMO
+		AND COBERTURA.OTCLAVE1 = TO_NUMBER(ATRIBUTO.ATRIBUTO10);
+
+  END IF;
+  RETURN D_GCOBERT;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN '';
+END FUN_DES_GRUPCOBERT;
+
+/*
+   NOME : FUN_PERCENTAGEM_TOTAL_COAS
+   *  OBJECTIVO : Obtêm o valor da percentagem do co-seguro cedido
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: BRIGIDA RAMOS
+*/
+FUNCTION FUN_PERCENTAGEM_TOTAL_COAS( PI_CDUNIECO IN NUMBER
+                                   , PI_CDRAMO IN NUMBER
+                                   , PI_ESTADO IN VARCHAR2
+                                   , PI_NMPOLIZA IN NUMBER
+                                   , PI_DATAACTUAL IN DATE DEFAULT
+
+SYSDATE) RETURN NUMBER
+AS
+  PERC_COASEG NUMBER;
+BEGIN
+	SELECT SUM(X.PORCPART)
+	INTO PERC_COASEG
+	FROM MPOLICOA X
+	WHERE X.CDUNIECO = PI_CDUNIECO
+		AND X.CDRAMO = PI_CDRAMO
+		AND X.ESTADO = PI_ESTADO
+		AND X.NMPOLIZA = PI_NMPOLIZA
+		AND X.STATUS = 'V'
+		AND X.NMSUPLEM = (
+			SELECT MAX(NMSUPLEM)
+			FROM MPOLICOA Z
+			WHERE Z.CDUNIECO = X.CDUNIECO
+				AND Z.CDRAMO = X.CDRAMO
+				AND Z.ESTADO = X.ESTADO
+				AND Z.NMPOLIZA = X.NMPOLIZA
+				AND Z.NMSUPLEM <= TO_CHAR(PI_DATAACTUAL, 'J') || '99999999999'
+			);
+
+   RETURN NVL(PERC_COASEG,0);
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN '';
+END;
+
+--
+/*Procedimiento que pasándole un pedido y un evento de tipo 'PG',te saca los datos
+del pedido de garantia asociado,los da la garantia anterior,si hubiera, y los datos de la
+primera propuesta del analista */
+PROCEDURE Pl_PEDIDO(PI_NMPEDIDO IN NUMBER
+                                          ,PI_NMEVENTO IN VARCHAR2
+                                          ,PI_CDPERSON IN VARCHAR2
+                                          ,POUT_NMGARANT   OUT NUMBER
+                                          ,POUT_CDPRIORI   OUT VARCHAR2
+                                          ,POUT_IMPSOLCO   OUT NUMBER
+                                          ,POUT_IMPSOLPO   OUT NUMBER
+                                          ,POUT_FEREGISGAR OUT DATE
+										  ,POUT_FEFINVIG   OUT DATE
+                                          ,POUT_NMMAXPAG   OUT NUMBER
+                                          ,POUT_NMGARANTE  OUT NUMBER
+                                          ,POUT_IMPSOLCO2  OUT NUMBER
+                                          ,POUT_IMPCONCO2  OUT NUMBER
+                                          ,POUT_IMPSOLPO2  OUT NUMBER
+                                          ,POUT_IMPCONPO2  OUT NUMBER
+                                          ,POUT_CDANADEC2  OUT VARCHAR2
+                                          ,POUT_CDDECISI2  OUT VARCHAR2
+                                          ,POUT_FEVIGENC2  OUT DATE
+                                          ,POUT_FEFINVIG2   OUT DATE
+                                          ,POUT_PTPROPOS   OUT NUMBER
+                                          ,POUT_PTPRORPC  OUT NUMBER
+                                          ,POUT_FEVALIDA  OUT DATE
+                                          ,POUT_CDDECISI  OUT VARCHAR2
+                                          ,POUT_CDANAEST  OUT VARCHAR2
+ ) AS
+   --
+V_CDUNIECO    NUMBER(3);
+V_CDRAMO      NUMBER(3);
+V_NMPROPUE    NUMBER(10);
+V_NMGARANT    NUMBER(6);
+V_CDPRIORI    VARCHAR2(2) :=NULL;
+V_IMPSOLCO    NUMBER(17,5):=NULL;
+V_IMPSOLPO    NUMBER(17,5):=NULL;
+V_FEREGISGAR  DATE :=NULL;
+V_FEFINVIG    DATE :=NULL;
+V_NMMAXPAG    NUMBER(3):=NULL;
+--
+V_NMGARANTE NUMBER(6);
+V_IMPSOLCO2 NUMBER(17,5):=NULL;
+V_IMPCONCO2 NUMBER(17,5):=NULL;
+V_IMPSOLPO2 NUMBER(17,5):=NULL;
+V_IMPCONPO2 NUMBER(17,5):=NULL;
+V_CDANADEC2 VARCHAR2(30):=NULL;
+V_CDDECISI2 VARCHAR2(2) :=NULL;
+V_FEVIGENC2 DATE :=NULL;
+V_FEFINVIG2 DATE :=NULL;
+--
+V_PTPROPOS  NUMBER(17,5):=NULL;
+V_PTPRORPC  NUMBER(17,5):=NULL;
+V_FEVALIDA  DATE :=NULL;
+V_CDDECISI  VARCHAR2(2) :=NULL;
+V_CDANAEST  VARCHAR2(30):=NULL;
+--
+ROW_DATGARANT co_progar%ROWTYPE;
+V_ERROR NUMBER(2) :=0;
+BEGIN
+  BEGIN
+	SELECT A.CDUNIECO --unidad econômica
+		,A.CDRAMO --producto
+		,A.NMPROPUE --PROPUESTA
+		,A.NMGARANT --Número del pedido de garantia
+		,A.CDPRIORI --prioridade
+		,A.IMPSOLCO --mont. pedido comercial
+		,A.IMPSOLPO --mont. pedido político
+		,A.FEREGISGAR --data registro
+		,A.FEFINVIG --validade
+		,A.NMMAXPAG -- cond. pagamento
+		,B.PTPROPOS --mont. proposto comercial
+		,B.PTPROPRPC --mont. proposto político
+		,B.FEVALIDA -- vigencia proposta
+		,C.CDDECISI --código de decisão proposto
+		,C.CDANAEST --código analista
+	INTO V_CDUNIECO
+		,V_CDRAMO
+		,V_NMPROPUE
+		,V_NMGARANT
+		,V_CDPRIORI
+		,V_IMPSOLCO
+		,V_IMPSOLPO
+		,V_FEREGISGAR
+		,V_FEFINVIG
+		,V_NMMAXPAG
+		,V_PTPROPOS
+		,V_PTPRORPC
+		,V_FEVALIDA
+		,V_CDDECISI
+		,V_CDANAEST
+	FROM CO_PROGAR A
+		,CO_PGARANR B
+		,CO_DETAANR C
+	WHERE B.NMPEDIDO = PI_NMPEDIDO
+		AND B.NMEVENTO = PI_NMEVENTO
+		AND A.CDUNIECO = B.CDUNIECO
+		AND A.CDRAMO = B.CDRAMO
+		AND A.NMPROPUE = B.NMPROPUE
+		AND A.NMGARANT = B.NMGARANT
+		AND C.NMPEDIDO = B.NMPEDIDO
+		AND C.NMEVENTO = B.NMEVENTO;
+
+    EXCEPTION WHEN NO_DATA_FOUND THEN
+           NULL;
+   END;
+--recuperamos la garantia anterior
+ pkg_ent_gar.pl_garantia_anterior(V_CDUNIECO,V_CDRAMO,V_NMPROPUE,V_NMGARANT,PI_CDPERSON,row_datgarant,v_error);
+ IF V_ERROR = 0 AND ROW_DATGARANT.NMGARANT IS NOT NULL THEN --tenemos garantia anterior,recuperamos sus datos
+
+ BEGIN
+	SELECT A.NMGARANT
+		,A.IMPSOLCO
+		,A.IMPCONCO
+		,A.IMPSOLPO
+		,A.IMPCONPO
+		,A.CDANADEC
+		,A.CDDECISI
+		,A.FEVIGENC
+		,A.FEFINVIG
+	INTO V_NMGARANTE
+		,V_IMPSOLCO2
+		,V_IMPCONCO2
+		,V_IMPSOLPO2
+		,V_IMPCONPO2
+		,V_CDANADEC2
+		,V_CDDECISI2
+		,V_FEVIGENC2
+		,V_FEFINVIG2
+	FROM CO_PROGAR A
+	WHERE A.CDUNIECO = V_CDUNIECO
+		AND A.CDRAMO = V_CDRAMO
+		AND A.NMPROPUE = V_NMPROPUE
+		AND A.NMGARANT = ROW_DATGARANT.NMGARANT;
+
+  EXCEPTION WHEN NO_DATA_FOUND THEN
+        NULL;
+  END;
+END IF;
+-- datos del pedido de garantia
+     POUT_NMGARANT   := V_NMGARANT;
+     POUT_CDPRIORI   := V_CDPRIORI;
+     POUT_IMPSOLCO   := V_IMPSOLCO;
+     POUT_IMPSOLPO   := V_IMPSOLPO;
+     POUT_FEREGISGAR := V_FEREGISGAR;
+     POUT_FEFINVIG   := V_FEFINVIG;
+     POUT_NMMAXPAG   :=    V_NMMAXPAG;
+--datos de la garantia anterior
+     POUT_NMGARANTE   := V_NMGARANTE;
+     POUT_IMPSOLCO2   := V_IMPSOLCO2;
+     POUT_IMPCONCO2   := V_IMPCONCO2;
+     POUT_IMPSOLPO2   := V_IMPSOLPO2;
+     POUT_IMPCONPO2   := V_IMPCONPO2;
+     POUT_CDANADEC2   := V_CDANADEC2;
+     POUT_CDDECISI2   := V_CDDECISI2;
+     POUT_FEVIGENC2   := V_FEVIGENC2;
+     POUT_FEFINVIG2    := V_FEFINVIG2;
+--datos de la primera propuesta del analista
+     POUT_PTPROPOS  := V_PTPROPOS;
+     POUT_PTPRORPC  := V_PTPRORPC;
+     POUT_FEVALIDA  := V_FEVALIDA;
+     POUT_CDDECISI  := V_CDDECISI;
+     POUT_CDANAEST  := V_CDANAEST;
+END;
+
+/*Procedimiento que pasándole un pedido y un evento de tipo 'PL' o 'PC' (de plafones),te saca los datos
+de la primera propuesta del plafond del analista */
+PROCEDURE PL_PLAFONAMIENTO(PI_NMPEDIDO IN NUMBER
+                          ,PI_NMEVENTO IN NUMBER
+                          ,POUT_PTPLAGLOP OUT NUMBER
+                          ,POUT_PTPLAINDP OUT NUMBER
+                          ,POUT_DATAFIN   OUT DATE
+                          ,POUT_CDDECISOR OUT VARCHAR2
+                          ,POUT_PTPLACAUP OUT NUMBER
+                          ,POUT_SWCONTRA  OUT VARCHAR2
+                          ,POUT_RESTRICP  OUT VARCHAR2
+                          ,POUT_CDANALIST OUT VARCHAR2) AS
+V_PTPLAGLOP   NUMBER(17,5):= NULL;
+V_PTPLAINDP   NUMBER(17,5):= NULL;
+V_DATAFIN     DATE := NULL;
+V_CDDECISO    VARCHAR2(2):=NULL;
+V_PTPLACAUP   NUMBER(17,5):= NULL;
+V_SWCONTRA    VARCHAR2(1);
+V_RESTRICP    VARCHAR2(250);
+V_CDANAEST    VARCHAR2(30);
+BEGIN
+    BEGIN
+		SELECT A.PTPLAGLOP --proposta plafond global crédito
+			,A.PTPLAINDP --proposta plafond individual crédito
+			,A.DATAFIN -- vigencia dus plafonds
+			,B.CDDECISI --código de decisao do plafond
+			,A.PTPLACAUP --proposta de plafond em caução
+			,A.SWCONTRA -- contragarantias
+			,A.RESTRICP --restricciones
+			,B.CDANAEST --código de analista
+		INTO V_PTPLAGLOP
+			,V_PTPLAINDP
+			,V_DATAFIN
+			,V_CDDECISO
+			,V_PTPLACAUP
+			,V_SWCONTRA
+			,V_RESTRICP
+			,V_CDANAEST
+		FROM CO_PLAFANR A
+			,CO_DETAANR B
+		WHERE A.NMPEDIDO = PI_NMPEDIDO
+			AND A.NMEVENTO = PI_NMEVENTO
+			AND B.NMPEDIDO = A.NMPEDIDO
+			AND B.NMEVENTO = A.NMEVENTO;
+
+            EXCEPTION WHEN NO_DATA_FOUND THEN
+             NULL;
+        END;
+       POUT_PTPLAGLOP  := V_PTPLAGLOP  ;
+       POUT_PTPLAINDP  := V_PTPLAINDP  ;
+      POUT_DATAFIN    := V_DATAFIN;
+      POUT_CDDECISOR  := V_CDDECISO   ;
+      POUT_PTPLACAUP  := V_PTPLACAUP  ;
+      POUT_SWCONTRA   := V_SWCONTRA  ;
+      POUT_RESTRICP   := V_RESTRICP   ;
+      POUT_CDANALIST  := V_CDANAEST;
+   END;
+/*
+   NOME : FUN_TAXA_COMISSAO
+   *  OBJECTIVO : RETORNA O VALOR DA TAXA DE COMISSAO A UTILIAR
+                  PARA UM DADO CONCEITO, NUM DADO RECIBO
+   *  UTILIZAÇÃO: PKG_FORMULAS_COSEC.FUN_TAXA_COMISSAO(APOLICE.NMCUADRO
+                                                      ,APOLICE.CDTIPREN
+                                                      ,APOLICE.NMRENOVA
+                                                      ,ABS(DETRECIBO.PTIMPORT)
+                                                      ,DETRECIBO.CDTIPCON)
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: NUNO FARINHA
+*/
+FUNCTION FUN_TAXA_VAL_COMISSAO (PI_QUADRO_COMISSOES        IN    VARCHAR2
+                           ,PI_PERIODICIDADE_APOLICE   IN    NUMBER
+                           ,PI_RENOVACOES_APOLICE      IN    NUMBER
+                           ,PI_VALOR_PREMIO            IN    NUMBER
+                           ,PI_TIPO_CONCEITO_RECIBO    IN    VARCHAR2) RETURN NUMBER
+IS
+  V_TAXA_VAL_COMISSAO TCUCOPRO.NMFIJOPR%TYPE;
+BEGIN
+	SELECT NMFIJOPR
+	INTO V_TAXA_VAL_COMISSAO
+	FROM TCUCOPRO
+	WHERE PI_QUADRO_COMISSOES = NMCUADRO
+		AND PI_PERIODICIDADE_APOLICE BETWEEN DURACDES
+			AND DURACHAS
+		AND PI_RENOVACOES_APOLICE + 1 BETWEEN ANUALDES
+			AND ANUALHAS
+		AND PI_VALOR_PREMIO BETWEEN IMPDESDE
+			AND IMPHASTA
+		AND PI_TIPO_CONCEITO_RECIBO = CDTIPCON;
+
+  RETURN V_TAXA_VAL_COMISSAO;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 0;
+END;
+
+/*
+   NOME : FUN_TAXA_COMISSAO
+   *  OBJECTIVO : RETORNA O VALOR DA TAXA DE COMISSAO A UTILIAR
+                  PARA UM DADO CONCEITO, NUM DADO RECIBO
+   *  UTILIZAÇÃO: PKG_FORMULAS_COSEC.FUN_TAXA_COMISSAO(APOLICE.NMCUADRO
+                                                      ,APOLICE.CDTIPREN
+                                                      ,APOLICE.NMRENOVA
+                                                      ,ABS(DETRECIBO.PTIMPORT)
+                                                      ,DETRECIBO.CDTIPCON)
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: NUNO FARINHA
+*/
+FUNCTION FUN_TAXA_COMISSAO (PI_QUADRO_COMISSOES        IN    VARCHAR2
+                           ,PI_PERIODICIDADE_APOLICE   IN    NUMBER
+                           ,PI_RENOVACOES_APOLICE      IN    NUMBER
+                           ,PI_VALOR_PREMIO            IN    NUMBER
+                           ,PI_TIPO_CONCEITO_RECIBO    IN    VARCHAR2) RETURN NUMBER
+IS
+  V_TAXA_COMISSAO TCUCOPRO.POCOMPRO%TYPE;
+BEGIN
+	SELECT POCOMPRO
+	INTO V_TAXA_COMISSAO
+	FROM TCUCOPRO
+	WHERE PI_QUADRO_COMISSOES = NMCUADRO
+		AND PI_PERIODICIDADE_APOLICE BETWEEN DURACDES
+			AND DURACHAS
+		AND PI_RENOVACOES_APOLICE + 1 BETWEEN ANUALDES
+			AND ANUALHAS
+		AND PI_VALOR_PREMIO BETWEEN IMPDESDE
+			AND IMPHASTA
+		AND PI_TIPO_CONCEITO_RECIBO = CDTIPCON;
+
+  RETURN V_TAXA_COMISSAO/100;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN 0;
+END;
+
+/*
+   NOME : FUN_TAXA_CAMBIO
+   *  OBJECTIVO : RETORNA O VALOR DA TAXA DE CAMBIO
+                  DADOS A MOEDA BASE, MOEDA FINAL E DATA DE CAMBIO.
+                  SE NÃO FOR DADA A MOEDA FINAL, E USADA A MOEDA FUNCIONAL
+                  SE NÃO FOR DADA A DATA DE CAMBIO, E USADA A DO FINAL DO MES PASSADO
+   *  UTILIZAÇÃO: PKG_FORMULAS_COSEC.FUN_TAXA_CAMBIO (APOLICE.CDMONEDA)
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: NUNO FARINHA
+   *  ALTERADO POR: BRIGIDA RAMOS
+   *  ALTERACAO: SEMPRE QUE NÃO FÔR ENCONTRADA TAXA DE CAMBIO VERIFICA SE A MOEDA BASE É IGUAL
+   *        À MOEDA FINAL. SE SIM DEVOLVE 1 SE NÃO DEVOLVE NULL
+*/
+FUNCTION FUN_TAXA_CAMBIO (PI_MOEDA_BASE     IN   VARCHAR2
+                         ,PI_MODEDA_FINAL   IN   VARCHAR2 DEFAULT NULL
+                         ,PI_DATA_CAMBIO    IN   DATE DEFAULT LAST_DAY(ADD_MONTHS(SYSDATE, -1))) RETURN
+
+NUMBER
+IS
+  V_TAXA_CAMBIO    TCAMBIOS.PTCAMBIO%TYPE;
+  N_CAMBIO     NUMBER;
+BEGIN
+/*  SELECT COUNT(PTCAMBIO)
+  INTO   N_CAMBIO
+  FROM   TCAMBIOS CAMBIO
+  WHERE  CAMBIO.CDMONBAS = PI_MOEDA_BASE
+  AND    CAMBIO.CDMONEDA = (SELECT NVL(PI_MODEDA_FINAL, CDEURO) FROM TKRNLPAR)
+  AND    CAMBIO.FEVALOR = (
+           SELECT MAX(X.FEVALOR)
+           FROM   TCAMBIOS X
+           WHERE  X.FEVALOR <= PI_DATA_CAMBIO
+           AND    X.CDMONBAS = CAMBIO.CDMONBAS
+           AND    X.CDMONEDA  = CAMBIO.CDMONEDA);
+ IF (N_CAMBIO=0) THEN
+    IF (PI_MOEDA_BASE=NVL(PI_MODEDA_FINAL,'EUR')) THEN
+		RETURN 1;
+    ELSE
+		RETURN NULL;
+    END IF;
+ ELSE
+    IF (N_CAMBIO=1) THEN*/
+
+		SELECT /*+ INDEX(CAMBIO SYS_C008845) */
+			PTCAMBIO
+		INTO V_TAXA_CAMBIO
+		FROM TCAMBIOS CAMBIO
+		WHERE CAMBIO.CDMONBAS = PI_MOEDA_BASE
+			AND CAMBIO.CDMONEDA = (
+				SELECT NVL(PI_MODEDA_FINAL, CDEURO)
+				FROM TKRNLPAR
+				)
+			AND CAMBIO.FEVALOR = (
+				SELECT MAX(X.FEVALOR)
+				FROM TCAMBIOS X
+				WHERE X.FEVALOR <= PI_DATA_CAMBIO
+					AND X.CDMONBAS = CAMBIO.CDMONBAS
+					AND X.CDMONEDA = CAMBIO.CDMONEDA
+				);
+
+    RETURN V_TAXA_CAMBIO;
+/*    ELSE
+    RETURN NULL;
+    END IF;
+ END IF;*/
+EXCEPTION
+  WHEN OTHERS THEN
+    IF (PI_MOEDA_BASE=NVL(PI_MODEDA_FINAL,'EUR')) THEN
+		RETURN 1;
+    ELSE
+		RETURN NULL;
+    END IF;
+END FUN_TAXA_CAMBIO;
+
+/*
+   NOME : GET_INTERVENTOR
+   *  OBJECTIVO : RETORNA O PRIMEIRO INTERVENTOR DE UM DADO RECIBO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: JOAO BONINA
+*/
+FUNCTION  GET_INTERVENTOR ( PI_CDUNIECO IN NUMBER
+                               , PI_NMRECIBO IN NUMBER
+                               ) RETURN VARCHAR2 AS
+    INTERVENTOR TRECCOM.CDAGENTE%TYPE;
+    BEGIN
+		SELECT CDAGENTE
+		INTO INTERVENTOR
+		FROM TRECCOM
+		WHERE CDUNIECO = PI_CDUNIECO
+			AND NMRECIBO = PI_NMRECIBO
+			AND ROWNUM = 1;
+
+RETURN INTERVENTOR;
+
+END GET_INTERVENTOR;
+
+/*
+   NOME : GET_DECLARACOES_EM_FALTA
+   *  OBJECTIVO : RETORNA AS DECLARAÇÕES DE VENDA EM FALTA DESDE A DATA DE EMISSÃO
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 2.0
+   *  CRIADO POR: JOAO BONINA
+   *  ALTERADO POR: RUI PORTUGAL -> Correcção da query para NÃO retornar mais que 1 registo para a mesmo mês da declaração.
+*/
+FUNCTION GET_DECLARACOES_EM_FALTA(PIN_CDUNIECO IN INTEGER, PIN_CDRAMO IN INTEGER, PIN_NMPOLIZA IN INTEGER) RETURN VARCHAR2 AS
+    DECLS_EM_FALTA VARCHAR2(5000);
+    DATA MPOLIZAS.FEEFECTO%TYPE;
+    DUMMY NUMBER;
+    SEPARADOR_ANO VARCHAR2(4);
+    PRI_MES_ANO NUMBER;
+    PRI_VIGENCIA NUMBER;
+
+    CURSOR VIGENCIAS IS
+		SELECT APOL.FEEMISIO
+			,APOL.FEEFECTO
+			,APOL.FEPROREN
+			,ATRIB.OTVALOR
+		FROM MPOLIZAS APOL
+			,TVALOPOL ATRIB
+		WHERE 1 = 1
+			AND ATRIB.CDATRIBU = 15
+			AND ATRIB.CDRAMO = APOL.CDRAMO
+			AND ATRIB.CDUNIECO = APOL.CDUNIECO
+			AND ATRIB.NMPOLIZA = APOL.NMPOLIZA
+			AND ATRIB.ESTADO = APOL.ESTADO
+			AND ATRIB.NMSUPLEM = (
+				SELECT MAX(X.NMSUPLEM)
+				FROM TVALOPOL X
+				WHERE 1 = 1
+					AND X.CDUNIECO = ATRIB.CDUNIECO
+					AND X.CDRAMO = ATRIB.CDRAMO
+					AND X.NMPOLIZA = ATRIB.NMPOLIZA
+					AND X.ESTADO = ATRIB.ESTADO
+					AND X.CDATRIBU = ATRIB.CDATRIBU
+					AND X.NMSUPLEM <= TO_CHAR(DECODE(APOL.OTTEMPOT, 'T', APOL.FEVENCIM, APOL.FEPROREN), 'J') || '99999999999'
+				)
+			AND APOL.NMRENOVA >= (
+				SELECT MAX(X.NMRENOVA - 1)
+				FROM MPOLIZAS X
+				WHERE X.NMPOLIZA = APOL.NMPOLIZA
+					AND X.ESTADO = APOL.ESTADO
+					AND X.CDRAMO = APOL.CDRAMO
+					AND X.CDUNIECO = APOL.CDUNIECO
+				)
+			AND APOL.NMPOLIZA = PIN_NMPOLIZA
+			AND APOL.CDRAMO = PIN_CDRAMO
+			AND APOL.CDUNIECO = PIN_CDUNIECO;
+
+
+BEGIN
+    SEPARADOR_ANO := '1500';
+    PRI_MES_ANO := 1;
+    PRI_VIGENCIA := 1;
+    FOR RW IN VIGENCIAS LOOP
+		IF RW.OTVALOR != 0 then
+			IF PRI_VIGENCIA = 0 THEN
+				DATA := RW.FEEFECTO;
+			ELSE
+				DATA := ADD_MONTHS(RW.FEEFECTO, RW.OTVALOR);
+				PRI_VIGENCIA := 0;
+			END IF;
+			WHILE (DATA < RW.FEPROREN) LOOP
+			BEGIN
+				IF (DATA >= ADD_MONTHS(SYSDATE, -1)) THEN
+					RETURN DECLS_EM_FALTA;
+				ELSE
+					BEGIN
+					 SELECT COUNT(DECVEN.FEPERDEC)
+					INTO DUMMY
+					FROM CO_DECVEN DECVEN
+					WHERE
+					1=1
+					AND DECVEN.FEPERDEC = TO_CHAR(DATA, 'MON-RR')
+					AND DECVEN.NMORDEN  = 1
+					AND DECVEN.nmpoliza = PIN_NMPOLIZA
+					AND DECVEN.CDRAMO   = PIN_CDRAMO
+					  AND DECVEN.cdunieco = PIN_CDUNIECO;
+					IF DUMMY=0 THEN
+						IF DECLS_EM_FALTA IS NULL THEN
+							IF SEPARADOR_ANO != TO_CHAR(DATA, 'RRRR') THEN
+								SEPARADOR_ANO := TO_CHAR(DATA, 'RRRR');
+								PRI_MES_ANO := 0;
+								IF SEPARADOR_ANO = TO_CHAR(ADD_MONTHS(DATA, -1),'RRRR') THEN
+									DECLS_EM_FALTA :=CHR(10)||SEPARADOR_ANO||CHR(10)||TRIM(TO_CHAR(ADD_MONTHS(DATA, -1), 'MONTH'));
+								ELSE
+									DECLS_EM_FALTA :=TRIM(TO_CHAR(ADD_MONTHS(DATA, -12), 'RRRR'))||CHR(10)||TRIM(TO_CHAR(ADD_MONTHS(DATA, -1), 'MONTH'));
+								END IF;
+							ELSE
+								DECLS_EM_FALTA := TRIM(TO_CHAR(ADD_MONTHS(DATA,-1), 'MONTH'));
+							END IF;
+						ELSE
+							IF SEPARADOR_ANO != TO_CHAR(DATA, 'RRRR') THEN
+								SEPARADOR_ANO := TO_CHAR(DATA, 'RRRR');
+								PRI_MES_ANO := 1;
+								IF SEPARADOR_ANO = TO_CHAR(ADD_MONTHS(DATA, -1),'RRRR') THEN
+									DECLS_EM_FALTA :=DECLS_EM_FALTA||CHR(10)||SEPARADOR_ANO||CHR(10)||TRIM(TO_CHAR(ADD_MONTHS(DATA, -1), 'MONTH'));
+								ELSE
+									DECLS_EM_FALTA := DECLS_EM_FALTA||','||TRIM(TO_CHAR(ADD_MONTHS(DATA, -1), 'MONTH'))||CHR(10)||SEPARADOR_ANO||CHR(10);
+								END IF;
+							ELSE
+								IF PRI_MES_ANO = 1 THEN
+									PRI_MES_ANO := 0;
+									DECLS_EM_FALTA :=DECLS_EM_FALTA||TRIM(TO_CHAR(ADD_MONTHS(DATA, -1), 'MONTH'));
+								ELSE
+									DECLS_EM_FALTA := DECLS_EM_FALTA||','||TRIM(TO_CHAR(ADD_MONTHS(DATA, -1), 'MONTH'));
+								END IF;
+							END IF;
+						END IF;
+					END IF;
+					END;
+					DATA := ADD_MONTHS(DATA, RW.OTVALOR);
+				END IF;
+			END;
+			END LOOP;
+		END IF;
+    END LOOP;
+    RETURN DECLS_EM_FALTA;
+END GET_DECLARACOES_EM_FALTA;
+
+/*
+   NOME : FUN_PREMIOBRUTO_ACUM_ENT
+   *  OBJECTIVO : Retorna o acumulado dos prémios brutos (antes de impostos e liquidos
+   *  de estornos e anulações) entre datas por entidade
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: JOAO BERNARDINO
+   *  ALTERADO POR:
+*/
+
+FUNCTION FUN_PREMIOBRUTO_ACUM_ENT(PI_CDPERSON IN NUMBER
+                                 ,PI_DATA_REF IN DATE
+                         ) RETURN NUMBER AS
+AUX_IMPCAU NUMBER;
+AUX_IMPCRED NUMBER;
+
+BEGIN
+	SELECT NVL(SUM(PREMIOS_APOLICE.ptimport), 0)
+	INTO AUX_IMPCRED
+	FROM mrecibo RECIBOS_APOLICE
+		,mrecidet PREMIOS_APOLICE
+		,mpolizas APOLICE
+		,mpoliper TOMADOR
+	WHERE 1 = 1
+		AND PREMIOS_APOLICE.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+			),'PPDIV')
+		AND PREMIOS_APOLICE.nmrecibo = RECIBOS_APOLICE.nmrecibo
+		AND PREMIOS_APOLICE.cdunieco = RECIBOS_APOLICE.cdunieco
+		AND DECODE(RECIBOS_APOLICE.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+		AND RECIBOS_APOLICE.FEINICIO BETWEEN TRUNC(PI_DATA_REF, 'YEAR')
+			AND PI_DATA_REF
+		AND RECIBOS_APOLICE.nmpoliza = APOLICE.nmpoliza
+		AND RECIBOS_APOLICE.estado = APOLICE.estado
+		AND RECIBOS_APOLICE.cdramo = APOLICE.cdramo
+		AND RECIBOS_APOLICE.cdunieco = APOLICE.cdunieco
+		AND APOLICE.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM mpolizas X
+			WHERE X.nmpoliza = APOLICE.nmpoliza
+				AND X.estado = APOLICE.estado
+				AND X.STATUS = 'V'
+				AND X.cdramo = APOLICE.cdramo
+				AND X.cdunieco = APOLICE.cdunieco
+				AND X.NMSUPLEM <= TO_CHAR(PI_DATA_REF, 'J') || '99999999999'
+			)
+		AND APOLICE.nmpoliza = TOMADOR.nmpoliza
+		AND APOLICE.estado = TOMADOR.estado
+		AND APOLICE.cdramo = TOMADOR.cdramo
+		AND APOLICE.cdunieco = TOMADOR.cdunieco
+		AND TOMADOR.nmsuplem = (
+			SELECT MAX(X.nmsuplem)
+			FROM mpoliper X
+			WHERE X.nmpoliza = TOMADOR.nmpoliza
+				AND X.estado = TOMADOR.estado
+				AND X.STATUS = 'V'
+				AND X.cdramo = TOMADOR.cdramo
+				AND X.cdunieco = TOMADOR.cdunieco
+				AND X.NMSUPLEM <= TO_CHAR(PI_DATA_REF, 'J') || '99999999999'
+			)
+		AND TOMADOR.CDUNIECO = 1
+		AND TOMADOR.CDRAMO LIKE '1%'
+		AND TOMADOR.CDROL = 'TO'
+		AND TOMADOR.CDPERSON = PI_CDPERSON;
+
+
+	SELECT
+		--NVL(SUM(TO_NUMBER(ATRIBUTO_RISCO.OTVALOR,'9G999D9999', 'NLS_NUMERIC_CHARACTERS = ''.,''')/100*PREMIOS_APOLICE.ptimport),0)
+		NVL(SUM(COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(ATRIBUTO_RISCO.OTVALOR, '.', ','), '-,', '-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0) / 100 * PREMIOS_APOLICE.ptimport), 0)
+	INTO AUX_IMPCAU
+	FROM mrecibo RECIBOS_APOLICE
+		,mrecidet PREMIOS_APOLICE
+		,MPOLIPER ENTIDADE_RISCO
+		,TVALOSIT ATRIBUTO_RISCO
+	WHERE 1 = 1
+		AND PREMIOS_APOLICE.CDTIPCON in ((
+			SELECT CODIGO
+			FROM TMANTENI
+			WHERE 1 = 1
+				AND CDTABLA = 'TLMIPREM'
+				AND CODIGO = CDTIPCON
+			),'PPDIV')
+		AND PREMIOS_APOLICE.nmrecibo = RECIBOS_APOLICE.nmrecibo
+		AND PREMIOS_APOLICE.cdunieco = RECIBOS_APOLICE.cdunieco
+		AND DECODE(RECIBOS_APOLICE.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+		AND RECIBOS_APOLICE.FEINICIO BETWEEN TRUNC(PI_DATA_REF, 'YEAR')
+			AND PI_DATA_REF
+		AND RECIBOS_APOLICE.nmpoliza = ENTIDADE_RISCO.nmpoliza
+		AND RECIBOS_APOLICE.estado = ENTIDADE_RISCO.estado
+		AND RECIBOS_APOLICE.cdramo = ENTIDADE_RISCO.cdramo
+		AND RECIBOS_APOLICE.cdunieco = ENTIDADE_RISCO.cdunieco
+		AND ATRIBUTO_RISCO.CDATRIBU = 1
+		AND ATRIBUTO_RISCO.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM TVALOSIT X
+			WHERE X.CDUNIECO = ATRIBUTO_RISCO.CDUNIECO
+				AND X.CDRAMO = ATRIBUTO_RISCO.CDRAMO
+				AND X.ESTADO = ATRIBUTO_RISCO.ESTADO
+				AND X.STATUS = 'V'
+				AND X.NMPOLIZA = ATRIBUTO_RISCO.NMPOLIZA
+				AND X.NMSITUAC = ATRIBUTO_RISCO.NMSITUAC
+				AND X.CDATRIBU = ATRIBUTO_RISCO.CDATRIBU
+				AND X.NMSUPLEM <= TO_CHAR(PI_DATA_REF, 'J') || '99999999999'
+			)
+		AND ATRIBUTO_RISCO.NMSITUAC = ENTIDADE_RISCO.NMSITUAC
+		AND ATRIBUTO_RISCO.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+		AND ATRIBUTO_RISCO.ESTADO = ENTIDADE_RISCO.ESTADO
+		AND ATRIBUTO_RISCO.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND ATRIBUTO_RISCO.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND ENTIDADE_RISCO.NMSUPLEM = (
+			SELECT MAX(X.NMSUPLEM)
+			FROM MPOLIPER X
+			WHERE X.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+				AND X.CDRAMO = ENTIDADE_RISCO.CDRAMO
+				AND X.NMPOLIZA = ENTIDADE_RISCO.NMPOLIZA
+				AND X.ESTADO = ENTIDADE_RISCO.ESTADO
+				AND X.STATUS = 'V'
+				AND X.CDROL = ENTIDADE_RISCO.CDROL
+				AND X.NMSUPLEM <= TO_CHAR(PI_DATA_REF, 'J') || '99999999999'
+			)
+		AND ENTIDADE_RISCO.CDROL = 'RC'
+		AND ENTIDADE_RISCO.CDRAMO LIKE '2%'
+		AND ENTIDADE_RISCO.CDUNIECO = 1
+		AND ENTIDADE_RISCO.CDPERSON = PI_CDPERSON;
+
+
+  RETURN aux_impCRED+AUX_IMPCAU;
+EXCEPTION
+    WHEN OTHERS THEN RETURN 0;
+END FUN_PREMIOBRUTO_ACUM_ENT;
+
+/*
+   NOME : FUN_PREMIOBRUTO_ACUM_GRUPO
+   *  OBJECTIVO : Retorna o acumulado dos prémios brutos (antes de impostos e liquidos
+   *  de estornos e anulações) entre datas para todas as entidades do grupo
+   *  UTILIZAÇÃO:
+   *  VERSÃO    : 1.0
+   *  CRIADO POR: JOAO BERNARDINO
+   *  ALTERADO POR:
+*/
+FUNCTION FUN_PREMIOBRUTO_ACUM_GRUPO( PI_CDGRUENT IN VARCHAR2
+                                   , PI_DATA_REF IN DATE
+                                             ) RETURN NUMBER AS
+
+  LRES NUMBER := 0;
+
+  CURSOR GRUPO IS
+    SELECT
+           CDPERFIL
+         , FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) COEFICIENTE
+    FROM
+           CO_ENTIREL
+    WHERE
+           CDGRUENT = PI_CDGRUENT
+      AND  FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(SWDOMINA, 'S', 0, -1);
+
+BEGIN
+  FOR RW IN GRUPO LOOP
+     IF RW.COEFICIENTE > 0 THEN
+      LRES := LRES + FUN_PREMIOBRUTO_ACUM_ENT(RW.CDPERFIL, PI_DATA_REF) * RW.COEFICIENTE;
+     END IF;
+  END LOOP;
+
+  RETURN LRES;
+
+EXCEPTION
+  WHEN OTHERS THEN RETURN 0;
+END FUN_PREMIOBRUTO_ACUM_GRUPO;
+
+FUNCTION  GET_PAIS_ENT_RISCO ( PI_CDUNIECO IN NUMBER
+                               , PI_CDRAMO IN NUMBER
+                               , PI_NMPOLIZA IN NUMBER
+                               ) RETURN VARCHAR2
+AS
+PAIS_ENTIDADE_RISCO VARCHAR(200) := NULL;
+BEGIN
+
+   IF PI_CDRAMO = 150 THEN
+
+		SELECT TRIM(PAISES.DESCRIPL)
+		INTO PAIS_ENTIDADE_RISCO
+		FROM CO_TVALOPRO ENT_RIS
+			, TMANTENI PAISES
+			, mpolizas apolice
+		WHERE 1 = 1
+			AND PAISES.CODIGO(+) = ENT_RIS.OTVALOR
+			AND PAISES.CDTABLA(+) = 'TPAISES'
+			AND ENT_RIS.CDATRIBU = 26
+			AND ENT_RIS.CDUNIECO = apolice.CDUNIECO
+			AND ENT_RIS.CDRAMO = apolice.CDRAMO
+			AND ENT_RIS.NMPROPUE = apolice.nmsolici
+			AND apolice.nmpoliza = PI_NMPOLIZA
+			AND apolice.ESTADO = 'M'
+			AND ENT_RIS.CDUNIECO = PI_CDUNIECO
+			AND ENT_RIS.CDRAMO = PI_CDRAMO
+			AND apolice.nmsuplem = (
+				SELECT MAX(BB.nmsuplem)
+				FROM mpolizas BB
+				WHERE BB.nmpoliza = apolice.nmpoliza
+					AND BB.CDUNIECO = apolice.CDUNIECO
+					AND BB.CDRAMO = apolice.CDRAMO
+					AND BB.ESTADO = 'M'
+					AND BB.nmsuplem <= TO_CHAR(sysdate, 'J') || '99999999999'
+				)
+			AND ENT_RIS.FEMODIF = (
+				SELECT MAX(AA.FEMODIF)
+				FROM CO_TVALOPRO AA
+				WHERE AA.CDUNIECO = ENT_RIS.CDUNIECO
+					AND AA.CDRAMO = ENT_RIS.CDRAMO
+					AND AA.NMPROPUE = ENT_RIS.NMPROPUE
+					AND AA.CDATRIBU = ENT_RIS.CDATRIBU
+					AND AA.FEMODIF <= SYSDATE
+				);
+
+   END IF;
+
+
+    RETURN PAIS_ENTIDADE_RISCO;
+
+EXCEPTION
+  WHEN OTHERS THEN
+      RETURN PAIS_ENTIDADE_RISCO;
+
+END GET_PAIS_ENT_RISCO;
+
+/*
+   NOME : FUN_PLAFCRE_GRUPO_REAL_NODATE
+*/
+FUNCTION FUN_PLAFCRE_GRUPO_REAL_NODATE( p_cdperson IN NUMBER
+                               , p_ind_tippla IN VARCHAR2
+                               , P_DOMINA IN VARCHAR2 DEFAULT 'S') RETURN NUMBER AS
+   V_MONCRE NUMBER (17,5);
+   V_REACRE NUMBER(17,5);
+   V_MONCAU NUMBER(17,5);
+   V_REACAU NUMBER(17,5);
+   V_ERROR  NUMBER;
+BEGIN
+	PL_PLAFOND_GRUPO_NODATE(P_CDPERSON,P_IND_TIPPLA,P_DOMINA,V_MONCRE,V_REACRE,V_ERROR);
+	RETURN (V_REACRE);
+END FUN_PLAFCRE_GRUPO_REAL_NODATE;
+
+/* */
+PROCEDURE PL_PLAFOND_GRUPO_NODATE ( p_cdperson IN NUMBER,
+                             p_ind_tippla IN VARCHAR2,
+                             p_ind_domina IN CHAR,
+                             p_ptnom_cre IN OUT NUMBER,
+                             p_ptreal_cre IN OUT NUMBER,
+                             p_error IN OUT NUMBER)
+IS
+  v_ptnom_cre  co_plafocre.ptimpind%TYPE := NULL;
+  v_cdgruent   co_grupent.cdgruent%TYPE;
+  v_error      NUMBER(1) := 0;
+  v_coefic     NUMBER := 0;
+  v_var           NUMBER;
+  v_vigor      DATE;
+  CURSOR c_plagrupo IS
+    SELECT
+      cdperfil
+    , PERCREL
+    , swdomina
+    , FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI)     COEFICIENTE
+    FROM
+      co_entirel
+    WHERE
+        cdgruent = v_cdgruent
+    AND FUN_COEFI_REAL(CDPERFIL, CDGRUENT, CDPERPAI) > DECODE(P_IND_DOMINA,'S', 0, -1)
+    ORDER BY cdperfil;
+  j  c_plagrupo%ROWTYPE;
+BEGIN
+  pl_obtener_grupo(p_cdperson,v_cdgruent,v_error);
+  IF v_error = 0 THEN
+    p_error := 0;
+    FOR RW IN C_PLAGRUPO LOOP
+        pl_plaf_ent_cre_NODATE(RW.cdperfil,v_var,v_ptnom_cre,v_vigor,v_error);
+        p_ptnom_cre := NVL(p_ptnom_cre,0) + NVL(v_ptnom_cre,0);
+      IF v_error = 0 THEN
+        V_COEFIC := RW.COEFICIENTE;
+        DBMS_OUTPUT.PUT_LINE('  :::::>'||TO_CHAR(V_COEFIC,'999D99')||' - '||RW.CDPERFIL||' - '||V_PTNOM_CRE||' - '||P_PTREAL_CRE);
+        p_ptreal_cre := NVL(p_ptreal_cre,0) + (NVL(v_ptnom_cre,0) * v_coefic);
+      END IF;
+      V_PTNOM_CRE:=0;
+      V_VIGOR:=NULL;
+      V_ERROR:=0;
+    END LOOP;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    p_error := 1;
+END;
+
+/**Funcion que calcula el plafond (individual y global) de la entidad de crédito ,filtrando por dos fechas**/
+/* NOME : PL_PLAF_ENT_CRE
+*/
+PROCEDURE PL_PLAF_ENT_CRE_NODATE ( p_cdperson IN NUMBER,
+							p_ptind IN OUT NUMBER,
+							p_ptglo IN OUT NUMBER,
+                            p_vigor IN OUT DATE,
+							p_error IN OUT NUMBER)
+IS
+  CURSOR c1_plafocre IS
+    SELECT NVL(ptimpind, 0) INDIVIDUAL
+		,NVL(ptimpglo, 0) GLOBAL
+		,datafin
+	FROM co_plafocre plafcre
+	WHERE plafcre.cdperson = p_cdperson
+		AND plafcre.dataini = (
+			SELECT MAX(cr.dataini)
+			FROM co_plafocre cr
+			WHERE cr.cdperson = plafcre.cdperson
+			)
+		AND PLAFCRE.NMPLAFON = (
+			SELECT MAX(X.NMPLAFON)
+			FROM CO_PLAFOCRE X
+			WHERE PLAFCRE.CDPERSON = X.CDPERSON
+			)
+	ORDER BY dataini DESC;
+
+BEGIN
+  p_error := 0;
+
+    FOR RW IN C1_PLAFOCRE LOOP
+      P_PTIND:= RW.INDIVIDUAL;
+      P_PTGLO:= RW.GLOBAL;
+      P_VIGOR:= rw.DATAFIN;
+    END LOOP;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    p_error := 1;
+END PL_PLAF_ENT_CRE_NODATE;
+
+/*
+   NOME : GET_DPR_EM_FALTA
+   *  OBJECTIVO : RETORNA AS DPRS EM FALTA DA VIGENCIA MAIS RECENTE
+   *  UTILIZAÇÃO:
+   *  VERSÃO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION GET_DPR_EM_FALTA (  pin_cdunieco IN  mpolizas.cdunieco%TYPE,
+                           pin_cdramo   IN  mpolizas.cdramo%TYPE,
+                           pin_nmpoliza IN  mpolizas.nmpoliza%TYPE
+						   )
+                           RETURN NUMBER IS
+
+	vTIPOTAR  TTAPVAAT.OTCLAVE1%TYPE;
+	vOTVALOR1 TVALOPOL.OTVALOR%TYPE;
+	nCONTA    NUMBER := 0;
+	nMES      NUMBER := 0;
+	dFEEFECTO DATE;
+	dDATA     DATE;
+	dDTFIMVIG DATE;
+	dFEREFDPR DATE;
+	dDTANULAC DATE := NULL;
+	vNMPERDPR TVALOPOL.CDATRIBU%TYPE;
+	v_cdperson   mpoliper.cdperson%TYPE;
+	v_hhini   VARCHAR2(5);
+
+	CURSOR c_mpoliper IS
+	SELECT per1.cdperson
+	FROM mpoliper per1
+	WHERE per1.cdunieco = pin_cdunieco
+		AND per1.cdramo = pin_cdramo
+		AND per1.estado = 'M'
+		AND per1.nmpoliza = pin_nmpoliza
+		AND per1.nmsituac = 0
+		AND per1.STATUS = 'V'
+		AND per1.cdrol IN (
+			'TO'
+			,'OT'
+			)
+		AND per1.nmsuplem = (
+			SELECT MAX(per2.nmsuplem)
+			FROM mpoliper per2
+			WHERE per2.cdunieco = per1.cdunieco
+				AND per2.cdramo = per1.cdramo
+				AND per2.estado = per1.estado
+				AND per2.nmpoliza = per1.nmpoliza
+				AND per2.nmsituac = per1.nmsituac
+				AND per2.cdrol = per1.cdrol
+				AND per2.cdperson = per1.cdperson
+				AND per2.nmsuplem <= TO_CHAR(dDATA, 'J') || '0000' || '0000000'
+			);
+
+
+BEGIN
+
+	SELECT /*+  INDEX(ATRIB)  */
+		A.FEEFECTO
+		,DECODE(A.OTTEMPOT, 'R', A.FEPROREN, A.FEVENCIM)
+		,ATRIB.OTVALOR
+	INTO dFEEFECTO
+		,dDTFIMVIG
+		,vOTVALOR1
+	FROM MPOLIZAS A
+		,TVALOPOL ATRIB
+	WHERE A.CDUNIECO = PIN_CDUNIECO
+		AND A.CDRAMO = PIN_CDRAMO
+		AND A.ESTADO = 'M'
+		AND A.NMPOLIZA = PIN_NMPOLIZA
+		AND A.NMSUPLEM = (
+			SELECT MAX(B.NMSUPLEM)
+			FROM MPOLIZAS B
+			WHERE B.CDUNIECO = A.CDUNIECO
+				AND B.CDRAMO = A.CDRAMO
+				AND B.ESTADO = A.ESTADO
+				AND B.NMPOLIZA = A.NMPOLIZA
+				AND B.NMSUPLEM <= TO_CHAR(SYSDATE, 'J') || '99999999999'
+			)
+		AND ATRIB.CDATRIBU = 15
+		AND ATRIB.CDRAMO = A.CDRAMO
+		AND ATRIB.CDUNIECO = A.CDUNIECO
+		AND ATRIB.NMPOLIZA = A.NMPOLIZA
+		AND ATRIB.ESTADO = A.ESTADO
+		AND ATRIB.NMSUPLEM = (
+			SELECT MAX(B.NMSUPLEM)
+			FROM TVALOPOL B
+			WHERE B.CDUNIECO = ATRIB.CDUNIECO
+				AND B.CDRAMO = ATRIB.CDRAMO
+				AND B.ESTADO = ATRIB.ESTADO
+				AND B.NMPOLIZA = ATRIB.NMPOLIZA
+				AND B.CDATRIBU = ATRIB.CDATRIBU
+				AND B.NMSUPLEM <= TO_NUMBER(TO_CHAR(A.FEEFECTO, 'J') || '99999999999')
+			);
+
+
+	IF (vOTVALOR1 IS NULL or vOTVALOR1 = 0) THEN
+       RETURN 0;
+    END IF;
+
+	dFEREFDPR := LEAST(dDTFIMVIG,SYSDATE);
+
+	dDATA:= dFEEFECTO;
+
+	IF dFEREFDPR > dDTFIMVIG THEN
+      dFEREFDPR := dDTFIMVIG;
+    END IF;
+
+	dDTANULAC :=GET_DT_ANULACAO_APOLICE (PIN_CDUNIECO, PIN_CDRAMO, PIN_NMPOLIZA);
+
+	IF dDTANULAC IS NOT NULL THEN
+		IF dFEREFDPR > dDTANULAC THEN
+			dFEREFDPR := dDTANULAC;
+        END IF;
+    END IF;
+
+	LOOP
+
+		dDATA:= ADD_MONTHS(dDATA,vOTVALOR1);
+
+			EXIT WHEN dDATA > dFEREFDPR;
+
+            IF ADD_MONTHS(TRUNC(dDATA),1) <= TO_DATE('01/'||TO_CHAR(SYSDATE,'MM/YYYY'),'DD/MM/YYYY') THEN
+                FOR reg_to IN c_mpoliper LOOP
+                    v_cdperson:= reg_to.cdperson;
+
+                    SELECT /*+  INDEX(CO_DECVEN)  */
+					COUNT(*)
+                    INTO   nMES
+                    FROM   CO_DECVEN
+                    WHERE  CDUNIECO = PIN_CDUNIECO
+                        AND    CDRAMO   = PIN_CDRAMO
+                        AND    CDPERSON = v_cdperson
+                        AND    NMPOLIZA = PIN_NMPOLIZA
+                        AND    SUBSTR(FEPERDEC,1,3) = TO_CHAR(dDATA,'MON')
+                        AND    SUBSTR(FEPERDEC,-2)  = SUBSTR( TO_CHAR(dDATA,'YYYY'),-2);
+
+                    IF nMES = 0 THEN
+                        nCONTA := nCONTA + 1;
+                    END IF;
+
+                END LOOP;
+			END IF; -- De IF ADD_MONTHS(dDATA,2) >= TO_DATE('01/'||TO_CHAR(SYSDATE,'MM/YYYY'),'DD/MM/YYYY') THEN
+
+    END LOOP;
+	RETURN nCONTA;
+EXCEPTION
+   WHEN OTHERS THEN
+    RETURN(NULL);
+END GET_DPR_EM_FALTA;
+
+/*
+   NOME : GET_DPRS_EM_FALTA
+   *  OBJECTIVO : RETORNA TODAS AS DPRS EM FALTA
+   *  UTILIZAÇÃO:
+   *  VERSÃO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION GET_DPRS_EM_FALTA (PIN_CDUNIECO IN INTEGER, PIN_CDRAMO IN INTEGER, PIN_NMPOLIZA IN INTEGER) RETURN NUMBER AS
+	DPRS NUMBER := 0 ;
+    CURSOR VIGENCIAS IS
+    SELECT APOL.FEEFECTO
+	FROM mpolizas APOL
+	WHERE 1 = 1
+		AND APOL.NMPOLIZA = PIN_NMPOLIZA
+		AND APOL.CDRAMO = PIN_CDRAMO
+		AND APOL.CDUNIECO = PIN_CDUNIECO
+		AND APOL.STATUS = 'V'
+		AND APOL.ESTADO = 'M'
+		AND APOL.nmsuplem = (
+			SELECT max(x.nmsuplem)
+			FROM mpolizas x
+			WHERE x.nmpoliza = APOL.nmpoliza
+				AND x.STATUS = APOL.STATUS
+				AND x.estado = APOL.ESTADO
+				AND x.nmrenova = APOL.nmrenova
+				AND x.cdramo = APOL.CDRAMO
+				AND x.cdunieco = APOL.CDUNIECO
+		);
+BEGIN
+    IF PIN_CDRAMO in (100, 101, 104, 105) then
+		FOR RW IN VIGENCIAS LOOP
+
+			dprs := dprs + pck_cnet_gen.f_dpr_em_falta(PIN_CDUNIECO, PIN_CDRAMO, PIN_NMPOLIZA, rw.feefecto , -1);
+
+		END LOOP;
+		RETURN DPRS;
+	ELSE
+		RETURN null;
+	end if;
+
+END GET_DPRS_EM_FALTA;
+
+/*
+   NOME : GET_VALOR_ATRIB_RECIBO
+   *  OBJECTIVO : RETORNA O VALOR DO ATRIBUTO DO RECIBO PELO O NOME DO ATRIBUTO
+   *  UTILIZAÇÃO:
+   *  VERSÃO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION GET_VALOR_ATRIB_RECIBO (PIN_CDUNIECO IN co_tvalorec.CDATRIBU%TYPE, PIN_NMRECIBO IN co_tvalorec.nmrecibo%TYPE, PIN_ATRIB IN co_tatrirec.DSATRIBU%TYPE) RETURN NUMBER AS
+value NUMBER :=0;
+BEGIN
+
+	select 
+	--to_number(REPLACE(NVL(valor.otvalor,0), '.', ','))
+	COALESCE(TO_NUMBER(REGEXP_SUBSTR(REPLACE(REPLACE(valor.otvalor,'.',','),'-,','-0,'), '([+-]?\d+\,\d{0,9})|([+-]?\,\d{0,9})|([+-]?\d+)')), 0)
+	INTO value
+	from co_tvalorec valor
+	, co_tatrirec atrib
+	where valor.CDATRIBU = atrib.CDATRIBU
+		and valor.TIPORECI = atrib.TIPORECI
+		and atrib.DSATRIBU = PIN_ATRIB
+		and valor.nmrecibo = PIN_NMRECIBO
+		and valor.cdunieco = PIN_CDUNIECO
+	;
+
+	RETURN value;
+
+	EXCEPTION
+		WHEN OTHERS THEN
+		RETURN 0;
+
+END GET_VALOR_ATRIB_RECIBO;
+
+/*
+   NOME : FUN_MEDIA_TAXA_CAMBIO_AMEACA
+   *  OBJECTIVO : RETORNA A MÉDIA PONDERADA DA TAXA DE CAMBIO PARA O VALOR TOTAL DA AMEAÉA COMUNICADA
+   *  UTILIZAÇÃO:
+   *  VERSÃO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION FUN_MEDIA_TAXA_CAMBIO_AMEACA (PIN_CDUNIECO IN CO_FAAME.CDUNIECO%TYPE, PIN_CDTIPORA IN CO_FAAME.CDTIPORA%TYPE, PIN_NMPROAME IN CO_FAAME.NMPROAME%TYPE, PIN_NMCOMAME IN CO_FAAME.NMCOMAME%TYPE) RETURN NUMBER AS
+NUMERADOR NUMBER :=0;
+DENOMINADOR NUMBER :=0;
+TAXA_CAMB NUMBER :=0;
+BEGIN
+
+	select SUM(FATURAS.NMIMPFAC*FATURAS.TASACAMB), SUM(FATURAS.NMIMPFAC)
+	INTO NUMERADOR, DENOMINADOR
+	from CO_FAAME FATURAS
+	where FATURAS.CDUNIECO = PIN_CDUNIECO
+		and FATURAS.CDTIPORA = PIN_CDTIPORA
+		and FATURAS.NMPROAME = PIN_NMPROAME
+		and FATURAS.NMCOMAME = PIN_NMCOMAME
+	GROUP BY FATURAS.CDUNIECO
+		, FATURAS.CDTIPORA
+		, FATURAS.NMPROAME
+		, FATURAS.NMCOMAME
+
+	;
+	IF NUMERADOR=0 or DENOMINADOR = 0 then
+		return 0;
+	Else
+		RETURN NUMERADOR/DENOMINADOR;
+	end if;
+
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			select NVL(x.t_cambio,y.dummy) 
+			INTO TAXA_CAMB
+			from (
+				select PKG_FORMULAS_COSEC.FUN_TAXA_CAMBIO(COMUNICACAO.CDMONEDA, 'EUR', COMUNICACAO.FEOCAME) t_cambio
+				, 1 dummy
+				from CO_COAME COMUNICACAO
+				where COMUNICACAO.CDUNIECO = PIN_CDUNIECO
+					and COMUNICACAO.CDTIPORA = PIN_CDTIPORA
+					and COMUNICACAO.NMPROAME = PIN_NMPROAME
+					and COMUNICACAO.NMCOMAME = PIN_NMCOMAME
+			) x
+			,(select 1 dummy from dual)y
+			where x.dummy(+) = y.dummy
+			;
+		RETURN TAXA_CAMB;
+
+		WHEN OTHERS THEN
+			RETURN 1;
+
+END FUN_MEDIA_TAXA_CAMBIO_AMEACA;
+/*
+   NOME : FUN_PAE_APOL_PER
+   *  OBJECTIVO : RETORNA O VALOR DO PRÉMIO ANUAL ESTIMADO SEM IMPOSTOS DE UMA APÓLICE DE UM DETERMINADO PERIODO DE TEMPO PARA OS PRODUTOS 120 E 121
+   *  UTILIZAÇÃO: ESTA FUNÇÃO É USADA EXCLUSIVAMENTE NO MAPA M4
+   *  VERSÃO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/
+FUNCTION FUN_PAE_APOL_PER (PI_CDUNIECO IN NUMBER
+                              ,PI_CDRAMO  IN NUMBER
+                              ,PI_ESTADO  IN VARCHAR2
+                              ,PI_NMPOLIZA IN NUMBER
+                              ,PI_DATAINI  IN DATE
+                              ,PI_DATAFIM  IN DATE
+                              )  RETURN NUMBER IS
+AUX_PREMIO MRECIDET.PTIMPORT%TYPE;
+AUX_PREMIO2 MRECIDET.PTIMPORT%TYPE;
+AUX_PREMIO3 MRECIDET.PTIMPORT%TYPE;
+AUX_GARANTIAS NUMBER;
+AUX_GARANTIAS2 NUMBER;
+BEGIN
+		SELECT SUM(DETRECIBO.PTIMPORT)
+		INTO AUX_PREMIO
+		FROM MRECIBO RECIBO
+			,MRECIDET DETRECIBO
+		WHERE 1 = 1
+			AND DETRECIBO.CDTIPCON = (
+				SELECT CODIGO
+				FROM TMANTENI
+				WHERE 1 = 1
+					AND CDTABLA = 'TLMIPREM'
+					AND CODIGO = CDTIPCON
+				)
+			AND DETRECIBO.NMRECIBO = RECIBO.NMRECIBO
+			AND DETRECIBO.CDUNIECO = RECIBO.CDUNIECO
+			AND DETRECIBO.PTIMPORT > 0
+			AND DECODE(RECIBO.CDESTADO, 2, 'N', 8, 'N', 12, 'N', 'S') = 'S'
+			AND RECIBO.NMPOLIZA = PI_NMPOLIZA
+			AND RECIBO.ESTADO = PI_ESTADO
+			AND RECIBO.CDRAMO = PI_CDRAMO
+			AND RECIBO.CDUNIECO = PI_CDUNIECO
+			AND TRUNC(DECODE(SIGN(RECIBO.FEEMISIO - RECIBO.FEINICIO), - 1, RECIBO.FEINICIO, RECIBO.FEEMISIO)) BETWEEN NVL(PI_DATAINI, TO_DATE('01-01-1900', 'DD-MM-RRRR'))
+				AND NVL(PI_DATAFIM, SYSDATE);
+
+
+		if AUX_PREMIO is null then
+
+			SELECT sum(garantias)
+			INTO AUX_GARANTIAS
+			FROM (
+				SELECT cdunieco
+					,cdramo
+					,estado
+					,nmpoliza
+					,nmpropue
+					,ano
+					,mes
+					,count(*) garantias
+				FROM CO_ZWFACT_OCDE
+				WHERE NVL(impconco, 0) > 0
+					AND feanulac IS NULL
+					AND NMPOLIZA = PI_NMPOLIZA
+					AND ESTADO = PI_ESTADO
+					AND CDRAMO = PI_CDRAMO
+					AND CDUNIECO = PI_CDUNIECO
+					AND to_date(mes || '-' || ano, 'mm-yyyy') BETWEEN NVL(PI_DATAINI, TO_DATE('01-01-1900', 'DD-MM-RRRR'))
+						AND NVL(PI_DATAFIM, SYSDATE)
+				GROUP BY cdunieco
+					,cdramo
+					,estado
+					,nmpoliza
+					,nmpropue
+					,ano
+					,mes
+				) garantias;
+
+
+			SELECT sum(garantias)  into AUX_GARANTIAS2
+			FROM (
+				SELECT cdunieco
+					,cdramo
+					,nmpoliza
+					,nmpropue
+					,count(*) garantias
+				FROM CO_progar
+				WHERE 1 = 1
+					AND IMPCONCO > 0
+					AND SWESTADO = 'PR'
+					AND NMPOLIZA = PI_NMPOLIZA
+					AND CDRAMO = PI_CDRAMO
+					AND CDUNIECO = PI_CDUNIECO
+					AND to_date(to_char(FEVIGENC, 'mmyyyy'), 'mmyyyy') <= NVL(PI_DATAFIM, SYSDATE)
+				GROUP BY cdunieco
+					,cdramo
+					,nmpoliza
+					,nmpropue
+				) garantias
+			WHERE 1 = 1;
+
+			if (AUX_GARANTIAS is not null or AUX_GARANTIAS2 is not null) then
+
+				AUX_PREMIO2 := FUN_PAE_APOL_PER(PI_CDUNIECO,PI_CDRAMO,PI_ESTADO,PI_NMPOLIZA,ADD_MONTHS(PI_DATAINI,-1),ADD_MONTHS(PI_DATAFIM,-1));
+
+				RETURN (AUX_PREMIO2);
+
+			ELSE 
+
+				return 0;
+
+			end IF;
+
+		ELSE RETURN (AUX_PREMIO*4);
+
+		end if;	
+
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PAE_APOL_PER;
+
+/*
+   NOME : FUN_PROVISAO_COD_SIN_DATA
+   *  OBJECTIVO : RETORNA O VALOR DO PAGAMENTO TOTAL DO SINISTRO POR CODIGO DO MESMO
+   *  UTILIZAÇÃO: ESTA FUNÇÃO É USADA EXCLUSIVAMENTE NO MAPA M78B-2
+   *  VERSÃO   : 1.0
+   *  CRIADO POR: JOAO RIBEIRO
+*/	
+FUNCTION FUN_PROVISAO_COD_SIN_DATA (PI_CDUNIECO IN NUMBER
+                               ,PI_CDRAMO   IN NUMBER
+                               ,PI_AAAPERTU IN NUMBER
+                               ,PI_NMSINIES IN NUMBER
+							   ,PI_CDCONVAL IN VARCHAR2
+                               ,PI_DATAINI   IN DATE
+                               ,PI_DATAFIM   IN DATE
+                               )   RETURN NUMBER IS
+AUX_PROVISAO MSINIVAL.PTPAGOS%TYPE;
+BEGIN
+	SELECT /*+ RULE */
+		SUM(VALORSIN.PTPAGOS * Pkg_Formulas_Cosec.FUN_TAXA_CAMBIO(VALORSIN.CDMONEDA))
+	INTO AUX_PROVISAO
+	FROM MSINIVAL VALORSIN
+	WHERE VALORSIN.FEMOVIMI BETWEEN NVL(PI_DATAINI, VALORSIN.FEMOVIMI)
+			AND PI_DATAFIM
+		AND VALORSIN.CDUNIECO = PI_CDUNIECO
+		AND VALORSIN.CDRAMO = PI_CDRAMO
+		AND VALORSIN.AAAPERTU = PI_AAAPERTU
+		AND VALORSIN.CDCONVAL = PI_CDCONVAL
+		AND VALORSIN.STATUS = 'M'
+		AND VALORSIN.NMSINIES = PI_NMSINIES;
+
+RETURN AUX_PROVISAO;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END FUN_PROVISAO_COD_SIN_DATA;
+
+/*
+-* NOME      : GET_PAGAMENTO_LIQ_COD_SIN
+-* OBJECTIVO : RETORNA O VALOR DOS PAGAMENTOS LIQUIDADOS A UMA DETERMINADA DATA POR CÉDIGO DE SINISTRO
+-* AUTOR     : BRIGIDA RAMOS
+-* DATA      : 26-05-2017
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PAGAMENTO_LIQ_COD_SIN ( P_CDUNIECO IN NUMBER
+                                , P_CDRAMO IN NUMBER
+								, P_AAAPERTU IN NUMBER
+								, P_STATUS IN VARCHAR2
+								, P_NMSINIES IN NUMBER
+								, P_CDCONVAL IN VARCHAR2
+                                , P_DATA_REF IN DATE) RETURN NUMBER AS
+AUX_VALOR MDSPASIN.IMPREFER%TYPE;
+BEGIN
+    SELECT SUM(DETPAG.IMPREFER)
+	INTO AUX_VALOR
+	FROM MPAGOSIN PAG
+		,MDSPASIN DETPAG
+	WHERE 1 = 1
+		AND DETPAG.NMORDPAG = PAG.NMORDPAG
+		AND DETPAG.NMSINIES = PAG.NMSINIES
+		AND DETPAG.STATUS = PAG.STATUS
+		AND DETPAG.AAAPERTU = PAG.AAAPERTU
+		AND DETPAG.CDRAMO = PAG.CDRAMO
+		AND DETPAG.CDUNIECO = PAG.CDUNIECO
+		AND DECODE(PAG.SWVIGOR, 'V', PAG.FECOBRO, DECODE(PAG.FEPREVIS, NULL, PAG.FEAUTORI, PAG.FEPREVIS)) <= P_DATA_REF
+		AND DECODE(PAG.CDTIPMOV, 1, 'S', 3, 'S', 'N') = 'S'
+		AND PAG.SWVIGOR != 'A'
+		AND PAG.SWESTADO = 3
+		AND PAG.CDCONVAL = P_CDCONVAL
+		AND PAG.NMSINIES = P_NMSINIES
+		AND PAG.STATUS = P_STATUS
+		AND PAG.AAAPERTU = P_AAAPERTU
+		AND PAG.CDRAMO = P_CDRAMO
+		AND PAG.CDUNIECO = P_CDUNIECO;
+
+    RETURN AUX_VALOR;
+  EXCEPTION
+             WHEN OTHERS THEN RETURN NULL;
+END GET_PAGAMENTO_LIQ_COD_SIN;
+
+/*
+-* NOME      : GET_RESSEG_CED_COD_DATA
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO CEDIDO A UMA DETERMINADA DATA POR CODIGO DE SINISTRO
+-* AUTOR     : João Ribeiro
+-* DATA      : 26-05-2017
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_RESSEG_CED_COD_DATA (PI_CDUNIECO IN NUMBER
+                               ,PI_CDRAMO   IN NUMBER
+                               ,PI_AAAPERTU IN NUMBER
+                               ,PI_NMSINIES IN NUMBER
+							   ,PI_CDCONVAL IN VARCHAR2
+                               ,PI_DATAINI   IN DATE
+                               ,PI_DATAFIM   IN DATE
+                               )   RETURN NUMBER IS
+AUX_PROVISAO MSINIVAL.PTPAGOS%TYPE;
+BEGIN
+	SELECT /*+ NO_EXPAND */
+		SUM((NVL(VALORSIN.PTIMPOBL, 0) + NVL(VALORSIN.PTIMPFAC, 0) + NVL(VALORSIN.PTIMPOLC, 0)) * Pkg_Formulas_Cosec.FUN_TAXA_CAMBIO(VALORSIN.CDMONEDA))
+	INTO AUX_PROVISAO
+	FROM MSINIVAL VALORSIN
+	WHERE VALORSIN.FEMOVIMI BETWEEN NVL(PI_DATAINI, VALORSIN.FEMOVIMI)
+			AND PI_DATAFIM
+		AND VALORSIN.CDUNIECO = PI_CDUNIECO
+		AND VALORSIN.CDRAMO = PI_CDRAMO
+		AND VALORSIN.AAAPERTU = PI_AAAPERTU
+		AND VALORSIN.STATUS = 'M'
+		AND VALORSIN.NMSINIES = PI_NMSINIES
+		AND VALORSIN.CDCONVAL = PI_CDCONVAL;
+
+RETURN AUX_PROVISAO;
+EXCEPTION
+  WHEN OTHERS THEN RETURN NULL;
+END GET_RESSEG_CED_COD_DATA;
+
+/*
+-* NOME      : GET_PAGAMENTO_LIQ_COD_RES
+-* OBJECTIVO : RETORNA O VALOR DO RESSEGURO LIQUIDADO A UMA DETERMINADA DATA POR CODIGO DE SINISTRO
+-* AUTOR     : João Ribeiro
+-* DATA      : 26-05-2017
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION GET_PAGAMENTO_LIQ_COD_RES ( P_CDUNIECO IN NUMBER
+                                , P_CDRAMO IN NUMBER
+								, P_AAAPERTU IN NUMBER
+								, P_STATUS IN VARCHAR2
+								, P_NMSINIES IN NUMBER
+								, P_CDCONVAL IN VARCHAR2
+                                , P_DATA_REF IN DATE) RETURN NUMBER AS
+AUX_VALOR MDSPASIN.IMPREFER%TYPE;
+BEGIN
+	SELECT SUM(NVL(PAG.PTIMPOBL, 0) + NVL(PAG.PTIMPFAC, 0) + NVL(PAG.PTIMPOLC, 0))
+	INTO AUX_VALOR
+	FROM MPAGOSIN PAG
+	WHERE 1 = 1
+		AND DECODE(PAG.SWVIGOR, 'V', PAG.FECOBRO, DECODE(PAG.FEPREVIS, NULL, PAG.FEAUTORI, PAG.FEPREVIS)) <= P_DATA_REF
+		AND DECODE(PAG.CDTIPMOV, 1, 'S', 3, 'S', 'N') = 'S'
+		AND PAG.SWVIGOR != 'A'
+		AND PAG.SWESTADO = 3
+		AND PAG.CDCONVAL = P_CDCONVAL
+		AND PAG.NMSINIES = P_NMSINIES
+		AND PAG.STATUS = P_STATUS
+		AND PAG.AAAPERTU = P_AAAPERTU
+		AND PAG.CDRAMO = P_CDRAMO
+		AND PAG.CDUNIECO = P_CDUNIECO;
+
+    RETURN AUX_VALOR;
+  EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END GET_PAGAMENTO_LIQ_COD_RES;
+
+
+/*
+-* NOME      : FUN_GARANT_DINAMICAS
+-* OBJECTIVO : RETORNA O RISCO ACUMULADO DAS GARNATIAS DINÉMICAS OU O NUMERO DE GARANTIAS DINAMICAS EXISTENTES PARA A ENTIDADE DE RISCO INDICADA
+-* AUTOR     : João Ribeiro
+-* DATA      : 19-06-2017
+-* VERSÃO    : 1.0
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_GARANT_DINAMICAS ( PI_CDPERSON IN NUMBER
+							  , PI_TIPO IN VARCHAR2
+							  , PI_TIP IN NUMBER) RETURN number AS
+v_capital	CO_PROGAR.IMPCONCO%TYPE;
+v_garantias	NUMBER(6):=0;
+v_apolices	NUMBER(6):=0;
+BEGIN
+	SELECT /*+ ordered */
+		NVL(SUM(DECODE(PI_TIPO, 'C', GARANTIA.IMPCONCO, 'P', GARANTIA.IMPCONPO, GARANTIA.IMPCONCO + GARANTIA.IMPCONPO) * PKG_FORMULAS_COSEC.FUN_TAXA_CAMBIO(PROPOSTA.CDMOEDA) * DECODE(PROPOSTA.INDCOASEG, 'N', 1, 1 - (PKG_FORMULAS_COSEC.FUN_PERCENTAGEM_TOTAL_COAS(PROPOSTA.CDUNIECO, PROPOSTA.CDRAMO, PROPOSTA.SWESTADO, PROPOSTA.NMPOLIZA, SYSDATE) / 100))), 0) CAPITAL
+		,NVL(SUM(DECODE(PI_TIPO, 'C', DECODE(GARANTIA.IMPSOLCO, 0, 0, 1), 'P', DECODE(GARANTIA.IMPSOLPO, 0, 0, 1), 1)), 0) N_GARANTIAS
+		,NVL(COUNT(DISTINCT PROPOSTA.NMPOLIZA), 0) N_APOLICES
+	INTO v_capital
+		,v_garantias
+		,v_apolices
+	FROM CO_PROROL ENTIDADE_RISCO
+		,CO_PROGAR GARANTIA
+		,CO_PROPOL PROPOSTA
+	WHERE 1 = 1
+		AND PROPOSTA.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND PROPOSTA.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND PROPOSTA.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+		AND PROPOSTA.FEMODIF = (
+			SELECT MAX(FEMODIF)
+			FROM CO_PROPOL X
+			WHERE X.CDUNIECO = PROPOSTA.CDUNIECO
+				AND X.CDRAMO = PROPOSTA.CDRAMO
+				AND X.NMPROPUE = PROPOSTA.NMPROPUE
+			)
+		AND GARANTIA.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+		AND GARANTIA.CDRAMO = ENTIDADE_RISCO.CDRAMO
+		AND GARANTIA.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+		AND GARANTIA.NMGARANT = ENTIDADE_RISCO.NMGARANT
+		AND GARANTIA.CDTIPGAR = 'A'
+		AND GARANTIA.SWESTADO IN (
+			'D'
+			,'M'
+			,'PR'
+			)
+		/* LINHAS INSERIDAS ISSUE 602 - ALTERAR GET_ATRIBUTO_APOLICE_DATA PARA PARAMETRO DATA A MAIOR DE SYSDATE OU DATA INICIO VIGOR APOLICE */
+		AND (
+			GARANTIA.CDRAMO != '100'
+			OR
+			--  PKG_FORMULAS_COSEC.GET_ATRIBUTO_APOLICE_DATA(GARANTIA.CDUNIECO,GARANTIA.CDRAMO,GARANTIA.SWESTADO,GARANTIA.NMPOLIZA,11) NOT IN (11,12) OR
+			PKG_FORMULAS_COSEC.GET_ATRIBUTO_APOLICE_DATA(GARANTIA.CDUNIECO, GARANTIA.CDRAMO, 'M', GARANTIA.NMPOLIZA, 11, GREATEST(PKG_FORMULAS_COSEC.GET_DT_VIGENCIA_APOLICE(PROPOSTA.CDUNIECO, PROPOSTA.CDRAMO, PROPOSTA.NMPOLIZA, 0, 'I'), SYSDATE), '-1') NOT IN (
+				11
+				,12
+				,16
+				,17
+				,19
+				)
+			)
+		/* FIM LINHAS INSERIDAS ISSUE 602 */
+		AND ENTIDADE_RISCO.STATUS = 'V'
+		AND ENTIDADE_RISCO.NMORDINA = (
+			SELECT MAX(NMORDINA)
+			FROM CO_PROROL X
+			WHERE X.CDUNIECO = ENTIDADE_RISCO.CDUNIECO
+				AND X.CDRAMO = ENTIDADE_RISCO.CDRAMO
+				AND X.NMPROPUE = ENTIDADE_RISCO.NMPROPUE
+				AND X.CDPERSON = ENTIDADE_RISCO.CDPERSON
+				AND X.NMGARANT = ENTIDADE_RISCO.NMGARANT
+				AND X.CDROL = ENTIDADE_RISCO.CDROL
+			)
+		AND ENTIDADE_RISCO.CDPERSON = PI_CDPERSON
+		AND ENTIDADE_RISCO.CDROL = 'ER'
+		AND ENTIDADE_RISCO.CDRAMO LIKE '1%'
+		AND ENTIDADE_RISCO.CDUNIECO NOT IN (
+			SELECT CHAVE
+			FROM CFG_VALORES_DOMINIO
+			WHERE DOMINIO_ID = 'EXCLUSAO_RISCO'
+			);
+
+
+	if PI_TIP = 1 then
+		RETURN v_capital;
+	elsif PI_TIP = 2 then
+		RETURN v_garantias;
+	elsif PI_TIP = 3 then
+		RETURN v_apolices;
+	else
+		return null;
+    end if;
+
+
+  EXCEPTION
+	WHEN OTHERS THEN RETURN NULL;
+END FUN_GARANT_DINAMICAS;
+
+/*FUN RISCO*/
+ FUNCTION FUN_DADOS_RISCO (P_FEFINAL IN DATE
+                           , P_CDROL IN VARCHAR2
+						   , P_NMGARANT NUMBER  
+						   , P_NMPROPUE IN NUMBER 
+						   , P_STATUS IN VARCHAR2
+						   , P_CDRAMO IN VARCHAR2
+						   , P_CDUNIECO IN NUMBER
+						   , P_NMSOLICI IN NUMBER) RETURN VARCHAR2 IS
+
+
+ AUX_CDPERSON CO_PROROL.cdperson%TYPE;						   
+
+ BEGIN
+
+	SELECT RISCO.CDPERSON
+	INTO AUX_CDPERSON
+	FROM CO_PROROL RISCO
+	WHERE RISCO.STATUS = 'V'
+		AND RISCO.NMORDINA = (
+			SELECT MAX(NMORDINA)
+			FROM CO_PROROL
+			WHERE 1 = 1
+				AND FEMODIF <= P_FEFINAL
+				AND CDROL = P_CDROL
+				AND NMGARANT = P_NMGARANT
+				AND NMPROPUE = P_NMPROPUE
+				AND STATUS = P_STATUS
+				AND CDRAMO = P_CDRAMO
+				AND CDUNIECO = P_CDUNIECO
+			)
+		AND RISCO.CDROL = 'ER'
+		AND RISCO.NMGARANT = P_NMGARANT
+		AND RISCO.NMPROPUE = P_NMSOLICI
+		AND RISCO.CDRAMO = P_CDRAMO
+		AND RISCO.CDUNIECO = P_CDUNIECO;
+
+
+	RETURN AUX_CDPERSON;
+
+EXCEPTION 
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_DADOS_RISCO;   
+
+/*
+-*  NOME      : fun_produto
+-*  OBJECTIVO : RETORNA A DESCRICAO do produto
+-*  UTILIZAÇÃO: 
+-*  VERSÃO    : 1.0
+-*  AUTOR     : VITOR RODRIGUES
+-*  DATA      : 12-01-2009
+-*
+-* ÚLTIMAS ALTERAÇÕES
+-*
+-*   DATA       AUTOR           DESCRIÇÃO
+-*   ========== =============== =================================================
+-*   12-01-2009 VITOR RODRIGUES    DEVOLVER A DESCRICAO DO TIPO DE produto */
+
+
+FUNCTION FUN_PRODUTO (P_CDRAMO IN VARCHAR2 ) RETURN VARCHAR2 IS
+
+AUX_PRODUTO VARCHAR2(100);
+
+BEGIN
+
+	SELECT CDRAMO || '-' || DSRAMO
+	INTO AUX_PRODUTO
+	FROM TRAMOS
+	WHERE 1 = 1
+		AND CDRAMO = P_CDRAMO;
+
+
+	RETURN AUX_PRODUTO;
+
+
+EXCEPTION 
+	WHEN OTHERS THEN
+		RETURN NULL;
+END FUN_PRODUTO;
+
+/*
+-* NOME      : FUN_PAE_GRUPO
+-* OBJECTIVO : RETORNA O SUMATÉRIO DOS PRÉMIOS ANUAIS ESTIMADOS DAS APÓLICES DO MESMO GRUPO
+-* AUTOR     : JOAO Ribeiro
+-* DATA      : 11-03-2025
+-* VERSAO    : 1.0
+-*
+-* ULTIMAS ALTERACOES
+-*
+-*   DATA       AUTOR           DESCRICAO
+-*   ========== =============== =================================================
+-*
+-*/
+FUNCTION FUN_PAE_GRUPO ( PI_GRUPO IN VARCHAR2 ) RETURN NUMBER IS
+
+AUX_PAE_GRUPO NUMBER;
+
+BEGIN
+
+	SELECT SUM(CASE 
+				WHEN atributos.cdramo IN (
+						100
+						,101
+						,104
+						,105
+						,107
+						,116
+						)
+					THEN (NVL(TO_NUMBER(REPLACE(atributos.atributo27, '.', ',')), 0) + NVL(TO_NUMBER(REPLACE(atributos.atributo26, '.', ',')), 0)) * NVL(TO_NUMBER(REPLACE(atributos.atributo28, '.', ',')) / 100, 0) + NVL(TO_NUMBER(REPLACE(atributos.atributo29, '.', ',')), 0) * NVL(TO_NUMBER(REPLACE(atributos.atributo30, '.', ',')) / 100, 0)
+				WHEN atributos.cdramo IN (106)
+					THEN NVL(TO_NUMBER(REPLACE(TabTarifApol.otvalor04, '.', ',')), 0)
+				WHEN atributos.cdramo IN (108)
+					THEN NVL(TO_NUMBER(REPLACE(TabTarifApol_2.otvalor04, '.', ',')), 0)
+				WHEN atributos.cdramo IN (109)
+					THEN NVL(TO_NUMBER(REPLACE(TabTarifApol_3.otvalor04, '.', ',')), 0)
+				WHEN atributos.cdramo IN (
+						120
+						,121
+						,122
+						,123
+						,125
+						)
+					THEN NVL(FUN_PAE_APOL_PER(atributos.cdunieco, atributos.cdramo, 'M', atributos.nmpoliza, (TO_DATE('01' || TO_CHAR(ADD_MONTHS(SYSDATE, - 1), 'mmyyyy'), 'ddmmyyyy')), (ADD_MONTHS(LAST_DAY(SYSDATE), - 1))), 0)
+				END) PAE_GRUPO
+	INTO AUX_PAE_GRUPO
+	FROM gd_atributos_apolice_mv atributos
+		,(
+			SELECT a.otclave1 AS tab_key1
+				,a.otclave2 AS tab_key2
+				,a.fedesde AS start_date
+				,a.fehasta AS end_date
+				,to_number(a.otclave3) AS max_vol_op
+				,nvl(LAG(to_number(a.otclave3), 1) OVER (
+						PARTITION BY a.otclave1
+						,a.otclave2 ORDER BY to_number(a.otclave3)
+						), 0) AS min_vol_op
+				,a.otvalor04
+			FROM TABLE (PKG_APP_UTIL.LISTA_TABAPOIO('TTARIPME')) a
+			ORDER BY a.otclave1
+				,a.otclave2
+				,to_number(a.otclave3)
+			) TabTarifApol
+		,(
+			SELECT a.otclave1 AS tab_key1
+				,a.fedesde AS start_date
+				,a.fehasta AS end_date
+				,to_number(a.otclave2) AS max_vol_op
+				,nvl(LAG(to_number(a.otclave2), 1) OVER (
+						PARTITION BY a.otclave1 ORDER BY to_number(a.otclave2)
+						), 0) AS min_vol_op
+				,a.otvalor04
+			FROM TABLE (PKG_APP_UTIL.LISTA_TABAPOIO('TTARIEXP')) a
+			ORDER BY a.otclave1
+				,a.otclave2
+			) TabTarifApol_2 /* TABELA DE CUSTOS Apolice 108*/
+		,(
+			SELECT a.otclave1 AS tab_key1
+				,a.fedesde AS start_date
+				,a.fehasta AS end_date
+				,to_number(a.otclave2) AS max_vol_op
+				,nvl(LAG(to_number(a.otclave2), 1) OVER (
+						PARTITION BY a.otclave1 ORDER BY to_number(a.otclave2)
+						), 0) AS min_vol_op
+				,a.otvalor04
+			FROM TABLE (PKG_APP_UTIL.LISTA_TABAPOIO('TTARITCI')) a
+			ORDER BY a.otclave1
+				,a.otclave2
+			) TabTarifApol_3 /* TABELA DE CUSTOS Apolice 109*/
+	WHERE 1 = 1
+		AND atributos.estado = 'M'
+		AND atributos.cdramo <= 199
+		AND atributos.cdunieco = 1
+		AND atributos.atributo79 = PI_GRUPO
+		AND TabTarifApol.tab_key1(+) = atributos.ATRIBUTO65
+		AND TabTarifApol.tab_key2(+) = atributos.ATRIBUTO67
+		AND TRUNC(sysdate) BETWEEN TabTarifApol.start_date(+)
+			AND TabTarifApol.end_date(+)
+		AND TO_NUMBER(REPLACE(atributos.atributo16, '.', ',')) BETWEEN (TabTarifApol.min_vol_op(+) + 1)
+			AND TabTarifApol.max_vol_op(+)
+		AND TabTarifApol_2.tab_key1(+) = atributos.ATRIBUTO65
+		AND TRUNC(sysdate) BETWEEN TabTarifApol_2.start_date(+)
+			AND TabTarifApol_2.end_date(+)
+		AND TO_NUMBER(REPLACE(atributos.atributo16, '.', ',')) BETWEEN (TabTarifApol_2.min_vol_op(+) + 1)
+			AND TabTarifApol_2.max_vol_op(+)
+		AND TabTarifApol_3.tab_key1(+) = atributos.ATRIBUTO65
+		AND TRUNC(sysdate) BETWEEN TabTarifApol_3.start_date(+)
+			AND TabTarifApol_3.end_date(+)
+		AND TO_NUMBER(REPLACE(atributos.atributo16, '.', ',')) BETWEEN (TabTarifApol_3.min_vol_op(+) + 1)
+			AND TabTarifApol_3.max_vol_op(+);
+
+
+
+	RETURN AUX_PAE_GRUPO;
+
+
+EXCEPTION 
+	WHEN OTHERS THEN
+		RETURN 0;
+END FUN_PAE_GRUPO;
+
+END;

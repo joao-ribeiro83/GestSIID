@@ -1,0 +1,141 @@
+-- PCK_SG (owner: GADOR_TESTES)
+
+
+-- ===== SPEC (PACKAGE) =====
+
+PACKAGE PCK_SG AS
+
+  ADMIN_USER CONSTANT VARCHAR2(20) := 'ADMINISTRADOR';
+--
+  ADMIN_CLASE CONSTANT VARCHAR2(1) := 'A';
+--
+  CHAR_RESERV CONSTANT VARCHAR2(1) := '¿';
+--
+  TYPE T_Char IS TABLE OF VARCHAR2(1);
+
+  tCharReserv T_Char:= T_Char('¿', '@', '#', '$','/','&',CHR(34), CHR(39) , '|' ,'^' , '¿' , '»' , '«' , '£' , '§', '%' , '¿' , '`' , '¿' , 'º', 'ª', ':' , '<' , '>' );
+  chararray varchar2(95):='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜßáíóúñÑªºãõØøÀÃÕ';
+--
+  type char_table_type is table of boolean index by varchar2(1);
+
+--
+  MIN_LENPWD CONSTANT NUMBER(4) := 3;
+--
+  gChars char_table_type;
+  gNums char_table_type;
+  gSpecialChars char_table_type;
+  gMaxIterations number:=300;
+--
+  FUNCTION F_REA_ADMIN RETURN VARCHAR2;
+--
+  FUNCTION F_REA_ADMIN_CLASE RETURN VARCHAR2;
+--
+  PROCEDURE P_VAL_USUARIOS(P_CDIDUSR VARCHAR2, P_REGISTRADO BOOLEAN);
+--
+  PROCEDURE P_VAL_DEFUSER(P_CDIDUSR VARCHAR2,P_REGISTRADO BOOLEAN);
+--
+  PROCEDURE P_VAL_USRROLES(P_CDUSRROL VARCHAR2, P_REGISTRADO BOOLEAN);
+--
+  PROCEDURE P_VAL_PERFILES(P_CDPERFIL VARCHAR2, P_REGISTRADO BOOLEAN);
+--
+  PROCEDURE P_CRE_USRROLES(P_CDUSRROL VARCHAR2, P_CDTIPOROL VARCHAR2);
+--
+  PROCEDURE P_DEL_USRROLES(P_CDUSRROL VARCHAR2);
+--
+  PROCEDURE P_VAL_MENUPERF(P_CDPERFIL VARCHAR2, P_CDRAIZ VARCHAR2,
+                           P_CDMENU VARCHAR2, P_REGISTRADO BOOLEAN);
+--
+  PROCEDURE P_VAL_MENUPERF(P_CDPERFIL VARCHAR2, P_CDRAIZ VARCHAR2);
+--
+  PROCEDURE P_CRE_MENUCASCADA(P_CDPERFIL VARCHAR2, P_CDMENU VARCHAR2);
+--
+  PROCEDURE P_DEL_MENUCASCADA(P_CDPERFIL VARCHAR2, P_CDMENU VARCHAR2);
+--
+  PROCEDURE P_CRE_ROLOBJ(P_CDUSRROL VARCHAR2, P_CDNOMOBJ VARCHAR2);
+--
+  PROCEDURE P_DEL_ROLOBJ(P_CDUSRROL VARCHAR2, P_CDNOMOBJ VARCHAR2);
+  PROCEDURE P_DEL_ROLOBJ(P_CDUSRROL VARCHAR2);
+
+--
+  PROCEDURE P_CRE_ROLPRIVI(P_CDUSRROL VARCHAR2, P_DSPRIVILE VARCHAR2);
+--
+  PROCEDURE P_DEL_ROLPRIVI(P_CDUSRROL VARCHAR2, P_DSPRIVILE VARCHAR2);
+  PROCEDURE P_DEL_ROLPRIVI(P_CDUSRROL VARCHAR2);
+--
+  PROCEDURE P_VAL_ROLPRIVI(P_CDUSRROL VARCHAR2, P_REGISTRADO BOOLEAN);
+--
+  FUNCTION F_VAL_ROLOBJ(P_CDUSRROL VARCHAR2, P_CDNOMOBJ VARCHAR2) RETURN BOOLEAN;
+--
+  PROCEDURE P_VAL_UNIDAUSR(P_CDUNIECO NUMBER, P_CDIDUSR VARCHAR2, P_REGISTRADO BOOLEAN);
+--
+  FUNCTION F_INS_ENCRIPT(P_PASSWORD VARCHAR2, P_STRING VARCHAR2) RETURN VARCHAR2;
+--
+  FUNCTION F_INS_DECRIPT(P_PASSWORD VARCHAR2, P_STRING VARCHAR2) RETURN VARCHAR2 ;
+--
+  -- C2904 PROCEDURE P_UPD_PWDUSER(P_CDIDUSR VARCHAR2, P_PASSWORD VARCHAR2, P_STRING VARCHAR2, P_SWCHGPWD IN VARCHAR2 DEFAULT 'N'); /* Issue 1102 - Incl. P_SWCHGPWD */
+  PROCEDURE P_UPD_PWDUSER(P_CDIDUSR VARCHAR2, P_PASSWORD VARCHAR2, P_IDKEYPWD VARCHAR2, P_SWCHGPWD IN VARCHAR2 DEFAULT 'N');  /* C2904 */
+--
+  FUNCTION F_CARACTERES_ESP RETURN VARCHAR2;
+--
+  FUNCTION F_VALIDA_PASSWORD(PIN_CDIDUSR IN M_USUARIOS.CDIDUSR%TYPE, PIN_PASSWORD IN VARCHAR2,
+							 PIN_USERTIPO IN VARCHAR2, PIN_MSG OUT VARCHAR2) RETURN NUMBER;
+--
+  FUNCTION F_VAL_PASSWORD(P_CDIDUSR VARCHAR2, P_PASSWORD VARCHAR2) RETURN BOOLEAN;
+--
+  FUNCTION F_COMPRUEBA_PASSWORD(PIN_CDIDUSR IN VARCHAR2, PIN_PASSWORD IN VARCHAR2, PIN_TENTATIVAS IN OUT NUMBER,
+							    POUT_CODE OUT VARCHAR2, POUT_MSG OUT VARCHAR2) RETURN NUMBER;
+--
+  FUNCTION UPD_NACCES_POL_FUN ( PIN_CDIDUSR IN VARCHAR2, PIN_FESYSTEM IN DATE ) RETURN NUMBER;
+--
+  FUNCTION UPD_SACCES_POL_FUN ( PIN_CDIDUSR IN VARCHAR2, PIN_FESYSTEM IN DATE, PIN_USERCLASE IN VARCHAR2,
+								PIN_IDRESPON IN VARCHAR2 ) RETURN NUMBER;
+--
+  FUNCTION F_REA_USERCLASE (P_CDIDUSR VARCHAR2) RETURN VARCHAR2;
+--
+  PROCEDURE p_get_dados_DOM (P_CDPERSON IN CO_ENTIDAD.CDPERSON%TYPE, P_CDTIPDOM IN MDOMICIL.CDTIPDOM%TYPE,
+                             P_NMORDDOM OUT MDOMICIL.NMORDDOM%TYPE,  P_EXISTE_DOM OUT BOOLEAN,
+	   					     P_SQLCODE OUT NUMBER,  P_SQLERRM OUT VARCHAR2);
+--
+  PROCEDURE p_get_dados_USR (pin_CDIDUSR IN VARCHAR2,  pin_CDPERFIL IN VARCHAR2,
+						   pin_cdtiputi IN VARCHAR2, pin_SWACTIVO IN VARCHAR2,
+                           pout_cdperson OUT NUMBER, pout_nmorddom OUT number,
+						   pout_SQLCODE OUT NUMBER,  pout_SQLERRM OUT VARCHAR2);
+--
+  /***** Issue 685 *********/
+  PROCEDURE P_NEW_PASSWORD (pin_CDIDUSR IN VARCHAR2, pin_SWCOMPPW IN VARCHAR2,
+                            pin_NMCHARPW IN NUMBER, pin_NMULTPW IN VARCHAR2,
+                            pout_NEWPWD OUT VARCHAR2, pout_SQLCODE OUT NUMBER,
+                            pout_SQLERRM OUT VARCHAR2);
+  /***** FIN Issue 685 *********/
+  --
+  FUNCTION F_VAL_CHAR(pin_cadena IN VARCHAR2) RETURN BOOLEAN; -- E1269
+  --
+  /* ****** Issue 1001 *************/
+  PROCEDURE p_user_exists (
+                             pin_cdidusr   IN       m_usuarios.cdidusr%TYPE
+                           , pout_swexist     OUT   m_usuarios.swactivo%TYPE
+                           , pout_msgerro     OUT   VARCHAR2
+                         );
+  --
+  PROCEDURE p_user_Remove (
+                           pin_cdidusr   IN       m_usuarios.cdidusr%TYPE
+                         , pout_msgerro     OUT   VARCHAR2
+                        );
+  --
+  PROCEDURE p_user_Create (
+                           pin_cdidusr    IN       m_usuarios.cdidusr%TYPE
+                         , pin_dsusuario  IN       m_usuarios.dsusuario%TYPE
+                         , pin_usermail   IN       m_usuarios.usermail%TYPE
+                         , pin_creationdt IN       DATE
+                         , pin_lastlogdt  IN       DATE
+                         , pout_msgerro     OUT   VARCHAR2
+                         );
+   /* ****** FIN Issue 1001 *************/
+   /*** C2904 ****/
+   FUNCTION f_ins_encrypta (p_string IN VARCHAR2, p_id_key OUT m_usuarios.idkeypwd%TYPE) RETURN VARCHAR2;
+   --
+   FUNCTION f_ins_decrypta (p_encrypted_string IN VARCHAR2, p_id_key IN m_usuarios.idkeypwd%TYPE) RETURN VARCHAR2;
+   /*** Fim C2904 ****/
+
+   PROCEDURE p_cria_password (pout_NEWPWD  OUT VARCHAR2,pout_sqlcode OUT VARCHAR2); --C2939
+END PCK_SG;

@@ -1,0 +1,61 @@
+# DOC_PERFIS_DEPARTAMENTO
+
+Owner: `SIID_TESTES` &nbsp; Type: `TABLE`
+
+Row count: **73**
+
+## Columns
+
+| NAME | TYPE | LENGTH | PRECISION | SCALE | NULLABLE | DEFAULT | COMMENT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ID | NUMBER | 22 |  |  | N |  |  |
+| CDDEPARTA | VARCHAR2 | 20 |  |  | Y |  |  |
+| CDEMPLEA | VARCHAR2 | 30 |  |  | Y |  |  |
+| FUNCAODEP_ID | VARCHAR2 | 15 |  |  | Y |  |  |
+| NOME | VARCHAR2 | 240 |  |  | Y |  |  |
+| ASSINATURA | BLOB | 4000 |  |  | Y |  |  |
+| TELEFONE | VARCHAR2 | 60 |  |  | Y |  |  |
+| TELEMOVEL | VARCHAR2 | 60 |  |  | Y |  |  |
+| FAX | VARCHAR2 | 60 |  |  | Y |  |  |
+| EMAIL | VARCHAR2 | 100 |  |  | Y |  |  |
+| DESCRICAO | VARCHAR2 | 240 |  |  | Y |  |  |
+| DATA_INICIO | DATE | 7 |  |  | Y |  |  |
+| DATA_FIM | DATE | 7 |  |  | Y |  |  |
+| DATA_CRIACAO | DATE | 7 |  |  | Y | SYSDATE |  |
+| CRIADO_POR | VARCHAR2 | 30 |  |  | Y | USER |  |
+| DATA_ACTUALIZACAO | DATE | 7 |  |  | Y |  |  |
+| ACTUALIZADO_POR | VARCHAR2 | 30 |  |  | Y |  |  |
+| CODIGO | VARCHAR2 | 30 |  |  | Y |  |  |
+
+
+## Primary / unique keys
+
+| CONSTRAINT_NAME | CONSTRAINT_TYPE | COLUMN_NAME | POSITION |
+| --- | --- | --- | --- |
+| PK_ID_PERFDEP | P | ID | 1 |
+| UK_ACESSOPERF_PERFDEP | U | FUNCAODEP_ID | 1 |
+| UK_ACESSOPERF_PERFDEP | U | CDDEPARTA | 2 |
+| UK_ACESSOPERF_PERFDEP | U | DATA_INICIO | 3 |
+| UK_ACESSOPERF_PERFDEP | U | CDEMPLEA | 4 |
+
+
+## Foreign keys
+
+| CONSTRAINT_NAME | COLUMN_NAME | POSITION | R_OWNER | R_TABLE_NAME |
+| --- | --- | --- | --- | --- |
+| FK_FUNCAODEP_PERFDEP | FUNCAODEP_ID | 1 | SIID_TESTES | DOC_FUNCOES_DEPARTAMENTO |
+
+
+## Indexes
+
+| INDEX_NAME | UNIQUENESS | COLUMN_NAME | COLUMN_POSITION |
+| --- | --- | --- | --- |
+| IDX_DEPARTAMENTO_PERFDEP | NONUNIQUE | CDDEPARTA | 1 |
+| IDX_EMPREGADO_PERFDEP | NONUNIQUE | CDEMPLEA | 1 |
+| IDX_FUNCAODEP_PERFDEP | NONUNIQUE | FUNCAODEP_ID | 1 |
+| PK_ID_PERFDEP | UNIQUE | ID | 1 |
+| UK_ACESSOPERF_PERFDEP | UNIQUE | FUNCAODEP_ID | 1 |
+| UK_ACESSOPERF_PERFDEP | UNIQUE | CDDEPARTA | 2 |
+| UK_ACESSOPERF_PERFDEP | UNIQUE | DATA_INICIO | 3 |
+| UK_ACESSOPERF_PERFDEP | UNIQUE | CDEMPLEA | 4 |
+

@@ -21,6 +21,7 @@ Everything the Node.js rewrite plan was built from (2026-09-14). Start with `MAS
 | `DECISIONS.md` | Created by Step 0.3: answered open questions, binding for later steps | yes |
 | `ARCHITECTURE.md` | Created by Step 1.1: binding architecture (stack, topology, DB layer, QBE/commit contracts, auth, files, conventions, form → route mapping) | yes |
 | `architecture.mmd` → `architecture.svg` | C4 container/component diagram source and its render (gstack `diagram` skill) | yes |
+| `UI_SPEC.md` + `../app/design-tokens.json` | Created by Step 1.2: UI design contract (tokens, app shell and per-role menu, message catalogue channels, DataBlock behaviour, screen wireframes, accessibility, component inventory) | yes |
 
 ## Regenerate the dumps
 

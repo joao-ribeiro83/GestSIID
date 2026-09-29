@@ -5,6 +5,14 @@ Inputs: `analysis/STRUCTURE.md`, `analysis/BUSINESS_RULES.md`, `analysis/SECURIT
 `analysis/forms-summary/**` (per-form inventories and PL/SQL text), `analysis/forms-xml/**` (Forms2XML dump of every module: the
 authoritative source for item properties, LOVs, alerts, menus, canvases), `dev/P/*.err` (trigger inventories), `CLAUDE.md`.
 
+## ⛔ HARD RULE — NO CHANGES TO THE ORACLE DATABASE
+
+Claude, tests and scripts are **NOT permitted to change the Oracle database** (owner's order, 2026-09-22).
+- No INSERT, UPDATE, DELETE, MERGE, DDL, PL/SQL block, write-package call, `SELECT ... FOR UPDATE`, or COMMIT — not even on `ZZTEST_` rows, not in a rolled-back transaction, not "restored afterwards", not to repair an earlier mistake.
+- Contract tests reach Oracle only through `app/apps/api/src/test/read-only-db.ts` (`readOnlyPool`). Write paths are tested with fakes only.
+- Reading (plain SELECT) is allowed. If a task seems to need a DB change: stop and ask the owner. Give them the SQL; do not run it.
+- Full rule: `analysis/TEST_STRATEGY.md` (top).
+
 ## 0. How to use this plan
 
 - Run the steps in order. Each step is one Claude Code session started in `I:\GestSIID12c`. Use `/clear` between steps.
@@ -90,9 +98,7 @@ flowchart LR
   P5 --> P7[Phase 7<br/>Documentos]
   P6 --> P7
   P7 --> P8[Phase 8<br/>Backups]
-  P7 --> P9[Phase 9<br/>Auditoria]
   P8 --> P10[Phase 10<br/>Hardening & release]
-  P9 --> P10
 ```
 
 | Phase | Scope | Size | Risk |
@@ -106,7 +112,7 @@ flowchart LR
 | 6 Modelos | template master-detail, sections, conditions, parameters, attributes, uploads | L | High (WebUtil replacement) |
 | 7 Documentos | main document management, queue, comments, attachments, all operations, admin vs user | XL | High |
 | 8 Backups | Novo backup, Backups online | M | Medium |
-| 9 Auditoria | Médias execução dashboard (optional) | S | Low |
+| 9 Auditoria | removed (D-06) | — | — |
 | 10 Hardening & release | security, QA, design review, docs, deployment, parallel run, cutover | M | Medium |
 
 Phase 4 is the pilot: it takes one simple form (Impressoras) all the way through API, UI, tests and Docker. What the pilot
@@ -324,7 +330,7 @@ Everything must run with `pnpm i && pnpm -r test` without a database; the DB int
 Invoke `frontend-design:frontend-design`; use `context7-mcp` for Vite, TanStack Router and TanStack Query current APIs. Read analysis/UI_SPEC.md, app/design-tokens.json and analysis/ARCHITECTURE.md.
 In app/apps/web create the React 19 + Vite + TypeScript SPA:
 1. Tailwind + shadcn/ui initialised from the design tokens (light/dark).
-2. TanStack Router file-based routes: /login, / (shell), and a placeholder route per menu leaf using the exact Portuguese labels and tree from UI_SPEC (Gestão → Documentos, Backups → Novo / Backups Online, Impressoras Associadas → Documento / Utilizador, Alterar password; Gador → Gestores, Equipa de Gestão (OD68); Configuração → Reports, Modelos, Permissões, Impressoras; Administração → Domínios, Unidades Medida, Tipos Mídia, Utilizadores, Variáveis SIID; Auditoria → Médias Execução). Menu config is one typed array with a `roles` field.
+2. TanStack Router file-based routes: /login, / (shell), and a placeholder route per menu leaf using the exact Portuguese labels and tree from UI_SPEC (Gestão → Documentos, Backups → Novo / Backups Online; Gador → Gestores, Equipa de Gestão (OD68); Configuração → Reports, Modelos, Permissões, Impressoras, Impressoras Associadas → Documento / Utilizador, Alterar password; Administração → Domínios, Unidades Medida, Tipos Mídia, Utilizadores, Variáveis SIID; Auditoria → Médias Execução). Menu config is one typed array with a `roles` field.
 3. App shell per UI_SPEC: top bar (environment, user, role, logout), collapsible left nav, breadcrumb, content outlet, toast provider, confirm dialog provider (Portuguese buttons: Sim / Não / OK / Cancelar).
 4. src/api/client.ts — fetch wrapper with credentials, JSON errors mapped to toasts, typed with packages/shared; TanStack Query provider.
 5. Vitest + Testing Library smoke test for the shell and menu filtering by role.
@@ -389,7 +395,7 @@ Implement in apps/api:
 3. POST /api/auth/regeneracao-password — FD_ALTERAR_PASSWORD does NOT change the user's password: it sets the shared document-regeneration password, i.e. UPDATE SVR_VARIAVEIS_SIID SET VALOR = CRYPT_PKG.ENCRYPTSTRINGRAW(:password) WHERE TIPO_VARIAVEL_RF='PASSWORD' AND AMBIENTE_ID=:ambiente, after checking password = confirmation (alert PASSWORD_ERRADA). Implement it with bind variables, restricted per DECISIONS D-07 (ADM only recommended), audited. Also POST /api/auth/reauth-regeneracao { password } that compares CRYPT_PKG.ENCRYPTSTRINGRAW(:password) with that row and sets a short-lived flag in the session (used by Step 7.2 for the CONFIRMAR_PASSWORD flow).
 4. Login must also enforce CFG_UTILIZADORES.DATA_INICIO / DATA_FIM when D-07 says so (SEC-006). requireRole('ADM'|'USER') preHandler + a `currentUser` decorator that services use to fill CRIADO_POR / ACTUALIZADO_POR columns.
 5. Audit log: login success/failure, logout, password change → table or pino audit stream per ARCHITECTURE.md.
-6. Contract tests (fastify.inject) against the test schema with a ZZTEST_ user created and removed by the test; unit tests with a fake db for the branches.
+6. Contract tests (fastify.inject) against the test schema, READ-ONLY through readOnlyPool (HARD RULE: no Oracle changes — no ZZTEST_ rows); a successful login uses an owner-given account (GESTSIID_TEST_USER / GESTSIID_TEST_PASSWORD); unit tests with a fake db for the branches and every write path.
 Then run the `security-review` skill on the diff and spawn `code-modernization:security-auditor` to review the auth code; fix findings before finishing.
 ```
 
@@ -399,17 +405,25 @@ Then run the `security-review` skill on the diff and spawn `code-modernization:s
 |---|---|---|---|
 | sonnet | medium | `frontend-design:frontend-design` | none |
 
-**Inputs:** `analysis/UI_SPEC.md` (Login wireframe, shell), Step 3.1 endpoints, `analysis/forms-extracted/T/FD_LOGIN_SIID.fmb.txt` (labels).
-**Done when:** Playwright: login as ADM shows the full menu, login as USER hides admin-only entries, wrong password shows the Portuguese alert, "Alterar password" works, logout returns to /login, deep links redirect to /login when unauthenticated.
+**Inputs:** `analysis/UI_SPEC.md` (Login wireframe, shell), Step 3.1 endpoints in `app/apps/api/src/features/auth/routes.ts`, `analysis/forms-extracted/T/FD_LOGIN_SIID.fmb.txt` (labels).
+**Done when:** Playwright: login as ADM shows the full menu, login as USER hides admin-only entries, wrong password shows the Portuguese alert, "Alterar password" works (three fields; wrong current value and mismatch show their messages), logout returns to /login, deep links redirect to /login when unauthenticated.
 
 ```text
-Invoke `frontend-design:frontend-design`. Read analysis/UI_SPEC.md (Login and shell), the auth endpoints from apps/api/src/routes/auth*, and grep analysis/forms-extracted/T/FD_LOGIN_SIID.fmb.txt for the item prompts (Utilizador, Password, Ambiente) and alert texts.
+Invoke `frontend-design:frontend-design`. Read analysis/UI_SPEC.md (Login and shell), the auth endpoints in app/apps/api/src/features/auth/routes.ts, and grep analysis/forms-extracted/T/FD_LOGIN_SIID.fmb.txt for the item prompts (Utilizador, Password, Ambiente) and alert texts.
+HARD RULE: you are NOT permitted to change the Oracle database (see CLAUDE.md and analysis/TEST_STRATEGY.md). This step needs no Oracle at all.
+Step 3.1 API (already built, do not change its contract):
+- POST /api/auth/login { utilizador, password } → 200 { user: { username, nome, role, ambiente }, csrf }; 400 VALIDACAO with fields.utilizador / fields.password; 401 LOGIN_INVALIDO "Utilizador e/ou password inválidos." (also when throttled).
+- GET /api/auth/me → { user, csrf }; 401 SESSAO_EXPIRADA. POST /api/auth/logout → 204 (needs x-csrf-token).
+- POST /api/auth/regeneracao-password { actual, nova, confirmacao } (ADM only, needs x-csrf-token) → 204; 422 PASSWORDS_DIFERENTES with fields.confirmacao "As passwords não coincidem. Alteração não efectuada."; 403 PASSWORD_ERRADA "A password inserida está errada." (wrong current value, or locked after 5 wrong tries).
 Build in apps/web:
-1. /login page: utilizador, password, environment shown as a read-only badge (AMBIENTE_ID from GET /api/health or /api/auth/config), submit on Enter, inline error with the exact alert text, loading state.
+1. /login page: utilizador, password, environment shown as a read-only badge (ambiente from GET /api/health), submit on Enter, inline error with the exact alert text, loading state.
 2. Auth store (TanStack Query "me" + router beforeLoad guard); menu filtered by role using the menu config's `roles`; admin-only leaves hidden for USER (per DECISIONS D-08).
-3. "Alterar password" (Gestão menu leaf; window title "Alteração da Password de Regeração") as a modal with the two fields PASSWORD / CONFIRMACAO and the same messages — it changes the document-regeneration password (Step 3.1 endpoint), visible only to the roles allowed by DECISIONS D-07.
+3. "Alterar password" (Configuração menu leaf, ADM only per DECISIONS A-09 and D-07; window title "Alteração da Password de Regeração") as a modal with THREE fields: "Password actual" (actual), "Password" (nova), "Confirmação" (confirmacao) — D-07 requires the current value. It calls POST /api/auth/regeneracao-password. Show 403 PASSWORD_ERRADA as a field error on "Password actual" (UI_SPEC catalogue #15) and 422 PASSWORDS_DIFERENTES as a field error on "Confirmação" (#6). It changes the shared document-regeneration password, not the user's login password.
 4. Logout in the top bar; session-expired handling (401 anywhere → toast + redirect to /login).
-5. Playwright tests for the scenarios in "Done when" (use the ZZTEST_ users the API tests create, or a seeded fixture per TEST_STRATEGY.md).
+5. Playwright tests for the scenarios in "Done when", against the Oracle-less dev server (app/apps/api/src/dev-server.ts):
+   - Give dev-server.ts an in-memory AuthRepo (the AuthRepo interface in features/auth/repo.ts) with one fake ADM user and one fake USER user and a fake regeneration password, passed to buildApp as `authRepo`. Plain-text compare is fine: dev only, never in the Docker image.
+   - Today the dev server logs every request in as a fake DEV admin (the onRequest hook in features/dev/routes.ts) and turns CSRF off (buildApp `devMocks`). Both would make the login tests pass for the wrong reason. When authRepo is present: remove that auto-login and keep CSRF on. Update e2e/datablock.spec.ts so it logs in first.
+   - No Oracle, no ZZTEST_ users.
 ```
 
 ---
@@ -534,30 +548,69 @@ Invoke `retro` (gstack) over the git history of Phase 4, then `gsd-extract-learn
 
 ## Phase 5 — Configuração
 
+What Phase 4 taught (full list in `app/CLAUDE.md` and the Revision log): the engine carries a plain screen with no change, but
+every screen still needed one small engine extension; `STRUCTURE.md` prose under-describes the forms, so field lists come from
+`analysis/forms-xml/summary/<FORM>.md`; `ARCHITECTURE.md` §10.1 (routes and rules) and §12 (prompt corrections) are binding and
+override older wording. Paths from here on: API `app/apps/api/src/features/<name>/`, SPA `app/apps/web/src/routes/_app/<menu>/<screen>.tsx`
+(the placeholder files and the `menu.ts` entries already exist). Every prompt starts by reading `app/CLAUDE.md`.
+
+### Step 5.0 — Engine gaps found by the Phase 4 retrospective
+
+| Model | Effort | Skills | Agents |
+|---|---|---|---|
+| sonnet | medium | `superpowers:test-driven-development`, `ponytail:ponytail`, `security-review` | none |
+
+**Done when:** (1) a `preset=` the resource does not define returns `400 VALIDACAO` and a defined one ANDs its fixed SQL (memoryStore matches it too); (2) Utilizadores only lists and writes rows of the configured `AMBIENTE_ID`, and changing `PASSWORD`, `TIPO_UTILIZADOR_RF`, `DATA_INICIO`, `DATA_FIM` or deleting a user ends that user's sessions (ARCHITECTURE §5); (3) the seven contract tests share one setup helper; (4) the dev domain stub reads the Domínios memory store; (5) `<LovPicker>` exists and `<ImpressoraPicker>` is a thin wrapper over it; `pnpm -r typecheck`, `pnpm -r test`, `pnpm -r lint`, `pnpm exec playwright test` green.
+
+```text
+Invoke `ponytail:ponytail` and `superpowers:test-driven-development`. Read app/CLAUDE.md, analysis/ARCHITECTURE.md §4.1 and §5, and analysis/PILOT_NOTES.md.
+HARD RULE: you are NOT permitted to change the Oracle database. Write paths are tested with memoryStore only.
+Close the gaps the Phase 4 retrospective found, each with a failing test first:
+1. List presets. packages/shared parses `preset=` but apps/api/src/lib/listQuery.ts ignores it (ARCHITECTURE §4.1 says unknown parameters are 400, never ignored). Add `export interface ListPreset { sql: string; binds?: Record<string, unknown>; matches: (row: Record<string, unknown>) => boolean }` to lib/listQuery.ts; `buildListQuery(resource, q, { parent, presets })` ANDs `presets[q.preset].sql` (bind names prefixed so they cannot clash) and throws 400 VALIDACAO with field `preset` for an unknown name; `oracleStore(pool, resource, callTimeoutMs, { presets })` and `memoryStore(resource, seed, { autoId, presets })` pass them through (memoryStore filters with `matches`). The SQL is server code only; the client sends just the name.
+2. Utilizadores scope and sessions. features/utilizadores/routes.ts lists every environment's users and never ends sessions. Add a store decorator like `scoped` in features/variaveis/routes.ts: list forced to `AMBIENTE_ID = ambiente`, get/update/remove of another environment's row → 404 NAO_ENCONTRADO. Add `destroyUserSessions(username)` to http/session-store.ts (it already has `findSessionIdsByUsername`) and call it from the utilizadores store after an update that sets PASSWORD, TIPO_UTILIZADOR_RF, DATA_INICIO or DATA_FIM, and after a delete. Pass the session store into registerUtilizadoresRoutes as a dependency (a no-op fake in unit tests).
+3. Contract-test helper. The seven *.contract.test.ts files each repeat ~40 lines (initOracleClient, outFormat, pool, readOnlyPool, buildApp, login cookie). Create apps/api/src/test/contract-app.ts exporting `contractApp(): Promise<{ app, login(): Promise<string>, close(): Promise<void> }>` (read-only pool only; login uses GESTSIID_TEST_USER / GESTSIID_TEST_PASSWORD) and `hasTestDb` / `hasTestUser` booleans for describe.skipIf; move the seven files onto it. Behaviour of the tests must not change.
+4. Dev fixture drift. In features/dev/routes.ts the static `DOMINIOS` map and the Domínios memory stores are separate fixtures (PILOT_NOTES Step 4.6). Make the dev `GET /api/dominios/:dominioId/valores` answer from the `dominiosValores` memory store (rows of that DOMINIO_ID, ordered PRIORIDADE, CHAVE, mapped to { CHAVE, DESIGNACAO, PRIORIDADE }) when it has rows for the id, else from the static map. Move the static entries the store now covers into the Domínios seed.
+5. Generic LOV picker. Generalise apps/web/src/components/ImpressoraPicker.tsx into components/LovPicker.tsx: props `{ open, onOpenChange, onSelect(row), title, endpoint, columns: { col: string; label: string }[], filters?: Record<string, string>, sortRows?: (a, b) => number }`, text filter across the shown columns, list endpoint with `size=500`. ImpressoraPicker keeps its current props and becomes a wrapper, so configuracao/impressoras.tsx and e2e/impressoras.spec.ts stay unchanged. Steps 5.2, 5.5 and 7.3 use LovPicker.
+Update app/CLAUDE.md (patterns table, gotchas) for each change. Run `security-review` on the diff (item 2 is a session change).
+```
+
 ### Step 5.1 — Parâmetros de reports (FD_CONFIGURACAO_REPORTS)
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
-| sonnet | medium | `superpowers:test-driven-development` | none |
+| opus | medium | `superpowers:test-driven-development` | none |
 
-**Done when:** Configuração → Reports ("Gestão de Relatórios") maintains the master `SVR_REPORT_SIID` (ID from `ID_TEMPLATE_REPORT_SEQ`, N_PARAMETROS, directories, file name, observations, valid flag) and its detail `SVR_PARAMETROS_REPORT` (N_PARAMETRO auto MAX+1, NOME, TIPO_PARAMETRO_RF from domain TIPO_PARAMETRO, OBRIGATORIO, CHECK_UNIQUE "Único", VALIDO) with the form's rules: the first three parameters are fixed to `_USER` (type 2), `P_USUARIO` (type 1), `P_DATAACTUAL` (type 1) and their names are read-only (alerts ALERTA_1PARAM..3PARAM); saving checks N_PARAMETROS = number of details + 1 (alert N_PARAM_ERRADO).
+**Done when:** Configuração → Reports ("Gestão de Relatórios") shows the master `SVR_REPORT_SIID` and its detail `SVR_PARAMETROS_REPORT` and saves both through one `POST /api/reports/guardar` in one transaction with the rules of ARCHITECTURE §10.1 "reports" (new id from `ID_TEMPLATE_REPORT_SEQ`; rows 1–3 fixed to `_USER` / `P_USUARIO` / `P_DATAACTUAL` with read-only names, alerts ALERTA_1PARAM..3PARAM; new row `N_PARAMETRO = MAX+1`; the N_PARAMETROS rule with its 0/1-row skip, alert N_PARAM_ERRADO); unit, contract (GET only) and Playwright tests pass.
+**Why opus:** the first multi-row atomic save. The DataBlock saves one request per row today, so both the SPA and the API need a small new piece.
 
 ```text
-Invoke `superpowers:test-driven-development`. Legacy sources: analysis/STRUCTURE.md §3.12 "FD_CONFIGURACAO_REPORTS", analysis/BUSINESS_RULES.md "Administration → report parameters", analysis/forms-summary/T/FD_CONFIGURACAO_REPORTS.fmb.plsql.txt (13 triggers), tables SVR_REPORT_SIID and SVR_PARAMETROS_REPORT in analysis/db/tables/.
-Build master + detail resources and the screen on the Domínios master-detail pattern (Step 4.6); the "save report" endpoint applies master + details in one transaction and enforces the three fixed parameters and the N_PARAMETROS rule with the same Portuguese alert texts. Tests as in the pilot.
+Invoke `superpowers:test-driven-development`. Read app/CLAUDE.md, analysis/ARCHITECTURE.md §4.3 (the Reports exception) and §10.1 "reports", analysis/forms-xml/summary/FD_CONFIGURACAO_REPORTS.md (fields, alerts), the KEY-COMMIT and WHEN-VALIDATE triggers in analysis/forms-xml/T/FD_CONFIGURACAO_REPORTS_fmb.xml, analysis/BUSINESS_RULES.md BR-ADM-05, analysis/db/tables/SVR_REPORT_SIID.md and SVR_PARAMETROS_REPORT.md.
+HARD RULE: you are NOT permitted to change the Oracle database. The save endpoint is tested with an in-memory repository only; contract tests are GET-only through readOnlyPool.
+Build:
+1. packages/shared/src/resources/reports.ts: `reports` (SVR_REPORT_SIID, roles read ADM, write []) and `reportsParametros` (SVR_PARAMETROS_REPORT, parentKeys ['REPORT_ID'], roles read ADM, write []), columns and labels from the XML digest. Flags S/N use the BINARIO domain select (no checkbox editor exists).
+2. features/reports/: `crudRoutes` for both lists (detail path `/api/reports/:REPORT_ID/parametros`; the param name must equal the column); rules as pure functions in features/reports/rules.ts (unit-tested one by one with the exact alert texts); `POST /api/reports/guardar { master: { rid?, orig?, values }, parametros: { insert: [], update: [{ rid, orig, values }], delete: [{ rid, orig }] } }` behind an interface `ReportsRepo { guardar(input, ctx): Promise<{ id: number }> }` with `oracleReportsRepo(pool, callTimeoutMs)` (one `withTransaction`: `lockRow` before each UPDATE/DELETE, bind-only SQL, `ID_TEMPLATE_REPORT_SEQ.NEXTVAL ... RETURNING ID INTO :id`, audit columns from the session) and `memoryReportsRepo(seed)` for unit tests and the dev server. Wire both in app.ts and features/dev/routes.ts.
+3. DataBlock external save: add `save?: 'rows' | 'external'` to DataBlockProps (default 'rows' = today). With 'external' the block hides its own Guardar/Cancelar, and `DataBlockHandle` gains `changes(): SaveStep[]` (planSave of the overlay) and `markSaved(): void`. Unit-test both in dirty.test.ts / a DataBlock test. The Reports screen owns one DirtyBar that collects master + detail changes, posts guardar, then calls markSaved on both or shows the 422 message on the right field.
+4. apps/web/src/routes/_app/configuracao/reports.tsx: master DataBlock + detail DataBlock via useDetailBlock(current, { REPORT_ID: 'ID' }); a new report pre-fills rows 1–3; their NOME is read-only.
+5. Tests: routes.test.ts (every rule and alert, via memoryReportsRepo), routes.contract.test.ts (GET lists, via contractApp from Step 5.0), e2e/reports.spec.ts (create report, fixed rows, N_PARAM_ERRADO, edit, delete a parameter).
 ```
 
 ### Step 5.2 — Impressoras associadas: por Documento and por Utilizador
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
-| sonnet | medium | `superpowers:test-driven-development` | none |
+| sonnet | high | `superpowers:test-driven-development` | none |
 
-**Done when:** Gestão → Impressoras Associadas → Documento (`DOC_IMPRESSORAS_DOC` × `DOC_MODELOS_DOCUMENTO` × `SVR_IMPRESSORAS`) and → Utilizador (`DOC_IMPRESSOES_MODELO_USR` × `M_USUARIOS` × `SVR_IMPRESSORAS`) reproduce `FD_GESTAO_IMPRESSORAS_DOC` and `FD_GESTAO_IMPRESSORAS_USR`, including their LOVs and uniqueness rules.
+**Done when:** Configuração → Impressoras Associadas (ADM only, DECISIONS A-09) → Documento and → Utilizador reproduce `FD_GESTAO_IMPRESSORAS_DOC` and `FD_GESTAO_IMPRESSORAS_USR` with the routes of ARCHITECTURE §10.1 "impressoras-associadas" (lists + named actions `nova`, `alterar-validade`, `anular`, and for Utilizador `copiar-modelo`, `copiar-utilizador`), the overlap rule `DATAS_INCOMPAT`, the D-22 printer-order help text, and model / user / printer chosen through `<LovPicker>`; tests pass.
+**Why high:** Phase 4 screens were plain CRUD plus one rule; these are two screens with five named actions and overlap checks each.
 
 ```text
-Invoke `superpowers:test-driven-development`. Legacy sources: analysis/STRUCTURE.md §3 sheets FD_GESTAO_IMPRESSORAS_DOC and FD_GESTAO_IMPRESSORAS_USR; analysis/BUSINESS_RULES.md "Printers"; the two .plsql.txt dumps in analysis/forms-summary/T/; LOV queries in the corresponding analysis/forms-extracted/T/*.txt (grep for SELECT); tables DOC_IMPRESSORAS_DOC, DOC_IMPRESSOES_MODELO_USR, SVR_IMPRESSORAS, DOC_MODELOS_DOCUMENTO, M_USUARIOS in analysis/db/tables/.
-Build two resources/screens on the pilot pattern. Model and user columns are chosen through LOV-style picker dialogs (searchable, same columns as the record groups), printer through <ImpressoraPicker>. Enforce the same uniqueness/validation rules and messages as the triggers. Tests as in the pilot.
+Invoke `superpowers:test-driven-development`. Read app/CLAUDE.md, analysis/ARCHITECTURE.md §4.3 (named actions) and §10.1 "impressoras-associadas", analysis/DECISIONS.md A-09 and D-22, analysis/BUSINESS_RULES.md BR-PRN-02 / BR-PRN-03, analysis/forms-xml/summary/FD_GESTAO_IMPRESSORAS_DOC.md and FD_GESTAO_IMPRESSORAS_USR.md (fields, LOV record-group SQL, alerts), the triggers in the matching *_fmb.xml, and analysis/db/tables/ for DOC_IMPRESSORAS_DOC, DOC_IMPRESSOES_MODELO_USR, SVR_IMPRESSORAS, DOC_MODELOS_DOCUMENTO, M_USUARIOS.
+HARD RULE: you are NOT permitted to change the Oracle database. Actions are tested with memoryStore / fakes only.
+Build two features on the pilot pattern:
+1. Resources `impressorasAssociadasDoc`, `impressorasAssociadasUsr` (roles ADM/ADM; list via crudRoutes with write: [] because every write is a named action), plus read-only LOV resources for the pickers: `lovModelos` (DOC_MODELOS_DOCUMENTO) and `lovUsuarios` (M_USUARIOS), roles read ADM, write [], registered with crudRoutes so they get QBE lists.
+2. Named actions `POST /api/impressoras-associadas/{documento|utilizador}/acoes/<acao>`: zod body, rule functions in features/impressoras-associadas/rules.ts (overlap per model / model+user; annul = both dates 01/01/1980; AMBIENTE_ID = configured value), `withTransaction` + `lockRow` + bind-only SQL, exact Portuguese alerts. Put the data access behind a small repo interface with an Oracle and a memory implementation, like Step 5.1.
+3. Screens configuracao/impressoras-associadas/documento.tsx and utilizador.tsx: DataBlock list (edit 'none'), toolbar buttons for the actions, dialogs with <LovPicker> for model / user and <ImpressoraPicker> for printer, D-22 help text.
+4. Dev fixtures + unit, contract (GET only, contractApp) and Playwright tests per action.
 ```
 
 ### Step 5.3 — Permissões: rules and API (FD_PERMISSOES_SIID)
@@ -566,12 +619,13 @@ Build two resources/screens on the pilot pattern. Model and user columns are cho
 |---|---|---|---|
 | opus | high | `superpowers:test-driven-development` | `code-modernization:test-engineer`, `feature-dev:code-reviewer` |
 
-**Done when:** the API exposes: list/QBE of `CFG_PERMISSOES_SIID` (with the 10 sort options of ORDENAR_PERMISSOES), "by user" view (models with / without permission for a user, add one / add all / remove one / remove all), "by model" view (users with / without permission), new permission, change permission (type + validity dates), copy permissions model → model and user → user; every rule and message from the form is covered by a contract test.
+**Done when:** the routes of ARCHITECTURE §10.1 "permissoes" exist: `GET /api/permissoes` over `CFG_PERMISSOES_SIID_VW` with presets `validas` (default in the SPA) and `todas` and the 10 sort columns of ORDENAR_PERMISSOES; `GET /api/permissoes/por-utilizador` and `/por-modelo` → `{ com, sem }`; `POST /api/permissoes/acoes/{nova,alterar,anular,adicionar,remover,copiar-modelo,copiar-utilizador}` with rows identified by the logical key and `lockRow` on it; every rule and message of the form is covered by a unit test on a fake; contract tests cover the GETs.
 
 ```text
-Invoke `superpowers:test-driven-development`; spawn `code-modernization:test-engineer` first to turn the rules into failing contract tests, then implement, then spawn `feature-dev:code-reviewer`.
-Legacy sources: analysis/STRUCTURE.md §3 "FD_PERMISSOES_SIID" (blocks ORDENAR_PERMISSOES, DOC_PERMISSOES_IMPRESSAO, CTR_USERS_SIID, MODELOS_SEM_PERMISSAO, PERMISSOES_USER, CTR_MODELOS_SIID, UTILIZADORES_SEM_PERMISSAO, PERMISSOES_MODELOS, NOVA_PERMISSAO, ALTERAR_PERMISSAO, COPIAR_PERMISSOES, COPIAR_PERMISSOES_UTILIZADOR), analysis/BUSINESS_RULES.md "Permissions", analysis/forms-summary/T/FD_PERMISSOES_SIID.fmb.plsql.txt (all 17 triggers; the record-group SQL behind each list), analysis/db/tables/CFG_PERMISSOES_SIID.md, CFG_UTILIZADORES_VW.md, DOC_MODELOS_DOCUMENTO.md, CFG_VALORES_DOMINIO.md (TIPO_PERMISSAO_RF, UNIDADE_NEGOCIO_RF domains).
-Implement apps/api/src/features/permissoes/: a service with pure functions for the rules (validity dates, duplicate detection, unit-of-business filter, what "copy" does with existing rows) and routes: GET /api/permissoes (QBE), GET /api/permissoes/por-utilizador/:username {com, sem}, GET /api/permissoes/por-modelo/:modeloId {com, sem}, POST add / add-all / remove / remove-all for both directions, POST /api/permissoes (nova), PUT /api/permissoes/:id (alterar), POST /api/permissoes/copiar-modelo, POST /api/permissoes/copiar-utilizador. All writes in one transaction, audit columns filled from the session user, ADM only. Keep the exact Portuguese messages.
+Invoke `superpowers:test-driven-development`; spawn `code-modernization:test-engineer` first to turn the rules into failing unit tests on a fake repository, then implement, then spawn `feature-dev:code-reviewer`.
+Read app/CLAUDE.md, analysis/ARCHITECTURE.md §4.1 (presets), §4.3 and §10.1 "permissoes", analysis/DECISIONS.md D-21, analysis/BUSINESS_RULES.md BR-PERM-01..11, analysis/forms-xml/summary/FD_PERMISSOES_SIID.md and the 17 triggers + record-group SQL in analysis/forms-xml/T/FD_PERMISSOES_SIID_fmb.xml, analysis/db/tables/ CFG_PERMISSOES_SIID.md, CFG_PERMISSOES_SIID_VW.md, CFG_UTILIZADORES_VW.md, DOC_MODELOS_DOCUMENTO.md, CFG_VALORES_DOMINIO.md (TIPO_PERMISSAO_RF, UNIDADE_NEGOCIO_RF).
+HARD RULE: you are NOT permitted to change the Oracle database. Contract tests are GET-only through contractApp (Step 5.0); every write rule is proven on the fake.
+Implement apps/api/src/features/permissoes/: resource `permissoes` over the view (write: []), presets via the Step 5.0 `presets` option (`validas` = SYSDATE BETWEEN DATA_INICIO AND NVL(DATA_FIM, SYSDATE+1), `todas` = no extra WHERE), pure rule functions in rules.ts (validity dates, duplicate/overlap detection with the Forms sentinels 01/01/1980, 31-12-2200, 9999-12-31, business-unit filter, what copy does with existing rows), a `PermissoesRepo` interface with Oracle and memory implementations, the named-action routes, and a read-only `lovUtilizadoresVw` resource over CFG_UTILIZADORES_VW (filterable by unidade de negócio, BR-PERM-03) plus a `lovModelosValidos` resource (models valid today) for the Step 5.4 pickers. Every write in one `withTransaction`; audit columns from the session user; ADM only; exact Portuguese messages. Register in app.ts and features/dev/routes.ts (seeded memory repo for Step 5.4's e2e).
 ```
 
 ### Step 5.4 — Permissões: screen
@@ -580,24 +634,30 @@ Implement apps/api/src/features/permissoes/: a service with pure functions for t
 |---|---|---|---|
 | opus | medium | `frontend-design:frontend-design`, `ui-ux-pro-max:ui-styling` | none |
 
-**Done when:** Configuração → Permissões offers the list tab and the two "transfer list" tabs (por Utilizador / por Modelo) with add/remove one/all, the Nova / Alterar / Copiar dialogs, and Playwright covers each flow.
+**Done when:** Configuração → Permissões offers the list tab (preset Válidas / Todas) and the two "transfer list" tabs (por Utilizador / por Modelo) with add/remove one/all, the Nova / Alterar / Anular / Copiar dialogs, and Playwright covers each flow against the dev server.
 
 ```text
-Invoke `frontend-design:frontend-design` and `ui-ux-pro-max:ui-styling`. Read analysis/UI_SPEC.md (Permissões wireframe), the API from Step 5.3, and the labels in analysis/forms-extracted/T/FD_PERMISSOES_SIID.fmb.txt.
-Build apps/web/src/routes/configuracao/permissoes/: tab "Lista" (DataBlock with the 10 sort options as header sort), tab "Por utilizador" (user picker + two side-by-side lists with ➜ / ⇉ / ⬅ / ⇇ buttons = ADD_PERMISSAO / ADD_TODOS / REMOVE_PERMISSAO / REMOVE_TODOS, type and business-unit selects from the domain lists), tab "Por modelo" (mirror), dialogs Nova permissão, Alterar permissão, Copiar permissões (modelo → modelo), Copiar permissões (utilizador → utilizador). Keyboard accessible, optimistic updates with rollback on error, Portuguese messages. Playwright tests per flow.
+Invoke `frontend-design:frontend-design` and `ui-ux-pro-max:ui-styling`. Read app/CLAUDE.md, analysis/UI_SPEC.md (Permissões wireframe), the Step 5.3 routes in app/apps/api/src/features/permissoes/, and analysis/forms-xml/summary/FD_PERMISSOES_SIID.md (labels, tab order).
+Build apps/web/src/routes/_app/configuracao/permissoes.tsx (split into a folder only if the file passes ~400 lines): tab "Lista" (DataBlock, edit 'none', preset toggle Válidas/Todas, the 10 sort columns as header sort), tab "Por utilizador" (user via <LovPicker> over the utilizadores-vw lookup + two side-by-side lists with ➜ / ⇉ / ⬅ / ⇇ = adicionar / adicionar todos / remover / remover todos, type and business-unit selects from their domains), tab "Por modelo" (mirror), dialogs Nova, Alterar, Anular, Copiar (modelo → modelo), Copiar (utilizador → utilizador). The transfer list is a new component under components/ (keyboard accessible, list roles, aria-live count). Refetch after each action instead of optimistic updates (the server decides overlaps). Portuguese messages from the API. Playwright spec per flow against the dev server.
 ```
 
 ### Step 5.5 — Perfis de departamento (FD_PERFIS_DEPARTAMENTO)
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
-| sonnet | medium | `superpowers:test-driven-development`, `context7-mcp` | none |
+| sonnet | high | `superpowers:test-driven-development`, `context7-mcp`, `security-review` | none |
 
-**Done when:** Gador → Equipa de Gestão (OD68) maintains `DOC_PERFIS_DEPARTAMENTO` and `DOC_FUNCOES_DEPARTAMENTO` with employee lookup (`CO_EMPLEADOS`, `TTAPVAAT`) and replaces the `GetImageFileName` Java bean with an image upload/preview stored where the form stored it.
+**Done when:** Gador → Equipa de Gestão (OD68) maintains `DOC_PERFIS_DEPARTAMENTO` as ONE block (ARCHITECTURE §10: no DELETE, `ID = MAX+1` in `beforeInsert`, `GET /api/perfis-departamento/sugestao?cdemplea=` per BR-ADM-04, `DOC_FUNCOES_DEPARTAMENTO` is only a lookup); the signature image is `PUT | GET | DELETE /api/perfis-departamento/:id/assinatura` on the `ASSINATURA` BLOB with the §6 rules (multipart limits, signature allow-list, 413/415, `nosniff`); a reusable `imageRoutes` helper exists for Step 6.2; `security-review` reports no high finding.
+**Why high:** the first multipart upload and the first BLOB write in the app.
 
 ```text
-Invoke `superpowers:test-driven-development`; use `context7-mcp` for @fastify/multipart and node-oracledb BLOB binds. Legacy sources: analysis/STRUCTURE.md §3 "FD_PERFIS_DEPARTAMENTO", analysis/BUSINESS_RULES.md "Administration → department profiles", analysis/forms-summary/T/FD_PERFIS_DEPARTAMENTO.fmb.plsql.txt (FBEAN calls: what the bean returned and which column/path received the image), analysis/DECISIONS.md D-03, tables DOC_PERFIS_DEPARTAMENTO, DOC_FUNCOES_DEPARTAMENTO, CO_EMPLEADOS, TTAPVAAT in analysis/db/tables/.
-Build master (perfis) / detail (funções) resources and screen on the pilot pattern; employee fields via a picker over CO_EMPLEADOS; image (signature/photo) via multipart upload with type/size validation, stored as BLOB or under DOCS_ROOT exactly as decided in D-03, with a preview in the side panel. Tests as in the pilot.
+Invoke `superpowers:test-driven-development`; use `context7-mcp` for @fastify/multipart (Fastify 5) and node-oracledb Buffer/BLOB binds. Read app/CLAUDE.md, analysis/ARCHITECTURE.md §6 "Images" and §10 row FD_PERFIS_DEPARTAMENTO, analysis/BUSINESS_RULES.md BR-ADM-04, analysis/forms-xml/summary/FD_PERFIS_DEPARTAMENTO.md, analysis/db/tables/ DOC_PERFIS_DEPARTAMENTO.md, DOC_FUNCOES_DEPARTAMENTO.md, CO_EMPLEADOS.md, TTAPVAAT.md.
+HARD RULE: you are NOT permitted to change the Oracle database. The upload/delete path is tested with a fake connection; contract tests are GET-only.
+Build:
+1. Resource `perfisDepartamento` (one block, no delete: roles write ADM, the SPA sets canDelete false, and a store decorator's `remove` throws AppError(403, 'SEM_PERMISSAO', …) so the API refuses it too), `beforeInsert` ID via `SqlExpr('(SELECT NVL(MAX(ID),0)+1 FROM DOC_PERFIS_DEPARTAMENTO)')` (ORA-00001 on a race → 409, retry is the user's), the `sugestao` route, pseudo-domain feeds for funções (REGISTO_VALIDO='S') and TTAPVAAT codes, a read-only `lovEmpregados` resource (CO_EMPLEADOS WHERE SWACTIVO='S' via `exclude` or a store decorator) for <LovPicker>.
+2. Register @fastify/multipart once in app.ts. apps/api/src/lib/imageRoutes.ts exporting `imageRoutes(app, { path, table, column, key: (params) => binds, keyWhere, roles })` that registers PUT (multipart field `ficheiro`, limits { fileSize: UPLOAD_MAX_MB MiB, files: 1, fields: 0 }, `toBuffer()`, first-bytes allow-list JPEG/PNG/GIF/BMP else 415, too large 413, `lockRow` + bound UPDATE, audit), GET (404 when null; content type from the first bytes, else octet-stream + attachment; `Cache-Control: private, no-store`) and DELETE (SET column = NULL). Unit-test every branch with a fake connection.
+3. Screen gador/equipa-gestao.tsx: DataBlock (panel edit), employee via <LovPicker>, signature preview + upload + remove in the side panel.
+4. Dev fixtures (memory image store), unit, contract (GET), Playwright (upload a small PNG, see the preview, remove it). Run `security-review` at the end.
 ```
 
 ---
@@ -606,47 +666,51 @@ Build master (perfis) / detail (funções) resources and screen on the pilot pat
 
 The form is a master (`DOC_MODELOS_DOCUMENTO`) with detail tabs `DOC_SECCOES_DOCUMENTO`, `DOC_CONDICOES_APR`, `SVR_PARAMETROS_REPORT`,
 `DOC_PARAMETROS_OMISSAO`, `DOC_ATRIBUTOS_EDOC`, `DOC_ATRIBUTOS_ARQUIVO`, dialogs `EDITAR_MODELO`, `EDITAR_CODIGO_BARRAS`, sort/search blocks
-`CONSULTA` / `CONSULTA_SECCOES`, and file transfer through WebUtil with the form-level packages `PKG_FICHIERS` / `PKG_TRANSFERTS`.
+`CONSULTA` / `CONSULTA_SECCOES`. WebUtil and the form-level packages `PKG_FICHIERS` / `PKG_TRANSFERTS` only moved the section image; they
+are replaced by the BLOB image routes (ARCHITECTURE §6, §12). The routes are fixed in ARCHITECTURE §10.1 "modelos".
 
-### Step 6.1 — Modelos API: master, details, transactions
+### Step 6.1 — Modelos API: master, details, actions
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
 | opus | high | `superpowers:test-driven-development` | `code-modernization:test-engineer`, `feature-dev:code-reviewer` |
 
-**Done when:** every block of the form has a resource/endpoint; master-detail cascades (ON-CLEAR-DETAILS, ON-CHECK-DELETE-MASTER, ON-POPULATE-DETAILS), the PRE-INSERT/PRE-UPDATE derivations and the ASK_COMMIT semantics are reproduced; contract tests cover the rules in `BUSINESS_RULES.md` "Models".
+**Done when:** every route of ARCHITECTURE §10.1 "modelos" except the image routes exists: `crudRoutes('modelos')` (grid, Alterar Modelo and Código Barras all `PUT /api/modelos/:rid` with their column subsets), `clonar` for models and sections, nested `crudRoutes` for secções / condições / parâmetros-omissão histórico / atributos eDoc / arquivo, `GET .../parametros-report` and `PUT .../omissao` (BR-MOD-09/10 versioning), the `tipos-conteudo` / `contextos-apr` lookups with `preSelected` (D-28), `modelos-genericos`; the delete-master guards; unit tests cover every rule in `BUSINESS_RULES.md` "Models" on fakes; contract tests cover the GETs.
 
 ```text
-Invoke `superpowers:test-driven-development`; spawn `code-modernization:test-engineer` for failing tests first, `feature-dev:code-reviewer` at the end.
-Legacy sources: analysis/STRUCTURE.md §3 "FD_CONFIGURACAO_MODELOS", analysis/BUSINESS_RULES.md "Models / templates", dev/P/FD_CONFIGURACAO_MODELOS.err (trigger inventory), analysis/forms-summary/T/FD_CONFIGURACAO_MODELOS.fmb.plsql.txt (program units ORDENAR_POR, REFRESH, ONS_ASK_COMMIT, CHECK_PACKAGE_FAILURE, QUERY_MASTER_DETAILS, CLEAR_ALL_MASTER_DETAILS, ONS_ROLLBACK and all block triggers), analysis/db/tables/ for DOC_MODELOS_DOCUMENTO, DOC_SECCOES_DOCUMENTO, DOC_CONDICOES_APR, SVR_PARAMETROS_REPORT, DOC_PARAMETROS_OMISSAO, DOC_ATRIBUTOS_EDOC, DOC_ATRIBUTOS_ARQUIVO, DOC_PARAMETRO, CFG_VALORES_DOMINIO.
-Implement apps/api/src/features/modelos/: master resource (QBE with the CONSULTA sort/filter buttons: ID, DESCRICAO, COPIAS, REIMPRESSAO, DATA_INICIO, DATA_FIM, GENERICO_ID, MODO_EXPEDICAO_RF, MODO_CERTIFICADO_RF, MODO_PROTECAO_RF, STAMP, TODOS), one detail resource per tab filtered by the master key, EDITAR_MODELO and EDITAR_CODIGO_BARRAS as PUT endpoints with the same validations, delete-master guard (ON-CHECK-DELETE-MASTER rule), and a "save model" endpoint that applies a batch of master+detail changes in one transaction (the Forms COMMIT_FORM). Ignore file upload for now (Step 6.2). Exact Portuguese messages. Contract tests in rolled-back transactions.
+Invoke `superpowers:test-driven-development`; spawn `code-modernization:test-engineer` for failing unit tests first, `feature-dev:code-reviewer` at the end.
+Read app/CLAUDE.md, analysis/ARCHITECTURE.md §4.3, §4.4, §10.1 "modelos" and §12 row 6.1 (per-row crudRoutes + named actions; NO "save model" batch endpoint), analysis/DECISIONS.md D-23, D-28 and the BR-MOD-04/07 entry, analysis/BUSINESS_RULES.md "Models / templates" (BR-MOD-01..13), analysis/forms-xml/summary/FD_CONFIGURACAO_MODELOS.md and the triggers/program units (ORDENAR_POR, ONS_ASK_COMMIT, QUERY_MASTER_DETAILS, CLEAR_ALL_MASTER_DETAILS, ON-CHECK-DELETE-MASTER) in analysis/forms-xml/T/FD_CONFIGURACAO_MODELOS_fmb.xml, analysis/db/tables/ for DOC_MODELOS_DOCUMENTO, DOC_SECCOES_DOCUMENTO, DOC_CONDICOES_APR, SVR_PARAMETROS_REPORT, DOC_PARAMETROS_OMISSAO, DOC_ATRIBUTOS_EDOC, DOC_ATRIBUTOS_ARQUIVO, DOC_TIPOS_CONTEUDO, DOC_CONTEXTOS_APR.
+HARD RULE: you are NOT permitted to change the Oracle database. Contract tests are GET-only through contractApp; clone, versioning and every write are tested on memoryStore / fake repos.
+Implement apps/api/src/features/modelos/ on the Domínios pattern: one resource per block in packages/shared/src/resources/modelos.ts; nested detail paths whose params equal the parentKeys column names (e.g. `/api/modelos/:MODELO_ID/seccoes`, `/api/modelos/:MODELO_ID/seccoes/:TIPOSEC_ID/:ALINEA/condicoes`); the CONSULTA sort/filter columns as sortable/filterable resource columns; store decorators for ON-CHECK-DELETE-MASTER (like withDeleteGuard) and for the PRE-INSERT/PRE-UPDATE derivations; named actions `POST /api/modelos/:id/acoes/clonar` and `.../seccoes/.../acoes/clonar` (one withTransaction each, behind a repo interface with Oracle + memory implementations); the `omissao` versioning in one transaction; lookups as pseudo-domain feeds (short lists) with `preSelected` returned alongside the rows. Section lists include `TIPO_IMAGEM` decoded in SQL from `DBMS_LOB.SUBSTR(IMAGEM, 4, 1)`; the IMAGEM BLOB itself is never a resource column. Exact Portuguese messages. Wire app.ts and dev fixtures (seed at least two models with sections and conditions for Step 6.3's e2e).
 ```
 
-### Step 6.2 — Template files: replace WebUtil transfers (PKG_FICHIERS / PKG_TRANSFERTS)
+### Step 6.2 — Section images: replace WebUtil transfers
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
-| opus | high | `superpowers:test-driven-development`, `context7-mcp`, `security-review` | `code-modernization:security-auditor` |
+| sonnet | medium | `superpowers:test-driven-development`, `security-review` | `code-modernization:security-auditor` |
 
-**Done when:** a section's template file can be uploaded (browser → API → BLOB column or DOCS_ROOT path, whichever the form used via CLIENT_TO_DB / CLIENT_TO_AS) and downloaded/previewed; the ported logic of `PKG_FICHIERS` / `PKG_TRANSFERTS` has unit tests; the streaming endpoint rejects path traversal.
+**Done when:** `PUT | GET | DELETE /api/modelos/:modeloId/seccoes/:tiposecId/:alinea/imagem` serve `DOC_SECCOES_DOCUMENTO.IMAGEM` through the Step 5.5 `imageRoutes` helper with the §6 rules; nothing of `PKG_FICHIERS` / `PKG_TRANSFERTS` / WebUtil is ported (no file system, no `DOCS_ROOT`); `security-review` and the auditor report no high finding.
+**Why smaller:** ARCHITECTURE §6/§12 reduced this step from "port two packages + file system" to one call of an existing helper.
 
 ```text
-Invoke `superpowers:test-driven-development`; use `context7-mcp` for @fastify/multipart streaming and node-oracledb LOB APIs; run `security-review` and spawn `code-modernization:security-auditor` at the end.
-Legacy sources: analysis/forms-summary/T/FD_CONFIGURACAO_MODELOS.fmb.plsql.txt — the package bodies PKG_FICHIERS and PKG_TRANSFERTS are defined inside the form (see dev/P/FD_CONFIGURACAO_MODELOS.err "Compiling package body PKG_FICHIERS/PKG_TRANSFERTS"); the BT_SELECT / BT_CLIENT_DB triggers of DOC_SECCOES_DOCUMENTO; WebUtil calls CLIENT_GET_FILE_NAME, CLIENT_TO_DB(_WITH_PROGRESS), CLIENT_TO_AS(_WITH_PROGRESS), CLIENT_WIN_API_ENVIRONMENT, HOST; analysis/DECISIONS.md D-03/D-04; analysis/STRUCTURE.md §3 for which column/table holds the file (BLOB) or the path.
-Implement: POST /api/modelos/:id/seccoes/:seccaoId/ficheiro (multipart, size limit UPLOAD_MAX_MB, allowed extensions as the form allowed), GET .../ficheiro (stream with correct content-type and filename), DELETE if the form allowed it. Port the useful parts of PKG_FICHIERS/PKG_TRANSFERTS to TypeScript (or call them if they also exist in the DB per analysis/db/packages/) with unit tests. Any path under DOCS_ROOT must be resolved and verified to stay inside DOCS_ROOT. Playwright test uploads a small file and downloads it back byte-identical.
+Invoke `superpowers:test-driven-development`. Read app/CLAUDE.md, analysis/ARCHITECTURE.md §6 "Images" and §12 row 6.2, app/apps/api/src/lib/imageRoutes.ts (built in Step 5.5), analysis/BUSINESS_RULES.md BR-MOD-06.
+HARD RULE: you are NOT permitted to change the Oracle database. Upload/delete are tested with a fake connection only.
+Register the section image routes in apps/api/src/features/modelos/ with `imageRoutes` (key = MODELO_ID, TIPOSEC_ID, ALINEA; roles ADM). Add unit tests for the section-specific key handling (a missing section → 404; a locked row → 409 REGISTO_BLOQUEADO). No path is built from input; there is no file system access. Then run `security-review` and spawn `code-modernization:security-auditor` on features/modelos + lib/imageRoutes.ts; fix findings.
 ```
 
 ### Step 6.3 — Modelos screen
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
-| opus | medium | `frontend-design:frontend-design`, `ui-ux-pro-max:ui-styling` | none |
+| opus | high | `frontend-design:frontend-design`, `ui-ux-pro-max:ui-styling` | none |
 
-**Done when:** Configuração → Modelos shows the master DataBlock with the CONSULTA filter/sort bar, and a detail area with tabs Secções, Condições, Parâmetros report, Parâmetros omissão, Atributos eDoc, Atributos arquivo; editing a section allows file upload/download; Editar modelo and Editar código de barras dialogs exist; the unsaved-changes bar reproduces ASK_COMMIT; Playwright covers create model → add section with file → save → reopen.
+**Done when:** Configuração → Modelos shows the master DataBlock with the CONSULTA filter/sort columns and a detail area with tabs Secções, Condições, Parâmetros report, Parâmetros omissão, Atributos eDoc, Atributos arquivo; a section's image can be uploaded, previewed and removed; Alterar Modelo, Código Barras and both Clonar dialogs exist; leaving with unsaved rows asks "Deseja gravar as alterações efectuadas?" (the DataBlock `confirmLeave` guard); Playwright covers create model → add section with image → save → reopen.
+**Why high:** Domínios (one detail) filled a session; this is six detail tabs, four dialogs and an upload. If the context runs out, split: (a) master + Secções + Condições + image, (b) the other tabs + dialogs.
 
 ```text
-Invoke `frontend-design:frontend-design` and `ui-ux-pro-max:ui-styling`. Read analysis/UI_SPEC.md (Modelos wireframe), the Step 6.1/6.2 endpoints, labels in analysis/forms-extracted/T/FD_CONFIGURACAO_MODELOS.fmb.txt.
-Build apps/web/src/routes/configuracao/modelos/ with the master DataBlock (columns and sort/filter buttons of the CONSULTA block), the detail tabs as detail DataBlocks bound to the selected master row, section file upload with progress (the form used *_WITH_PROGRESS), the two dialogs, and the dirty-state bar that asks "Deseja gravar as alterações?" exactly where the form's ASK_COMMIT did. Playwright test for the flow in "Done when".
+Invoke `frontend-design:frontend-design` and `ui-ux-pro-max:ui-styling`. Read app/CLAUDE.md, analysis/UI_SPEC.md (Modelos wireframe), the Step 6.1/6.2 routes in app/apps/api/src/features/modelos/, analysis/forms-xml/summary/FD_CONFIGURACAO_MODELOS.md (labels, tab order, field order), analysis/DECISIONS.md D-23 / D-28.
+Replace apps/web/src/routes/_app/configuracao/modelos.tsx (split into a folder when it passes ~400 lines): master DataBlock (panel edit), detail tabs as detail DataBlocks via useDetailBlock bound to the selected master row (Condições is a detail of the selected section), `visibleWhen` for any conditional item, `defaults` for item initial values, the lookup-backed selects with their `preSelected` value as the new-row default, section image upload / preview / remove, dialogs Alterar Modelo and Código Barras (PUT with their column subsets) and Clonar modelo / Clonar secção, and the unsaved-changes guard where the form's ASK_COMMIT fired. Playwright test for the flow in "Done when" against the dev server.
 ```
 
 ---
@@ -657,25 +721,30 @@ The main screen. Blocks: `SVR_DOCUMENTOS` (main list, over `SVR_DOCUMENTOS_VW`),
 CRIADO_POR, REFERENCIA, DESTINATARIO, LOTE; filter buttons EM_BRANCO, TODOS, NAO_EXECUTADOS, EM_ERRO, A_EXECUTAR, EXECUCAO; actions SPOOL, REGERAR,
 REIMPRIMIR, ESTADO, SUSPENDER, RETOMAR, CANCELAR, VIA, COPIA, ANULAR, REENVIAR, REENVIAR_EMAIL, REARQUIVAR, FATURAELECTRONICA; SELECCIONAR_TODOS),
 details `SVR_DOCUMENTO_COMENTARIOS`, `SVR_PARAMETROS_DOCUMENTO`, `SVR_QUEUE`, `ERR_ERROS_SIID`, `SVR_ANEXOS_DOCUMENTO`, dialogs `REIMPRIMIR`, `PROCURAR`
-/ `PROCURAR_PARAMETROS`, `CONVERTE_PARAM`, `CLONAR` / `CLONAR_DOCUMENTO`, `SUSPENDER`, `RETOMAR`, `CONFIRMAR_PASSWORD`; program units REIMPRIMIR,
-REGERAR, ANULA, REENVIAR, REENVIA_EMAIL, RECRIAR, REARQUIVAR, FILE_EXISTS, ORDENAR_POR; DB packages `PKG_DOCUMENTOS_SVR` (ANULAR, SET_PARAMETRO_STRING, EXECUTA,
-GET_ID_EXECUCAO), `PKG_SIID_UTIL` (CAN_BE_UPLOADED_EDOC), `CRYPT_PKG` (ENCRYPTSTRINGRAW); selection kept in `SVR_GESTAO_SIID_TMP` (globals SELEC_TABLE_ID /
-SEARCH_TABLE_ID / KEEP_QUERY); most actions are `INSERT INTO SVR_QUEUE` (types EXECUCAO, IMPRESSAO, COPIA, 2.VIA, REENVIAR, EMAIL, TOXML, ARQUIVO; state ESPERA)
-plus an `ERR_ERROS_SIID` audit row, executed later by the external queue processor; the WHEN-TIMER-EXPIRED trigger is an hourly tablespace gauge (`GD_ESPACO_BD`).
-Full detail: `analysis/STRUCTURE.md` §3.3.
+/ `PROCURAR_PARAMETROS`, `CONVERTE_PARAM`, `CLONAR` / `CLONAR_DOCUMENTO`, `SUSPENDER`, `RETOMAR`, `CONFIRMAR_PASSWORD`; DB packages `PKG_DOCUMENTOS_SVR`
+(ANULAR, SET_PARAMETRO_STRING, EXECUTA, GET_ID_EXECUCAO), `PKG_SIID_UTIL` (CAN_BE_UPLOADED_EDOC), `CRYPT_PKG` (ENCRYPTSTRINGRAW). Most actions are
+`INSERT INTO SVR_QUEUE` plus an `ERR_ERROS_SIID` row, executed later by the external queue processor. Binding target: ARCHITECTURE §4.1 "Documentos
+specifics", §4.2 (selection = `ids` or `consulta`, nothing stored in `SVR_GESTAO_SIID_TMP`), §5 (roles, regeneration password), §6 (PDF proxy),
+§10.1 "documentos", §11. Dropped: tablespace gauge (D-13), Auditoria (D-06). Full legacy detail: `analysis/STRUCTURE.md` §3.3.
 
-### Step 7.1 — Documents read model: list, filters, selection, detail tabs, viewing
+### Step 7.1 — Documents read model: list, presets, search, detail tabs, PDF
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
 | opus | high | `superpowers:test-driven-development`, `feature-dev:feature-dev` | `feature-dev:code-explorer`, `code-modernization:test-engineer` |
 
-**Done when:** `GET /api/documentos` reproduces the SVR_DOCUMENTOS block query over `SVR_DOCUMENTOS_VW` (KEY-EXEQRY / KEY-ENTQRY logic incl. the "IS NULL" convention, the six filter presets with their exact WHERE clauses, the eight sort buttons incl. LOTE, the PROCURAR parameter search with intersection semantics over `SVR_PARAMETROS_DOC_NOME_VW`, the MOSTRAR_GRUPO grouping rule, the POST-QUERY row colouring for OFFLINE / ANULADO and the `***` comment marker); selection (SELECCIONAR / SELECCIONAR_TODOS) is stored in `SVR_GESTAO_SIID_TMP` keyed by a per-session `SEQ_SVR_GS_TMP` id exactly as the form did; detail endpoints exist for parâmetros, comentários (read), anexos, fila (SVR_QUEUE with IMPRESSORA description and RESULTADO), erros (ERR_ERROS_SIID), detalhes (ATRIBUTO1..25, ATRIB_ARQ_1..20); `GET /api/documentos/:id/pdf` proxies FileServerSIID (`FILESERVER_URL/pdf/{FILESERVER_ENV}?spoolid=`) after the session check; the CONVERTE_PARAM lookups (MRECIBO NMRECINUE→NMRECIBO, MPERSONA CDIDEPER→CDPERSON) are endpoints; the hourly tablespace gauge (GD_ESPACO_BD) is `GET /api/documentos/espaco` if D-13 keeps it.
+**Done when:** `GET /api/documentos` reproduces the block query over `SVR_DOCUMENTOS_VW`: the six filter presets with the form's WHERE text (via the Step 5.0 `presets`), the Forms "IS NULL" convention (`null` / `notnull` operators), the sort buttons incl. `LOTE` → `LOTE_ID, LOTE_ORDEM` and `FATURACAO_ELECTRONICA` (A-05), USER sorts by `ID` only (D-08), `param[NOME]=VALOR` + `paramModelo` intersection search, `grupo=<id>` (Mostrar grupo), the `totalCapped` count, row-colour columns (OFFLINE / ANULADO, `***` comment marker); `GET /api/documentos/:id` (reduced columns for USER, §5); tabs parâmetros, comentários (GET), anexos, fila, erros; CONVERTE_PARAM conversions; `GET /api/documentos/:id/pdf` proxies `FILESERVER_BASE_URL` per §6 and D-29; contract tests compare API rows with the form's SQL run read-only against the test schema.
 
 ```text
-Invoke `feature-dev:feature-dev` and `superpowers:test-driven-development`; spawn `feature-dev:code-explorer` to trace the query and selection logic, `code-modernization:test-engineer` to write the contract tests first.
-Legacy sources: analysis/STRUCTURE.md §3.3 "FD_GESTAO_SIID" (blocks, filter WHERE clauses, PROCURAR, MOSTRAR_GRUPO, SVR_QUEUE POST-QUERY, timer), analysis/BUSINESS_RULES.md "Document lifecycle" (search/filter/sort/selection/queue/comments/attachments rules), dev/P/FD_GESTAO_SIID.err (trigger inventory), analysis/forms-summary/T/FD_GESTAO_SIID.fmb.plsql.txt (the actual SQL of every filter button, KEY-EXEQRY, KEY-ENTQRY, POST-QUERY, PROCURAR, CONVERTE_PARAM, SVR_QUEUE triggers, WHEN-TIMER-EXPIRED, MOSTRAR_DOCUMENTO), analysis/DECISIONS.md D-03/D-13, analysis/db/tables/ for SVR_DOCUMENTOS, SVR_DOCUMENTOS_VW, SVR_PARAMETROS_DOCUMENTO, SVR_PARAMETROS_DOC_NOME_VW, SVR_GESTAO_SIID_TMP, SVR_QUEUE, ERR_ERROS_SIID, SVR_ANEXOS_DOCUMENTO, SVR_DOCUMENTO_COMENTARIOS, SVR_IMPRESSORAS, MPERSONA, MRECIBO, GD_ESPACO_BD.
-Implement apps/api/src/features/documentos/ read side only: list with the same columns as the block, the filter presets (Todos, Em branco, Não executados, Em erro, A executar, Execução) as named filters copying the form's WHERE text into parameterized SQL, the sorts, parameter search (POST /api/documentos/procurar with the same intersection semantics writing SEARCH_TABLE_ID rows), the group view, server-side selection (POST /api/documentos/seleccao { ids, on }, /seleccao/todos with the current filter, DELETE /seleccao; rows in SVR_GESTAO_SIID_TMP under a SELEC_TABLE_ID allocated per login session and deleted on logout/expiry, because the queue processor and the backup form read that table), detail endpoints, the PDF proxy with streaming and no caching of the spool id in URLs beyond the session, CONVERTE_PARAM endpoints, and the gauge endpoint. Contract tests compare the API rows with the form's SQL executed directly against the test schema (trace-based parity from TEST_STRATEGY.md).
+Invoke `feature-dev:feature-dev` and `superpowers:test-driven-development`; spawn `feature-dev:code-explorer` to trace the query logic, `code-modernization:test-engineer` to write the contract tests first.
+Read app/CLAUDE.md, analysis/ARCHITECTURE.md §4.1 (Documentos specifics), §4.2, §5 (USER limits), §6 (PDF), §10.1 "documentos", §12 row 7.1, analysis/DECISIONS.md D-03, D-08, D-13 (dropped), D-16, D-19, D-29, A-05, A-07, A-08, analysis/STRUCTURE.md §3.3, analysis/BUSINESS_RULES.md "Document lifecycle", analysis/forms-xml/summary/FD_GESTAO_SIID.md and the KEY-EXEQRY / KEY-ENTQRY / POST-QUERY / filter-button / PROCURAR / MOSTRAR_GRUPO / CONVERTE_PARAM trigger text in analysis/forms-xml/T/FD_GESTAO_SIID_fmb.xml, analysis/db/tables/ for SVR_DOCUMENTOS_VW, SVR_PARAMETROS_DOC_NOME_VW, SVR_QUEUE, ERR_ERROS_SIID, SVR_ANEXOS_DOCUMENTO, SVR_DOCUMENTO_COMENTARIOS, SVR_IMPRESSORAS, MPERSONA, MRECIBO.
+HARD RULE: you are NOT permitted to change the Oracle database. Everything in this step is read-only; contract tests go through contractApp (Step 5.0).
+Implement apps/api/src/features/documentos/ read side:
+1. Resource `documentos` (read ADM + USER, write []) with the block's columns; presets `todos`, `em-branco`, `nao-executados`, `em-erro` (a subquery, not temp-table rows), `a-executar`, `execucao` copied from the XML into parameterized SQL (model codes stay constants in the feature, as in Forms).
+2. Engine additions this needs, each unit-tested in lib/listQuery.test.ts: sort aliases (one sort key → several columns, e.g. LOTE → LOTE_ID, LOTE_ORDEM); a per-role sort allow-list (USER: ID only → 400 VALIDACAO otherwise); extra list parameters `param[NOME]`, `paramModelo`, `grupo` handled by the documentos store (packages/shared/src/listQuery.ts today treats every non-reserved key as a filter column, so a later unknown-column check rejects them: add them to the parsed query explicitly; truly unknown keys stay 400).
+3. Detail and tab routes of §10.1 (USER detail = reduced column list), conversions, the PDF proxy exactly as §6 (fetch with AbortSignal.timeout(FILESERVER_TIMEOUT_MS), 404/502 DOCUMENTO_NAO_DISPONIVEL with the D-29 reason, stream with `Cache-Control: private, no-store`; the upstream is faked with a local HTTP server in unit tests).
+4. Dev fixtures (a few hundred generated documents covering every state and preset) for Step 7.3's e2e.
+Contract tests: for each preset, sort and the parameter search, run the form's SQL (copied from the XML) read-only and the API against the same filters, and compare ids.
 ```
 
 ### Step 7.2 — Document operations API (all actions of the toolbar)
@@ -684,12 +753,13 @@ Implement apps/api/src/features/documentos/ read side only: list with the same c
 |---|---|---|---|
 | fable | high | `superpowers:test-driven-development`, `security-review` | `code-modernization:test-engineer`, `feature-dev:code-reviewer`, `code-modernization:security-auditor` |
 
-**Done when:** each action of ORDENACAO_DOCUMENTOS is an endpoint with the same preconditions, writes and messages as the form: Regerar (queue EXECUCAO + audit row; requires the regeneration password when a selected document has a TERMINADO IMPRESSAO queue entry or its model has MODO_EXPEDICAO_RF='G'; skips annulled ones and lists them), Reimprimir / 2ª Via / Cópia (REIMPRIMIR dialog: associated printer or chosen printer; queue IMPRESSAO / 2.VIA / COPIA; 2ª via only when N_IMPRESSOES<>0), Anular (`PKG_DOCUMENTOS_SVR.ANULAR`), Cancelar (UPDATE SVR_QUEUE → CANCELLED with the state restriction; the 'AFREITAS' bypass handled per D-12), Suspender / Retomar (ESPERA ↔ SUSPENSO for the selection or for all), Reenviar EDoc (MODO_EXPEDICAO_RF='W' and `PKG_SIID_UTIL.CAN_BE_UPLOADED_EDOC`; queue REENVIAR), Reenviar e-mail (queue EMAIL with ATRIBUTO01 = MAX(ATRIBUTO01) of earlier EMAIL rows), Re-arquivar (ARQ_ID not null; queue ARQUIVO), "Fatura electrónica" (a SORT button in the form, `Ordenar_Por('FATURA_ELECTRONICA','ASC')` — expose as a sortable column, not an action; RECRIAR/TOXML is dead code, do not implement unless D-decisions ask), Clonar (SET_PARAMETRO_STRING per parameter + P_USUARIO + _USER, EXECUTA(modelo), GET_ID_EXECUCAO, then LOTE_ID update with a bind), queue-row Cancelar / Retomar from the fila tab; every rule has a contract test; the state matrix is documented in `analysis/DOCUMENT_STATES.md`.
+**Done when:** each action of ARCHITECTURE §10.1 "documentos" `POST /api/documentos/acoes/<acao>` (`regerar`, `reimprimir`, `segunda-via`, `copia`, `anular`, `cancelar`, `suspender`, `retomar`, `reenviar-edoc`, `reenviar-email`, `rearquivar`), `POST /api/documentos/:id/clonar`, `POST /api/documentos/:docId/fila/:queueId/cancelar` and `GET /api/documentos/fila/contagem` exists with the form's preconditions, writes and messages; `{ ids | consulta }` selection (§4.2); the `428 PASSWORD_REGERACAO_NECESSARIA` flow (§5); skip rules A-06; Cancelar force per D-12; package calls per document, each committed (A-01); every rule has a unit test on a fake connection; the state matrix is in `analysis/DOCUMENT_STATES.md`.
 
 ```text
-Invoke `superpowers:test-driven-development`; spawn `code-modernization:test-engineer` to write failing contract tests from the rules first; at the end run `security-review`, spawn `feature-dev:code-reviewer` and `code-modernization:security-auditor`.
-Legacy sources: analysis/STRUCTURE.md §3.3 "Triggers and program units" (one line per action, with the exact queue types, states and audit texts), analysis/BUSINESS_RULES.md "Document lifecycle", analysis/forms-summary/T/FD_GESTAO_SIID.fmb.plsql.txt (program units REIMPRIMIR, REGERAR, ANULA, REENVIAR, REENVIA_EMAIL, RECRIAR, REARQUIVAR; the WHEN-BUTTON-PRESSED triggers of every ORDENACAO_DOCUMENTOS action; blocks REIMPRIMIR, SUSPENDER, RETOMAR, CLONAR, CLONAR_DOCUMENTO, CONFIRMAR_PASSWORD; popup ESTADO_PEDIDO), analysis/db/packages/PKG_DOCUMENTOS_SVR.sql, PKG_SIID_UTIL.sql, CRYPT_PKG.sql (exact signatures), analysis/db/sequences.md (ID_QUEUE_SEQ, ID_ERROS_SEQ), analysis/DECISIONS.md D-04/D-05/D-07/D-12.
-Implement apps/api/src/features/documentos/operacoes/: one service function per action taking (session user, selection or document ids, dialog inputs) → validates preconditions with pure functions (unit-tested), performs the same INSERT INTO SVR_QUEUE (ID_QUEUE_SEQ.NEXTVAL, type, document, SYSDATE, 'ESPERA', session username, printer, ATRIBUTO01) and INSERT INTO ERR_ERROS_SIID (ID_ERROS_SEQ.NEXTVAL, 'ERRO_DOC', SYSDATE, the same Portuguese text e.g. 'DOCUMENTO REGERADO POR <user>', document) or package call per document inside one transaction per batch, records outcome per document, returns { ok: [...], skipped: [{id, reason}] } with the Portuguese messages (alerts DESEJA_*, NAO_TEM_REGISTOS, OUT list, PASSWORD_ERRADA). Regenerate uses the reauth flag set by POST /api/auth/reauth-regeneracao (Step 3.1). CRIADO_POR is always the session user, never a request field. Write analysis/DOCUMENT_STATES.md: state × action matrix with the source trigger for each cell. No HOST / TEXT_IO code is ported (D-04).
+Invoke `superpowers:test-driven-development`; spawn `code-modernization:test-engineer` to write failing unit tests from the rules first; at the end run `security-review`, spawn `feature-dev:code-reviewer` and `code-modernization:security-auditor`.
+Read app/CLAUDE.md, analysis/ARCHITECTURE.md §3 (package table, A-01 commits), §4.2, §4.3 (named actions, `{ ok, skipped }`), §5 (regeneration password, audit), §10.1 "documentos", §11, §12 row 7.2, analysis/DECISIONS.md D-04, D-05, D-07, D-12, D-17, D-18, D-20, D-28, A-01, A-04, A-06, analysis/STRUCTURE.md §3.3 "Triggers and program units", analysis/BUSINESS_RULES.md "Document lifecycle", the program units REIMPRIMIR, REGERAR, ANULA, REENVIAR, REENVIA_EMAIL, REARQUIVAR and every ORDENACAO_DOCUMENTOS WHEN-BUTTON-PRESSED trigger in analysis/forms-xml/T/FD_GESTAO_SIID_fmb.xml, analysis/db/packages/PKG_DOCUMENTOS_SVR.sql, PKG_SIID_UTIL.sql, CRYPT_PKG.sql, analysis/db/sequences.md.
+HARD RULE: you are NOT permitted to change the Oracle database. No action is ever run against Oracle — not in tests, not "to check"; every write path and package call is tested with a fake DbConnection that records SQL and binds. Contract tests may only read (e.g. that a sequence or view the SQL uses exists).
+Implement apps/api/src/features/documentos/operacoes/: selection resolution (ids, or consulta → `SELECT ID FROM SVR_DOCUMENTOS_VW WHERE <same listQuery WHERE>` via buildListQuery); one service function per action (session user, ids, dialog inputs) → pure precondition functions (unit-tested) → the same SVR_QUEUE / ERR_ERROS_SIID inserts as the form (ID_QUEUE_SEQ / ID_ERROS_SEQ, SYSDATE, 'ESPERA', session username, printer, ATRIBUTO01) in one withTransaction per batch, or one package call per document (never inside an app transaction; drop the connection with close({ drop: true }) after a clone error) → `{ ok: number[], skipped: [{ id, motivo }] }` with the Portuguese messages. CRIADO_POR is always the session user. Audit via `request.auditDetails` (§5). Write analysis/DOCUMENT_STATES.md: state × action matrix with the source trigger for each cell. No HOST / TEXT_IO code (D-04). If the context runs out, split into (a) regerar / reimprimir / segunda-via / copia / clonar and (b) the rest.
 ```
 
 ### Step 7.3 — Documentos screen: list, toolbar, dialogs
@@ -698,56 +768,63 @@ Implement apps/api/src/features/documentos/operacoes/: one service function per 
 |---|---|---|---|
 | opus | high | `frontend-design:frontend-design`, `ui-ux-pro-max:ui-styling` | none |
 
-**Done when:** Gestão → Documentos reproduces the form: DataBlock with the form's columns, checkbox selection + "Seleccionar todos", the six filter preset buttons, the sort buttons (bold on the active one, as ORDENAR_POR did), parameter search dialog (PROCURAR with "Procurar apenas no modelo"), the row context menu GENERICO (Mostrar documento, Mostrar comentários, Detalhes, Mostrar grupo, Parâmetros, Procurar por parâmetros, Ver impressões, Ver log, Clonar), the action toolbar enabled/disabled by state and selection, dialogs (Reimprimir options + printer picker, Suspender, Retomar, Clonar with CONVERTE_PARAM on double-click of P_NMRECIBO / P_CDPERSON, Confirmar password), per-document result feedback, PDF viewer (new tab on the proxy URL), the fila tab with Cancelar / Retomar on a queue row, the optional tablespace gauge (D-13); Playwright covers select → reimprimir and select → anular.
+**Done when:** Gestão → Documentos reproduces the form: DataBlock with the form's columns and row colours, checkbox selection + "Seleccionar todos" (sends `consulta`, §4.2), the six preset buttons, the sort buttons (bold on the active one), the PROCURAR parameter search dialog, the row context menu GENERICO, the action toolbar enabled by role, state and selection (DOCUMENT_STATES.md), dialogs (Reimprimir with <ImpressoraPicker>, Suspender, Retomar, Cancelar with "Cancelar em todos os estados" per D-12, Clonar with CONVERTE_PARAM, Confirmar password on 428), the per-document result summary, the PDF in a new tab, the detail tabs, a manual "Actualizar" button; no gauge (D-13); Playwright covers select → reimprimir, select → anular and the USER toolbar.
 
 ```text
-Invoke `frontend-design:frontend-design` and `ui-ux-pro-max:ui-styling`. Read analysis/UI_SPEC.md (Documentos wireframe), Steps 7.1/7.2 endpoints, analysis/DOCUMENT_STATES.md, analysis/STRUCTURE.md §3.3 (blocks, popup GENERICO, dialogs), labels in analysis/forms-extracted/T/FD_GESTAO_SIID.fmb.txt.
-Build apps/web/src/routes/gestao/documentos/: list DataBlock (row colouring OFFLINE / ANULADO and `***` comment marker as the form's POST-QUERY did), toolbar with the exact button labels and enablement from DOCUMENT_STATES.md, context menu, dialogs, viewer, result summary dialog listing skipped documents with their messages, detail tabs (parâmetros, comentários, anexos, fila, erros, detalhes), manual refresh. Keyboard: Enter = query, Space = toggle selection, Ctrl+A = select all. Playwright tests for the two flows in "Done when".
+Invoke `frontend-design:frontend-design` and `ui-ux-pro-max:ui-styling`. Read app/CLAUDE.md, analysis/UI_SPEC.md (Documentos wireframe), the Step 7.1/7.2 routes in app/apps/api/src/features/documentos/, analysis/DOCUMENT_STATES.md, analysis/ARCHITECTURE.md §4.2, §5, §7 (refresh), §12 row 7.3, analysis/STRUCTURE.md §3.3 (blocks, popup GENERICO, dialogs), analysis/forms-xml/summary/FD_GESTAO_SIID.md (labels).
+Replace apps/web/src/routes/_app/gestao/documentos.tsx (split into a folder under gestao/documentos/ when it passes ~400 lines): list DataBlock (edit 'none', selection 'multi', row colouring from the list columns), preset buttons (`preset=`), toolbar with the exact button labels and enablement from DOCUMENT_STATES.md and the session role, context menu, dialogs, result summary listing skipped documents with their messages, detail tabs (parâmetros, comentários, anexos, fila with Cancelar on a queue row, erros, detalhes), PDF link. Keyboard: Enter = query, Space = toggle selection, Ctrl+A = select all. Playwright specs for the flows in "Done when" against the dev server (USER via a second storageState created in e2e/global-setup.ts with the dev USER account USER1 / user1 from features/auth/dev-repo.ts).
 ```
 
-### Step 7.4 — Comments, attachments, queue, errors (write side)
+### Step 7.4 — Comments and attachments (write side)
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
 | sonnet | medium | `superpowers:test-driven-development` | none |
 
-**Done when:** comments can be added (SVR_DOCUMENTO_COMENTARIOS PRE-INSERT/POST-INSERT rules, sequence id_comentario_documento_seq), attachments can be downloaded (and uploaded if the form allowed), the queue tab shows SVR_QUEUE rows with RESULTADO and the errors tab shows ERR_ERROS_SIID; all four tabs are wired in the Documentos screen.
+**Done when:** `POST /api/documentos/:id/comentarios` adds a comment (`COMENTARIO_ID` from `ID_COMENTARIO_DOCUMENTO_SEQ`, `DATA = SYSDATE`, `USER_ID` = session user; ADM only per D-08); attachments can be downloaded (and uploaded only if the form allowed it); the comentários and anexos tabs of the Documentos screen use them; tests pass.
 
 ```text
-Invoke `superpowers:test-driven-development`. Legacy sources: analysis/forms-summary/T/FD_GESTAO_SIID.fmb.plsql.txt (blocks SVR_DOCUMENTO_COMENTARIOS with its SAVE mouse-click, SVR_QUEUE triggers incl. RESULTADO, ERR_ERROS_SIID, SVR_ANEXOS_DOCUMENTO usage), analysis/BUSINESS_RULES.md (comments, attachments, queue, errors), analysis/db/tables/ for those tables and sequences.md.
-Implement the write endpoints (POST comment, attachment upload if applicable) and finish the detail tabs in the Documentos screen with the same columns and messages. Contract + Playwright tests.
+Invoke `superpowers:test-driven-development`. Read app/CLAUDE.md, analysis/ARCHITECTURE.md §10.1 "documentos" (tabs), analysis/DECISIONS.md D-08 / A-08 (USER adds no comments), the SVR_DOCUMENTO_COMENTARIOS triggers and the SVR_ANEXOS_DOCUMENTO usage in analysis/forms-xml/T/FD_GESTAO_SIID_fmb.xml, analysis/BUSINESS_RULES.md (comments, attachments), analysis/db/tables/ for those tables and analysis/db/sequences.md.
+HARD RULE: you are NOT permitted to change the Oracle database. The comment insert is tested on a fake connection / memoryStore only.
+Implement the comment write (a detail crudRoutes with write: ['ADM'] and a beforeInsert hook, or a named route if the form's rules need more), the attachment download (and upload only if the form had one, via lib/imageRoutes.ts or a sibling helper for non-image files), and wire both tabs in the Documentos screen. Unit, contract (GET) and Playwright tests.
 ```
 
-### Step 7.5 — USER variant, parity pass and backups hand-off
+### Step 7.5 — USER variant and parity pass
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
 | opus | medium | `superpowers:verification-before-completion`, `gsd-verify-work` | `code-modernization:architecture-critic` |
 
-**Done when:** every difference between `FD_GESTAO_SIID` and `FD_GESTAO_SIID_USER` listed in `STRUCTURE.md` §1 and `DECISIONS.md` D-08 is enforced server-side for role USER and reflected in the UI; the parity checklist for Phase 7 in `TEST_STRATEGY.md` is fully ticked or each gap is logged; the architecture critic signs off the documentos feature.
+**Done when:** every USER limit of ARCHITECTURE §5 and DECISIONS D-08 / A-08 is enforced server-side (403 tests for each admin-only route) and reflected in the UI; the Phase 7 parity checklist in `TEST_STRATEGY.md` is ticked with evidence or each gap is logged in `analysis/PHASE7_GAPS.md`; the architecture critic signs off `features/documentos`.
 
 ```text
-Invoke `superpowers:verification-before-completion` and `gsd-verify-work`; spawn `code-modernization:architecture-critic` to review apps/api/src/features/documentos.
-Read analysis/STRUCTURE.md §1 (admin vs user differences), analysis/DECISIONS.md D-08, analysis/TEST_STRATEGY.md (Phase 7 checklist), and diff analysis/forms-summary/T/FD_GESTAO_SIID.fmb.plsql.txt against FD_GESTAO_SIID_USER.fmb.plsql.txt to confirm the list.
-Enforce the USER restrictions in requireRole/preHandlers and hide the corresponding UI; add contract tests that a USER session gets 403 on admin-only actions; walk the parity checklist and tick it in TEST_STRATEGY.md with evidence (test name or manual check); write analysis/PHASE7_GAPS.md for anything not reproducible and why.
+Invoke `superpowers:verification-before-completion` and `gsd-verify-work`; spawn `code-modernization:architecture-critic` to review app/apps/api/src/features/documentos.
+Read app/CLAUDE.md, analysis/ARCHITECTURE.md §5 and §11, analysis/DECISIONS.md D-08 and A-08, analysis/TEST_STRATEGY.md (Phase 7 checklist), and diff analysis/forms-xml/summary/FD_GESTAO_SIID.md against FD_GESTAO_SIID_USER.md to confirm the list.
+HARD RULE: you are NOT permitted to change the Oracle database. Parity evidence comes from read-only contract tests and fake-connection unit tests; write parity on the real schema is the business users' UAT in Step 10.6.
+Add unit tests that a USER session gets 403 on every admin-only route and 400 on non-ID sorts; check the SPA hides the same things; walk the checklist and tick it in TEST_STRATEGY.md with the test name or manual check; write analysis/PHASE7_GAPS.md for anything not reproducible and why.
 ```
 
 ---
 
 ## Phase 8 — Backups (FD_NOVO_BACKUP, FD_BACKUPS_ONLINE)
 
+Parity reference is the forms' SQL, not the package procedures (DECISIONS A-02): one transaction inserts `SVR_BACKUPS`, sets
+`SVR_DOCUMENTOS.BACKUP_ID` and inserts `SVR_QUEUE ('BACKUP')`; Backups Online sets `MEDIA_ONLINE` and `DRIVE_ONLINE`. Routes: ARCHITECTURE §10.1 "backups".
+
 ### Step 8.1 — Backups rules and API
 
 | Model | Effort | Skills | Agents |
 |---|---|---|---|
-| opus | high | `superpowers:test-driven-development` | `code-modernization:test-engineer` |
+| opus | medium | `superpowers:test-driven-development` | `code-modernization:test-engineer` |
 
-**Done when:** "Novo backup" (select documents/queue entries into `SVR_GESTAO_SIID_TMP`, choose media type `CFG_TIPOS_MIDIA`, destination and name, create `SVR_BACKUPS` rows and whatever the form wrote/called) and "Backups online" (list `SVR_BACKUPS`, bring a backup online / show its documents, the EXECUTE_QUERY/FORMS_DDL logic) are endpoints with contract tests.
+**Done when:** `GET /api/backups/meses`, `GET /api/backups/candidatos?mes=` (with `totalBytes`), `POST /api/backups` (validations #49, #30, #50; `NOME` and `DESTINO` expressions copied from the XML; one transaction; update count check → 409), `GET /api/backups` (with `TAMANHO_BACKUP`) and `POST /api/backups/online` exist per §10.1; a backup with `DATA_CRIACAO` cannot be changed (D-25); `BACKUP` / `ONLINE` variables are read through `createGetVariavel`; every write rule has a unit test on a fake connection; contract tests cover the GETs.
+**Why medium:** A-02 and §10.1 already pin every statement; the work is faithful copying and tests, not design.
 
 ```text
 Invoke `superpowers:test-driven-development`; spawn `code-modernization:test-engineer` first.
-Legacy sources: analysis/STRUCTURE.md §3 "FD_NOVO_BACKUP" and "FD_BACKUPS_ONLINE", analysis/BUSINESS_RULES.md "Backups", analysis/forms-summary/T/FD_NOVO_BACKUP.fmb.plsql.txt (14 triggers; globals DESTINO_BACKUP, NOME_BACKUP, SELEC_TABLE_ID; the FORMS_DDL statements; the call to FD_IMPRESSORAS_SIID as picker) and FD_BACKUPS_ONLINE.fmb.plsql.txt, analysis/DECISIONS.md D-03, tables SVR_BACKUPS, SVR_DOCUMENTOS, SVR_GESTAO_SIID_TMP, SVR_QUEUE, CFG_TIPOS_MIDIA, SVR_VARIAVEIS_SIID in analysis/db/tables/.
-Implement apps/api/src/features/backups/: the selection endpoints reuse Step 7.1's selection store; POST /api/backups (novo) validates media capacity/unit rules if the form did, writes exactly what the form wrote in one transaction; GET /api/backups (QBE), GET /api/backups/:id/documentos, POST /api/backups/:id/online (or whatever "Colocar online" did). Every FORMS_DDL becomes a fixed parameterized statement. Portuguese messages preserved. Contract tests.
+Read app/CLAUDE.md, analysis/ARCHITECTURE.md §10.1 "backups" and §12 rows 8.1 / 8.2, analysis/DECISIONS.md D-24, D-25, A-02, analysis/BUSINESS_RULES.md "Backups" (BR-BKP-*), analysis/forms-xml/summary/FD_NOVO_BACKUP.md and FD_BACKUPS_ONLINE.md, the triggers in the matching *_fmb.xml (copy the NOME / DESTINO expressions verbatim: TO_CHAR(n,'00') pads a leading blank), analysis/db/tables/ SVR_BACKUPS, SVR_DOCUMENTOS, SVR_QUEUE, CFG_TIPOS_MIDIA, SVR_VARIAVEIS_SIID.
+HARD RULE: you are NOT permitted to change the Oracle database. POST /api/backups and /online are tested with a fake DbConnection only; contract tests are GET-only via contractApp.
+Implement apps/api/src/features/backups/: resources for the lists (write []), the candidate list on the list contract, `POST /api/backups` and `POST /api/backups/online` as named routes behind a repo interface (Oracle: one withTransaction, executeMany on the connection for the per-document UPDATE / INSERT; memory: for unit tests and the dev server). Wire `createGetVariavel` (apps/api/src/lib/variaveis.ts) in app.ts's deps.db block and pass it to the backups feature for the BACKUP destination and the ONLINE drive ('E:\' when missing). No printer picker, no selection table, no package calls. Portuguese messages preserved.
 ```
 
 ### Step 8.2 — Backups screens
@@ -756,28 +833,19 @@ Implement apps/api/src/features/backups/: the selection endpoints reuse Step 7.1
 |---|---|---|---|
 | sonnet | medium | `frontend-design:frontend-design` | none |
 
-**Done when:** Gestão → Backups → Novo is a 3-step wizard (selecção → mídia/destino/nome → confirmação) and Backups Online is a DataBlock with the online action and a documents detail; Playwright covers creating a backup from a selection.
+**Done when:** Gestão → Backups → Novo is a 3-step wizard (mês + candidatos → mídia/observações → confirmação) and Backups Online is two lists over one resource (online / offline) with the online action; Playwright covers creating a backup from a selection and bringing one online against the dev server.
 
 ```text
-Invoke `frontend-design:frontend-design`. Read analysis/UI_SPEC.md (backup wireframes), Step 8.1 endpoints, labels in analysis/forms-extracted/T/FD_NOVO_BACKUP.fmb.txt and FD_BACKUPS_ONLINE.fmb.txt.
-Build apps/web/src/routes/gestao/backups/novo.tsx (wizard reusing the Documentos DataBlock in selection mode, <ImpressoraPicker> where the form opened FD_IMPRESSORAS_SIID, media type select from Tipos de Mídia) and online.tsx (DataBlock + detail + action). Playwright test for the flow in "Done when".
+Invoke `frontend-design:frontend-design`. Read app/CLAUDE.md, analysis/UI_SPEC.md (backup wireframes), the Step 8.1 routes in app/apps/api/src/features/backups/, analysis/ARCHITECTURE.md §12 row 8.2 (no printer picker, no documents detail), analysis/forms-xml/summary/FD_NOVO_BACKUP.md and FD_BACKUPS_ONLINE.md (labels).
+Replace apps/web/src/routes/_app/gestao/backups/novo.tsx (wizard: month select, candidate DataBlock with selection 'multi' and the running total of bytes, media type select from the Tipos Mídia pseudo-domain feed, confirmation) and online.tsx (two DataBlocks filtered by MEDIA_ONLINE, "Colocar online" / "Retirar" actions). Playwright tests for the flows in "Done when".
 ```
 
 ---
 
-## Phase 9 — Auditoria (optional, per DECISIONS D-06)
+## Phase 9 — Auditoria (removed)
 
-### Step 9.1 — Médias de execução dashboard
-
-| Model | Effort | Skills | Agents |
-|---|---|---|---|
-| sonnet | medium | `dataviz`, `frontend-design:frontend-design` | none |
-
-**Done when:** Auditoria → Médias Execução shows execution averages per model/period computed from `SVR_DOCUMENTOS` / `SVR_QUEUE` (replacing the disabled Oracle Report MEDIAS_DOCUMENTOS), with date filters and CSV export; skipped entirely if D-06 says drop.
-
-```text
-Read analysis/DECISIONS.md D-06; stop if the answer is "drop". Otherwise invoke `dataviz` and `frontend-design:frontend-design`. The Oracle Report MEDIAS_DOCUMENTOS is not in the repo; derive the metric from analysis/db/tables/SVR_QUEUE.md and SVR_DOCUMENTOS.md (timestamps of request, execution, completion) and from any hint in analysis/forms-summary/T/MD_SIID.mmb.plsql.txt. Build GET /api/auditoria/medias?de=&ate=&modelo= (SQL aggregation, unit-tested) and a page with a stat tile row, a bar chart per model and a table with CSV export. Portuguese labels.
-```
+Dropped by DECISIONS D-06 (2026-09-15): no Auditoria menu, no Médias Execução page, no Oracle Reports dependency. Step 9.1 is removed.
+A future request is a new feature with its own spec.
 
 ---
 
@@ -789,10 +857,12 @@ Read analysis/DECISIONS.md D-06; stop if the answer is "drop". Otherwise invoke 
 |---|---|---|---|
 | opus | high | `cso`, `security-review` | `code-modernization:security-auditor` |
 
-**Done when:** `/cso` and `security-review` report no high/critical finding; `analysis/SECURITY_FINDINGS.md` "Requirements for the Node.js rewrite" are all ticked with evidence; headers, CSRF, rate limits, cookie flags, upload limits and audit logging are verified by tests.
+**Done when:** `/cso` and `security-review` report no high/critical finding; `analysis/SECURITY_FINDINGS.md` "Requirements for the Node.js rewrite" are all ticked with evidence; headers, CSRF, rate limits, cookie flags, session rotation, `destroyUserSessions`, upload limits and audit logging are verified by tests; the accepted risks (D-03 plain-HTTP file server, D-30 owner-rights account, D-07 SEC-005 hash, §6 byte-exact images, in-memory sessions) are listed with their mitigations.
 
 ```text
-Invoke `cso` (gstack) over app/, then `security-review`; spawn `code-modernization:security-auditor` for an independent pass. Read analysis/SECURITY_FINDINGS.md and tick each requirement in a new section "Verification" with the file/test that proves it. Fix every high/critical finding. Verify: helmet-style headers, CSRF protection for cookie sessions, login rate limit, session rotation on login, secure cookie flags behind TLS, multipart limits, no stack traces in responses, dependency audit (pnpm audit) clean or documented, Docker image runs as non-root and has no secrets (docker history).
+Invoke `cso` (gstack) over app/, then `security-review`; spawn `code-modernization:security-auditor` for an independent pass. Read app/CLAUDE.md, analysis/SECURITY_FINDINGS.md, analysis/ARCHITECTURE.md §5 and §6, analysis/DECISIONS.md D-03, D-07, D-11, D-30.
+HARD RULE: you are NOT permitted to change the Oracle database. Verify with unit tests and read-only contract tests only.
+Tick each requirement in a new SECURITY_FINDINGS.md section "Verification" with the file/test that proves it. Fix every high/critical finding. Verify: security headers and CSP, CSRF on every non-GET route, login and regeneration-password throttles, session regeneration on login, destroyUserSessions after user changes, secure cookie flags when COOKIE_SECURE=true, multipart limits and signature allow-list, no stack traces in responses, no DDL / GRANT / EXECUTE IMMEDIATE anywhere in app/ (D-11), bind-only SQL (grep for template strings inside execute calls), `pnpm audit` clean or documented, Docker image runs as non-root and has no secrets (`docker history`). Write the accepted-risk list into SECURITY_FINDINGS.md.
 ```
 
 ### Step 10.2 — QA sweep in the browser
@@ -804,7 +874,8 @@ Invoke `cso` (gstack) over app/, then `security-review`; spawn `code-modernizati
 **Done when:** `/qa` finds no P1 bug on any menu leaf for both roles; `/design-review` issues are fixed; a QA report is saved in `analysis/QA_REPORT.md`.
 
 ```text
-Start the app with docker compose against the test schema, then invoke `qa` (gstack) to test every menu leaf for an ADM user and for a USER user (create ZZTEST_ users if needed), then `design-review` for visual consistency, spacing and AI-slop patterns. Fix what is found. Save the final report to analysis/QA_REPORT.md.
+Read app/CLAUDE.md. HARD RULE: you are NOT permitted to change the Oracle database, and must not create users or any other rows.
+Run the QA in two passes. (1) Write flows: start the Oracle-less dev server (`pnpm --filter @gestsiid/api dev:mock` + `pnpm --filter @gestsiid/web dev`) and invoke `qa` (gstack) on every menu leaf as the dev ADM and the dev USER, including create / edit / delete / actions. (2) Read flows on real data: start the app against the test schema with the owner-given ADM and USER accounts (GESTSIID_TEST_USER / GESTSIID_TEST_PASSWORD and the USER pair the owner supplies) and run `qa` in read-only mode: list, filter, sort, open details, open PDFs — never press Guardar, Apagar or an action button. Then `design-review` for visual consistency, spacing and AI-slop patterns. Fix what is found. Save the final report to analysis/QA_REPORT.md.
 ```
 
 ### Step 10.3 — Code quality and simplification
@@ -813,10 +884,10 @@ Start the app with docker compose against the test schema, then invoke `qa` (gst
 |---|---|---|---|
 | sonnet | medium | `simplify`, `ponytail:ponytail-audit`, `code-review`, `coderabbit:code-review` | `code-simplifier:code-simplifier` |
 
-**Done when:** the audits report no duplicated screen logic that the DataBlock/crudRoutes helpers should own; lint/typecheck/tests green; `ponytail:` debt comments listed in `analysis/DEBT.md`.
+**Done when:** the audits report no duplicated screen logic that the DataBlock / crudRoutes / store-decorator helpers should own; `features/dev/routes.ts` seeds are split per feature if the file passed ~600 lines; lint/typecheck/tests green; `ponytail:` debt comments listed in `analysis/DEBT.md`.
 
 ```text
-Invoke `ponytail:ponytail-audit` over app/, then `simplify`, then `code-review` (high) and `coderabbit:code-review`; spawn `code-simplifier:code-simplifier` for the hot spots. Apply safe simplifications, keep behaviour identical (tests must stay green). Run `ponytail:ponytail-debt` and save the ledger to analysis/DEBT.md.
+Read app/CLAUDE.md. Invoke `ponytail:ponytail-audit` over app/, then `simplify`, then `code-review` (high) and `coderabbit:code-review`; spawn `code-simplifier:code-simplifier` for the hot spots. Look first at repeated store decorators (scoping by AMBIENTE_ID, delete guards, cache invalidation) and repeated repo interfaces (Reports, Impressoras associadas, Permissões, Modelos, Backups): extract a shared helper only where three or more copies are identical. If features/dev/routes.ts passed ~600 lines, move each feature's seed to features/dev/seeds/<name>.ts. Apply safe simplifications, keep behaviour identical (tests must stay green). Run `ponytail:ponytail-debt` and save the ledger to analysis/DEBT.md. Update app/CLAUDE.md if a pattern changed.
 ```
 
 ### Step 10.4 — Performance and resilience
@@ -825,10 +896,11 @@ Invoke `ponytail:ponytail-audit` over app/, then `simplify`, then `code-review` 
 |---|---|---|---|
 | sonnet | medium | `benchmark`, `context7-mcp` | none |
 
-**Done when:** list endpoints of Documentos answer under 500 ms p95 on the test schema with 50-row pages; pool sizing, statement timeouts, connection loss recovery and graceful shutdown are tested; results saved in `analysis/PERF.md`.
+**Done when:** list endpoints of Documentos answer under 500 ms p95 on the test schema with 50-row pages (read-only GETs); pool exhaustion, statement timeout, connection loss and graceful shutdown are proven by unit tests on a fake pool; results saved in `analysis/PERF.md`.
 
 ```text
-Invoke `benchmark` (gstack) against the running container for the Documentos list, Permissões lists and Modelos master; use `context7-mcp` for node-oracledb pool tuning (poolMin/Max, queueTimeout, statement cache, fetchArraySize) and Fastify keep-alive settings. Add indexes only as a recommendation in analysis/PERF.md (DBA decides). Test: pool exhaustion returns 503 quickly, DB restart is survived, SIGTERM drains requests and closes the pool.
+Read app/CLAUDE.md. HARD RULE: you are NOT permitted to change the Oracle database — benchmark GET endpoints only; never restart, stop or reconfigure the database.
+Invoke `benchmark` (gstack) against the running container for the Documentos list (each preset), Permissões lists and Modelos master; use `context7-mcp` for node-oracledb pool tuning (poolMin/Max, queueTimeout, statement cache, fetchArraySize, prefetchRows) and Fastify keep-alive. Prove with unit tests on a fake pool: queueTimeout → fast 503 BD_INDISPONIVEL, callTimeout → 504 TEMPO_ESGOTADO, a dropped connection (ORA-03113 / DPI-1080) is released and the next request gets a new one, SIGTERM drains requests and closes the pool. Add indexes only as a recommendation in analysis/PERF.md (DBA decides).
 ```
 
 ### Step 10.5 — Documentation
@@ -837,10 +909,10 @@ Invoke `benchmark` (gstack) against the running container for the Documentos lis
 |---|---|---|---|
 | sonnet | low | `document-generate`, `claude-md-management:revise-claude-md` | none |
 
-**Done when:** `app/README.md`, `app/DEPLOY.md`, an operator runbook and a user guide (Portuguese, per menu leaf, with screenshots from the browse skill) exist; root `CLAUDE.md` describes both the legacy folders and the new app.
+**Done when:** `app/README.md`, `app/DEPLOY.md`, `app/CLAUDE.md`, an operator runbook and a user guide (Portuguese, per menu leaf, with screenshots from the browse skill) are current; root `CLAUDE.md` describes both the legacy folders and the new app; the D-11 DBA hand-over (23 grants) is in the runbook.
 
 ```text
-Invoke `document-generate` (gstack) for app/ and `claude-md-management:revise-claude-md` for the root CLAUDE.md. Produce: app/README.md (dev setup), app/DEPLOY.md (already started in 2.3; complete it: env vars table, TLS/proxy, backups of nothing — the DB is the state —, log locations, upgrade/rollback), docs/RUNBOOK.md (health, common errors, DB unreachable, pool exhaustion), docs/MANUAL_UTILIZADOR.md in Portuguese with one section per menu leaf and screenshots captured with the `browse` skill.
+Invoke `document-generate` (gstack) for app/ and `claude-md-management:revise-claude-md` for the root CLAUDE.md and app/CLAUDE.md. Produce: app/README.md (dev setup), app/DEPLOY.md (complete it: env vars table from .env.example, Instant Client 19 in the image, TLS/proxy per D-09, no volumes — the DB and FileServerSIID hold all state —, log rotation, upgrade/rollback), docs/RUNBOOK.md (health, common errors, DB unreachable, pool exhaustion, FileServerSIID down, the D-11 grant script for the DBA), docs/MANUAL_UTILIZADOR.md in Portuguese with one section per menu leaf and screenshots captured with the `browse` skill from the dev server.
 ```
 
 ### Step 10.6 — Parallel run, UAT and cutover
@@ -849,10 +921,11 @@ Invoke `document-generate` (gstack) for app/ and `claude-md-management:revise-cl
 |---|---|---|---|
 | opus | medium | `gsd-verify-work`, `gsd-audit-milestone`, `canary` | none |
 
-**Done when:** the full parity checklist in `TEST_STRATEGY.md` is ticked by business users during a parallel run against the same test schema (per D-10); a cutover plan with rollback exists; credentials exposed by the Forms app are rotated (DBA); production compose file prepared.
+**Done when:** the full parity checklist in `TEST_STRATEGY.md` is ticked by business users during a parallel run against the same test schema (per D-10); the §11 verification items (NLS parity rows, users locked out by D-07b dates, nginx + TLS + `COOKIE_SECURE` + `TRUST_PROXY`) are closed; a cutover plan with rollback exists; credentials exposed by the Forms app are rotated (DBA); production compose file prepared.
 
 ```text
-Invoke `gsd-verify-work` to drive the UAT session with the business users through every parity item, then `gsd-audit-milestone` against the objective in analysis/MASTER_PLAN.md section 1. Write analysis/CUTOVER.md: pre-checks (DB grants for the service account, DOCS_ROOT mount, TLS), go-live steps, monitoring with the `canary` skill for the first hours, rollback (Forms stays deployed and untouched), and the DBA task list (rotate the accounts named in analysis/SECURITY_FINDINGS.md, drop the per-user synonyms the forms created if no longer needed).
+Read app/CLAUDE.md and analysis/ARCHITECTURE.md §11. HARD RULE: Claude does not run write flows against Oracle. The business users run the UAT writes themselves, with the owner's approval, in the app and in Forms; Claude prepares the scripts, reads results with SELECTs and records evidence.
+Invoke `gsd-verify-work` to drive the UAT session with the business users through every parity item, then `gsd-audit-milestone` against the objective in analysis/MASTER_PLAN.md section 1. Write analysis/CUTOVER.md: pre-checks (service-account grants per D-30, Instant Client in the image, TLS via nginx per D-09, FILESERVER_BASE_URL per environment, AMBIENTE_ID boot check per D-27), the list of active users whose DATA_INICIO/DATA_FIM would lock them out (a SELECT the owner reviews), go-live steps, monitoring with the `canary` skill for the first hours, rollback (Forms stays deployed and untouched), and the DBA task list (rotate the accounts named in analysis/SECURITY_FINDINGS.md, drop the per-user synonyms the forms created if no longer needed, the D-11 grant script).
 ```
 
 ---
@@ -867,23 +940,28 @@ Invoke `gsd-verify-work` to drive the UAT session with the business users throug
 | `superpowers:brainstorming`, `writing-plans`, `test-driven-development`, `verification-before-completion` | throughout | process discipline |
 | `feature-dev:feature-dev` (+ `code-explorer`, `code-architect`, `code-reviewer`) | 1.1, 2.4, 4.1, 7.1 | guided feature development on the codebase |
 | `frontend-design:frontend-design`, `ui-ux-pro-max:design-system` / `ui-styling`, `gsd-ui-phase` | 1.2, 2.2, 2.4, 3.2, 5.4, 6.3, 7.3, 8.2 | intentional, consistent enterprise UI |
-| `context7-mcp` | 0.2, 1.1, 2.x, 3.1, 5.5, 6.2, 10.4 | current docs for node-oracledb, Fastify, TanStack, Vite |
-| `security-review`, `cso`, `code-modernization:security-auditor` | 3.1, 4.3, 4.5, 6.2, 7.2, 10.1 | auth, uploads, dynamic SQL |
+| `context7-mcp` | 0.2, 1.1, 2.x, 3.1, 5.5, 10.4 | current docs for node-oracledb, Fastify, TanStack, Vite |
+| `security-review`, `cso`, `code-modernization:security-auditor` | 3.1, 4.3, 5.0, 5.5, 6.2, 7.2, 10.1 | auth, sessions, uploads, dynamic SQL |
 | `qa`, `design-review`, `browse`, `benchmark`, `canary`, `retro` (gstack) | 4.7, 10.x | browser QA, visual review, perf, post-deploy |
-| `simplify`, `ponytail:*`, `code-review`, `coderabbit:code-review`, `code-simplifier` | 2.1, 10.3 | keep the code small |
-| `dataviz` | 9.1 | dashboard charts |
+| `simplify`, `ponytail:*`, `code-review`, `coderabbit:code-review`, `code-simplifier` | 2.1, 5.0, 10.3 | keep the code small |
 | `document-generate`, `claude-md-management:revise-claude-md` | 10.5 | docs |
 | `gsd-verify-work`, `gsd-audit-milestone`, `gsd-extract-learnings` | 4.7, 7.5, 10.6 | UAT and milestone audit |
 
 ## Appendix B — Model policy
 
-- `sonnet`: scaffolding, CRUD screens that copy the pilot, docs, quality passes.
-- `opus`: architecture, design system, the DataBlock engine, auth, permissions, modelos, documentos read model and screens, backups rules, security/QA sweeps.
-- `fable` (one step): 7.2 document operations — the densest business logic with the highest cost of error. If unavailable, run 7.2 on `opus xhigh` split in two sessions: (a) Reimprimir/Regerar/Recriar/Via/Cópia/Spool, (b) Anular/Reenviar/E-mail/Rearquivar/Suspender/Retomar/Cancelar/Fatura electrónica/Clonar/Estado.
+- `sonnet`: scaffolding, CRUD screens that copy the pilot, docs, quality passes. Phase 4 showed a "copy the pilot" screen still needs one small engine extension, so such steps run at `medium` effort at least, `high` when a screen adds named actions or the first use of a platform feature (upload, BLOB).
+- `opus`: architecture, design system, the DataBlock engine, auth, permissions, modelos, documentos read model and screens, backups rules, security/QA sweeps, and any step that changes both the DataBlock and the API contract (5.1).
+- `fable` (one step): 7.2 document operations — the densest business logic with the highest cost of error. If unavailable, run 7.2 on `opus xhigh` split in two sessions: (a) regerar / reimprimir / segunda-via / copia / clonar, (b) anular / cancelar / suspender / retomar / reenviar-edoc / reenviar-email / rearquivar / fila cancelar.
 
 ## Revision log
 
 - 2026-09-14 — initial plan.
 - 2026-09-14 — Oracle Forms 12.2.1.4 tools found at `I:\Middleware\Oracle_Home`; Forms2XML dumps added (`analysis/forms-xml`, script `analysis/tools/forms2xml.ps1`); new Step 0.4 refreshes the analysis from the XML; per-form inputs now point at the XML digests.
 - 2026-09-14 — folded in `STRUCTURE.md` and `SECURITY_FINDINGS.md`: pilot changed to Impressoras (Domínios is master-detail), Reports is master-detail, "Alterar password" is the document-regeneration password, PDFs come from FileServerSIID (proxy), document actions are SVR_QUEUE inserts, HOST/TEXT_IO code is dead, Gestores grants DB privileges (D-11), decisions D-11..D-13 added, `.env.example` gained FILESERVER_* and lost DOCS_ROOT.
+- 2026-09-28 — Step 4.7 pilot retrospective. Phases 5–10 rewritten from Phase 4 (commits `70ca2c7`, `9f3b420`, uncommitted Steps 4.2–4.4), `PILOT_NOTES.md`, and `ARCHITECTURE.md` §12, whose prompt corrections had never been applied to Phases 5–10. `app/CLAUDE.md` written (how to add a screen, patterns, gotchas).
+  - **New Step 5.0** (engine gaps found in the retro): `preset=` is parsed by `packages/shared` but ignored by `lib/listQuery.ts`, breaking ARCHITECTURE §4.1 "never ignored" and needed by Permissões / Documentos; Utilizadores lists every environment's users and never ends sessions (ARCHITECTURE §5 `destroyUserSessions` has no caller); seven contract tests copy the same ~40-line setup (new `test/contract-app.ts`); the dev domain stub and the Domínios store drift apart; only one LOV picker exists (new `<LovPicker>`).
+  - **Helpers the old prompts named that do not exist:** `resources-server/<name>.ts` with `presets` / `staticWhere` / `validate` (real pattern: hooks and store decorators in `features/<name>/routes.ts`, `exclude` on the resource); `GET /api/lov/:name` (real pattern: pseudo-domain feeds at `/api/dominios/<NAME>/valores` for selects, read-only resources + `<LovPicker>` for long lists; §10.1's lookup table stays the SQL source); the selection store in `SVR_GESTAO_SIID_TMP` (ARCHITECTURE §4.2: `ids` or `consulta`); a "save model" batch endpoint (per-row `crudRoutes` + named actions); `DOCS_ROOT` and ported `PKG_FICHIERS` / `PKG_TRANSFERTS` (BLOB image routes); `FILESERVER_URL` / `FILESERVER_ENV` (`FILESERVER_BASE_URL`); `<ImpressoraPicker>` in Novo backup; the tablespace gauge (D-13). Route paths now point at `apps/web/src/routes/_app/...` (placeholders exist) and field facts at `analysis/forms-xml/summary/<FORM>.md`.
+  - **HARD RULE fixes:** removed "contract tests in rolled-back transactions" (6.1), "create ZZTEST_ users" (10.2) and "DB restart is survived" (10.4); every step that writes now says write paths are tested on fakes and contract tests are GET-only; 10.2 splits QA into dev-server writes + read-only real data; 10.6 leaves UAT writes to the business users.
+  - **Model / effort:** 5.1 sonnet medium → opus medium (first atomic multi-row save; adds `save: 'external'` to DataBlock); 5.2 medium → high (five named actions, overlap rules); 5.5 medium → high (first multipart upload and BLOB write; builds `lib/imageRoutes.ts`); 6.2 opus high → sonnet medium (one call of `imageRoutes`); 6.3 medium → high (six detail tabs, with a split fallback); 8.1 opus high → opus medium (A-02 and §10.1 pin every statement). Appendix B updated.
+  - **Scope:** Phase 9 removed (D-06); 5.5 is one block, not master-detail (§10); 8.1 wires `createGetVariavel`; 8.2 has no documents detail; 7.2 routes and skip rules follow §10.1 / A-06 / D-12; 7.4 limited to comments and attachments (queue and errors tabs are read-only, built in 7.1).
 
