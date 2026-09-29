@@ -19,6 +19,7 @@ async function buildApp() {
   app.get('/zod-error', async () => {
     z.object({ nome: z.string() }).parse({});
   });
+  app.post('/json', async () => ({ ok: true }));
   app.get('/boom', async () => {
     throw new Error('unexpected wiring bug');
   });
@@ -68,5 +69,29 @@ describe('registerErrorHandler', () => {
     expect(body.code).toBe('ERRO');
     expect(body.message).toBe('Erro');
     expect(JSON.stringify(body)).not.toContain('unexpected wiring bug');
+  });
+
+  it('answers a client mistake (malformed JSON, 400) with its own 4xx, not a 500', async () => {
+    const app = await buildApp();
+    const res = await app.inject({
+      method: 'POST',
+      url: '/json',
+      headers: { 'content-type': 'application/json' },
+      payload: '{"a":',
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toMatchObject({ code: 'PEDIDO_INVALIDO', message: 'Pedido inválido.' });
+  });
+
+  it('keeps the status of other 4xx Fastify errors (415 unsupported type)', async () => {
+    const app = await buildApp();
+    const res = await app.inject({
+      method: 'POST',
+      url: '/json',
+      headers: { 'content-type': 'application/x-nada' },
+      payload: 'x',
+    });
+    expect(res.statusCode).toBe(415);
+    expect(res.json().code).toBe('PEDIDO_INVALIDO');
   });
 });

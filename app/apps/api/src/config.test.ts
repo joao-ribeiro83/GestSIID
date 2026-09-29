@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ConfigError, parseConfig } from './config.ts';
+import { ConfigError, configWarnings, parseConfig } from './config.ts';
 
 const VALID_ENV = {
   DB_USER: 'siid_app',
@@ -96,5 +96,18 @@ describe('parseConfig', () => {
   it('accepts an empty BASE_PATH and a BASE_PATH with a leading slash', () => {
     expect(parseConfig({ ...VALID_ENV, BASE_PATH: '' }).BASE_PATH).toBe('');
     expect(parseConfig({ ...VALID_ENV, BASE_PATH: '/gestsiid' }).BASE_PATH).toBe('/gestsiid');
+  });
+});
+
+describe('configWarnings', () => {
+  it('warns when production sends the session cookie over plain HTTP', () => {
+    const warnings = configWarnings(parseConfig(VALID_ENV));
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toMatch(/COOKIE_SECURE/);
+  });
+
+  it('is quiet with COOKIE_SECURE=true, and in development', () => {
+    expect(configWarnings(parseConfig({ ...VALID_ENV, COOKIE_SECURE: 'true' }))).toEqual([]);
+    expect(configWarnings(parseConfig({ ...VALID_ENV, NODE_ENV: 'development' }))).toEqual([]);
   });
 });

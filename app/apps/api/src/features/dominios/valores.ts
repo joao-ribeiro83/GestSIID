@@ -14,6 +14,8 @@ const VALORES_SQL =
   ' ORDER BY PRIORIDADE, CHAVE';
 
 const CACHE_MS = 60_000;
+/** The domain id comes from the URL: a cap keeps a script from filling the memory with made-up ids. */
+const CACHE_MAX = 500;
 
 /**
  * Shared with `features/dominios/routes.ts`: a write to `CFG_VALORES_DOMINIO` invalidates the
@@ -25,11 +27,17 @@ export function createDominiosCache() {
   return {
     get: (id: string): DominioValor[] | undefined => {
       const hit = map.get(id);
+      if (hit && hit.expires <= Date.now()) map.delete(id);
       return hit && hit.expires > Date.now() ? hit.rows : undefined;
     },
+    /** An empty result is not kept (an unknown id is not a domain worth remembering). */
     set: (id: string, rows: DominioValor[]): void => {
+      if (rows.length === 0) return;
+      map.delete(id); // re-set moves it to the newest position
+      if (map.size >= CACHE_MAX) map.delete(map.keys().next().value!);
       map.set(id, { rows, expires: Date.now() + CACHE_MS });
     },
+    size: (): number => map.size,
     invalidate: (id: string): void => {
       map.delete(id);
     },

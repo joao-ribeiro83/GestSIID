@@ -32,14 +32,19 @@ async function appWith(role: 'ADM' | 'USER' | null) {
   // What reaches the store is what would reach Oracle: record it.
   const inner = memoryStore(utilizadores, [ana]);
   const written: Values[] = [];
+  const destroyed: string[] = [];
   const store: CrudStore = {
     ...inner,
     insert: (v, p, c) => (written.push(v), inner.insert(v, p, c)),
     update: (r, o, v, c) => (written.push(v), inner.update(r, o, v, c)),
   };
-  registerUtilizadoresRoutes(app, { store, ambiente: 'GADOR_TESTES' });
+  registerUtilizadoresRoutes(app, {
+    store,
+    ambiente: 'GADOR_TESTES',
+    destroySessions: (u) => void destroyed.push(u),
+  });
   await app.ready();
-  return { app, written };
+  return { app, written, destroyed };
 }
 type App = Awaited<ReturnType<typeof appWith>>['app'];
 
@@ -216,5 +221,41 @@ describe('utilizadores routes — access', () => {
     expect((await post(user, novo)).statusCode).toBe(403);
     const anon = (await appWith(null)).app;
     expect((await anon.inject({ url: '/api/utilizadores' })).statusCode).toBe(401);
+  });
+});
+
+describe('utilizadores — sessions of a changed account', () => {
+  const rowOf = async (app: App) => (await app.inject({ url: '/api/utilizadores' })).json().rows[0];
+
+  it('an update ends the sessions of that user, so a demotion or an expiry applies at once', async () => {
+    const { app, destroyed } = await appWith('ADM');
+    const { _rid, ...orig } = await rowOf(app);
+    const r = await app.inject({
+      method: 'PUT',
+      url: `/api/utilizadores/${_rid}`,
+      payload: { orig, values: { TIPO_UTILIZADOR_RF: 'USER' } },
+    });
+    expect(r.statusCode).toBe(200);
+    expect(destroyed).toEqual(['ANA']);
+  });
+
+  it('a delete ends the sessions of that user', async () => {
+    const { app, destroyed } = await appWith('ADM');
+    const { _rid, ...orig } = await rowOf(app);
+    const r = await app.inject({ method: 'DELETE', url: `/api/utilizadores/${_rid}`, payload: { orig } });
+    expect(r.statusCode).toBe(204);
+    expect(destroyed).toEqual(['ANA']);
+  });
+
+  it('a refused write (bad dates) ends no session', async () => {
+    const { app, destroyed } = await appWith('ADM');
+    const { _rid, ...orig } = await rowOf(app);
+    const bad = await app.inject({
+      method: 'PUT',
+      url: `/api/utilizadores/${_rid}`,
+      payload: { orig, values: { DATA_FIM: '2000-01-01T00:00:00' } },
+    });
+    expect(bad.statusCode).toBe(400);
+    expect(destroyed).toEqual([]);
   });
 });

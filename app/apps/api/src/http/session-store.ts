@@ -76,6 +76,13 @@ export class SessionStore {
     return ids;
   }
 
+  /** Ends every session of `username` (account changed or removed); returns how many. */
+  destroyUserSessions(username: string): number {
+    const ids = this.findSessionIdsByUsername(username);
+    for (const sid of ids) this.sessions.delete(sid);
+    return ids.length;
+  }
+
   stop(): void {
     clearInterval(this.timer);
   }

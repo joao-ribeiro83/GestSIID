@@ -74,6 +74,16 @@ export function parseConfig(env: Record<string, string | undefined>): Config {
   return result.data;
 }
 
+/** Boot-time hazards that are valid settings (plain HTTP is the accepted state before TLS, D-09). */
+export function configWarnings(config: Config): string[] {
+  const warnings: string[] = [];
+  if (config.NODE_ENV === 'production' && !config.COOKIE_SECURE)
+    warnings.push(
+      'COOKIE_SECURE=false: the session cookie and CSRF token travel in clear text. Put TLS in front (D-09) and set COOKIE_SECURE=true before go-live.',
+    );
+  return warnings;
+}
+
 /** Boot entry point: parses process.env, prints a readable message and exits 1 on failure. */
 export function loadConfig(): Config {
   try {

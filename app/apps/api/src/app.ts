@@ -80,7 +80,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   registerSecurityHeaders(app, deps.config);
   registerErrorHandler(app);
-  await registerSession(app, deps.config);
+  const sessions = await registerSession(app, deps.config);
   // CSRF stays on whenever real login is possible, even in the Oracle-less dev server
   // (Step 3.2): only the auto-login dev demo (no authRepo) can skip it.
   await app.register(multipart); // limits are set per route (lib/imageRoutes.ts)
@@ -121,6 +121,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
         registerUtilizadoresRoutes(sub, {
           store: oracleStore(pool, utilizadores, callTimeoutMs),
           ambiente: deps.ambiente,
+          destroySessions: (username) => void sessions.destroyUserSessions(username),
         });
         registerVariaveisRoutes(sub, {
           store: oracleStore(pool, variaveis, callTimeoutMs),

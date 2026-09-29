@@ -1,5 +1,5 @@
 import { Writable } from 'node:stream';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { pt } from '@gestsiid/shared';
 import { buildApp } from '../../app.ts';
 import { requireRole } from '../../http/auth-guard.ts';
@@ -104,7 +104,11 @@ describe('POST /api/auth/login — refusals', () => {
     expect(res.statusCode).toBe(401);
     expect(res.json()).toMatchObject({ code: 'LOGIN_INVALIDO', message: pt.loginInvalido });
     expect(res.headers['set-cookie']).toBeUndefined();
-    expect(audits('login.fail')).toEqual([expect.objectContaining({ details: { utilizador: u, motivo } })]);
+    expect(audits('login.fail')).toEqual([
+      expect.objectContaining({ details: { utilizadorHash: expect.stringMatching(/^[0-9a-f]{8}$/), motivo } }),
+    ]);
+    // What was typed in the username box may be a pasted password: never in the log.
+    expect(JSON.stringify(audits('login.fail'))).not.toContain(u);
     await app.close();
   });
 
@@ -125,19 +129,28 @@ describe('POST /api/auth/login — refusals', () => {
     await app.close();
   });
 
-  it('concurrent guesses for one username cannot pass the 10-failure lock', async () => {
+  it('concurrent guesses from one IP cannot pass the per-minute limit', async () => {
     const { app, calls } = await setup();
-    await Promise.all(Array.from({ length: 30 }, (_, i) => login(app, 'ADMIN', 'wrong', `10.0.3.${i}`)));
-    expect(calls.filter((c) => c[0] === 'findLogin').length).toBeLessThanOrEqual(10);
+    await Promise.all(Array.from({ length: 30 }, () => login(app, 'ADMIN', 'wrong', '10.0.3.1')));
+    expect(calls.filter((c) => c[0] === 'findLogin').length).toBeLessThanOrEqual(5);
     await app.close();
   });
 
-  it('10 failures for one username lock it, even from new IPs', async () => {
-    const { app } = await setup();
-    for (let i = 0; i < 10; i++) await login(app, 'ADMIN', 'wrong', `10.0.1.${i}`);
-    const { res } = await login(app, 'ADMIN', 'pw', '10.0.2.1');
-    expect(res.statusCode).toBe(401);
-    await app.close();
+  it('10 failures from one IP lock that IP + username only: the real user still gets in from elsewhere', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      const { app } = await setup();
+      for (let i = 0; i < 10; i++) {
+        vi.setSystemTime(Date.now() + 5 * 60_000); // spread so the per-IP limit never trips
+        await login(app, 'ADMIN', 'wrong', '6.6.6.6');
+      }
+      vi.setSystemTime(Date.now() + 1000);
+      expect((await login(app, 'ADMIN', 'pw', '6.6.6.6')).res.statusCode).toBe(401); // the attacker: locked
+      expect((await login(app, 'ADMIN', 'pw', '10.0.2.1')).res.statusCode).toBe(200); // the user: fine
+      await app.close();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

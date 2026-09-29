@@ -71,6 +71,14 @@ export function registerErrorHandler(app: FastifyInstance): void {
       return;
     }
 
+    // A client mistake Fastify already classified (malformed JSON, unsupported type, body too large).
+    const status = (error as FastifyError).statusCode;
+    if (status !== undefined && status >= 400 && status < 500) {
+      const body: ErrorBody = { code: 'PEDIDO_INVALIDO', message: 'Pedido inválido.', requestId: request.id };
+      reply.status(status).send(body);
+      return;
+    }
+
     request.log.error({ err: error }, 'unhandled error');
     const body: ErrorBody = { code: 'ERRO', message: 'Erro', requestId: request.id };
     reply.status(500).send(body);

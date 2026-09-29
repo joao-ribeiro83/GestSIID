@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 
@@ -13,7 +13,7 @@ export interface SpaConfig {
  * Serves the built SPA (`apps/web/dist`) at `/` and falls back to `index.html` for any
  * unmatched GET whose path is not under `${basePath}/api` and whose Accept header wants html
  * (client-side routing). `index.html` is read once at startup and gets `<base href>` injected
- * (§2); hashed assets get a one-year immutable cache, `index.html` gets `no-cache`.
+ * (§2); files under assets/ (content-hashed) get a one-year immutable cache, `index.html` gets `no-cache`.
  *
  * `/` is registered explicitly rather than left to `@fastify/static`'s `index` option: static
  * treats a request that resolves to a directory as a listing and returns 403 instead of falling
@@ -23,6 +23,7 @@ export async function registerSpa(app: FastifyInstance, config: SpaConfig): Prom
   const rawHtml = await readFile(join(config.distDir, 'index.html'), 'utf8');
   const html = rawHtml.replace('<head>', `<head>\n<base href="${config.basePath}/">`);
   const apiPrefix = `${config.basePath}/api`;
+  const assetsDir = join(config.distDir, 'assets');
 
   const sendIndex = (reply: FastifyReply) => reply.header('Cache-Control', 'no-cache').type('text/html').send(html);
 
@@ -32,8 +33,11 @@ export async function registerSpa(app: FastifyInstance, config: SpaConfig): Prom
     root: config.distDir,
     prefix: '/',
     index: false,
-    setHeaders(reply) {
-      reply.header('Cache-Control', 'max-age=31536000, immutable');
+    // Only Vite's content-hashed files under assets/ may be immutable; anything else (favicon,
+    // manifest…) keeps its name across releases, so it is revalidated.
+    setHeaders(reply, pathName) {
+      const hashed = !relative(assetsDir, pathName).startsWith('..');
+      reply.header('Cache-Control', hashed ? 'max-age=31536000, immutable' : 'no-cache');
     },
   });
 

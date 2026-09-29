@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { pt } from '@gestsiid/shared';
@@ -60,18 +61,21 @@ export function registerAuthRoutes(app: FastifyInstance, deps: AuthDeps): void {
 
     const username = utilizador.toUpperCase(); // LOGIN.UTILIZADOR has CaseRestriction="Upper"
     const refuse = (motivo: string) => {
-      audit(request, 'login.fail', { utilizador: username, motivo });
+      // A short hash, not the text: the box may hold a password pasted by mistake. Still lets an
+      // operator see that the same account is being hit.
+      const utilizadorHash = createHash('sha256').update(username).digest('hex').slice(0, 8);
+      audit(request, 'login.fail', { utilizadorHash, motivo });
       return loginInvalido();
     };
 
     if (!throttle.checkLogin(request.ip, username)) throw refuse('bloqueado');
     // Count the failure before the DB call, so parallel guesses cannot all slip past the lock;
     // loginSucceeded clears it again.
-    throttle.loginFailed(username);
+    throttle.loginFailed(request.ip, username);
     const row = await repo.findLogin(username, password, ambiente);
     if (!row || row.OK !== 1 || row.ATIVO !== 1)
       throw refuse(!row ? 'utilizador' : row.OK !== 1 ? 'password' : 'inativo');
-    throttle.loginSucceeded(username);
+    throttle.loginSucceeded(request.ip, username);
 
     const user: SessionUser = {
       username: row.USERNAME,

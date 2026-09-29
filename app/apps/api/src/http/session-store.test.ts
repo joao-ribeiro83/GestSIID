@@ -88,4 +88,19 @@ describe('SessionStore', () => {
     expect(new Set(store.findSessionIdsByUsername('JRIBEIRO'))).toEqual(new Set(['sid-1', 'sid-2']));
     store.stop();
   });
+
+  it('destroyUserSessions removes every session of that user and no other', async () => {
+    const store = new SessionStore();
+    await set(store, 'a1', { user: { username: 'ANA' } });
+    await set(store, 'a2', { user: { username: 'ANA' } });
+    await set(store, 'b1', { user: { username: 'BRUNO' } });
+    await set(store, 'anon', { csrf: 'x' });
+
+    expect(store.destroyUserSessions('ANA')).toBe(2);
+    expect(await get(store, 'a1')).toBeUndefined();
+    expect(await get(store, 'a2')).toBeUndefined();
+    expect(await get(store, 'b1')).toBeDefined();
+    expect(await get(store, 'anon')).toBeDefined();
+    store.stop();
+  });
 });

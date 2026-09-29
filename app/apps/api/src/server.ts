@@ -2,7 +2,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import oracledb from 'oracledb';
 import { buildApp } from './app.ts';
-import { loadConfig } from './config.ts';
+import { configWarnings, loadConfig } from './config.ts';
 import { buildPoolAttrs, query, type DbPool } from './db/oracle.ts';
 import { oracleAuthRepo } from './features/auth/repo.ts';
 
@@ -74,4 +74,5 @@ async function shutdown(): Promise<void> {
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
+for (const warning of configWarnings(config)) app.log.warn(warning);
 await app.listen({ port: config.PORT, host: '0.0.0.0' });

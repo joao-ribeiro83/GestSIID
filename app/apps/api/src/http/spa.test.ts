@@ -12,6 +12,7 @@ async function makeFixtureDist(): Promise<string> {
   await writeFile(join(dir, 'index.html'), '<!doctype html>\n<html>\n<head></head>\n<body>app</body>\n</html>\n');
   await mkdir(join(dir, 'assets'));
   await writeFile(join(dir, 'assets', 'app.abc123.js'), 'console.log("hi")');
+  await writeFile(join(dir, 'favicon.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
   return dir;
 }
 
@@ -63,6 +64,14 @@ describe('registerSpa', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('<base href="/">');
+  });
+
+  it('a file outside assets/ (not content-hashed) is revalidated, never cached as immutable', async () => {
+    const app = await buildApp();
+    const res = await app.inject({ method: 'GET', url: '/favicon.svg' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['cache-control']).toBe('no-cache');
   });
 
   it('serves a hashed asset with a long, immutable cache header', async () => {

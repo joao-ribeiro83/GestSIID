@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import { describe, expect, it, vi } from 'vitest';
 import type { DbConnection, DbPool } from '../../db/oracle.ts';
 import { registerErrorHandler } from '../../http/errors.ts';
-import { registerDominiosRoutes } from './valores.ts';
+import { createDominiosCache, registerDominiosRoutes } from './valores.ts';
 
 function fakePool(rows: Record<string, unknown>[]) {
   const execute = vi.fn().mockResolvedValue({ rows });
@@ -66,5 +66,37 @@ describe('GET /api/dominios/:dominioId/valores', () => {
 
     const r = await app.inject({ url: '/api/dominios/BINARIO/valores' });
     expect(r.statusCode).toBe(401);
+  });
+});
+
+describe('createDominiosCache', () => {
+  const row = { CHAVE: 'S', DESIGNACAO: 'Sim', PRIORIDADE: 0 };
+
+  it('does not keep an empty result, so made-up domain ids cannot fill the memory', () => {
+    const cache = createDominiosCache();
+    cache.set('NAO_EXISTE', []);
+    expect(cache.get('NAO_EXISTE')).toBeUndefined();
+    expect(cache.size()).toBe(0);
+  });
+
+  it('holds at most 500 domains: the oldest goes first', () => {
+    const cache = createDominiosCache();
+    for (let i = 0; i < 600; i++) cache.set(`D${i}`, [row]);
+    expect(cache.size()).toBe(500);
+    expect(cache.get('D0')).toBeUndefined();
+    expect(cache.get('D599')).toEqual([row]);
+  });
+
+  it('drops an expired entry when it is read', () => {
+    vi.useFakeTimers();
+    try {
+      const cache = createDominiosCache();
+      cache.set('BINARIO', [row]);
+      vi.advanceTimersByTime(60_001);
+      expect(cache.get('BINARIO')).toBeUndefined();
+      expect(cache.size()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

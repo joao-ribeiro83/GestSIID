@@ -23,16 +23,22 @@ export interface ImageStore {
   clear(key: ImageKey, ctx: CrudCtx): Promise<boolean>;
 }
 
-const SIGNATURES: [mime: string, magic: number[]][] = [
-  ['image/jpeg', [0xff, 0xd8, 0xff]],
-  ['image/png', [0x89, 0x50, 0x4e, 0x47]],
-  ['image/gif', [0x47, 0x49, 0x46, 0x38]],
-  ['image/bmp', [0x42, 0x4d]],
-];
+const startsWith = (data: Buffer, magic: string) => data.subarray(0, magic.length).toString('latin1') === magic;
+// DIB header sizes a BMP can carry (BITMAPCOREHEADER … BITMAPV5HEADER).
+const BMP_DIB_SIZES = [12, 40, 52, 56, 64, 108, 124];
 
-/** The image type named by the first bytes, or null (BR-MOD-06). */
+/**
+ * The image type named by the first bytes, or null (BR-MOD-06). The whole magic is checked, not
+ * its first bytes: a text file starting with "BM" is not a bitmap. A BMP must have the 14-byte
+ * file header (reserved fields 0) and a known DIB header size.
+ */
 export function sniffImage(data: Buffer): string | null {
-  return SIGNATURES.find(([, magic]) => magic.every((b, i) => data[i] === b))?.[0] ?? null;
+  if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return 'image/jpeg';
+  if (startsWith(data, '\x89PNG\r\n\x1a\n')) return 'image/png';
+  if (startsWith(data, 'GIF87a') || startsWith(data, 'GIF89a')) return 'image/gif';
+  if (startsWith(data, 'BM') && data.length >= 26 && data.readUInt32LE(6) === 0 && BMP_DIB_SIZES.includes(data.readUInt32LE(14)))
+    return 'image/bmp';
+  return null;
 }
 
 const BAD_TYPE = 'Tipo de ficheiro não suportado. Use JPEG, PNG, GIF ou BMP.';

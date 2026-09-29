@@ -61,12 +61,39 @@ function withDateOrder(store: CrudStore): CrudStore {
   };
 }
 
+/**
+ * A session copies the role and the validity dates at login and never re-reads them, so a
+ * demotion, an expiry date, a new password or a delete would apply only when the session ends
+ * (up to 8 h). Ending the user's sessions after the write makes it apply at once.
+ */
+function withSessionRevocation(store: CrudStore, destroy: (username: string) => void): CrudStore {
+  const usernameOf = async (rid: string, ctx: Parameters<CrudStore['get']>[1]) => {
+    const username = (await store.get(rid, ctx))?.['USERNAME'];
+    return typeof username === 'string' ? username : undefined;
+  };
+  return {
+    ...store,
+    update: async (rid, orig, v, ctx) => {
+      const username = await usernameOf(rid, ctx);
+      const row = await store.update(rid, orig, v, ctx);
+      if (username) destroy(username);
+      return row;
+    },
+    remove: async (rid, orig, ctx) => {
+      const username = await usernameOf(rid, ctx);
+      await store.remove(rid, orig, ctx);
+      if (username) destroy(username);
+    },
+  };
+}
+
 export function registerUtilizadoresRoutes(
   app: FastifyInstance,
-  deps: { store: CrudStore; ambiente: string },
+  deps: { store: CrudStore; ambiente: string; destroySessions?: (username: string) => void },
 ): void {
+  const guarded = withDateOrder(deps.store);
   crudRoutes(app, utilizadores, {
-    store: withDateOrder(deps.store),
+    store: deps.destroySessions ? withSessionRevocation(guarded, deps.destroySessions) : guarded,
     hooks: utilizadoresHooks(deps.ambiente),
   });
 }

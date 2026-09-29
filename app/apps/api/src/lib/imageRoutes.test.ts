@@ -11,7 +11,8 @@ import { imageRoutes, oracleImageStore, sniffImage, type ImageStore } from './im
 const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');
 const JPEG = Buffer.from('ffd8ffe000104a464946', 'hex');
 const GIF = Buffer.from('474946383961010001', 'hex');
-const BMP = Buffer.from('424d1e000000000000', 'hex');
+// BITMAPFILEHEADER (14 bytes: 'BM', size, 0, 0, data offset) + BITMAPINFOHEADER size 40
+const BMP = Buffer.from('424d1e0000000000000036000000280000000100000001000000', 'hex');
 
 function multipartBody(
   parts: { name: string; filename?: string; type?: string; data: Buffer | string }[],
@@ -68,7 +69,17 @@ describe('sniffImage', () => {
     expect(sniffImage(GIF)).toBe('image/gif');
     expect(sniffImage(BMP)).toBe('image/bmp');
     expect(sniffImage(Buffer.from('<svg onload=alert(1)>'))).toBeNull();
+    expect(sniffImage(Buffer.from('GIF87a-anything'))).toBe('image/gif');
     expect(sniffImage(Buffer.alloc(0))).toBeNull();
+  });
+});
+
+describe('sniffImage — the whole magic, not the first two bytes', () => {
+  it('refuses text that merely starts like an image', () => {
+    expect(sniffImage(Buffer.from('BM is a text file, not a bitmap at all'))).toBeNull();
+    expect(sniffImage(Buffer.from('GIF is a text file'))).toBeNull();
+    expect(sniffImage(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x00]))).toBeNull(); // PNG prefix, wrong rest
+    expect(sniffImage(BMP.subarray(0, 20))).toBeNull(); // header cut short
   });
 });
 
