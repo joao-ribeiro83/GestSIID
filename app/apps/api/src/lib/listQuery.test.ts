@@ -49,7 +49,7 @@ describe('buildListQuery — SELECT', () => {
     const { list } = build({ page: '3', size: '25' });
     expect(list.sql).toBe(
       'SELECT ID, DOMINIO_ID, NOME, TIPO, TO_CHAR(DATA_INICIO,\'YYYY-MM-DD"T"HH24:MI:SS\') AS DATA_INICIO, OBS, ' +
-        'ROWIDTOCHAR(ROWID) AS "_rid" FROM CFG_IMPRESSORAS ORDER BY NOME ASC, ID ASC ' +
+        'CAST(ROWID AS VARCHAR2(4000)) AS "_rid" FROM CFG_IMPRESSORAS ORDER BY NOME ASC, ID ASC ' +
         'OFFSET :skip ROWS FETCH NEXT :take ROWS ONLY',
     );
     expect(list.binds).toEqual({ skip: 50, take: 25 });
@@ -87,7 +87,7 @@ describe('buildListQuery — write-only columns', () => {
   it('never selects them, so no list or get can return the value', () => {
     const sql = buildListQuery(users, parseListQuery({})).list.sql;
     expect(sql).not.toContain('PASSWORD');
-    expect(selectList(users)).toBe('USERNAME, ROWIDTOCHAR(ROWID) AS "_rid"');
+    expect(selectList(users)).toBe('USERNAME, CAST(ROWID AS VARCHAR2(4000)) AS "_rid"');
   });
 
   it('a filter or a sort on them is a 400, not an oracle for the stored value', () => {
@@ -95,6 +95,24 @@ describe('buildListQuery — write-only columns', () => {
       validationError(() => buildListQuery(users, parseListQuery({ 'f[PASSWORD]': 'x' }))).fields,
     ).toBeDefined();
     validationError(() => buildListQuery(users, parseListQuery({ sort: 'PASSWORD:asc' })));
+  });
+});
+
+describe('buildListQuery — expr columns', () => {
+  const seccoes = defineResource({
+    name: 'seccoes',
+    source: 'DOC_SECCOES_DOCUMENTO',
+    columns: {
+      ALINEA: { type: 'number', label: 'Alínea', sort: true },
+      TIPO_IMAGEM: { type: 'code', label: 'Tipo', expr: "DECODE(X, 1, 'PNG')" },
+    },
+    defaultSort: [{ column: 'ALINEA', direction: 'asc' }],
+    tiebreak: 'ALINEA',
+    roles: { read: ['ADM'], write: [] },
+  });
+
+  it('selects the expression under the column name', () => {
+    expect(selectList(seccoes)).toBe(`ALINEA, (DECODE(X, 1, 'PNG')) AS TIPO_IMAGEM`);
   });
 });
 
@@ -238,6 +256,11 @@ describe('rid encoding', () => {
   it('makes a ROWID URL-safe and back', () => {
     const rowid = 'AAAR3sAAEAAAACXAAA+/';
     expect(encodeRid(rowid)).toBe('AAAR3sAAEAAAACXAAA-_');
+    expect(decodeRid(encodeRid(rowid))).toBe(rowid);
+  });
+
+  it('keeps the logical ROWID of an index-organized table (DOC_MODELOS_DOCUMENTO)', () => {
+    const rowid = '*BAnABiQFRDEuQTECwQIHeG8BDQEBAf4+';
     expect(decodeRid(encodeRid(rowid))).toBe(rowid);
   });
 

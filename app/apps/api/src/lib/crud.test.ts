@@ -278,14 +278,32 @@ describe('oracleStore — SQL', () => {
       ctx,
     );
     expect(calls[0]?.sql).toContain(
-      'FROM CFG_IMPRESSORAS WHERE ROWID = CHARTOROWID(:rid) AND (NOME = :__orig_0',
+      'FROM CFG_IMPRESSORAS WHERE ROWID = :rid AND (NOME = :__orig_0',
     );
     expect(calls[0]?.sql).toContain('TO_CHAR(DATA_INICIO,\'YYYY-MM-DD"T"HH24:MI:SS\') = :__orig_1');
     expect(calls[0]?.sql).toContain('FOR UPDATE NOWAIT');
     expect(calls[0]?.binds).toMatchObject({ rid: 'AAAR3sAAEAAAACXAA+/' });
     expect(calls[1]?.sql).toBe(
-      'UPDATE CFG_IMPRESSORAS SET NOME = :v0 WHERE ROWID = CHARTOROWID(:rid)',
+      'UPDATE CFG_IMPRESSORAS SET NOME = :v0 WHERE ROWID = :rid RETURNING ROWID INTO :nrid',
     );
+  });
+
+  it('insert has room for the long logical ROWID of an index-organized table', async () => {
+    const { pool, calls } = fakePool([{ outBinds: { rid: ['*BAnABgwFRDEuQTH+'] } }, { rows: [{ ID: 3 }] }]);
+    await oracleStore(pool, res, 1000).insert({ NOME: 'x' }, {}, ctx);
+    expect((calls[0]?.binds['rid'] as { maxSize: number }).maxSize).toBe(4000);
+  });
+
+  it('update re-reads the row by the ROWID the UPDATE returns (an IOT key change moves the row)', async () => {
+    const { pool, calls } = fakePool([
+      { rows: [{ 1: 1 }] },
+      { rowsAffected: 1, outBinds: { nrid: ['*BAnNOVO+'] } },
+      { rows: [{ ID: 1, _rid: '*BAnNOVO+' }] },
+    ]);
+    const row = await oracleStore(pool, res, 1000).update('*BAnABgwFRDEuQTVELHO-', {}, { NOME: 'HP 2' }, ctx);
+    expect(calls[1]?.sql).toBe('UPDATE CFG_IMPRESSORAS SET NOME = :v0 WHERE ROWID = :rid RETURNING ROWID INTO :nrid');
+    expect(calls[2]?.binds).toEqual({ rid: '*BAnNOVO+' });
+    expect(row['_rid']).toBe('*BAnNOVO-');
   });
 
   it('a lock that finds no row rolls back with 409 REGISTO_ALTERADO', async () => {
@@ -335,7 +353,7 @@ describe('oracleStore — SQL', () => {
       ctx,
     );
     expect(calls[1]?.sql).toBe(
-      'UPDATE CFG_UTILIZADORES SET PASSWORD = RAWTOHEX(USER_SECURITY.ENCRYPT(:v0)) WHERE ROWID = CHARTOROWID(:rid)',
+      'UPDATE CFG_UTILIZADORES SET PASSWORD = RAWTOHEX(USER_SECURITY.ENCRYPT(:v0)) WHERE ROWID = :rid RETURNING ROWID INTO :nrid',
     );
     expect(calls[1]?.binds).toMatchObject({ v0: 'nova' });
   });
