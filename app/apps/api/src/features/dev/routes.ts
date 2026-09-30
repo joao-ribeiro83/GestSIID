@@ -35,6 +35,8 @@ import {
   VARIAVEIS_DOMINIOS,
 } from '@gestsiid/shared';
 import { auditHooks, crudRoutes, type CrudHooks, type CrudStore, type Row } from '../../lib/crud.ts';
+import { memoryDocumentosRepo } from '../documentos/repo.ts';
+import { registerDocumentosRoutes } from '../documentos/routes.ts';
 import { registerDominiosCrudRoutes } from '../dominios/routes.ts';
 import { registerImpressorasAssociadasRoutes } from '../impressoras-associadas/routes.ts';
 import { memoryModelosRepo, type ModelosStores } from '../modelos/repo.ts';
@@ -49,6 +51,7 @@ import { registerTiposMidiaRoutes } from '../tipos-midia/routes.ts';
 import { registerUnidadesMedidaRoutes } from '../unidades-medida/routes.ts';
 import { registerUtilizadoresRoutes } from '../utilizadores/routes.ts';
 import { registerVariaveisRoutes } from '../variaveis/routes.ts';
+import { documentosSeed } from './documentosSeed.ts';
 import { memoryImageStore } from './memoryImageStore.ts';
 import { memoryStore } from './memoryStore.ts';
 
@@ -607,6 +610,12 @@ export async function registerDevRoutes(
   });
   // Step 6.1: Modelos (Configuração › Modelos). Clonar and the omissão versioning write through
   // the same stores the grid reads.
+  // Gestão › Documentos (Step 7.1). No FileServerSIID here: the PDF route answers 502.
+  registerDocumentosRoutes(app, {
+    repo: memoryDocumentosRepo(documentosSeed()),
+    fileServer: { baseUrl: 'http://127.0.0.1:9/FileServerSIID/restapi/FileServer/pdf/T', timeoutMs: 1000 },
+  });
+
   const m = seedModelos();
   const modelosStores: ModelosStores = {
     modelos: memoryStore(modelos, m.modelos),

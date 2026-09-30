@@ -242,6 +242,19 @@ describe('oracleStore — SQL', () => {
     expect(out).toEqual({ rows: [{ ID: 1, _rid: 'AAAR3sAAEAAAACXAA-_' }], total: 1 });
   });
 
+  it('list applies the per-role sort list of the session role (no SQL runs on a 400)', async () => {
+    const { pool, calls } = fakePool([]);
+    const limited = defineResource({ ...res, sortRoles: { USER: ['ID'] } });
+    await expect(
+      oracleStore(pool, limited, 1000).list(
+        { filters: {}, sort: [{ column: 'NOME', direction: 'asc' }], page: 1, size: 50 },
+        {},
+        { user: { username: 'U', role: 'USER' } },
+      ),
+    ).rejects.toMatchObject({ statusCode: 400, code: 'VALIDACAO' });
+    expect(calls).toEqual([]);
+  });
+
   it('insert binds values, converts dates, inlines SYSDATE and returns the ROWID', async () => {
     const { pool, calls } = fakePool([
       { outBinds: { rid: ['AAAR3sAAEAAAACXAAA'] } },

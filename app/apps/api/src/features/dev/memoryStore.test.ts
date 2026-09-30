@@ -146,3 +146,37 @@ describe('memoryStore', () => {
     });
   });
 });
+
+describe('memoryStore — sort aliases and per-role sort list (same rules as the SQL)', () => {
+  const docs = defineResource({
+    name: 'docs',
+    source: 'DOCS',
+    columns: {
+      ID: { type: 'number', label: 'Id', sort: true },
+      LOTE_ID: { type: 'number', label: 'Lote' },
+      LOTE_ORDEM: { type: 'number', label: 'Ordem' },
+    },
+    sortAliases: { LOTE: ['LOTE_ID', 'LOTE_ORDEM'] },
+    sortRoles: { USER: ['ID'] },
+    defaultSort: [{ column: 'ID', direction: 'desc' }],
+    tiebreak: 'ID',
+    roles: { read: ['ADM', 'USER'], write: [] },
+  });
+  const store = memoryStore(docs, [
+    { ID: 1, LOTE_ID: 1, LOTE_ORDEM: 2 },
+    { ID: 2, LOTE_ID: 2, LOTE_ORDEM: 1 },
+    { ID: 3, LOTE_ID: 1, LOTE_ORDEM: 1 },
+  ]);
+
+  it('sorts by every column of an alias', async () => {
+    const { rows } = await store.list({ ...q, sort: [{ column: 'LOTE', direction: 'asc' }] }, {}, ctx);
+    expect(rows.map((r) => r['ID'])).toEqual([3, 1, 2]);
+  });
+
+  it('USER sorting by a key outside its list is 400 VALIDACAO', async () => {
+    const user = { user: { username: 'U', role: 'USER' as const } };
+    await expect(
+      store.list({ ...q, sort: [{ column: 'LOTE', direction: 'asc' }] }, {}, user),
+    ).rejects.toMatchObject({ statusCode: 400, code: 'VALIDACAO' });
+  });
+});

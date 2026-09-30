@@ -40,6 +40,11 @@ export interface Resource<C extends string = string> {
   exclude?: { column: C; values: readonly string[] };
   /** Named server-side WHERE fragments picked with `?preset=<name>` (§4.1); no preset = none. */
   presets?: Record<string, string>;
+  /** Sort keys that are not columns: `sort=KEY:dir` → each term in `dir` (a form that sorted on
+   * two columns, or on an expression). Terms are column names or fixed SQL, never request text. */
+  sortAliases?: Record<string, readonly string[]>;
+  /** Roles limited to these sort keys (Documentos: USER sorts by `ID` only, D-08). */
+  sortRoles?: Partial<Record<Role, readonly string[]>>;
   defaultSort: readonly ListQuerySort[];
   /** Unique column appended to every ORDER BY so paging is stable. */
   tiebreak: C;

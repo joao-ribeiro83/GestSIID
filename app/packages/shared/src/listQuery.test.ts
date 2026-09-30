@@ -39,6 +39,35 @@ describe('parseListQuery', () => {
     ]);
   });
 
+  it('parses the Documentos search parameters: param[NOME] (repeatable), paramModelo, grupo', () => {
+    const result = parseListQuery({
+      'param[P_NMRECIBO]': '12%',
+      'param[P_ANO]': ['2025', '2026'],
+      paramModelo: 'R3%',
+      grupo: '77',
+    });
+    expect(result.params).toEqual([
+      { nome: 'P_NMRECIBO', valor: '12%' },
+      { nome: 'P_ANO', valor: '2025' },
+      { nome: 'P_ANO', valor: '2026' },
+    ]);
+    expect(result.paramModelo).toBe('R3%');
+    expect(result.grupo).toBe('77');
+    expect(result.filters).toEqual({});
+  });
+
+  it('leaves params, paramModelo and grupo out when absent', () => {
+    const result = parseListQuery({ 'f[ID]': '1' });
+    expect(result).not.toHaveProperty('params');
+    expect(result).not.toHaveProperty('paramModelo');
+    expect(result).not.toHaveProperty('grupo');
+  });
+
+  it('rejects a mangled param key', () => {
+    expect(() => parseListQuery({ 'param[]': 'x' })).toThrow();
+    expect(() => parseListQuery({ 'param[A][B]': 'x' })).toThrow();
+  });
+
   it('rejects an unknown query shape: bad operator', () => {
     expect(() => parseListQuery({ 'f[NOME][bogus]': 'x' })).toThrow();
   });
@@ -90,6 +119,9 @@ describe('toQueryString', () => {
       'f[TIPO][in]': ['A', 'B'],
       'f[DATA][from]': '2026-01-01',
       'f[OBS][null]': '1',
+      'param[P_ANO]': ['2025', '2026'],
+      paramModelo: 'R3%',
+      grupo: '9',
       sort: 'NOME:asc,ID:desc',
       page: '3',
       size: '25',

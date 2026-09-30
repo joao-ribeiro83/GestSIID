@@ -98,7 +98,7 @@ export function sessionCtx(request: FastifyRequest, allowed: readonly Role[]): C
   return { user };
 }
 
-function listQueryOf(raw: unknown): ListQuery {
+export function listQueryOf(raw: unknown): ListQuery {
   try {
     return parseListQuery(raw);
   } catch (e) {
@@ -224,7 +224,7 @@ export function oracleStore(pool: DbPool, resource: Resource, callTimeoutMs: num
     list: (q, parent, ctx) =>
       mapped(() =>
         withConnection(pool, ctx.user, `${resource.name}.list`, callTimeoutMs, async (conn) => {
-          const { list, count } = buildListQuery(resource, q, { parent });
+          const { list, count } = buildListQuery(resource, q, { parent, role: ctx.user.role });
           const rows =
             (await conn.execute<Row>(list.sql, list.binds as oracledb.BindParameters)).rows ?? [];
           const n = (
