@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { defineResource } from '@gestsiid/shared';
 import {
   dirtyReducer,
+  lockOrig,
   planSave,
   runSave,
   validateOverlay,
@@ -130,5 +131,22 @@ describe('runSave', () => {
       (action) => events.push(action),
     );
     expect(events.at(-1)).toMatchObject({ type: 'status', rid: 'a', status: 'conflict' });
+  });
+});
+
+describe('lockOrig', () => {
+  it('drops _rid and computed columns, which the API refuses in orig', () => {
+    const r = defineResource({
+      name: 'y',
+      source: 'Y',
+      columns: {
+        ID: { type: 'number', label: 'Id' },
+        TIPO: { type: 'code', label: 'Tipo', expr: "'X'" },
+      },
+      defaultSort: [],
+      tiebreak: 'ID',
+      roles: { read: ['ADM'], write: ['ADM'] },
+    });
+    expect(lockOrig(r, { _rid: 'a', ID: 1, TIPO: 'PNG' })).toEqual({ ID: 1 });
   });
 });

@@ -8,6 +8,7 @@ import {
   modelosParametrosOmissao,
   modelosSeccoes,
   MODELOS_DOMINIOS,
+  pagedResult,
 } from '@gestsiid/shared';
 import { AppError } from '../../db/errors.ts';
 import { auditHooks, crudRoutes, sessionCtx, type CrudStore } from '../../lib/crud.ts';
@@ -24,9 +25,9 @@ import { APAGAR_MESTRE, erroIntervalo, INICIO_SUPERIOR } from './rules.ts';
  *   POST /api/modelos/:MODELO_ID/acoes/clonar                              Clonar Modelo (BR-MOD-03)
  *   POST /api/modelos/:MODELO_ID/seccoes/:TIPOSEC_ID/:ALINEA/acoes/clonar  Clonar alínea (BR-MOD-05)
  *   PUT|GET|DELETE /api/modelos/:MODELO_ID/seccoes/:TIPOSEC_ID/:ALINEA/imagem  section image (BR-MOD-06, §6)
- *   GET  /api/modelos/:MODELO_ID/parametros-report                         BR-MOD-08
+ *   GET  /api/modelos/:MODELO_ID/parametros-report                         BR-MOD-08 (paged envelope, _rid = N_PARAMETRO)
  *   PUT  /api/modelos/:MODELO_ID/parametros-report/:N_PARAMETRO/omissao    BR-MOD-09 versioning
- *   GET  /api/dominios/{MODELOS_GENERICOS,TIPOS_CONTEUDO,CONTEXTOS_APR}/valores   select feeds (D-28)
+ *   GET  /api/dominios/{MODELOS_GENERICOS,TIPOS_CONTEUDO,CONTEXTOS_APR,FORMA_CONTROLO}/valores   select feeds (D-28)
  */
 
 const ADM = modelos.roles.write;
@@ -199,7 +200,9 @@ export function registerModelosRoutes(
   app.get(`${M}/parametros-report`, async (request) => {
     const { user } = sessionCtx(request, ADM);
     const { MODELO_ID } = modeloParams.parse(request.params);
-    return { rows: await repo.parametrosReport(user, MODELO_ID) };
+    const rows = await repo.parametrosReport(user, MODELO_ID);
+    // One page, keyed like a grid row, so the SPA's DataBlock reads it as any list.
+    return pagedResult(rows.map((r) => ({ ...r, _rid: String(r.N_PARAMETRO) })), rows.length, 1, 1000);
   });
 
   app.put(`${M}/parametros-report/:N_PARAMETRO/omissao`, async (request) => {
@@ -243,6 +246,12 @@ export function registerModelosRoutes(
       ctx,
     );
     return { rows: rows.map((r) => ({ CHAVE: r['ID'], DESIGNACAO: r['DESCRICAO'] })) };
+  });
+
+  // The FORMA_CONTROLO_RF list item: its elements are their own labels.
+  app.get(`/api/dominios/${MODELOS_DOMINIOS.formaControlo}/valores`, async (request) => {
+    sessionCtx(request, ADM);
+    return { rows: ['C', 'V', 'U', 'UV'].map((v) => ({ CHAVE: v, DESIGNACAO: v })) };
   });
 
   const opcoes = (lista: ListaOpcoes) =>

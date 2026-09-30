@@ -124,6 +124,13 @@ export function planSave(o: Overlay): SaveStep[] {
   ];
 }
 
+/** A row as the API's `origSchema` takes it: no `_rid`, no computed (`expr`) display columns. */
+export function lockOrig(resource: Resource, row: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(row).filter(([c]) => c !== '_rid' && !resource.columns[c]?.expr),
+  );
+}
+
 /** Client-side check before anything is sent (§3.10 step 1), with the resource's own schemas. */
 export function validateOverlay(o: Overlay, resource: Resource): Record<string, RowError> {
   const insert = valuesSchema(resource, 'insert');

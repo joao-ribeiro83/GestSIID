@@ -265,6 +265,7 @@ describe('access (every route is ADM only)', () => {
     ['GET', '/api/dominios/MODELOS_GENERICOS/valores'],
     ['GET', '/api/dominios/TIPOS_CONTEUDO/valores'],
     ['GET', '/api/dominios/CONTEXTOS_APR/valores'],
+    ['GET', '/api/dominios/FORMA_CONTROLO/valores'],
   ];
 
   it.each(routes)('USER gets 403 SEM_PERMISSAO on %s %s', async (method, url, payload) => {
@@ -666,6 +667,8 @@ describe('GET /api/modelos/:MODELO_ID/parametros-report (BR-MOD-08)', () => {
     const r = await appWith().inject({ url: '/api/modelos/M1/parametros-report' });
     expect(r.statusCode).toBe(200);
     const rows = r.json().rows as Record<string, unknown>[];
+    expect(r.json()).toMatchObject({ total: 3, totalCapped: false, page: 1 }); // the grid's envelope
+    expect(rows.map((p) => p['_rid'])).toEqual(['1', '2', '3']);
     expect(rows).toHaveLength(3);
     expect(rows).toMatchObject([
       {
@@ -698,10 +701,10 @@ describe('GET /api/modelos/:MODELO_ID/parametros-report (BR-MOD-08)', () => {
     ]);
   });
 
-  it.each(['M2', 'NOPE'])('a model without a report (%s) → { rows: [] }', async (id) => {
+  it.each(['M2', 'NOPE'])('a model without a report (%s) → no rows', async (id) => {
     const r = await appWith().inject({ url: `/api/modelos/${id}/parametros-report` });
     expect(r.statusCode).toBe(200);
-    expect(r.json()).toEqual({ rows: [] });
+    expect(r.json()).toMatchObject({ rows: [], total: 0 });
   });
 });
 
@@ -1004,6 +1007,12 @@ describe('select feeds', () => {
         { CHAVE: 'GEN1', DESIGNACAO: 'Genérico B' },
       ],
     });
+  });
+
+  it('FORMA_CONTROLO: the list item C, V, U, UV, each its own label', async () => {
+    const r = await appWith().inject({ url: '/api/dominios/FORMA_CONTROLO/valores' });
+    expect(r.statusCode).toBe(200);
+    expect(r.json().rows).toEqual(['C', 'V', 'U', 'UV'].map((v) => ({ CHAVE: v, DESIGNACAO: v })));
   });
 
   it('TIPOS_CONTEUDO without a section: every type by ID, preSelected null', async () => {

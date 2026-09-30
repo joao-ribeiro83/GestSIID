@@ -56,6 +56,7 @@ import { CellEditor, useDominio, type CommitMove } from './CellEditor';
 import { DirtyBar } from './DirtyBar';
 import {
   dirtyReducer,
+  lockOrig,
   planSave,
   runSave,
   validateOverlay,
@@ -139,10 +140,18 @@ export interface DataBlockProps<Row extends GridRow = GridRow> {
   toolbar?: (ctx: { selection: Selection; current: Row | null; refetch: () => void }) => ReactNode;
   onCurrentRowChange?: (row: Row | null) => void;
   beforeCurrentRowChange?: () => Promise<boolean>;
+  /** #46 when the current row changes while this block has unsaved rows (a Forms block whose
+   * POST-RECORD called ASK_COMMIT), after `beforeCurrentRowChange`. */
+  askOnRowLeave?: boolean;
   onSelectionChange?: (s: Selection) => void;
   handleRef?: Ref<DataBlockHandle>;
   /** Panel editing only: extra content under the fields (`null` row = a new, unsaved one). */
   panelExtra?: (row: Row | null) => ReactNode;
+  /** Text of the clear-filters button (a form's own "Todos" button). */
+  clearFiltersLabel?: string;
+  /** Writes a planned row change itself, for a block whose rows do not save through the plain
+   * `PUT|POST|DELETE endpoint` routes (a named action per row). Reject with an ApiError. */
+  saveStep?: (step: SaveStep) => Promise<unknown>;
   /** Named server-side filter (`resource.presets`); a change goes back to page 1. */
   preset?: string;
   emptyText?: string;
@@ -255,18 +264,20 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     }
     setSaving(true);
     const send = (step: SaveStep) => {
+      if (props.saveStep) return props.saveStep(step);
       const quiet = { quiet: true };
       if (step.kind === 'delete') {
         return apiFetch(
           `${endpoint}/${step.rid}`,
-          { method: 'DELETE', body: JSON.stringify({ orig: step.orig }) },
+          { method: 'DELETE', body: JSON.stringify({ orig: lockOrig(resource, step.orig) }) },
           quiet,
         );
       }
       if (step.kind === 'update') {
+        const orig = lockOrig(resource, step.orig);
         return apiFetch(
           `${endpoint}/${step.rid}`,
-          { method: 'PUT', body: JSON.stringify({ orig: step.orig, values: step.values }) },
+          { method: 'PUT', body: JSON.stringify({ orig, values: step.values }) },
           quiet,
         );
       }
@@ -287,7 +298,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     setBarError(pt.db.erroNoRegisto(positionOf(result.failed.rid), result.failed.message));
     return false;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- positionOf only reads `rows`
-  }, [overlay, resource, endpoint, queryClient, rows]);
+  }, [overlay, resource, endpoint, queryClient, rows, props.saveStep]);
 
   const discard = useCallback(() => {
     dispatch({ type: 'discardAll' });
@@ -361,12 +372,12 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
   }, [currentSig]);
 
   const moveTo = async (rid: string | null, col = current.col) => {
-    if (
-      rid !== current.rid &&
-      props.beforeCurrentRowChange &&
-      !(await props.beforeCurrentRowChange())
-    )
-      return;
+    if (rid !== current.rid) {
+      // Read before any await: the row `insertRow` has just added is not a change being left.
+      const askSelf = props.askOnRowLeave && dirtyRef.current;
+      if (props.beforeCurrentRowChange && !(await props.beforeCurrentRowChange())) return;
+      if (askSelf && !(await confirmLeave())) return;
+    }
     setCurrent({ rid, col: Math.max(0, Math.min(col, cols.length - 1)) });
   };
 
@@ -869,7 +880,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
               onClick={() => void clearFilters()}
               disabled={!filtersActive && !filtersPending}
             >
-              {pt.db.limparFiltros}
+              {props.clearFiltersLabel ?? pt.db.limparFiltros}
             </Button>
           </>
         )}

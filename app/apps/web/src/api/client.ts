@@ -46,6 +46,12 @@ const apiBase = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/api`;
 /** Absolute-path URL of an API path, for `<img src>` and the like (fetch calls use `apiFetch`). */
 export const apiUrl = (path: string): string => `${apiBase}${path}`;
 
+function sessionExpired(): void {
+  toast.error(pt.sessaoExpirada);
+  queryClient.clear();
+  onSessionExpired?.();
+}
+
 /**
  * `credentials: 'same-origin'` sends the session cookie; every non-GET request carries the CSRF
  * token. Error bodies are toasted here except 401 (handled by route guards / re-login, UI-27) and
@@ -80,9 +86,7 @@ export async function apiFetch<T>(
     // the normal "not logged in yet" case, handled quietly by the router's beforeLoad guard.
     // Every other 401 is a session that expired mid-use (UI-27).
     if (res.status === 401 && path !== '/auth/login' && path !== '/auth/me') {
-      toast.error(pt.sessaoExpirada);
-      queryClient.clear();
-      onSessionExpired?.();
+      sessionExpired();
     } else if (res.status !== 401 && !opts.quiet) {
       toast.error(error.message);
     }
@@ -90,4 +94,37 @@ export async function apiFetch<T>(
   }
 
   return body as T;
+}
+
+/**
+ * A multipart upload that reports progress (0..1), which `fetch` cannot do. Same cookie, CSRF and
+ * 401 handling as `apiFetch`; other errors are not toasted: the caller shows them.
+ */
+export function apiUpload(
+  path: string,
+  body: FormData,
+  onProgress: (fraction: number) => void,
+  method = 'PUT',
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, `${apiBase}${path}`);
+    if (csrfToken) xhr.setRequestHeader('x-csrf-token', csrfToken);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(e.loaded / e.total);
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve();
+      let parsed: ApiErrorBody | null = null;
+      try {
+        parsed = JSON.parse(xhr.responseText) as ApiErrorBody;
+      } catch {
+        // not JSON (a proxy's HTML page): the generic message
+      }
+      if (xhr.status === 401) sessionExpired();
+      reject(new ApiError(xhr.status, parsed));
+    };
+    xhr.onerror = () => reject(new ApiError(0, null));
+    xhr.send(body);
+  });
 }
