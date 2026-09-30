@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { useDominio } from './CellEditor';
 import type { ColumnView } from './DataBlock';
-import type { GridRow } from './dirty';
+import { lockOrig, type GridRow } from './dirty';
 import { formatCell, fromInput, toInput } from './format';
 
 type FormValues = Record<string, string>;
@@ -96,10 +96,9 @@ export function PanelForm({ resource, columns, endpoint, row, defaults, extra, t
           { quiet: true },
         );
       } else {
-        const { _rid, ...orig } = row;
         await apiFetch(
-          `${endpoint}/${_rid}`,
-          { method: 'PUT', body: JSON.stringify({ orig, values }) },
+          `${endpoint}/${row._rid}`,
+          { method: 'PUT', body: JSON.stringify({ orig: lockOrig(resource, row), values }) },
           { quiet: true },
         );
       }

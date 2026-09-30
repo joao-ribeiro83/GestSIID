@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { Tabs } from 'radix-ui';
@@ -15,12 +15,20 @@ import { apiFetch } from '@/api/client';
 import { useDominio } from '@/components/datablock/CellEditor';
 import { DataBlock, type ColumnView } from '@/components/datablock/DataBlock';
 import type { GridRow } from '@/components/datablock/dirty';
-import { dmyToIso, isoToDmy } from '@/components/datablock/qbe';
 import { Picker } from '@/components/Picker';
 import { useConfirm } from '@/components/shell/confirm-dialog-provider';
 import { TransferList } from '@/components/TransferList';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import {
+  dataIso,
+  DateField,
+  DialogForm,
+  dmy,
+  DominioSelect,
+  inputCls,
+  ReadField,
+} from '@/components/DialogForm';
 
 /**
  * Configuração › Permissões (UI_SPEC §4.4, MASTER_PLAN Step 5.4): `FD_PERMISSOES_SIID`.
@@ -70,19 +78,7 @@ const FIM_BULK = '2200-12-31T00:00:00';
 /** `01/01/1980`: DATA_FIM of a row annulled from the grid (FIM_ANULADA in rules.ts). */
 const FIM_ANULADA = '1980-01-01T00:00:00';
 const TODOS: ListQuery = { filters: {}, sort: [], page: 1, size: 500 };
-const inputCls =
-  'h-8 rounded-md border border-input bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring';
-
-const dmy = (iso: string | null) => (iso ? isoToDmy(iso) : '');
-const errorText = (e: unknown) => (e instanceof Error ? e.message : 'Erro'); // ApiError, or datas()
 const byKey = <T,>(k: keyof T) => (a: T, b: T) => (a[k] < b[k] ? -1 : a[k] > b[k] ? 1 : 0);
-
-/** DD-MM-AAAA text → ISO datetime; '' → null; unreadable → false. */
-function dataIso(text: string): string | null | false {
-  if (text.trim() === '') return null;
-  const iso = dmyToIso(text);
-  return iso ? `${iso}T00:00:00` : false;
-}
 
 function hoje(): string {
   const d = new Date();
@@ -329,57 +325,6 @@ interface FormProps {
   onDone: () => void;
 }
 
-/** Dialog body as a form: Enter submits, the server's rule message shows as a form alert. */
-function DialogForm({
-  title,
-  onCancel,
-  submit,
-  canSubmit = true,
-  children,
-}: {
-  title: string;
-  onCancel: () => void;
-  submit: () => Promise<void>;
-  canSubmit?: boolean;
-  children: ReactNode;
-}) {
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setError(null);
-    try {
-      await submit();
-    } catch (err) {
-      setError(errorText(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-  return (
-    <form onSubmit={(e) => void onSubmit(e)} className="flex flex-col gap-4">
-      <DialogHeader>
-        <DialogTitle>{title}</DialogTitle>
-      </DialogHeader>
-      {error && (
-        <p role="alert" className="rounded-md border border-destructive/40 bg-status-danger-bg px-3 py-2 text-sm text-danger-text">
-          {error}
-        </p>
-      )}
-      <div className="flex flex-col gap-3">{children}</div>
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          {pt.cancelar}
-        </Button>
-        <Button type="submit" disabled={!canSubmit || saving}>
-          {pt.ok}
-        </Button>
-      </DialogFooter>
-    </form>
-  );
-}
-
 function PickField({ label, value, onOpen }: { label: string; value: string | null; onOpen: () => void }) {
   return (
     <div className="grid grid-cols-[8rem_1fr] items-center gap-2 text-sm">
@@ -394,51 +339,6 @@ function PickField({ label, value, onOpen }: { label: string; value: string | nu
         {value ?? <span className="font-sans text-muted-foreground">Escolher…</span>}
       </Button>
     </div>
-  );
-}
-
-function ReadField({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid grid-cols-[8rem_1fr] items-center gap-2 text-sm">
-      <span>{label}</span>
-      <output aria-label={label} className="flex h-8 items-center rounded-md bg-muted px-2">
-        {value}
-      </output>
-    </div>
-  );
-}
-
-function DateField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label className="grid grid-cols-[8rem_1fr] items-center gap-2 text-sm">
-      {label}
-      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="DD-MM-AAAA" className={inputCls} />
-    </label>
-  );
-}
-
-/** A CFG_VALORES_DOMINIO list: shows DESIGNACAO, keeps CHAVE; blank first (nothing chosen). */
-function DominioSelect({
-  dominioId,
-  value,
-  onChange,
-  className = inputCls,
-}: {
-  dominioId: string;
-  value: string;
-  onChange: (v: string) => void;
-  className?: string;
-}) {
-  const opcoes = useDominio(dominioId);
-  return (
-    <select value={value} onChange={(e) => onChange(e.target.value)} className={className}>
-      <option value="" />
-      {opcoes.data?.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
   );
 }
 

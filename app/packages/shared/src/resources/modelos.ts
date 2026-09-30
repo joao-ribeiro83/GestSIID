@@ -248,6 +248,34 @@ export const modelosCondicoes = defineResource({
 });
 
 /**
+ * Tab "Parâmetros" (block `SVR_PARAMETROS_REPORT`, read by `GET …/parametros-report`, BR-MOD-08):
+ * the report's parameters with the model's current default value. Not a table of its own: a row
+ * saves through `PUT …/parametros-report/:N_PARAMETRO/omissao` (BR-MOD-09), `_rid` = N_PARAMETRO.
+ * OBRIGATORIO / VALIDO / CHECK_UNIQUE are the form's read-only check boxes; DETALHES = `***` when
+ * the parameter has a history.
+ */
+export const modelosParametrosReport = defineResource({
+  name: 'modelos-parametros-report',
+  source: 'SVR_PARAMETROS_REPORT',
+  columns: {
+    N_PARAMETRO: { type: 'number', label: 'Nº Parâmetro' },
+    NOME: { type: 'text', label: 'Nome' },
+    NOME_CONSULTA: { type: 'text', label: 'Nome Consulta', edit: true, maxLength: 240 },
+    OBRIGATORIO: { type: 'code', label: 'Obrigatório' },
+    VALIDO: { type: 'code', label: 'Válido' },
+    CHECK_UNIQUE: { type: 'code', label: 'Unicidade' },
+    CONSULTA_ONLINE: { type: 'code', label: 'Consulta', edit: true, maxLength: 1 },
+    VALOR: { type: 'text', label: 'Valor por Omissão', edit: true, maxLength: 240 },
+    DATA_INICIO: { type: 'date', label: 'Inicio Vigência', edit: true },
+    DATA_FIM: { type: 'date', label: 'Fim Vigência', edit: true },
+    DETALHES: { type: 'code', label: 'Histórico' },
+  },
+  defaultSort: [{ column: 'N_PARAMETRO', direction: 'asc' }],
+  tiebreak: 'N_PARAMETRO',
+  roles: { read: ['ADM'], write: ['ADM'] },
+});
+
+/**
  * "Histórico" of a report parameter's default value (`DOC_PARAMETROS_OMISSAO`, PK MODELO_ID +
  * N_PARAMETRO + DATA_INICIO). Date rules BR-MOD-10 are checked by the API. The current value is
  * edited through `PUT …/parametros-report/:N_PARAMETRO/omissao` (BR-MOD-09 versioning).
@@ -291,10 +319,10 @@ const atributoCols = {
     maxLength: 10,
   },
   N_ATRIBUTO: { type: 'number', label: 'Nº Atributo', sort: true },
-  DESCRICAO: { type: 'text', label: 'Descricao', filter: ['like'] },
-  NOME_PARAMETRO: { type: 'text', label: 'Nome Parametro', filter: ['eq', 'like'], sort: true },
+  DESCRICAO: { type: 'text', label: 'Descrição', filter: ['like'] },
+  NOME_PARAMETRO: { type: 'text', label: 'Nome Parâmetro', filter: ['eq', 'like'], sort: true },
   ORDEM_PARAMETRO: { type: 'number', label: 'Ordem', sort: true },
-  VALOR_OMISSAO: { type: 'text', label: 'Valor Omissao' },
+  VALOR_OMISSAO: { type: 'text', label: 'Valor Omissão' },
   TIPO_PARAMETRO: { type: 'code', label: 'Tipo de Parâmetro', filter: ['eq'] },
   DATA_INICIO: { type: 'date', label: 'Data Inicio', filter: DATAS, sort: true },
   DATA_FIM: { type: 'date', label: 'Data Fim', filter: DATAS, sort: true },
@@ -344,7 +372,8 @@ export const modelosAtributosArquivo = defineResource({
  * Select feeds (`GET /api/dominios/:id/valores`). The first five are real domains
  * (`CFG_VALORES_DOMINIO`); the last three are pseudo-domain feeds of the modelos feature
  * (`GENERICOS` = REC_GENERICOS; `TIPOS_CONTEUDO` / `CONTEXTOS_APR` also return `preSelected`
- * for `?MODELO_ID=&TIPOSEC_ID=`, D-28).
+ * for `?MODELO_ID=&TIPOSEC_ID=`, D-28). `FORMA_CONTROLO` is the static list item of
+ * FORMA_CONTROLO_RF (C, V, U, UV), served the same way so the grid can show it as a select.
  */
 export const MODELOS_DOMINIOS = {
   modoExpedicao: 'MODO_EXPEDICAO',
@@ -355,4 +384,5 @@ export const MODELOS_DOMINIOS = {
   genericos: 'MODELOS_GENERICOS',
   tiposConteudo: 'TIPOS_CONTEUDO',
   contextosApr: 'CONTEXTOS_APR',
+  formaControlo: 'FORMA_CONTROLO',
 } as const;
