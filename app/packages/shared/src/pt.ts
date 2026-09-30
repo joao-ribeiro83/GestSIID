@@ -114,4 +114,47 @@ export const pt = {
   /** Example text-with-values function (§8). */
   naoImpressosAnulados: (ids: number[]): string =>
     `Os seguintes documentos não foram impressos por estarem anulados: ${ids.join(', ')}`,
+
+  /** FD_GESTAO_SIID batch operations (BUSINESS_RULES.md §3 #7–#25, Step 7.2). The `Não foram …`
+   * texts are the OUT alert headers; the API returns them as the `motivo` of each skipped id, so
+   * the SPA groups the ids under the same header the form showed. */
+  documentos: {
+    desejaImprimir: 'Deseja imprimir os documentos selecionados?',
+    desejaRegerar: 'Deseja regerar os documentos selecionados?',
+    desejaAnular: 'Deseja anular os documentos selecionados?',
+    desejaCancelar: 'Deseja cancelar os documentos selecionados?',
+    desejaReenviar: 'Deseja reenviar os documentos selecionados?',
+    desejaRearquivar: 'Deseja re-arquivar os documentos selecionados?',
+    desejaCancelarPedido: 'Deseja cancelar este pedido?',
+    inserirPassword: 'Insira a password para regerar o(s) documento(s) seleccionado(s):',
+    impressoraAssociada: 'Imprimir documentos para a impressora associada',
+    outraImpressora: 'Outra impressora:',
+    impressosAnulados:
+      'Não foram impressos os documentos com os seguintes spool_id, por se encontrarem anulados:',
+    segundaViaSemImpressao:
+      'Para imprimir 2ª Via é necessário que o documento já tenha sido impresso.',
+    regeradosAnulados:
+      'Não foram Regerados os documentos com os seguintes spool_id, por se encontrarem anulados:',
+    reenviadosNaoEdoc:
+      'Não foram Reenviados os documentos com os seguintes spool_id, por não serem documentos para o EDoc:',
+    reenviadosNaoEmail:
+      'Não foram Reenviados os documentos com os seguintes spool_id, por não serem documentos de Email:',
+    rearquivadosNaoArquivo:
+      'Não foram Re-Arquivados os documentos com os seguintes spool_id, por não serem documentos para ARQUIVO:',
+    suspenderSeleccionados: 'Suspender documentos seleccionados',
+    suspenderTodos: 'Suspender todos os documentos em espera',
+    retomarSeleccionados: 'Retomar documentos seleccionados',
+    retomarTodos: 'Retomar todos os documentos suspensos',
+    /** D-12 checkbox of the Cancelar dialog. */
+    cancelarTodosEstados: 'Cancelar em todos os estados',
+    documentoNaoEncontrado: 'Documento não encontrado.',
+    impressoraInvalida: 'Impressora inválida.',
+    pedidoNaoCancelavel: 'O pedido já não está em espera nem terminado.',
+    /** D-17: DISPONIVEL_RF is not ANU after PKG_DOCUMENTOS_SVR.ANULAR (the package hides errors). */
+    anularFalhou: 'A anulação não foi registada pelo servidor.',
+    /** §4.2 selection cap of the batch actions (the list count cap). */
+    seleccaoExcessiva: 'A selecção excede 10 000 documentos. Restrinja a consulta.',
+    /** PKG_DOCUMENTOS_SVR.EXECUTA swallowed an error: GET_ID_EXECUCAO returned -1. */
+    clonarFalhou: 'O servidor não criou o documento. Consulte o log do documento de origem.',
+  },
 } as const;

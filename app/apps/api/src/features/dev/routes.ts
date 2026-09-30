@@ -37,6 +37,8 @@ import {
 import { auditHooks, crudRoutes, type CrudHooks, type CrudStore, type Row } from '../../lib/crud.ts';
 import { memoryDocumentosRepo } from '../documentos/repo.ts';
 import { registerDocumentosRoutes } from '../documentos/routes.ts';
+import { memoryOperacoesDb } from '../documentos/operacoes/memoria.ts';
+import { registerOperacoesRoutes } from '../documentos/operacoes/routes.ts';
 import { registerDominiosCrudRoutes } from '../dominios/routes.ts';
 import { registerImpressorasAssociadasRoutes } from '../impressoras-associadas/routes.ts';
 import { memoryModelosRepo, type ModelosStores } from '../modelos/repo.ts';
@@ -611,10 +613,14 @@ export async function registerDevRoutes(
   // Step 6.1: Modelos (Configuração › Modelos). Clonar and the omissão versioning write through
   // the same stores the grid reads.
   // Gestão › Documentos (Step 7.1). No FileServerSIID here: the PDF route answers 502.
+  const docsSeed = documentosSeed();
+  const docsRepo = memoryDocumentosRepo(docsSeed);
   registerDocumentosRoutes(app, {
-    repo: memoryDocumentosRepo(documentosSeed()),
+    repo: docsRepo,
     fileServer: { baseUrl: 'http://127.0.0.1:9/FileServerSIID/restapi/FileServer/pdf/T', timeoutMs: 1000 },
   });
+  // Step 7.2: the toolbar actions write into the same seed the list reads.
+  registerOperacoesRoutes(app, { repo: docsRepo, db: memoryOperacoesDb(docsSeed) });
 
   const m = seedModelos();
   const modelosStores: ModelosStores = {

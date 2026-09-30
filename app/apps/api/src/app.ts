@@ -31,6 +31,8 @@ import { registerAuthRoutes } from './features/auth/routes.ts';
 import { registerDevRoutes } from './features/dev/routes.ts';
 import { oracleDocumentosRepo } from './features/documentos/repo.ts';
 import { registerDocumentosRoutes, type FileServer } from './features/documentos/routes.ts';
+import { oracleOperacoesDb } from './features/documentos/operacoes/oracle.ts';
+import { registerOperacoesRoutes } from './features/documentos/operacoes/routes.ts';
 import { registerDominiosCrudRoutes } from './features/dominios/routes.ts';
 import { createDominiosCache, registerDominiosRoutes } from './features/dominios/valores.ts';
 import { registerHealthRoute } from './features/health/routes.ts';
@@ -183,11 +185,11 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
           imageStore: oracleImageStore(pool, SECCAO_IMAGEM, callTimeoutMs),
           maxBytes,
         });
-        if (deps.fileServer)
-          registerDocumentosRoutes(sub, {
-            repo: oracleDocumentosRepo(pool, callTimeoutMs),
-            fileServer: deps.fileServer,
-          });
+        if (deps.fileServer) {
+          const repo = oracleDocumentosRepo(pool, callTimeoutMs);
+          registerDocumentosRoutes(sub, { repo, fileServer: deps.fileServer });
+          registerOperacoesRoutes(sub, { repo, db: oracleOperacoesDb(pool, callTimeoutMs) });
+        }
       },
       { prefix: deps.config.BASE_PATH },
     );
