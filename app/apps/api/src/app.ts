@@ -34,7 +34,7 @@ import { createDominiosCache, registerDominiosRoutes } from './features/dominios
 import { registerHealthRoute } from './features/health/routes.ts';
 import { registerImpressorasAssociadasRoutes } from './features/impressoras-associadas/routes.ts';
 import { registerImpressorasRoutes } from './features/impressoras/routes.ts';
-import { oracleModelosRepo } from './features/modelos/repo.ts';
+import { oracleModelosRepo, SECCAO_IMAGEM } from './features/modelos/repo.ts';
 import { registerModelosRoutes } from './features/modelos/routes.ts';
 import { oraclePerfisRepo } from './features/perfis-departamento/repo.ts';
 import { registerPerfisDepartamentoRoutes } from './features/perfis-departamento/routes.ts';
@@ -120,6 +120,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   if (deps.db) {
     const { pool, callTimeoutMs } = deps.db;
+    const maxBytes = (deps.config.UPLOAD_MAX_MB ?? 10) * 1024 * 1024;
     await app.register(
       async (sub) => {
         registerImpressorasRoutes(sub, { store: oracleStore(pool, impressoras, callTimeoutMs) });
@@ -163,7 +164,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
             { table: 'DOC_PERFIS_DEPARTAMENTO', column: 'ASSINATURA', keyWhere: 'ID = :id' },
             callTimeoutMs,
           ),
-          maxBytes: (deps.config.UPLOAD_MAX_MB ?? 10) * 1024 * 1024,
+          maxBytes,
         });
         registerModelosRoutes(sub, {
           stores: {
@@ -175,6 +176,8 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
             atributosArquivo: oracleStore(pool, modelosAtributosArquivo, callTimeoutMs),
           },
           repo: oracleModelosRepo(pool, callTimeoutMs),
+          imageStore: oracleImageStore(pool, SECCAO_IMAGEM, callTimeoutMs),
+          maxBytes,
         });
       },
       { prefix: deps.config.BASE_PATH },
