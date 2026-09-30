@@ -62,7 +62,10 @@ const TAB_SQL: Record<Tab, string> = {
   parametros:
     "SELECT NOME, VALOR, N_PARAMETRO FROM SVR_PARAMETROS_DOC_NOME_VW WHERE DOCUMENTO_ID = :id AND NOME NOT IN ('_USER', 'P_ID') ORDER BY N_PARAMETRO",
   comentarios: `SELECT COMENTARIO_ID, ${dateSelect('DATA')} AS DATA, USER_ID, COMENTARIO FROM SVR_DOCUMENTO_COMENTARIOS WHERE DOCUMENTO_ID = :id ORDER BY COMENTARIO_ID`,
-  anexos: 'SELECT ANEXODOC_ID, TIPO_ANEXO_RF FROM SVR_ANEXOS_DOCUMENTO WHERE DOCUMENTO_ID = :id ORDER BY ANEXODOC_ID',
+  // Step 7.4 (UI_SPEC Anexos): the attached document's Modelo / Estado / Data do pedido.
+  anexos:
+    `SELECT A.ANEXODOC_ID, A.TIPO_ANEXO_RF, V.MODELO_ID, V.ESTADO, ${dateSelect('V.DATA_PEDIDO')} AS DATA_PEDIDO ` +
+    'FROM SVR_ANEXOS_DOCUMENTO A LEFT JOIN SVR_DOCUMENTOS_VW V ON V.ID = A.ANEXODOC_ID WHERE A.DOCUMENTO_ID = :id ORDER BY A.ANEXODOC_ID',
   // Block SVR_QUEUE (ORDER BY id, data_pedido, tipo_queue_rf) + POST-QUERY printer text (BR-DOC-24):
   // the queue row's printer, else the document's.
   fila:
@@ -257,7 +260,7 @@ export interface DocumentosSeed {
 const TAB_COLUNAS: Record<Tab, { cols: string[]; ordem: string }> = {
   parametros: { cols: ['NOME', 'VALOR', 'N_PARAMETRO'], ordem: 'N_PARAMETRO' },
   comentarios: { cols: ['COMENTARIO_ID', 'DATA', 'USER_ID', 'COMENTARIO'], ordem: 'COMENTARIO_ID' },
-  anexos: { cols: ['ANEXODOC_ID', 'TIPO_ANEXO_RF'], ordem: 'ANEXODOC_ID' },
+  anexos: { cols: ['ANEXODOC_ID', 'TIPO_ANEXO_RF', 'MODELO_ID', 'ESTADO', 'DATA_PEDIDO'], ordem: 'ANEXODOC_ID' },
   fila: {
     cols: ['ID', 'TIPO_QUEUE_RF', 'DATA_PEDIDO', 'CRIADO_POR', 'DATA_EXECUCAO', 'DATA_FINALIZACAO', 'ESTADO', 'IMPRESSORA_ID', 'IMPRESSORA', 'RESULTADO'],
     ordem: 'ID',
@@ -272,16 +275,18 @@ export function memoryDocumentosRepo(seed: DocumentosSeed): DocumentosRepo {
   const tabela = (tab: Tab): Row[] =>
     ({ parametros: seed.parametros, comentarios: seed.comentarios, anexos: seed.anexos, fila: seed.fila, erros: seed.erros })[tab] ?? [];
   const fila = seed.fila ?? [];
-  const comentados = new Set((seed.comentarios ?? []).map((c) => c['DOCUMENTO_ID']));
   const listCols = Object.keys(documentosServer.columns);
 
   // Rebuilt on every list: the Step 7.2 operations mutate the seed (anular, clonar) and the dev
   // list must show it, like the Forms re-query did.
-  const listRows = () => docs.map((d) => ({
-    ...pick(d, listCols),
-    COR: d['DISPONIBILIDADE'] === 'OFF' ? 'OFFLINE' : d['DISPONIBILIDADE'] === 'ANU' || d['ATRIBUTO9'] === 'A' ? 'ANULADO' : null,
-    COMENTARIO: comentados.has(d['ID']) ? '***' : null,
-  }));
+  const listRows = () => {
+    const comentados = new Set((seed.comentarios ?? []).map((c) => c['DOCUMENTO_ID']));
+    return docs.map((d) => ({
+      ...pick(d, listCols),
+      COR: d['DISPONIBILIDADE'] === 'OFF' ? 'OFFLINE' : d['DISPONIBILIDADE'] === 'ANU' || d['ATRIBUTO9'] === 'A' ? 'ANULADO' : null,
+      COMENTARIO: comentados.has(d['ID']) ? '***' : null,
+    }));
+  };
   const vazio = (v: unknown) => v == null;
   const store = () => memoryStore(documentosServer, listRows(), {
     // ponytail: JS twins of PRESETS, close enough for dev/unit data (the SQL is contract-tested):
@@ -384,7 +389,7 @@ export function memoryDocumentosRepo(seed: DocumentosSeed): DocumentosRepo {
         .filter((r) => r['DOCUMENTO_ID'] === id)
         .filter((r) => tab !== 'parametros' || !['_USER', 'P_ID'].includes(String(r['NOME'])))
         .sort((a, b) => Number(a[ordem]) - Number(b[ordem]))
-        .map((r) => pick(r, cols));
+        .map((r) => pick(tab === 'anexos' ? { ...docs.find((d) => d['ID'] === r['ANEXODOC_ID']), ...r } : r, cols));
     },
 
     async conversao(tipo, valor) {

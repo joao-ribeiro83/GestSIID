@@ -65,6 +65,8 @@ export interface OperacoesDb {
   /** 409 REGISTO_ALTERADO when the row is not the document's; 409 PEDIDO_NAO_CANCELAVEL when not ESPERA/TERMINADO. */
   cancelarPedido(user: SessionUser, documentoId: number, queueId: number): Promise<void>;
   contagemFila(user: SessionUser, estado: EstadoFila): Promise<number>;
+  /** BR-DOC-30: COMENTARIO_ID from ID_COMENTARIO_DOCUMENTO_SEQ, DATA = SYSDATE, USER_ID = session user; 404 when the document does not exist. */
+  comentar(user: SessionUser, documentoId: number, comentario: string): Promise<number>;
   /** SET_PARAMETRO_STRING… EXECUTA … GET_ID_EXECUCAO, then LOTE_ID (D-17, D-20); the new id. */
   clonar(user: SessionUser, origem: { MODELO_ID: string; LOTE_ID: number | null }, parametros: Parametro[]): Promise<number>;
 }

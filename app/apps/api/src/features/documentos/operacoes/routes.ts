@@ -18,6 +18,7 @@ import type { OperacoesDb, Resultado } from './servico.ts';
  *   POST /api/documentos/acoes/:acao                       ADM        { ids | consulta [| todaFila], impressoraId?, force? } → { ok, skipped, pedidos? }
  *   POST /api/documentos/:id/clonar                        ADM        { parametros } → 201 { id }  (owner, 2026-09-30)
  *   POST /api/documentos/:docId/fila/:queueId/cancelar     ADM, USER  → 204
+ *   POST /api/documentos/:id/comentarios                   ADM        { comentario } → 201 { COMENTARIO_ID }  (Step 7.4, BR-DOC-30)
  *   GET  /api/documentos/fila/contagem?estado=             ADM        → { n }
  */
 
@@ -49,6 +50,7 @@ const clonarBody = z.object({
   // valor: SVR_DOCUMENTOS.PARAMETROnn is VARCHAR2(2000).
   parametros: z.array(z.object({ nome: z.string().min(1).max(30), valor: z.string().max(2000) })).max(100),
 });
+const comentarioBody = z.object({ comentario: z.string().trim().min(1).max(2000) }).strict();
 const contagemQuery = z.object({ estado: z.enum(['ESPERA', 'SUSPENSO']) });
 const filaParams = z.object({ docId: id, queueId: id });
 
@@ -135,6 +137,16 @@ export function registerOperacoesRoutes(app: FastifyInstance, opts: { db: Operac
     await db.cancelarPedido(user, docId, queueId);
     audit(request, 'documentos.fila.cancelar', { documentoId: docId, queueId });
     return reply.status(204).send();
+  });
+
+  // BR-DOC-30; the USER form has the block but no insert (D-08).
+  app.post('/api/documentos/:id/comentarios', async (request, reply) => {
+    const user = utilizador(request, ADM);
+    const documentoId = z.object({ id }).parse(request.params).id;
+    const { comentario } = comentarioBody.parse(request.body ?? {});
+    const novo = await db.comentar(user, documentoId, comentario);
+    audit(request, 'documentos.comentar', { documentoId, comentarioId: novo });
+    return reply.status(201).send({ COMENTARIO_ID: novo });
   });
 
   app.get('/api/documentos/fila/contagem', async (request) => {

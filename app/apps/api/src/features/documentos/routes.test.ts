@@ -241,7 +241,9 @@ describe('GET /api/documentos/:id/<tab>', () => {
     expect((await get('/api/documentos/3/erros')).body.rows).toEqual([
       { ID: 5, DATA_ERRO: '2026-09-03T10:00:00', DESCRICAO: 'DOCUMENTO REGERADO POR ANA' },
     ]);
-    expect((await get('/api/documentos/11/anexos')).body.rows).toEqual([{ ANEXODOC_ID: 12, TIPO_ANEXO_RF: 1 }]);
+    expect((await get('/api/documentos/11/anexos')).body.rows).toEqual([
+      { ANEXODOC_ID: 12, TIPO_ANEXO_RF: 1, MODELO_ID: 'M.ANEXO', ESTADO: 'IMPRESSO', DATA_PEDIDO: '2026-09-12T10:00:00' },
+    ]);
   });
 
   it('a document without rows gives an empty list', async () => {
