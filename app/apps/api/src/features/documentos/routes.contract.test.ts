@@ -57,6 +57,8 @@ const PRESET_WHERE: Record<string, string | null> = {
 const REFERENCIA_EXPR =
   "TO_NUMBER(REPLACE(TRANSLATE (DECODE( SIGN(LENGTH(N_REFERENCIA) - 2 * INSTR(N_REFERENCIA,'/') + 1),1,SUBSTR(N_REFERENCIA,INSTR(N_REFERENCIA,'/')+1),-1, SUBSTR(N_REFERENCIA,1,INSTR(N_REFERENCIA,'/')-1), N_REFERENCIA),'0123456789-/','0123456789  '), ' ', ''))";
 
+const REFERENCIA_SEGURA = REFERENCIA_EXPR.replace(/\)\)$/, ') DEFAULT NULL ON CONVERSION ERROR)');
+
 /** API sort → the form's ORDER BY text (ORDENAR_POR first press, its toggle, the LOTE button; BR-DOC-05).
  * FATURACAO_ELECTRONICA: the form passes the typo FATURA_ELECTRONICA (A-05). */
 const SORT_ORDER: [string, string][] = [
@@ -69,7 +71,10 @@ const SORT_ORDER: [string, string][] = [
   ['CRIADO_POR:asc', 'CRIADO_POR ASC'],
   ['DESTINATARIO:asc', 'DESTINATARIO ASC'],
   ['FATURACAO_ELECTRONICA:asc', 'FATURACAO_ELECTRONICA ASC'],
-  ['REFERENCIA:desc', `${REFERENCIA_EXPR} DESC`],
+  // Intended difference (owner, 2026-09-30): the form's TO_NUMBER raised ORA-01722 on any
+  // non-numeric reference; the API sorts those last in both directions.
+  ['REFERENCIA:desc', `${REFERENCIA_SEGURA} DESC NULLS LAST`],
+  ['REFERENCIA:asc', `${REFERENCIA_SEGURA} ASC NULLS LAST`],
   ['LOTE:desc', 'LOTE_ID DESC, LOTE_ORDEM DESC'],
   ['LOTE:asc', 'LOTE_ID ASC, LOTE_ORDEM ASC'],
 ];
@@ -492,18 +497,7 @@ describe.skipIf(!env['DB_CONNECT_STRING'])('documentos — TEST schema (read-onl
       'sort=%s',
       async (sort, order) => {
         const url = `/api/documentos?preset=todos&sort=${sort}&size=100`;
-        let expected: number[];
-        try {
-          expected = await formIds(null, order, 100);
-        } catch (e) {
-          // REFERENCIA only: the form's TO_NUMBER raises ORA-01722 when an N_REFERENCIA keeps a
-          // non-digit after TRANSLATE. Forms then shows an error and no rows; the API must not
-          // return a list either.
-          if (!sort.startsWith('REFERENCIA') || !/ORA-01722/.test(String(e))) throw e;
-          const r = await get(url);
-          expect(r.statusCode, r.body.slice(0, 300)).toBeGreaterThanOrEqual(400);
-          return;
-        }
+        const expected = await formIds(null, order, 100);
         expect(await ids(url)).toEqual(expected);
       },
       300_000,

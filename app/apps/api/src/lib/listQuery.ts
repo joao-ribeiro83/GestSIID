@@ -152,7 +152,8 @@ function orderBy(resource: Resource, q: ListQuery, role?: Role): string {
   const terms = keys.flatMap((s) => {
     const dir = s.direction === 'desc' ? 'DESC' : 'ASC';
     const cols = Object.hasOwn(aliases, s.column) ? (aliases[s.column] ?? []) : [s.column];
-    return cols.map((c) => `${c} ${dir}`);
+    // A fixed `NULLS LAST` on an alias term stays after the direction.
+    return cols.map((c) => (c.endsWith(' NULLS LAST') ? `${c.slice(0, -11)} ${dir} NULLS LAST` : `${c} ${dir}`));
   });
   if (!keys.some((s) => s.column === resource.tiebreak)) terms.push(`${resource.tiebreak} ASC`);
   return terms.join(', ');

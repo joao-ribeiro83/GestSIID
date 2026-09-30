@@ -271,6 +271,13 @@ describe('buildListQuery — sort aliases (one key → several ORDER BY terms)',
   it('an unknown key is still 400 VALIDACAO', () => {
     validationError(() => buildListQuery(withAlias, parseListQuery({ sort: 'LOTEX:asc' })));
   });
+
+  it('a term ending in NULLS LAST keeps it after the direction', () => {
+    const nulls = defineResource({ ...res, sortAliases: { REF: ['TO_NUMBER(OBS) NULLS LAST'] } });
+    expect(buildListQuery(nulls, parseListQuery({ sort: 'REF:desc' })).list.sql).toContain(
+      'ORDER BY TO_NUMBER(OBS) DESC NULLS LAST, ID ASC OFFSET',
+    );
+  });
 });
 
 describe('buildListQuery — per-role sort allow-list', () => {

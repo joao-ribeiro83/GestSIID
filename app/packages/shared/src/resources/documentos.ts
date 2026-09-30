@@ -13,9 +13,11 @@ import { defineResource } from '../resource.ts';
  * Spool (`ID`) only (D-08, A-08). Default = WHEN-NEW-FORM-INSTANCE `Ordenar_Por('ID','DESC')`.
  */
 
-// Button REFERENCIA: Ordenar_Por(<this>, 'DESC'), copied verbatim from FD_GESTAO_SIID_fmb.xml.
+// Button REFERENCIA: Ordenar_Por(<this>, 'DESC') from FD_GESTAO_SIID_fmb.xml, with one intended
+// difference (owner, 2026-09-30): the form's TO_NUMBER raised ORA-01722 on any reference with a
+// letter (15 806 rows in TEST), so the button always failed; here those references sort last.
 const REFERENCIA_ORDEM =
-  "TO_NUMBER(REPLACE(TRANSLATE (DECODE( SIGN(LENGTH(N_REFERENCIA) - 2 * INSTR(N_REFERENCIA,'/') + 1),1,SUBSTR(N_REFERENCIA,INSTR(N_REFERENCIA,'/')+1),-1, SUBSTR(N_REFERENCIA,1,INSTR(N_REFERENCIA,'/')-1), N_REFERENCIA),'0123456789-/','0123456789  '), ' ', ''))";
+  "TO_NUMBER(REPLACE(TRANSLATE (DECODE( SIGN(LENGTH(N_REFERENCIA) - 2 * INSTR(N_REFERENCIA,'/') + 1),1,SUBSTR(N_REFERENCIA,INSTR(N_REFERENCIA,'/')+1),-1, SUBSTR(N_REFERENCIA,1,INSTR(N_REFERENCIA,'/')-1), N_REFERENCIA),'0123456789-/','0123456789  '), ' ', '') DEFAULT NULL ON CONVERSION ERROR) NULLS LAST";
 
 const TEXTO = ['eq', 'like', 'null', 'notnull'] as const;
 const NUMERO = ['eq', 'null', 'notnull'] as const;
