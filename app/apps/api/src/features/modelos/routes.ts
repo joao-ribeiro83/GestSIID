@@ -11,6 +11,7 @@ import {
 } from '@gestsiid/shared';
 import { AppError } from '../../db/errors.ts';
 import { auditHooks, crudRoutes, sessionCtx, type CrudStore } from '../../lib/crud.ts';
+import { imageRoutes, type ImageStore } from '../../lib/imageRoutes.ts';
 import { localNow } from '../permissoes/repo.ts';
 import { normalizaData } from '../permissoes/rules.ts';
 import type { AlvoRamo, ListaOpcoes, ModelosRepo, ModelosStores } from './repo.ts';
@@ -22,6 +23,7 @@ import { APAGAR_MESTRE, erroIntervalo, INICIO_SUPERIOR } from './rules.ts';
  *
  *   POST /api/modelos/:MODELO_ID/acoes/clonar                              Clonar Modelo (BR-MOD-03)
  *   POST /api/modelos/:MODELO_ID/seccoes/:TIPOSEC_ID/:ALINEA/acoes/clonar  Clonar alínea (BR-MOD-05)
+ *   PUT|GET|DELETE /api/modelos/:MODELO_ID/seccoes/:TIPOSEC_ID/:ALINEA/imagem  section image (BR-MOD-06, §6)
  *   GET  /api/modelos/:MODELO_ID/parametros-report                         BR-MOD-08
  *   PUT  /api/modelos/:MODELO_ID/parametros-report/:N_PARAMETRO/omissao    BR-MOD-09 versioning
  *   GET  /api/dominios/{MODELOS_GENERICOS,TIPOS_CONTEUDO,CONTEXTOS_APR}/valores   select feeds (D-28)
@@ -55,10 +57,11 @@ const clonarBody = z.object({
   DATA_INICIO: data,
   DATA_FIM: dataOpc,
 });
+// One spelling per key: VARCHAR2(10) ids, ALINEA as plain digits (no 1e0, 0x1, -1).
 const seccaoParams = z.object({
-  MODELO_ID: z.string().min(1),
-  TIPOSEC_ID: z.string().min(1),
-  ALINEA: z.coerce.number().int(),
+  MODELO_ID: z.string().min(1).max(10),
+  TIPOSEC_ID: z.string().min(1).max(10),
+  ALINEA: z.string().regex(/^\d{1,9}$/).transform(Number),
 });
 const modeloParams = z.object({ MODELO_ID: z.string().min(1) });
 const parametroParams = z.object({ MODELO_ID: z.string().min(1), N_PARAMETRO: z.coerce.number().int() });
@@ -149,7 +152,7 @@ function soRamo(store: CrudStore, repo: ModelosRepo, alvo: AlvoRamo): CrudStore 
 
 export function registerModelosRoutes(
   app: FastifyInstance,
-  deps: { stores: ModelosStores; repo: ModelosRepo; now?: () => string },
+  deps: { stores: ModelosStores; repo: ModelosRepo; imageStore: ImageStore; maxBytes: number; now?: () => string },
 ): void {
   const { stores, repo } = deps;
   const now = deps.now ?? localNow;
@@ -177,6 +180,14 @@ export function registerModelosRoutes(
     const ALINEA = await repo.clonarSeccao(user, key);
     reply.status(201);
     return { ...key, ALINEA };
+  });
+
+  imageRoutes(app, {
+    path: `${M}/seccoes/:TIPOSEC_ID/:ALINEA/imagem`,
+    store: deps.imageStore,
+    key: (params) => seccaoParams.parse(params),
+    roles: ADM,
+    maxBytes: deps.maxBytes,
   });
 
   crudRoutes(app, modelosCondicoes, {

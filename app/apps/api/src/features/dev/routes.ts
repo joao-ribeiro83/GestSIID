@@ -624,6 +624,25 @@ export async function registerDevRoutes(
       tiposConteudo: m.tiposConteudo,
       contextos: m.contextos,
     }),
+    imageStore: memoryImageStore({
+      exists: async (k) =>
+        (
+          await modelosStores.seccoes.list(
+            {
+              filters: {
+                TIPOSEC_ID: [{ op: 'eq', value: String(k['TIPOSEC_ID']) }],
+                ALINEA: [{ op: 'eq', value: String(k['ALINEA']) }],
+              },
+              sort: [],
+              page: 1,
+              size: 1,
+            },
+            { MODELO_ID: String(k['MODELO_ID']) },
+            admCtx,
+          )
+        ).total > 0,
+    }),
+    maxBytes: 1024 * 1024,
   });
 }
 

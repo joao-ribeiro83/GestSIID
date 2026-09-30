@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { DbConnection, DbPool } from '../../db/oracle.ts';
 import { readOnlyPool } from '../../test/read-only-db.ts';
-import { oracleModelosRepo } from './repo.ts';
+import { oracleImageStore } from '../../lib/imageRoutes.ts';
+import { oracleModelosRepo, SECCAO_IMAGEM } from './repo.ts';
 import { MODELO_EXISTENTE, type PedidoOmissao } from './rules.ts';
 
 /**
@@ -344,5 +345,36 @@ describe('read paths pass the read-only guard used by the contract test', () => 
     await db.repo.parametrosReport(USER, 'ZMODX');
     expect(db.calls.some((c) => bound(c.binds).includes('ZMODX'))).toBe(true);
     for (const c of db.calls) noLiterals(c.sql);
+  });
+});
+
+describe('SECCAO_IMAGEM (DOC_SECCOES_DOCUMENTO.IMAGEM, Step 6.2)', () => {
+  const ctx = { user: { ...USER, role: 'ADM' as const } };
+  const key = { MODELO_ID: 'ZMODX', TIPOSEC_ID: 'ZSECX', ALINEA: 987654 };
+  const img = Buffer.from('89504e470d0a1a0a', 'hex');
+
+  it('locks and updates one section by its three key columns, binds only', async () => {
+    const db = fakeDb((sql) => (/FOR UPDATE/.test(sql) ? { rows: [{ 1: 1 }] } : {}));
+    expect(await oracleImageStore(db.pool, SECCAO_IMAGEM, 1000).set(key, img, ctx)).toBe(true);
+    const where = 'WHERE MODELO_ID = :MODELO_ID AND TIPOSEC_ID = :TIPOSEC_ID AND ALINEA = :ALINEA';
+    expect(db.calls[0]?.sql).toBe(`SELECT 1 FROM DOC_SECCOES_DOCUMENTO ${where} FOR UPDATE NOWAIT`);
+    expect(db.calls[1]?.sql).toBe(
+      `UPDATE DOC_SECCOES_DOCUMENTO SET IMAGEM = :__img, ACTUALIZADO_POR = :__user, DATA_ACTUALIZACAO = SYSDATE ${where}`,
+    );
+    expect(db.calls[1]?.binds).toMatchObject({ ...key, __user: USER.username });
+    expect(db.state.commits).toBe(1);
+    for (const c of db.calls) noLiterals(c.sql);
+  });
+
+  it('a section locked by another session is 409 REGISTO_BLOQUEADO and nothing is written', async () => {
+    const db = fakeDb((sql) => {
+      if (/FOR UPDATE/.test(sql)) throw new Error('ORA-00054: resource busy and acquire with NOWAIT specified');
+      return {};
+    });
+    await expect(oracleImageStore(db.pool, SECCAO_IMAGEM, 1000).clear(key, ctx)).rejects.toMatchObject({
+      statusCode: 409,
+      code: 'REGISTO_BLOQUEADO',
+    });
+    expect(dml(db.calls)).toEqual([]);
   });
 });

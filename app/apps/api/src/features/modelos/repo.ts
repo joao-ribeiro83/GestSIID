@@ -8,6 +8,7 @@ import {
   type SessionUser,
 } from '../../db/oracle.ts';
 import { SYSDATE, type CrudCtx, type CrudStore, type Parent, type Row } from '../../lib/crud.ts';
+import type { OracleImageConfig } from '../../lib/imageRoutes.ts';
 import { dateSelect, decodeRid } from '../../lib/listQuery.ts';
 import { localNow } from '../permissoes/repo.ts';
 import {
@@ -484,3 +485,10 @@ export function memoryModelosRepo(deps: {
     },
   };
 }
+
+/** `DOC_SECCOES_DOCUMENTO.IMAGEM` by the section's primary key (Step 6.2; the form's BT_CLIENT_DB). */
+export const SECCAO_IMAGEM: OracleImageConfig = {
+  table: 'DOC_SECCOES_DOCUMENTO',
+  column: 'IMAGEM',
+  keyWhere: 'MODELO_ID = :MODELO_ID AND TIPOSEC_ID = :TIPOSEC_ID AND ALINEA = :ALINEA',
+};

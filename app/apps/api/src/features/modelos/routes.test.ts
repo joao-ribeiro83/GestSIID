@@ -1,3 +1,4 @@
+import multipart from '@fastify/multipart';
 import Fastify from 'fastify';
 import {
   modelos,
@@ -9,6 +10,7 @@ import {
 } from '@gestsiid/shared';
 import { describe, expect, it } from 'vitest';
 import { registerErrorHandler } from '../../http/errors.ts';
+import { memoryImageStore } from '../dev/memoryImageStore.ts';
 import { memoryStore } from '../dev/memoryStore.ts';
 import { memoryModelosRepo, type ModelosStores } from './repo.ts';
 import {
@@ -192,6 +194,7 @@ const ARQUIVO = [
 function appWith(role: 'ADM' | 'USER' | null = 'ADM') {
   const app = Fastify();
   registerErrorHandler(app);
+  void app.register(multipart);
   app.decorateRequest('session', null as never);
   app.addHook('onRequest', async (req) => {
     (req as { session: unknown }).session = { user: role ? { username: 'JOAO', role } : undefined };
@@ -211,7 +214,10 @@ function appWith(role: 'ADM' | 'USER' | null = 'ADM') {
     contextos: CONTEXTOS,
     now: () => NOW,
   });
-  registerModelosRoutes(app, { stores, repo, now: () => NOW });
+  const imageStore = memoryImageStore({
+    exists: (k) => SECCOES.some((s) => s.MODELO_ID === k['MODELO_ID'] && s.TIPOSEC_ID === k['TIPOSEC_ID'] && s.ALINEA === k['ALINEA']),
+  });
+  registerModelosRoutes(app, { stores, repo, imageStore, maxBytes: 1024, now: () => NOW });
   return app;
 }
 
@@ -1046,5 +1052,48 @@ describe('select feeds', () => {
     const r = await appWith().inject({ url: `/api/dominios/CONTEXTOS_APR/valores?MODELO_ID=${m}&TIPOSEC_ID=${s}` });
     expect(r.statusCode).toBe(200);
     expect(r.json().preSelected).toBe(pre);
+  });
+});
+
+describe('seccoes imagem (Step 6.2, BR-MOD-06)', () => {
+  const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');
+  const upload = (data: Buffer) => {
+    const b = 'b0undary';
+    const head = `--${b}\r\nContent-Disposition: form-data; name="ficheiro"; filename="a.png"\r\nContent-Type: image/png\r\n\r\n`;
+    return {
+      payload: Buffer.concat([Buffer.from(head), data, Buffer.from(`\r\n--${b}--\r\n`)]),
+      headers: { 'content-type': `multipart/form-data; boundary=${b}` },
+    };
+  };
+  const url = (m: string, s: string, a: string | number) => `/api/modelos/${m}/seccoes/${s}/${a}/imagem`;
+
+  it('PUT, GET and DELETE the image of one section by MODELO_ID / TIPOSEC_ID / ALINEA', async () => {
+    const app = appWith();
+    expect((await app.inject({ url: url('M1', 'CAB', 1) })).statusCode).toBe(404);
+    const up = await app.inject({ method: 'PUT', url: url('M1', 'CAB', 1), ...upload(PNG) });
+    expect(up.statusCode).toBe(204);
+    const r = await app.inject({ url: url('M1', 'CAB', 1) });
+    expect(r.headers['content-type']).toBe('image/png');
+    expect(r.rawPayload.equals(PNG)).toBe(true);
+    expect((await app.inject({ url: url('M1', 'CAB', 2) })).statusCode).toBe(404); // other alínea, no image
+    expect((await app.inject({ method: 'DELETE', url: url('M1', 'CAB', 1) })).statusCode).toBe(204);
+    expect((await app.inject({ url: url('M1', 'CAB', 1) })).statusCode).toBe(404);
+  });
+
+  it('is 404 for a section that does not exist, 400 for a bad ALINEA, 403 for a USER', async () => {
+    const app = appWith();
+    expect((await app.inject({ method: 'PUT', url: url('M1', 'CAB', 9), ...upload(PNG) })).statusCode).toBe(404);
+    expect((await app.inject({ method: 'DELETE', url: url('M9', 'CAB', 1) })).statusCode).toBe(404);
+    for (const bad of ['x', '1e0', '0x1', '-1', '1.0'])
+      expect((await app.inject({ url: url('M1', 'CAB', bad) })).statusCode, bad).toBe(400);
+    expect((await app.inject({ url: url('M1', 'C'.repeat(11), 1) })).statusCode).toBe(400); // VARCHAR2(10)
+    expect((await appWith('USER').inject({ url: url('M1', 'CAB', 1) })).statusCode).toBe(403);
+  });
+
+  it('refuses bytes that are not JPEG/PNG/GIF/BMP (415) and a file over the limit (413)', async () => {
+    const app = appWith();
+    expect((await app.inject({ method: 'PUT', url: url('M1', 'CAB', 1), ...upload(Buffer.from('%PDF-1.4')) })).statusCode).toBe(415);
+    const big = Buffer.concat([PNG, Buffer.alloc(2048)]);
+    expect((await app.inject({ method: 'PUT', url: url('M1', 'CAB', 1), ...upload(big) })).statusCode).toBe(413);
   });
 });
