@@ -49,6 +49,7 @@ const app = await buildApp({
   distDir,
   authRepo: oracleAuthRepo(pool, config.DB_CALL_TIMEOUT_MS),
   db: { pool, callTimeoutMs: config.DB_CALL_TIMEOUT_MS },
+  fileServer: { baseUrl: config.FILESERVER_BASE_URL, timeoutMs: config.FILESERVER_TIMEOUT_MS },
   logger: { level: config.LOG_LEVEL },
   async checkDb() {
     const start = Date.now();

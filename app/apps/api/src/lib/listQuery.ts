@@ -1,4 +1,4 @@
-import type { ColumnDef, ListQuery, ListQueryFilter, Resource } from '@gestsiid/shared';
+import type { ColumnDef, ListQuery, ListQueryFilter, Resource, Role } from '@gestsiid/shared';
 import { AppError } from '../db/errors.ts';
 
 /**
@@ -80,14 +80,21 @@ function conditions(
   }
 }
 
-/** WHERE clause (without the keyword) + binds; also used to resolve a `consulta` selection. */
+/** WHERE clause (without the keyword) + binds; also used to resolve a `consulta` selection.
+ * `extra`: the caller's own condition for `param` / `paramModelo` / `grupo` (only the Documentos
+ * feature builds one); those parameters without it are a 400, never ignored. Its bind names must
+ * not start with `w`, `p` or `x`. */
 export function buildWhere(
   resource: Resource,
-  q: Pick<ListQuery, 'filters' | 'preset'>,
+  q: Pick<ListQuery, 'filters' | 'preset' | 'params' | 'paramModelo' | 'grupo'>,
   parent: Record<string, string | number> = {},
+  extra?: BuiltSql,
 ): BuiltSql {
   const binds: Record<string, unknown> = {};
   const parts: string[] = [];
+
+  if (!extra && (q.params || q.paramModelo !== undefined || q.grupo !== undefined))
+    throw invalid('query', 'Parâmetro de pesquisa não suportado nesta lista.');
 
   // Server-side text from the resource, picked by name only; ignored on resources without presets.
   if (resource.presets && q.preset !== undefined) {
@@ -124,17 +131,29 @@ export function buildWhere(
     for (const f of q.filters[column] ?? []) parts.push(conditions(column, def, f, bind));
   }
 
+  if (extra) {
+    parts.push(`(${extra.sql})`);
+    Object.assign(binds, extra.binds);
+  }
+
   return { sql: parts.join(' AND '), binds };
 }
 
-function orderBy(resource: Resource, q: ListQuery): string {
+function orderBy(resource: Resource, q: ListQuery, role?: Role): string {
+  const aliases = resource.sortAliases ?? {};
+  const forRole = role ? resource.sortRoles?.[role] : undefined;
   for (const s of q.sort) {
-    if (!Object.hasOwn(resource.columns, s.column) || !resource.columns[s.column]?.sort) {
+    const isColumn = Object.hasOwn(resource.columns, s.column) && resource.columns[s.column]?.sort;
+    if ((!isColumn && !Object.hasOwn(aliases, s.column)) || (forRole && !forRole.includes(s.column))) {
       throw invalid('sort', `Ordenação não permitida: ${s.column}`);
     }
   }
   const keys = q.sort.length > 0 ? q.sort : resource.defaultSort;
-  const terms = keys.map((s) => `${s.column} ${s.direction === 'desc' ? 'DESC' : 'ASC'}`);
+  const terms = keys.flatMap((s) => {
+    const dir = s.direction === 'desc' ? 'DESC' : 'ASC';
+    const cols = Object.hasOwn(aliases, s.column) ? (aliases[s.column] ?? []) : [s.column];
+    return cols.map((c) => `${c} ${dir}`);
+  });
   if (!keys.some((s) => s.column === resource.tiebreak)) terms.push(`${resource.tiebreak} ASC`);
   return terms.join(', ');
 }
@@ -153,14 +172,14 @@ export function selectList(resource: Resource): string {
 export function buildListQuery(
   resource: Resource,
   q: ListQuery,
-  opts: { parent?: Record<string, string | number> } = {},
+  opts: { parent?: Record<string, string | number>; role?: Role; extra?: BuiltSql } = {},
 ): ListSql {
-  const where = buildWhere(resource, q, opts.parent);
+  const where = buildWhere(resource, q, opts.parent, opts.extra);
   const whereSql = where.sql ? ` WHERE ${where.sql}` : '';
   return {
     list: {
       sql:
-        `SELECT ${selectList(resource)} FROM ${resource.source}${whereSql} ORDER BY ${orderBy(resource, q)} ` +
+        `SELECT ${selectList(resource)} FROM ${resource.source}${whereSql} ORDER BY ${orderBy(resource, q, opts.role)} ` +
         'OFFSET :skip ROWS FETCH NEXT :take ROWS ONLY',
       binds: { ...where.binds, skip: (q.page - 1) * q.size, take: q.size },
     },

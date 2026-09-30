@@ -7,6 +7,7 @@ import { z } from 'zod';
  *   f[COL]=v            f[COL][like]=v        f[COL][from]=YYYY-MM-DD  f[COL][to]=YYYY-MM-DD
  *   f[COL][null]=1      f[COL][notnull]=1      preset=<name>
  *   sort=COL:asc,COL2:desc (up to 3 keys)      page=1                  size=50 (max 500)
+ *   param[NOME]=v (repeatable)  paramModelo=v  grupo=<id>   (Documentos only: §4.1 "Documentos specifics")
  *
  * This module only parses the request shape into a typed object; building SQL from it is
  * `apps/api/src/db/listQuery.ts`'s job (it also knows the resource's declared columns, so it
@@ -30,9 +31,19 @@ export interface ListQuerySort {
   direction: 'asc' | 'desc';
 }
 
+/** Procurar por parâmetros: one `param[NOME]=VALOR` pair. */
+export interface ListQueryParam {
+  nome: string;
+  valor: string;
+}
+
 export interface ListQuery {
   filters: Record<string, ListQueryFilter[]>;
   preset?: string;
+  /** Documentos only; any other list rejects them (apps/api lib/listQuery.ts). Absent when not sent. */
+  params?: ListQueryParam[];
+  paramModelo?: string;
+  grupo?: string;
   sort: ListQuerySort[];
   page: number;
   size: number;
@@ -54,7 +65,8 @@ const COUNT_CAP = 10_000;
 
 const FILTER_KEY_RE = /^f\[([^[\]]+)\](?:\[([^[\]]+)\])?$/;
 const SORT_ENTRY_RE = /^([A-Za-z0-9_]+):(asc|desc)$/;
-const RESERVED_KEYS = new Set(['preset', 'sort', 'page', 'size']);
+const PARAM_KEY_RE = /^param\[([^[\]]+)\]$/;
+const RESERVED_KEYS = new Set(['preset', 'sort', 'page', 'size', 'paramModelo', 'grupo']);
 
 const rawQuerySchema = z.record(z.string(), z.union([z.string(), z.array(z.string())]));
 
@@ -76,8 +88,16 @@ export function parseListQuery(raw: unknown): ListQuery {
 
   // No prototype: a `f[__proto__]` key must stay a plain (unknown, rejected later) column name.
   const filters: Record<string, ListQueryFilter[]> = Object.create(null);
+  const params: ListQueryParam[] = [];
   for (const [key, rawValue] of Object.entries(query)) {
     if (RESERVED_KEYS.has(key)) continue;
+
+    const param = PARAM_KEY_RE.exec(key);
+    if (param?.[1]) {
+      for (const valor of Array.isArray(rawValue) ? rawValue : [rawValue])
+        params.push({ nome: param[1], valor });
+      continue;
+    }
 
     const match = FILTER_KEY_RE.exec(key);
     if (!match) {
@@ -136,7 +156,12 @@ export function parseListQuery(raw: unknown): ListQuery {
   );
   const size = Math.min(requestedSize, MAX_SIZE);
 
-  return { filters, preset, sort, page, size };
+  const extra: Pick<ListQuery, 'params' | 'paramModelo' | 'grupo'> = {};
+  if (params.length > 0) extra.params = params;
+  if (query['paramModelo'] !== undefined) extra.paramModelo = firstValue(query['paramModelo']);
+  if (query['grupo'] !== undefined) extra.grupo = firstValue(query['grupo']);
+
+  return { filters, preset, ...extra, sort, page, size };
 }
 
 /** Inverse of {@link parseListQuery}: the list request's query string (without `?`).
@@ -155,6 +180,9 @@ export function toQueryString(q: ListQuery): string {
     }
   }
   if (q.preset !== undefined) params.append('preset', q.preset);
+  for (const p of q.params ?? []) params.append(`param[${p.nome}]`, p.valor);
+  if (q.paramModelo !== undefined) params.append('paramModelo', q.paramModelo);
+  if (q.grupo !== undefined) params.append('grupo', q.grupo);
   if (q.sort.length > 0)
     params.append('sort', q.sort.map((s) => `${s.column}:${s.direction}`).join(','));
   if (q.page !== DEFAULT_PAGE) params.append('page', String(q.page));

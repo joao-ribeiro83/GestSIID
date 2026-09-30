@@ -29,6 +29,8 @@ import type { DbPool } from './db/oracle.ts';
 import type { AuthRepo } from './features/auth/repo.ts';
 import { registerAuthRoutes } from './features/auth/routes.ts';
 import { registerDevRoutes } from './features/dev/routes.ts';
+import { oracleDocumentosRepo } from './features/documentos/repo.ts';
+import { registerDocumentosRoutes, type FileServer } from './features/documentos/routes.ts';
 import { registerDominiosCrudRoutes } from './features/dominios/routes.ts';
 import { createDominiosCache, registerDominiosRoutes } from './features/dominios/valores.ts';
 import { registerHealthRoute } from './features/health/routes.ts';
@@ -76,6 +78,8 @@ export interface AppDeps {
   devMocks?: boolean;
   /** Oracle-backed resource routes (Impressoras, the domain lookup, …); absent = none registered. */
   db?: { pool: DbPool; callTimeoutMs: number };
+  /** FileServerSIID for the Documentos PDF proxy (§6); the Documentos routes need it and `db`. */
+  fileServer?: FileServer;
 }
 
 /**
@@ -179,6 +183,11 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
           imageStore: oracleImageStore(pool, SECCAO_IMAGEM, callTimeoutMs),
           maxBytes,
         });
+        if (deps.fileServer)
+          registerDocumentosRoutes(sub, {
+            repo: oracleDocumentosRepo(pool, callTimeoutMs),
+            fileServer: deps.fileServer,
+          });
       },
       { prefix: deps.config.BASE_PATH },
     );

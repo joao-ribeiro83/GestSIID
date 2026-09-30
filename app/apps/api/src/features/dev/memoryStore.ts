@@ -17,7 +17,8 @@ const now = () => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 };
 
-function likeRegex(pattern: string): RegExp {
+/** Oracle LIKE as a RegExp; `flags` = 's' for a case-sensitive plain `LIKE`. */
+export function likeRegex(pattern: string, flags = 'is'): RegExp {
   let re = '';
   for (let i = 0; i < pattern.length; i++) {
     const ch = pattern[i] ?? '';
@@ -27,7 +28,7 @@ function likeRegex(pattern: string): RegExp {
     else if (ch === '_') re += '.';
     else re += ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
-  return new RegExp(`^${re}$`, 'is');
+  return new RegExp(`^${re}$`, flags);
 }
 
 function matches(v: unknown, f: ListQueryFilter, type: string): boolean {
@@ -114,12 +115,18 @@ export function memoryStore(
   };
 
   return {
-    async list(q: ListQuery, parent) {
-      buildListQuery(resource, q, { parent }); // same allow-list and value checks as the SQL
+    async list(q: ListQuery, parent, ctx) {
+      // Same allow-list and value checks as the SQL.
+      buildListQuery(resource, q, { parent, role: ctx.user.role });
+      // ponytail: an alias term that is a SQL expression (Documentos REFERENCIA) is not sorted here.
       const keys = [
         ...(q.sort.length > 0 ? q.sort : resource.defaultSort),
         { column: resource.tiebreak, direction: 'asc' as const },
-      ];
+      ].flatMap((k) =>
+        (resource.sortAliases?.[k.column] ?? [k.column])
+          .filter((c) => Object.hasOwn(resource.columns, c))
+          .map((column) => ({ column, direction: k.direction })),
+      );
       const hit = rows
         .filter((r) => Object.entries(parent).every(([k, v]) => r[k] === v))
         .filter((r) => !resource.exclude?.values.includes(String(r[resource.exclude.column])))

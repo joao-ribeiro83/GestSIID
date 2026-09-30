@@ -101,6 +101,8 @@ rules and exact messages. Real columns: `../analysis/db/tables/<TABLE>.md`.
 | S/N flag | `code` column + `BINARIO` domain select. There is no checkbox editor. | `VALIDO` in Impressoras |
 | Computed read-only column (POST-QUERY decode) | `ColumnDef.expr`: selected as `(expr) AS COL`, never in `orig`, no edit/filter/sort. | `TIPO_IMAGEM` in `resources/modelos.ts` |
 | Form alert texts | Exact Portuguese text in the feature (`const JA_ASSOCIADO = '…'`) or `db/errors.ts` for ORA mappings. | `features/variaveis/routes.ts` |
+| Sort button on two columns / an expression; role-limited sort | `sortAliases: { LOTE: ['LOTE_ID', 'LOTE_ORDEM'] }`, `sortRoles: { USER: ['ID'] }` on the resource. | `resources/documentos.ts` |
+| Search that is not a column filter (PROCURAR, Mostrar grupo) | Parsed as `params` / `paramModelo` / `grupo`; the feature passes `buildListQuery(…, { extra })`, else 400. | `features/documentos/repo.ts` |
 
 No engine file needs a change for a plain screen. Each Phase 4 screen still needed one small
 engine extension (`SqlCall` + `writeOnly`, `exclude`, `visibleWhen`, `defaults`): add it to
@@ -127,6 +129,10 @@ engine extension (`SqlCall` + `writeOnly`, `exclude`, `visibleWhen`, `defaults`)
   ROWID is logical (`*BAn…`). The engine selects `CAST(ROWID AS VARCHAR2(4000))` and binds
   `ROWID = :rid`; `ROWIDTOCHAR`/`CHARTOROWID` fail there with ORA-01410.
 - Text ids sort as text (`'10' < '2'`); sort numerically in SQL (`TO_NUMBER(ID)`) or client-side.
+- `SVR_DOCUMENTOS_VW` is slow per row: sorting, counting or `ID IN (subquery)` over it takes
+  40 s to minutes. Documentos lists in two phases (page ids + count from `SVR_DOCUMENTOS`, then
+  the view rows by id) unless ESTADO / DISPONIBILIDADE is used (`features/documentos/repo.ts`).
+  Time new list SQL read-only on TEST first.
 
 **Test schema and fixtures**
 - Contract tests only read. Use owner-given accounts; do not seed `ZZTEST_` rows.

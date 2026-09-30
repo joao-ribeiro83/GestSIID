@@ -252,6 +252,67 @@ describe('buildListQuery — presets (a named server-side WHERE)', () => {
   });
 });
 
+describe('buildListQuery — sort aliases (one key → several ORDER BY terms)', () => {
+  const withAlias = defineResource({
+    ...res,
+    sortAliases: { LOTE: ['NOME', 'TIPO'], REF: ['TO_NUMBER(OBS)'] },
+  });
+
+  it('expands an alias into its terms, all in the requested direction, then the tiebreak', () => {
+    const { list } = buildListQuery(withAlias, parseListQuery({ sort: 'LOTE:desc' }));
+    expect(list.sql).toContain('ORDER BY NOME DESC, TIPO DESC, ID ASC OFFSET');
+  });
+
+  it('an alias term may be a fixed SQL expression from the resource', () => {
+    const { list } = buildListQuery(withAlias, parseListQuery({ sort: 'REF:asc,ID:desc' }));
+    expect(list.sql).toContain('ORDER BY TO_NUMBER(OBS) ASC, ID DESC OFFSET');
+  });
+
+  it('an unknown key is still 400 VALIDACAO', () => {
+    validationError(() => buildListQuery(withAlias, parseListQuery({ sort: 'LOTEX:asc' })));
+  });
+});
+
+describe('buildListQuery — per-role sort allow-list', () => {
+  const byRole = defineResource({ ...res, sortRoles: { USER: ['ID'] } });
+
+  it('USER may sort only by the listed keys: another key is 400 VALIDACAO', () => {
+    const err = validationError(() =>
+      buildListQuery(byRole, parseListQuery({ sort: 'NOME:asc' }), { role: 'USER' }),
+    );
+    expect(err.fields).toHaveProperty('sort');
+  });
+
+  it('USER may sort by a listed key in either direction', () => {
+    const { list } = buildListQuery(byRole, parseListQuery({ sort: 'ID:asc' }), { role: 'USER' });
+    expect(list.sql).toContain('ORDER BY ID ASC OFFSET');
+  });
+
+  it('a role without a list (ADM) keeps the resource sort allow-list', () => {
+    const { list } = buildListQuery(byRole, parseListQuery({ sort: 'NOME:asc' }), { role: 'ADM' });
+    expect(list.sql).toContain('ORDER BY NOME ASC, ID ASC OFFSET');
+  });
+});
+
+describe('buildListQuery — extra WHERE (Documentos param / paramModelo / grupo)', () => {
+  it('param, paramModelo or grupo without an extra WHERE from the caller is 400 VALIDACAO', () => {
+    for (const raw of [{ 'param[P_X]': '1' }, { paramModelo: 'R%' }, { grupo: '7' }]) {
+      validationError(() => build(raw));
+    }
+  });
+
+  it('ANDs the caller extra WHERE into list and count, with its binds', () => {
+    const extra = { sql: 'ID IN (SELECT 1 FROM DUAL WHERE :e0 = 1)', binds: { e0: 1 } };
+    const { list, count } = buildListQuery(res, parseListQuery({ 'f[NOME]': 'HP', grupo: '7' }), {
+      extra,
+    });
+    expect(list.sql).toContain(`WHERE NOME = :w0 AND (${extra.sql}) ORDER BY`);
+    expect(count.sql).toContain(`WHERE NOME = :w0 AND (${extra.sql}) FETCH FIRST`);
+    expect(list.binds).toMatchObject({ w0: 'HP', e0: 1 });
+    expect(count.binds).toEqual({ w0: 'HP', e0: 1 });
+  });
+});
+
 describe('rid encoding', () => {
   it('makes a ROWID URL-safe and back', () => {
     const rowid = 'AAAR3sAAEAAAACXAAA+/';
