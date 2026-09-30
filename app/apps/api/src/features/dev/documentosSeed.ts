@@ -65,6 +65,7 @@ export function documentosSeed(): DocumentosSeed {
       ATRIBUTO9: i % 17 === 0 ? 'A' : null,
       ATRIBUTO10: `A10-${i}`,
       ATRIB_ARQ_1: `ARQ-${i}`,
+      ARQ_ID: i % 6 === 0 ? i : null,
       VERSAO: 1,
       DISPONIBILIDADE: DISPONIBILIDADE[i % DISPONIBILIDADE.length],
       TAMANHO_BYTES: 20_000 + i * 37,
@@ -93,6 +94,12 @@ export function documentosSeed(): DocumentosSeed {
           DATA_EXECUCAO: dia(i % 270, 12), DATA_FINALIZACAO: dia(i % 270, 12), ESTADO: 'TERMINADO',
           IMPRESSORA_ID: null, IMPRESSORA: `Impressora ${1 + (i % 5)} - piso ${i % 3}`, RESULTADO: null,
         });
+      if (modelo === 'E.E12')
+        fila.push({
+          DOCUMENTO_ID: i, ID: queueId++, TIPO_QUEUE_RF: 'EMAIL', DATA_PEDIDO: dia(i % 270, 13), CRIADO_POR: 'SIID',
+          DATA_EXECUCAO: dia(i % 270, 13), DATA_FINALIZACAO: dia(i % 270, 13), ESTADO: 'TERMINADO',
+          IMPRESSORA_ID: null, IMPRESSORA: null, RESULTADO: null, ATRIBUTO01: i % 4 === 0 ? 'sem-arroba' : `cliente${i}@exemplo.pt`,
+        });
       if (i % 5 === 0) erros.push({ DOCUMENTO_ID: i, ID: i, DATA_ERRO: dia(i % 270, 13), DESCRICAO: 'DOCUMENTO REGERADO POR ANA' });
     }
   }
@@ -113,5 +120,19 @@ export function documentosSeed(): DocumentosSeed {
     erros,
     recibos: [{ NMRECINUE: 900001, NMRECIBO: 500001 }],
     pessoas: [{ CDIDEPER: '501234567', CDPERSON: 7001 }],
+    // Step 7.2 actions: O1.OD58 needs the regeneration password (G), R3.D28 goes to EDoc (W,
+    // only even ids can be uploaded); printers 1..5 are the seed's IMPRESSORA_ID values.
+    modelos: [
+      { ID: 'E.E1', MODO_EXPEDICAO_RF: 'I' },
+      { ID: 'E.E12', MODO_EXPEDICAO_RF: 'E' },
+      { ID: 'R3.D28', MODO_EXPEDICAO_RF: 'W' },
+      { ID: 'O1.OD58', MODO_EXPEDICAO_RF: 'G' },
+      { ID: 'M.CARTA', MODO_EXPEDICAO_RF: 'M' },
+      { ID: 'I1.D55', MODO_EXPEDICAO_RF: 'I' },
+      { ID: 'D1.A7', MODO_EXPEDICAO_RF: 'I' },
+      { ID: 'R3.D25', MODO_EXPEDICAO_RF: 'I' },
+    ],
+    impressorasValidas: ['1', '2', '3', '4', '5'],
+    edocOk: documentos.filter((d) => d['MODELO_ID'] === 'R3.D28' && Number(d['ID']) % 2 === 0).map((d) => Number(d['ID'])),
   };
 }

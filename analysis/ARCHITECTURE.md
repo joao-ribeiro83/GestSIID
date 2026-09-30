@@ -241,18 +241,18 @@ A detail resource declares `parentKeys`. Its list route is nested: `GET /api/<ma
 - Default deny: a global `onRequest` hook requires a live session for every `/api/*` route unless the route has `config.public` (health, login). Absolute lifetime is checked there too.
 - Every route has `config.roles`; the default is `['ADM']`. Routes open to USER say `['ADM','USER']`:
   - `auth/me`, `auth/logout`;
-  - Documentos: list (sort allow-list for USER = `ID` only, per D-08, confirmed by the owner, §13), detail (reduced columns), tabs `parametros`, `comentarios` (GET), `anexos`, `fila`, `erros`, `pdf`, `conversoes/recibo`, `conversoes/pessoa`, `POST /:id/clonar`, `POST /:docId/fila/:queueId/cancelar`;
+  - Documentos: list (sort allow-list for USER = `ID` only, per D-08, confirmed by the owner, §13), detail (reduced columns), tabs `parametros`, `comentarios` (GET), `anexos`, `fila`, `erros`, `pdf`, `conversoes/recibo`, `conversoes/pessoa`, `POST /:docId/fila/:queueId/cancelar` (Clonar became ADM only on 2026-09-30: the USER form hides the popup item, see DOCUMENT_STATES.md §4);
   - lookups `modelos`, `modelos-validos`, `impressoras-validas`, `usuarios`, and `GET /api/dominios/:dominioId/valores`.
 - USER document detail SQL selects the reduced column list: no `ATRIBUTO5..8`, `ATRIBUTO10..25`, `ATRIB_ARQ_1..20`, `ARQ_ID`, `EDOC_ID`, `REGISTO_ARQUIVO`, `REGISTO_EDOC`, `DATA_ARQUIVO`.
 - A role failure → `403 SEM_PERMISSAO`. The SPA's `beforeLoad` guards and the `roles` field in `menu.ts` only hide things; the server decides.
-- Clone and single queue cancel are reachable in the USER form (the `GENERICO` and `ESTADO_PEDIDO` popups are attached to its items in `FD_GESTAO_SIID_USER_fmb.xml`), which satisfies D-08's condition for giving them to USER.
+- Single queue cancel is reachable in the USER form (the `ESTADO_PEDIDO` popup is attached to its items in `FD_GESTAO_SIID_USER_fmb.xml`), which satisfies D-08's condition for giving it to USER. The `GENERICO` popup's `CLONAR` item is `Enabled="false" Visible="false"` there, so Clonar is ADM only (owner, 2026-09-30, Step 7.2).
 
 **Regeneration password** (D-07d, BR-DOC-13/14; A-04).
 - Only Regerar asks for it. Reimprimir, 2ª via and Cópia never do (BR-DOC-14).
 - `POST /api/documentos/acoes/regerar { ids | consulta, password? }`: the service checks every selected document, annulled ones included. If any has a `SVR_QUEUE` row with `TIPO_QUEUE_RF='IMPRESSAO' AND ESTADO='TERMINADO'`, or its model has `MODO_EXPEDICAO_RF='G'`, and `password` is missing → `428 PASSWORD_REGERACAO_NECESSARIA` with catalogue #14; the SPA opens the dialog and repeats the request with `password`.
 - Compare `RAWTOHEX(CRYPT_PKG.ENCRYPTSTRINGRAW(:pwd)) = VALOR` in SQL. Wrong → `403 PASSWORD_ERRADA` `A password inserida está errada.` One correct password covers the whole batch; annulled documents are then skipped and listed (#13).
 - Change (built in Step 3.1): `POST /api/auth/regeneracao-password { actual, nova, confirmacao }`, ADM only. `nova !== confirmacao` → `422 PASSWORDS_DIFERENTES` `As passwords não coincidem. Alteração não efectuada.`; then one bound `UPDATE SVR_VARIAVEIS_SIID SET VALOR = RAWTOHEX(CRYPT_PKG.ENCRYPTSTRINGRAW(:nova)) WHERE TIPO_VARIAVEL_RF = 'PASSWORD' AND AMBIENTE_ID = :ambiente AND VALOR = RAWTOHEX(CRYPT_PKG.ENCRYPTSTRINGRAW(:actual))` (check and write in one statement, no `lockRow`); 0 rows → `403 PASSWORD_ERRADA`; audit `regeneracao.alterada`.
-- Reauth (built in Step 3.1): `POST /api/auth/reauth-regeneracao { password }`, ADM only: a correct value sets `regeneracaoAte` in the session for 5 min (`hasRegeneracaoReauth(request)` in `features/auth/routes.ts`). Step 7.2 may use this flag or the `password` field of the `regerar` request above.
+- Reauth (built in Step 3.1): `POST /api/auth/reauth-regeneracao { password }`, ADM only: a correct value sets `regeneracaoAte` in the session for 5 min (`hasRegeneracaoReauth(request)` in `features/auth/routes.ts`). Step 7.2 uses this flag only: `regerar` has no `password` field; on a `428` the SPA calls the reauth route (throttled there) and repeats the request.
 
 **Audit** (SECURITY_FINDINGS §3 item 16, within "no DB change", D-07/D-10).
 - One global `onResponse` hook writes a pino line `{ audit: true, event, user, role, ip, method, route, status, reqId, details }` for every non-GET `/api/*` request. Handlers put ids ok/skipped, the Cancelar `force` flag (D-12) and similar facts into `request.auditDetails`.
@@ -493,7 +493,7 @@ Also dropped: Auditoria › Médias Execução (D-06; a commented report call, n
 
 | `acao` | Body extras | Per document | Skip rule |
 |---|---|---|---|
-| `regerar` | `password?` | `INSERT SVR_QUEUE ('EXECUCAO','ESPERA')` + `ERR_ERROS_SIID 'DOCUMENTO REGERADO POR <user>'`, one transaction for the batch (no package call) | annulled: `ATRIBUTO9 = 'A' OR DISPONIVEL_RF = 'ANU'` (A-06) |
+| `regerar` | none (reauth flag, §5) | `INSERT SVR_QUEUE ('EXECUCAO','ESPERA')` + `ERR_ERROS_SIID 'DOCUMENTO REGERADO POR <user>'`, one transaction for the batch (no package call) | annulled: `ATRIBUTO9 = 'A' OR DISPONIVEL_RF = 'ANU'` (A-06) |
 | `reimprimir`, `segunda-via`, `copia` | `impressoraId?` (valid printer) | `INSERT SVR_QUEUE ('IMPRESSAO' \| '2.VIA' \| 'COPIA', 'ESPERA', IMPRESSORA_ID)` | annulled (A-06, D-28); `segunda-via` also `N_IMPRESSOES = 0` → message #10 |
 | `anular` | | `ANULAR` → commit → re-read (§3) | `DISPONIVEL_RF <> 'ANU'` after the call |
 | `cancelar` | `force: boolean` | `UPDATE SVR_QUEUE SET ESTADO='CANCELLED' WHERE TIPO_QUEUE_RF='EXECUCAO' AND DOCUMENTO_ID=:id [AND ESTADO IN ('TERMINADO','ESPERA','ENQUEUED','EM EXECUCAO','ERRO')]` | none (D-12) |

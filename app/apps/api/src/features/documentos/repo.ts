@@ -11,7 +11,7 @@ import {
 import { AppError, mapOracleError } from '../../db/errors.ts';
 import { withConnection, type DbConnection, type DbPool, type SessionUser } from '../../db/oracle.ts';
 import type { CrudCtx, Row } from '../../lib/crud.ts';
-import { buildListQuery, dateSelect, selectList, type BuiltSql } from '../../lib/listQuery.ts';
+import { buildListQuery, buildWhere, dateSelect, selectList, type BuiltSql } from '../../lib/listQuery.ts';
 import {
   contrapartida,
   documentosServer,
@@ -46,6 +46,8 @@ export interface DocumentosRepo {
   conversao(tipo: Conversao, valor: string, user: SessionUser): Promise<string | null>;
   /** `DISPONIBILIDADE` of the document; undefined = no such document. */
   disponibilidade(id: number, user: SessionUser): Promise<string | undefined>;
+  /** Every id of the query (no paging, no sort): the `consulta` selection of the batch actions (§4.2). */
+  ids(q: ListQuery, ctx: CrudCtx): Promise<number[]>;
 }
 
 export const colunasDetalhe = (role: Role) =>
@@ -154,6 +156,8 @@ const documentosBase = defineResource({
     ),
   ),
 });
+/** §4.2: a `consulta` selection above this is refused (SELECCAO_EXCESSIVA); the list count cap. */
+export const MAX_SELECCAO = 10_000;
 const precisaVista = (q: ListQuery) =>
   (q.preset !== undefined && SO_NA_VISTA.presets.includes(q.preset)) ||
   SO_NA_VISTA.colunas.some((c) => q.filters[c] || q.sort.some((s) => s.column === c));
@@ -195,6 +199,16 @@ export function oracleDocumentosRepo(pool: DbPool, callTimeoutMs: number): Docum
         return { rows: ids.flatMap((id): Row[] => { const r = byId.get(id); return r ? [r] : []; }), total: n?.N ?? 0 };
       }),
 
+    ids: (q, ctx) =>
+      run(ctx.user, 'ids', async (conn) => {
+        const extra = await extraWhere(conn, q);
+        const resource = precisaVista(q) ? documentosServer : documentosBase;
+        const where = buildWhere(resource, q, undefined, extra);
+        // One row past the §4.2 cap is enough for the route to refuse the selection.
+        const sql = `SELECT ID FROM ${resource.source}${where.sql ? ` WHERE ${where.sql}` : ''} FETCH FIRST ${MAX_SELECCAO + 1} ROWS ONLY`;
+        return (await rows<{ ID: number }>(conn, sql, where.binds)).map((r) => r.ID);
+      }),
+
     detalhe: (id, role, user) =>
       run(user, 'detalhe', async (conn) => (await rows(conn, detalheSql(role), { id }))[0]),
 
@@ -233,6 +247,11 @@ export interface DocumentosSeed {
   erros?: Row[];
   recibos?: { NMRECINUE: number; NMRECIBO: number }[];
   pessoas?: { CDIDEPER: string; CDPERSON: number }[];
+  /** Step 7.2 (operacoes/memoria.ts): DOC_MODELOS_DOCUMENT dispatch modes, valid printer ids,
+   * ids for which PKG_SIID_UTIL.CAN_BE_UPLOADED_EDOC would return 1. */
+  modelos?: { ID: string; MODO_EXPEDICAO_RF: string | null }[];
+  impressorasValidas?: string[];
+  edocOk?: number[];
 }
 
 const TAB_COLUNAS: Record<Tab, { cols: string[]; ordem: string }> = {
@@ -256,13 +275,15 @@ export function memoryDocumentosRepo(seed: DocumentosSeed): DocumentosRepo {
   const comentados = new Set((seed.comentarios ?? []).map((c) => c['DOCUMENTO_ID']));
   const listCols = Object.keys(documentosServer.columns);
 
-  const listRows = docs.map((d) => ({
+  // Rebuilt on every list: the Step 7.2 operations mutate the seed (anular, clonar) and the dev
+  // list must show it, like the Forms re-query did.
+  const listRows = () => docs.map((d) => ({
     ...pick(d, listCols),
     COR: d['DISPONIBILIDADE'] === 'OFF' ? 'OFFLINE' : d['DISPONIBILIDADE'] === 'ANU' || d['ATRIBUTO9'] === 'A' ? 'ANULADO' : null,
     COMENTARIO: comentados.has(d['ID']) ? '***' : null,
   }));
   const vazio = (v: unknown) => v == null;
-  const store = memoryStore(documentosServer, listRows, {
+  const store = () => memoryStore(documentosServer, listRows(), {
     // ponytail: JS twins of PRESETS, close enough for dev/unit data (the SQL is contract-tested):
     // Em erro = the document's last queue row is ERRO; A executar / Execução ignore the MIN(id) cut.
     presets: {
@@ -342,9 +363,14 @@ export function memoryDocumentosRepo(seed: DocumentosSeed): DocumentosRepo {
         const values = ids.size > 0 ? [...ids].map(String) : ['-1'];
         base.filters = { ...base.filters, ID: [...(base.filters['ID'] ?? []), { op: 'in', values }] };
       }
-      const { rows, total } = await store.list(base, {}, ctx);
+      const { rows, total } = await store().list(base, {}, ctx);
       // Read-only resource: no `_rid`, as in the Oracle list.
       return { rows: rows.map((r) => pick(r, listCols)), total };
+    },
+
+    async ids(q, ctx) {
+      const { rows } = await this.list({ ...q, sort: [], page: 1, size: MAX_SELECCAO + 1 }, ctx);
+      return rows.map((r) => Number(r['ID']));
     },
 
     async detalhe(id, role) {

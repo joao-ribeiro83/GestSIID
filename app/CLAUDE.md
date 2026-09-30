@@ -103,6 +103,7 @@ rules and exact messages. Real columns: `../analysis/db/tables/<TABLE>.md`.
 | Form alert texts | Exact Portuguese text in the feature (`const JA_ASSOCIADO = '…'`) or `db/errors.ts` for ORA mappings. | `features/variaveis/routes.ts` |
 | Sort button on two columns / an expression; role-limited sort | `sortAliases: { LOTE: ['LOTE_ID', 'LOTE_ORDEM'] }`, `sortRoles: { USER: ['ID'] }` on the resource. | `resources/documentos.ts` |
 | Search that is not a column filter (PROCURAR, Mostrar grupo) | Parsed as `params` / `paramModelo` / `grupo`; the feature passes `buildListQuery(…, { extra })`, else 400. | `features/documentos/repo.ts` |
+| Batch action over a selection (queue inserts, package calls) | `POST /api/<feature>/acoes/<acao>` with `{ ids \| consulta }` (`repo.ids` resolves the query); pure rules in `regras.ts`, one service function per action over a narrow port (`OperacoesDb`) with an Oracle and a memory implementation; `{ ok, skipped: [{ id, motivo }] }`. Package calls never share a transaction with app DML (A-01). | `features/documentos/operacoes/` |
 
 No engine file needs a change for a plain screen. Each Phase 4 screen still needed one small
 engine extension (`SqlCall` + `writeOnly`, `exclude`, `visibleWhen`, `defaults`): add it to
