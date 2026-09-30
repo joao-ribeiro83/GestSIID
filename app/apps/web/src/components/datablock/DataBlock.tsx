@@ -20,6 +20,8 @@ import {
   useTable,
 } from '@tanstack/react-table';
 import {
+  Archive,
+  Ban,
   CircleAlert,
   CircleHelp,
   Circle,
@@ -45,6 +47,7 @@ import {
 import { ApiError, apiFetch } from '@/api/client';
 import { useConfirm } from '@/components/shell/confirm-dialog-provider';
 import { Button } from '@/components/ui/button';
+import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,15 +77,22 @@ import { formatFilterText, nextSort, parseFilterText } from './qbe';
  * DataBlock (UI_SPEC §3): the Forms multi-record block over TanStack Table + TanStack Query.
  * The server filters (query by example), sorts and pages; the block keeps unsaved rows in a local
  * overlay until Guardar, and asks #46 before anything would throw them away.
- * Not in this step: presets bar, context chips, URL state, LOV cells, row tones, context menus.
+ * Not in this step: presets bar, context chips, URL state, LOV cells (the screen draws its own
+ * presets and chips and passes them as `preset` / `extraQuery`).
  */
+
+/** Extra list parameters of Documentos (Procurar por parâmetros, Mostrar grupo). */
+export type ExtraQuery = Pick<ListQuery, 'params' | 'paramModelo' | 'grupo'>;
+
+/** Read-only row tone (§3.8): Forms POST-QUERY visual attributes OFFLINE / ANULADO. */
+export type RowTone = 'offline' | 'anulado';
 
 export type Selection =
   | { mode: 'none' }
   | { mode: 'ids'; ids: (string | number)[] }
   | {
       mode: 'consulta';
-      consulta: Pick<ListQuery, 'filters' | 'preset'>;
+      consulta: Pick<ListQuery, 'filters' | 'preset'> & ExtraQuery;
       total: number;
       capped: boolean;
     };
@@ -97,6 +107,9 @@ export interface ColumnView<Row> {
   hidden?: boolean;
   /** Shortened header; the full label goes to title/aria-label. */
   header?: string;
+  /** Sort key of the header when it is not the column itself (a `resource.sortAliases` key, e.g.
+   * Documentos `LOTE`, `REFERENCIA`). Default: the column when it has `sort: true`. */
+  sortKey?: string;
   render?: (row: Row) => ReactNode;
   /** Select filter (`in`), select editor and label lookup from a domain. */
   options?: { source: 'dominio'; dominioId: string };
@@ -117,6 +130,8 @@ export interface DataBlockHandle {
   discard: () => void;
   /** #46 when dirty: true = go on (saved or discarded), false = stay. */
   confirmLeave: () => Promise<boolean>;
+  /** After a batch action (§3.7): the selection is cleared. */
+  clearSelection: () => void;
 }
 
 export interface DataBlockProps<Row extends GridRow = GridRow> {
@@ -154,6 +169,13 @@ export interface DataBlockProps<Row extends GridRow = GridRow> {
   saveStep?: (step: SaveStep) => Promise<unknown>;
   /** Named server-side filter (`resource.presets`); a change goes back to page 1. */
   preset?: string;
+  /** `param[…]`, `paramModelo`, `grupo`; a change goes back to page 1 and clears the selection. */
+  extraQuery?: ExtraQuery;
+  rowTone?: (row: Row) => RowTone | null;
+  /** Items of the row context menu (right click, Shift+F10, Menu key); the row becomes current first. */
+  rowMenu?: (row: Row) => ReactNode;
+  /** Read-only blocks (`edit: 'none'`): Enter or double-click on a row. */
+  onRowActivate?: (row: Row, how: 'enter' | 'dblclick') => void;
   emptyText?: string;
   pageSize?: number;
   className?: string;
@@ -204,6 +226,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
   );
   const [selection, setSelection] = useState<Selection>({ mode: 'none' });
   const [panel, setPanel] = useState<{ row: Row | null } | null>(null);
+  const [menuRid, setMenuRid] = useState<string | null>(null);
   const [barError, setBarError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const focusBody = useRef(false);
@@ -220,7 +243,11 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
   // ── data ─────────────────────────────────────────────────────────────────────────────────
   const masterKeys = props.master?.keys;
   const enabled = props.master === undefined || masterKeys !== null;
-  const fetched: ListQuery = props.preset === undefined ? query : { ...query, preset: props.preset };
+  const fetched: ListQuery = {
+    ...query,
+    ...(props.preset === undefined ? {} : { preset: props.preset }),
+    ...props.extraQuery,
+  };
   const list = useQuery({
     queryKey: [endpoint, masterKeys ?? null, fetched],
     queryFn: () => apiFetch<PagedResult<Row>>(`${endpoint}?${toQueryString(fetched)}`),
@@ -236,7 +263,9 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     const fresh = Object.entries(overlay)
       .filter(([, e]) => e.state === 'new')
       .map(([rid, e]) => ({ ...blank, ...(masterKeys ?? {}), ...e.values, _rid: rid }) as Row);
-    const server = (enabled ? (list.data?.rows ?? []) : []).map((r) => {
+    // A read-only resource's rows carry no `_rid` (nothing to lock): its key stands in.
+    const server = (enabled ? (list.data?.rows ?? []) : []).map((raw) => {
+      const r = raw._rid === undefined ? ({ ...raw, _rid: String(raw[resource.tiebreak]) } as Row) : raw;
       const e = overlay[r._rid];
       return e && e.state !== 'new' ? ({ ...r, ...e.values } as Row) : r;
     });
@@ -245,6 +274,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
 
   const rowIndex = rows.findIndex((r) => r._rid === current.rid);
   const currentRow = rowIndex >= 0 ? (rows[rowIndex] ?? null) : null;
+  const menuRow = menuRid ? (rows.find((r) => r._rid === menuRid) ?? null) : null;
 
   // ── #46 guard ────────────────────────────────────────────────────────────────────────────
   /** `n` of "Erro no registo n": position on the page, or the key when the row is elsewhere. */
@@ -317,7 +347,13 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
 
   useImperativeHandle(
     props.handleRef,
-    () => ({ isDirty: () => dirtyRef.current, save, discard, confirmLeave }),
+    () => ({
+      isDirty: () => dirtyRef.current,
+      save,
+      discard,
+      confirmLeave,
+      clearSelection: () => setSelection({ mode: 'none' }),
+    }),
     [save, discard, confirmLeave],
   );
 
@@ -357,10 +393,13 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     setSelection({ mode: 'none' });
   }
 
-  const [seenPreset, setSeenPreset] = useState(props.preset);
-  if (seenPreset !== props.preset) {
-    setSeenPreset(props.preset);
-    setQuery((q) => (q.page === 1 ? q : { ...q, page: 1 }));
+  // Preset or chips changed: page 1, no selection; `todos` also goes back to the default sort
+  // (§3.4, BR-DOC-04).
+  const contextSig = JSON.stringify([props.preset ?? null, props.extraQuery ?? null]);
+  const [seenContext, setSeenContext] = useState(contextSig);
+  if (seenContext !== contextSig) {
+    setSeenContext(contextSig);
+    setQuery((q) => ({ ...q, page: 1, sort: props.preset === 'todos' ? [] : q.sort }));
     setSelection({ mode: 'none' });
   }
 
@@ -444,8 +483,22 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
 
   // ── sort (§3.5) ──────────────────────────────────────────────────────────────────────────
   const effectiveSort = query.sort.length > 0 ? query.sort : resource.defaultSort;
-  const onSort = (col: string, multi: boolean) => {
-    void runQuery((q) => ({ ...q, sort: nextSort(effectiveSort, col, multi), page: 1 }));
+  const onSort = (key: string, multi: boolean) => {
+    void runQuery((q) => ({ ...q, sort: nextSort(effectiveSort, key, multi), page: 1 }));
+  };
+  // USER may only sort by what `resource.sortRoles` lists (Documentos: Spool Id, D-08).
+  const roleSorts = props.role ? resource.sortRoles?.[props.role] : undefined;
+  const sortKeyOf = (c: ColumnView<never>) => {
+    const key = c.sortKey ?? (resource.columns[c.col]?.sort ? c.col : null);
+    return key && (!roleSorts || roleSorts.includes(key)) ? key : null;
+  };
+  const sortOf = (key: string) => {
+    const index = effectiveSort.findIndex((s) => s.column === key);
+    return {
+      dir: index >= 0 ? effectiveSort[index]!.direction : (false as const),
+      index,
+      count: effectiveSort.length,
+    };
   };
 
   // ── selection (§3.7) ─────────────────────────────────────────────────────────────────────
@@ -487,7 +540,13 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
         ? { mode: 'none' }
         : {
             mode: 'consulta',
-            consulta: { filters: query.filters, preset: fetched.preset },
+            consulta: {
+              filters: query.filters,
+              preset: fetched.preset,
+              params: fetched.params,
+              paramModelo: fetched.paramModelo,
+              grupo: fetched.grupo,
+            },
             total,
             capped,
           },
@@ -515,15 +574,6 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
       rowSelection: Object.fromEntries(rows.filter(isSelected).map((r) => [r._rid, true])),
     },
   });
-  const columnById = new Map(table.getAllLeafColumns().map((c) => [c.id, c]));
-  const sortOf = (col: string) => {
-    const column = columnById.get(col);
-    return {
-      dir: column?.getIsSorted() ?? false,
-      index: column?.getSortIndex() ?? -1,
-      count: effectiveSort.length,
-    };
-  };
   const pageCount = Math.max(1, table.getPageCount());
 
   // ── editing (§3.9) ───────────────────────────────────────────────────────────────────────
@@ -637,6 +687,10 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     } else if (key === 'PageDown') go(rowIndex + visibleRowCount());
     else if (key === 'PageUp') go(rowIndex - visibleRowCount());
     else if (key === ' ' && selectionMode === 'multi') toggleRow(rowIndex, e.shiftKey);
+    else if (key.toLowerCase() === 'a' && (e.ctrlKey || e.metaKey) && selectionMode === 'multi') {
+      if (selection.mode !== 'consulta') toggleAll();
+    } else if (key === 'Enter' && edit === 'none' && props.onRowActivate)
+      props.onRowActivate(currentRow, 'enter');
     else if (key === 'Enter' || key === 'F2') {
       if (edit === 'panel' && key === 'Enter' && canUpdate) setPanel({ row: currentRow });
       else startEdit(currentRow, current.col);
@@ -744,6 +798,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
       const isCurrent = row._rid === current.rid;
       const msgId = `${heading}-${row._rid}-msg`.replace(/\W/g, '');
       const error = entry?.error;
+      const tone = props.rowTone?.(row) ?? null;
       return (
         <RowView
           key={row._rid}
@@ -751,6 +806,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
           index={i}
           entry={entry}
           isCurrent={isCurrent}
+          tone={tone}
           selected={tr.getIsSelected()}
           msgId={error ? msgId : undefined}
           span={span}
@@ -760,7 +816,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
           }}
         >
           <td className={cn('w-6 border-border text-center', leadCount === 1 && 'border-r')}>
-            <Gutter entry={entry} />
+            <Gutter entry={entry} tone={tone} />
           </td>
           {selectionMode === 'multi' && (
             <td className="w-8 border-r border-border text-center">
@@ -796,7 +852,8 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
                   void moveTo(row._rid, ci);
                 }}
                 onDoubleClick={() => {
-                  if (edit === 'panel' && canUpdate) setPanel({ row });
+                  if (edit === 'none') props.onRowActivate?.(row, 'dblclick');
+                  else if (edit === 'panel' && canUpdate) setPanel({ row });
                   else startEdit(row, ci);
                 }}
                 className={cn(
@@ -943,6 +1000,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
               lead={lead}
               leadCount={leadCount}
               sortOf={sortOf}
+              sortKeyOf={sortKeyOf}
               onSort={onSort}
               shown={shown}
               isPending={isPendingCol}
@@ -971,7 +1029,30 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
               </tr>
             )}
           </thead>
-          <tbody onKeyDown={onBodyKey}>{body}</tbody>
+          {props.rowMenu ? (
+            <ContextMenu
+              onOpenChange={(open) => {
+                if (!open) setMenuRid(null);
+              }}
+            >
+              <ContextMenuTrigger asChild>
+                <tbody
+                  onKeyDown={onBodyKey}
+                  onContextMenu={(e) => {
+                    const rid = (e.target as HTMLElement).closest('tr')?.dataset['rid'];
+                    if (!rid) return e.preventDefault();
+                    setMenuRid(rid);
+                    void moveTo(rid);
+                  }}
+                >
+                  {body}
+                </tbody>
+              </ContextMenuTrigger>
+              <ContextMenuContent>{menuRow ? props.rowMenu(menuRow) : null}</ContextMenuContent>
+            </ContextMenu>
+          ) : (
+            <tbody onKeyDown={onBodyKey}>{body}</tbody>
+          )}
         </table>
       </div>
 
@@ -1026,6 +1107,7 @@ function RowView(props: {
   index: number;
   entry: OverlayEntry | undefined;
   isCurrent: boolean;
+  tone: RowTone | null;
   selected: boolean;
   msgId: string | undefined;
   span: number;
@@ -1038,6 +1120,8 @@ function RowView(props: {
   return (
     <>
       <tr
+        data-rid={props.row._rid}
+        data-tone={props.tone ?? undefined}
         aria-selected={selected || undefined}
         aria-rowindex={props.index + 1}
         aria-describedby={props.msgId}
@@ -1049,6 +1133,8 @@ function RowView(props: {
           entry?.state === 'new' && '[&>td:first-child]:shadow-[inset_2px_0_0_var(--row-new-bar)]',
           entry?.state === 'deleted' && 'bg-row-deleted',
           errorish && 'bg-row-error',
+          props.tone === 'offline' && '[&>td]:font-semibold [&>td]:text-text-offline',
+          props.tone === 'anulado' && '[&>td]:font-semibold [&>td]:text-text-anulado',
         )}
       >
         {props.children}
@@ -1078,7 +1164,19 @@ function RowView(props: {
 }
 
 /** Row state icon (§3.8), with a tooltip and screen-reader text. */
-function Gutter({ entry }: { entry: OverlayEntry | undefined }) {
+function Gutter({ entry, tone }: { entry: OverlayEntry | undefined; tone: RowTone | null }) {
+  if (!entry && tone) {
+    const [Icon, label, cls] =
+      tone === 'anulado'
+        ? [Ban, 'Anulado', 'text-text-anulado']
+        : [Archive, 'Offline', 'text-text-offline'];
+    return (
+      <span title={label} className="inline-flex items-center justify-center">
+        <Icon className={cn('size-3.5', cls)} aria-hidden />
+        <span className="sr-only">{label}</span>
+      </span>
+    );
+  }
   if (!entry) return null;
   const e = pt.db.estado;
   const [Icon, label, cls] =
