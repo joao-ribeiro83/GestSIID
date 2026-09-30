@@ -19,8 +19,10 @@ interface Props {
   /** Leading cells: gutter, and the select-all checkbox when selection is on. */
   lead: ReactNode;
   leadCount: number;
-  sortOf: (col: string) => { dir: false | 'asc' | 'desc'; index: number; count: number };
-  onSort: (col: string, multi: boolean) => void;
+  sortOf: (key: string) => { dir: false | 'asc' | 'desc'; index: number; count: number };
+  /** The sort key of a column for the current role (`ColumnView.sortKey` or the column), null = not sortable. */
+  sortKeyOf: (c: ColumnView<never>) => string | null;
+  onSort: (key: string, multi: boolean) => void;
   shown: (col: string) => FilterValue;
   isPending: (col: string) => boolean;
   errors: Record<string, string>;
@@ -40,6 +42,7 @@ export function HeaderRow({
   lead,
   leadCount,
   sortOf,
+  sortKeyOf,
   onSort,
   shown,
   isPending,
@@ -50,13 +53,13 @@ export function HeaderRow({
   onToBody,
 }: Props) {
   // Arrow keys move between headers and down into the filter row (§3.14).
-  const onHeaderKey = (e: React.KeyboardEvent<HTMLElement>, i: number, col: string) => {
+  const onHeaderKey = (e: React.KeyboardEvent<HTMLElement>, i: number, key: string | null) => {
     const row = e.currentTarget.closest('thead');
     const focus = (sel: string) => row?.querySelector<HTMLElement>(sel)?.focus();
     if (e.key === 'ArrowRight') focus(`[data-head="${i + 1}"]`);
     else if (e.key === 'ArrowLeft') focus(`[data-head="${i - 1}"]`);
     else if (e.key === 'ArrowDown') focus(`[data-filter="${i}"]`);
-    else if (e.key === 'Enter' && e.shiftKey) onSort(col, true);
+    else if (e.key === 'Enter' && e.shiftKey && key) onSort(key, true);
     else return;
     e.preventDefault();
   };
@@ -68,7 +71,8 @@ export function HeaderRow({
         {cols.map((c, i) => {
           const def = resource.columns[c.col];
           if (!def) return null;
-          const { dir, index, count } = sortOf(c.col);
+          const key = sortKeyOf(c);
+          const { dir, index, count } = sortOf(key ?? c.col);
           const label = c.header ?? def.label;
           return (
             <th
@@ -81,13 +85,13 @@ export function HeaderRow({
                 align(c, def.type),
               )}
             >
-              {def.sort ? (
+              {key ? (
                 <button
                   type="button"
                   data-head={i}
                   aria-label={c.header ? def.label : undefined}
-                  onClick={(e) => onSort(c.col, e.shiftKey)}
-                  onKeyDown={(e) => onHeaderKey(e, i, c.col)}
+                  onClick={(e) => onSort(key, e.shiftKey)}
+                  onKeyDown={(e) => onHeaderKey(e, i, key)}
                   className="inline-flex max-w-full items-center gap-1 rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   <span className="truncate">{label}</span>
@@ -107,7 +111,7 @@ export function HeaderRow({
                   data-head={i}
                   tabIndex={-1}
                   className="truncate"
-                  onKeyDown={(e) => onHeaderKey(e, i, c.col)}
+                  onKeyDown={(e) => onHeaderKey(e, i, null)}
                 >
                   {label}
                 </span>

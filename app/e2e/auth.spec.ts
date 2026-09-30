@@ -21,16 +21,21 @@ test('ADM login shows the full menu', async ({ page }) => {
   await expect(nav.getByText('Gador')).toBeVisible();
 });
 
-test('USER login hides admin-only menu entries', async ({ page }) => {
-  await login(page, 'USER1', 'user1');
-  await expect(page).toHaveURL('/');
-  const nav = page.getByRole('navigation', { name: 'Menu' });
-  // "Gestão" (Documentos' parent) is the only group a USER may see; its child starts collapsed
-  // on '/', so this checks group headers rather than expanding it.
-  await expect(nav.getByText('Gestão')).toBeVisible();
-  await expect(nav.getByText('Configuração')).toHaveCount(0);
-  await expect(nav.getByText('Administração')).toHaveCount(0);
-  await expect(nav.getByText('Gador')).toHaveCount(0);
+// The USER session from global-setup.ts (which logs USER1 in through the same API): one UI login
+// less, so this spec plus global-setup stay within the throttle's 5 logins/minute per IP.
+test.describe('USER session', () => {
+  test.use({ storageState: 'e2e/.auth/user.json' });
+
+  test('hides admin-only menu entries', async ({ page }) => {
+    await page.goto('/');
+    const nav = page.getByRole('navigation', { name: 'Menu' });
+    // "Gestão" (Documentos' parent) is the only group a USER may see; its child starts collapsed
+    // on '/', so this checks group headers rather than expanding it.
+    await expect(nav.getByText('Gestão')).toBeVisible();
+    await expect(nav.getByText('Configuração')).toHaveCount(0);
+    await expect(nav.getByText('Administração')).toHaveCount(0);
+    await expect(nav.getByText('Gador')).toHaveCount(0);
+  });
 });
 
 test('wrong password shows the Portuguese alert', async ({ page }) => {

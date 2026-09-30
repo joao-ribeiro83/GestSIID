@@ -2,11 +2,13 @@ import { request } from '@playwright/test';
 
 const WEB_PORT = 5174;
 const ADM_STATE = 'e2e/.auth/adm.json';
+const USER_STATE = 'e2e/.auth/user.json';
 
 /**
- * Logs in once as the fake ADM user and saves the session cookie, so most specs can start
- * already authenticated instead of each calling POST /auth/login (login-throttle.ts allows only
- * 5 attempts/minute per IP — every spec re-logging in would trip it well before the suite ends).
+ * Logs in once as the fake ADM user (and once as the USER one) and saves the session cookies, so
+ * most specs can start already authenticated instead of each calling POST /auth/login
+ * (login-throttle.ts allows only 5 attempts/minute per IP — every spec re-logging in would trip
+ * it well before the suite ends).
  */
 export default async function globalSetup(): Promise<void> {
   const ctx = await request.newContext({ baseURL: `http://127.0.0.1:${WEB_PORT}` });
@@ -25,4 +27,11 @@ export default async function globalSetup(): Promise<void> {
   if (!res?.ok()) throw new Error('global-setup: could not log in the fake ADM user');
   await ctx.storageState({ path: ADM_STATE });
   await ctx.dispose();
+
+  // The dev USER account (features/auth/dev-repo.ts), for the USER variant of Documentos.
+  const user = await request.newContext({ baseURL: `http://127.0.0.1:${WEB_PORT}` });
+  const login = await user.post('/api/auth/login', { data: { utilizador: 'USER1', password: 'user1' } });
+  if (!login.ok()) throw new Error('global-setup: could not log in the fake USER user');
+  await user.storageState({ path: USER_STATE });
+  await user.dispose();
 }
