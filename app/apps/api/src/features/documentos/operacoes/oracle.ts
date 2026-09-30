@@ -55,6 +55,11 @@ const MUDA_ESTADO = 'UPDATE SVR_QUEUE SET ESTADO = :para WHERE ESTADO = :de';
 // Popup ESTADO_PEDIDO.CANCELAR.
 const CANCELA_PEDIDO = "UPDATE SVR_QUEUE SET ESTADO = 'CANCELLED' WHERE ID = :q AND ESTADO IN ('ESPERA', 'TERMINADO')";
 const CONTAGEM = 'SELECT COUNT(*) AS N FROM SVR_QUEUE WHERE ESTADO = :estado';
+const DOCUMENTO_EXISTE = 'SELECT 1 AS OK FROM SVR_DOCUMENTOS WHERE ID = :id';
+// Block SVR_DOCUMENTO_COMENTARIOS: PRE-INSERT sequence, DATA / USER_ID from the block defaults (D-08).
+const COMENTAR =
+  'INSERT INTO SVR_DOCUMENTO_COMENTARIOS (COMENTARIO_ID, DATA, COMENTARIO, USER_ID, DOCUMENTO_ID) ' +
+  'VALUES (ID_COMENTARIO_DOCUMENTO_SEQ.NEXTVAL, SYSDATE, :comentario, :utilizador, :documento) RETURNING COMENTARIO_ID INTO :id';
 const LOTE_CLONE = 'UPDATE SVR_DOCUMENTOS SET LOTE_ID = :lote WHERE ID = :id';
 
 type Binds = Record<string, unknown>;
@@ -151,6 +156,19 @@ export function oracleOperacoesDb(pool: DbPool, callTimeoutMs: number): Operacoe
         await lockRow(conn, 'SVR_QUEUE', 'ID = :q AND DOCUMENTO_ID = :d', { q: queueId, d: documentoId }, {});
         if ((await affected(conn, CANCELA_PEDIDO, { q: queueId })) === 0)
           throw new AppError(409, 'PEDIDO_NAO_CANCELAVEL', pt.documentos.pedidoNaoCancelavel);
+      }),
+
+    comentar: (user, documentoId, comentario) =>
+      write(user, 'comentar', async (conn) => {
+        if ((await rows(conn, DOCUMENTO_EXISTE, { id: documentoId })).length === 0)
+          throw new AppError(404, 'NAO_ENCONTRADO', 'Registo não encontrado.');
+        const r = await conn.execute<unknown>(COMENTAR, {
+          comentario,
+          utilizador: user.username,
+          documento: documentoId,
+          id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+        });
+        return (r.outBinds as { id: number[] }).id[0]!;
       }),
 
     contagemFila: (user, estado) =>

@@ -109,6 +109,40 @@ test.describe('ADM', () => {
     await expect(row(page, 42)).toBeVisible();
     await expect(row(page, 43)).toBeVisible();
   });
+
+  test('Comentários: Guardar adds the comment (BR-DOC-30), the ✎ marker appears, blank text cannot be saved', async ({ page }) => {
+    await lote(page, 10);
+    await expect(row(page, 38).getByRole('button', { name: 'Comentários' })).toHaveCount(0);
+    await row(page, 38).getByRole('gridcell', { name: '38', exact: true }).click();
+    await page.getByRole('tab', { name: 'Comentários' }).click();
+
+    const texto = page.getByRole('textbox', { name: 'Comentário' });
+    const guardar = page.getByRole('button', { name: 'Guardar' });
+    await expect(guardar).toBeDisabled();
+    await texto.fill('   ');
+    await expect(guardar).toBeDisabled();
+
+    await texto.fill('Morada confirmada por telefone');
+    await guardar.click();
+    await expect(page.getByText('Guardado.')).toBeVisible();
+    await expect(texto).toHaveValue('');
+    const tabela = page.getByRole('table', { name: 'Comentários' });
+    await expect(tabela.getByRole('row').filter({ hasText: 'Morada confirmada por telefone' })).toHaveCount(1);
+    await expect(row(page, 38).getByRole('button', { name: 'Comentários' })).toBeVisible();
+  });
+
+  test('Anexos: Spool Id / Modelo / Estado / Data do pedido; double-click opens the document group', async ({ page }) => {
+    const filtro = grid(page).getByLabel('Filtro Id');
+    await filtro.fill('41');
+    await filtro.press('Enter');
+    await row(page, 41).getByRole('gridcell', { name: '41', exact: true }).click();
+    await page.getByRole('tab', { name: 'Anexos' }).click();
+    const tabela = page.getByRole('table', { name: 'Anexos' });
+    await expect(tabela.getByRole('columnheader')).toHaveText(['Spool Id', 'Modelo', 'Estado', 'Data do pedido']);
+    await expect(tabela.locator('tbody tr')).toHaveCount(2);
+    await tabela.locator('tbody tr').filter({ hasText: '42' }).dblclick();
+    await expect(page.getByText('Grupo do documento 42')).toBeVisible();
+  });
 });
 
 test.describe('USER', () => {
@@ -133,5 +167,15 @@ test.describe('USER', () => {
     await grid(page).locator('tbody tr').first().locator('td').nth(3).click({ button: 'right' });
     await expect(page.getByRole('menuitem', { name: 'Mostrar Grupo' })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'Clonar' })).toHaveCount(0);
+  });
+
+  test('Comentários is read-only for USER: the grid, no Comentário box, no Guardar (D-08)', async ({ page }) => {
+    await page.goto('/gestao/documentos');
+    await expect(grid(page).locator('tbody tr').first()).toBeVisible({ timeout: 20_000 });
+    await grid(page).locator('tbody tr').first().locator('td').nth(3).click();
+    await page.getByRole('tab', { name: 'Comentários' }).click();
+    await expect(page.getByRole('tabpanel', { name: 'Comentários' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'Comentário' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Guardar' })).toHaveCount(0);
   });
 });

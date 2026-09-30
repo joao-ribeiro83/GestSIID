@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleAlert, MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { pt, type ColumnDef } from '@gestsiid/shared';
@@ -20,8 +20,8 @@ import { cn } from '@/lib/utils';
 /**
  * Detail tabs of the current document (UI_SPEC §4.2): Mais Informação (`GET /api/documentos/:id`,
  * DETALHES_DOCUMENTO), Parâmetros, Comentários, Anexos, Detalhes (the queue, SVR_QUEUE) and Log
- * (ERR_ERROS_SIID), each `GET /api/documentos/:id/<tab>` → `{ rows }`. Read-only here; the
- * comment insert is Step 7.4.
+ * (ERR_ERROS_SIID), each `GET /api/documentos/:id/<tab>` → `{ rows }`. Read-only except the ADM
+ * comment box of Comentários (`POST /api/documentos/:id/comentarios`, BR-DOC-30, D-08).
  */
 
 type Row = Record<string, unknown>;
@@ -239,30 +239,70 @@ export function Parametros({ docId }: { docId: number | null }) {
   );
 }
 
-export function Comentarios({ docId }: { docId: number | null }) {
+/** The grid for everyone; ADM also gets the Comentário box + Guardar (USER form: read-only). */
+export function Comentarios({ docId, adm }: { docId: number | null; adm: boolean }) {
+  const qc = useQueryClient();
+  const [texto, setTexto] = useState('');
+  const guardar = useMutation({
+    mutationFn: () =>
+      apiFetch(`/documentos/${docId}/comentarios`, { method: 'POST', body: JSON.stringify({ comentario: texto.trim() }) }),
+    onSuccess: () => {
+      setTexto('');
+      toast.success(pt.db.guardado);
+    },
+    // The list carries the ✎ marker, so it is refetched with the tab.
+    onSettled: () => void qc.invalidateQueries({ queryKey: ['/documentos'] }),
+  });
   return (
-    <Grelha
-      label="Comentários"
-      docId={docId}
-      tab="comentarios"
-      cols={[
-        dataCol('DATA', 'Data'),
-        { key: 'USER_ID', label: 'Utilizador', width: 104 },
-        { key: 'COMENTARIO', label: 'Comentário', cls: 'whitespace-normal line-clamp-3' },
-      ]}
-    />
+    <div className="flex flex-col gap-3">
+      <Grelha
+        label="Comentários"
+        docId={docId}
+        tab="comentarios"
+        cols={[
+          dataCol('DATA', 'Data'),
+          { key: 'USER_ID', label: 'Utilizador', width: 104 },
+          { key: 'COMENTARIO', label: 'Comentário', cls: 'whitespace-normal line-clamp-3' },
+        ]}
+      />
+      {adm && docId !== null && (
+        <form
+          className="flex flex-col items-start gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (texto.trim()) guardar.mutate();
+          }}
+        >
+          <textarea
+            aria-label="Comentário"
+            rows={3}
+            maxLength={2000}
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            className="w-full max-w-2xl rounded-md border border-border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <Button type="submit" size="sm" disabled={!texto.trim() || guardar.isPending}>
+            Guardar
+          </Button>
+        </form>
+      )}
+    </div>
   );
 }
 
-export function Anexos({ docId }: { docId: number | null }) {
+/** Attachments are linked documents (SVR_ANEXOS_DOCUMENTO), not files: nothing to upload. */
+export function Anexos({ docId, onOpen }: { docId: number | null; onOpen: (id: number) => void }) {
   return (
     <Grelha
       label="Anexos"
       docId={docId}
       tab="anexos"
+      onActivate={(row) => onOpen(Number(row['ANEXODOC_ID']))}
       cols={[
         { key: 'ANEXODOC_ID', label: 'Spool Id', width: 120, cls: 'text-right font-mono tabular-nums' },
-        { key: 'TIPO_ANEXO_RF', label: 'Tipo Anexo' },
+        { key: 'MODELO_ID', label: 'Modelo', width: 120, cls: 'font-mono' },
+        { key: 'ESTADO', label: 'Estado', width: 128, render: (r) => <StatusBadge value={r['ESTADO']} domain="documento" /> },
+        dataCol('DATA_PEDIDO', 'Data do pedido'),
       ]}
     />
   );

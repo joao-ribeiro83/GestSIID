@@ -432,3 +432,35 @@ describe('clonar (BR-DOC-25, D-17, D-20, A-01: EXECUTA commits by itself)', () =
     expect(db.closeArgs).toEqual([{ drop: true }]);
   });
 });
+
+describe('comentar (BR-DOC-30: ID_COMENTARIO_DOCUMENTO_SEQ, SYSDATE, session user; one transaction)', () => {
+  const EXISTE = /FROM\s+SVR_DOCUMENTOS\s+WHERE\s+ID\s*=\s*:id/i;
+  const comDb = (existe: boolean) =>
+    fakeDb((sql) => {
+      if (EXISTE.test(sql)) return { rows: existe ? [{ OK: 1 }] : [] };
+      if (DML.test(sql)) return { outBinds: { id: [987656] } };
+      return {};
+    });
+
+  it('checks the document, then INSERTs with the sequence and SYSDATE, binds only, returns the new id, one commit', async () => {
+    const db = comDb(true);
+    const id = await db.db.comentar(USER, 987654, 'ZVALX');
+    expect(id).toBe(987656);
+    const [ins, ...resto] = dml(db.calls);
+    expect(resto).toEqual([]);
+    expect(tableOf(ins!.sql)).toBe('SVR_DOCUMENTO_COMENTARIOS');
+    expect(ins!.sql).toMatch(/ID_COMENTARIO_DOCUMENTO_SEQ\.NEXTVAL/i);
+    expect(ins!.sql).toMatch(/SYSDATE/i);
+    expect(ins!.sql).toMatch(/RETURNING\s+COMENTARIO_ID\s+INTO\s+:id/i);
+    expect(bound(ins!.binds)).toEqual(expect.arrayContaining(['ZVALX', 'ZUSERX', '987654']));
+    for (const c of sqls(db.calls)) noLiterals(c.sql);
+    expect(db.state).toEqual({ commits: 1, rollbacks: 0, closes: 1 });
+  });
+
+  it('no such document → 404 NAO_ENCONTRADO, no INSERT', async () => {
+    const db = comDb(false);
+    await expect(db.db.comentar(USER, 987654, 'ZVALX')).rejects.toMatchObject({ statusCode: 404, code: 'NAO_ENCONTRADO' });
+    expect(dml(db.calls)).toEqual([]);
+    expect(db.state.commits).toBe(0);
+  });
+});

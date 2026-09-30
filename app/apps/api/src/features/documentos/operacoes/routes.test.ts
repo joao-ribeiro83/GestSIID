@@ -673,3 +673,52 @@ describe('GET /api/documentos/fila/contagem (D-28 confirmation count)', () => {
     expect((await t.app.inject({ url: '/api/documentos/fila/contagem?estado=SUSPENSO' })).json()).toEqual({ n: 7 });
   });
 });
+
+describe('POST /api/documentos/:id/comentarios (BR-DOC-30, D-08: ADM only)', () => {
+  it('adds a comment: id from the sequence, session user, 201, and the GET tab and list marker see it', async () => {
+    const t = appWith();
+    const r = await t.post('/api/documentos/2/comentarios', { comentario: '  Verificar morada  ' });
+    expect(r.status).toBe(201);
+    expect(typeof r.body['COMENTARIO_ID']).toBe('number');
+    expect(t.s.comentarios).toHaveLength(1);
+    expect(t.s.comentarios![0]).toMatchObject({ DOCUMENTO_ID: 2, USER_ID: 'JOAO', COMENTARIO: 'Verificar morada' });
+    const tab = await t.app.inject({ method: 'GET', url: '/api/documentos/2/comentarios' });
+    expect(tab.json().rows).toMatchObject([{ USER_ID: 'JOAO', COMENTARIO: 'Verificar morada' }]);
+    const lista = await t.app.inject({ method: 'GET', url: '/api/documentos?size=50' });
+    const linha = lista.json().rows.find((x: Row) => x['ID'] === 2);
+    expect(linha['COMENTARIO']).toBe('***');
+  });
+
+  it('ids grow with each comment', async () => {
+    const t = appWith();
+    const a = await t.post('/api/documentos/2/comentarios', { comentario: 'a' });
+    const b = await t.post('/api/documentos/1/comentarios', { comentario: 'b' });
+    expect(b.body['COMENTARIO_ID'] as number).toBeGreaterThan(a.body['COMENTARIO_ID'] as number);
+  });
+
+  it.each([{}, { comentario: '' }, { comentario: '   ' }, { comentario: 'x'.repeat(2001) }, { comentario: 'a', extra: 1 }])(
+    'invalid body %j → 400 and nothing written',
+    async (body) => {
+      const t = appWith();
+      expect((await t.post('/api/documentos/2/comentarios', body)).status).toBe(400);
+      expect(t.s.comentarios ?? []).toEqual([]);
+    },
+  );
+
+  it('accepts exactly 2000 characters (COMENTARIO is VARCHAR2(2000))', async () => {
+    expect((await appWith().post('/api/documentos/2/comentarios', { comentario: 'x'.repeat(2000) })).status).toBe(201);
+  });
+
+  it('unknown document → 404 and nothing written', async () => {
+    const t = appWith();
+    expect((await t.post('/api/documentos/999/comentarios', { comentario: 'a' })).status).toBe(404);
+    expect(t.s.comentarios ?? []).toEqual([]);
+  });
+
+  it('USER → 403, no session → 401', async () => {
+    const u = appWith({ role: 'USER' });
+    expect((await u.post('/api/documentos/2/comentarios', { comentario: 'a' })).status).toBe(403);
+    expect(u.s.comentarios ?? []).toEqual([]);
+    expect((await appWith({ semSessao: true }).post('/api/documentos/2/comentarios', { comentario: 'a' })).status).toBe(401);
+  });
+});

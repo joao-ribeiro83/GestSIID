@@ -137,6 +137,20 @@ export function memoryOperacoesDb(seed: DocumentosSeed): OperacoesDb {
       q['ESTADO'] = 'CANCELLED';
     },
 
+    async comentar(user, documentoId, comentario) {
+      if (!doc(documentoId)) throw new AppError(404, 'NAO_ENCONTRADO', 'Registo não encontrado.');
+      const comentarios = (seed.comentarios ??= []);
+      const id = comentarios.reduce((m, c) => Math.max(m, Number(c['COMENTARIO_ID'] ?? 0)), 0) + 1;
+      comentarios.push({
+        COMENTARIO_ID: id,
+        DOCUMENTO_ID: documentoId,
+        DATA: new Date().toISOString().slice(0, 19),
+        USER_ID: user.username,
+        COMENTARIO: comentario,
+      });
+      return id;
+    },
+
     async contagemFila(_user, estado) {
       return fila.filter((q) => q['ESTADO'] === estado).length;
     },

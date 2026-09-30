@@ -254,10 +254,10 @@ function DocumentosScreen() {
             <Parametros docId={docId} />
           </Tabs.Content>
           <Tabs.Content value="comentarios" className="pt-3">
-            <Comentarios docId={docId} />
+            <Comentarios docId={docId} adm={adm} />
           </Tabs.Content>
           <Tabs.Content value="anexos" className="pt-3">
-            <Anexos docId={docId} />
+            <Anexos docId={docId} onOpen={mostrarGrupo} />
           </Tabs.Content>
           <Tabs.Content value="fila" className="pt-3">
             <Fila docId={docId} />
