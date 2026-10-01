@@ -20,6 +20,10 @@ const modeloCells = (page: Page) => grid(page).locator('tbody tr td:nth-child(2)
 // The footer reads "N registos" with no current row, "Registo P de N" once a row is current
 // (Nova impressora here always requires one first) — the total is always the *last* number.
 async function total(page: Page): Promise<number> {
+  // While the grid loads, the footer already reads "0 registos": wait for the data.
+  const table = block(page).locator('table[role="grid"]'); // CSS: still found while a dialog is open
+  await expect(table).toBeVisible();
+  await expect(table).not.toHaveAttribute('aria-busy', 'true');
   const text = (await footer(page).textContent()) ?? '';
   const nums = text.match(/\d+/g) ?? ['0'];
   return Number(nums[nums.length - 1]);

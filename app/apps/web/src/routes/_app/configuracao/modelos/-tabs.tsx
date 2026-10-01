@@ -1,4 +1,4 @@
-import { useCallback, useImperativeHandle, useMemo, useRef, useState, type RefObject } from 'react';
+import { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, History } from 'lucide-react';
 import {
@@ -22,9 +22,6 @@ import { dom, modeloPath, type TabProps } from './-common';
  * leaving a record (POST-RECORD), so each grid asks before its current row changes.
  */
 
-const leaveOf = (ref: RefObject<DataBlockHandle | null>) => async () =>
-  (await ref.current?.confirmLeave()) ?? true;
-
 /** The form's read-only check box (S/N). */
 const check = (col: string) => (row: GridRow) =>
   row[col] === 'S' ? (
@@ -41,7 +38,7 @@ export function Parametros({ keys, role, guardRef }: TabProps) {
   const grid = useRef<DataBlockHandle>(null);
   const [historico, setHistorico] = useState<GridRow | null>(null);
   const endpoint = `${modeloPath(keys)}/parametros-report`;
-  const leave = leaveOf(grid);
+  const leave = async () => (await grid.current?.confirmLeave()) ?? true;
   useImperativeHandle(guardRef, () => ({ leave }));
 
   // DETALHES went to DOC_PARAMETROS_OMISSAO: leaving this record first (ASK_COMMIT).
@@ -162,7 +159,7 @@ function HistoricoDialog(props: {
   onClose: () => void;
 }) {
   const grid = useRef<DataBlockHandle>(null);
-  const leave = leaveOf(grid);
+  const leave = async () => (await grid.current?.confirmLeave()) ?? true;
   return (
     <Dialog
       open
@@ -194,7 +191,7 @@ function HistoricoDialog(props: {
 /** "Atributos" (eDoc) and "Atributos Arquivo": only Ramo changes, for the whole group (BR-MOD-11). */
 export function Atributos({ keys, role, guardRef, arquivo }: TabProps & { arquivo?: boolean }) {
   const grid = useRef<DataBlockHandle>(null);
-  const leave = leaveOf(grid);
+  const leave = async () => (await grid.current?.confirmLeave()) ?? true;
   useImperativeHandle(guardRef, () => ({ leave }));
   const columns = useMemo<ColumnView<GridRow>[]>(
     () => [

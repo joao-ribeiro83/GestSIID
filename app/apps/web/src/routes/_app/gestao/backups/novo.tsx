@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -62,7 +62,7 @@ function NovoBackupScreen() {
   const qc = useQueryClient();
   const confirm = useConfirm();
   const grid = useRef<DataBlockHandle>(null);
-  const bytesPorId = useRef(new Map<number, number>());
+  const [bytesPorId, setBytesPorId] = useState(() => new Map<number, number>());
   const [step, setStep] = useState<1 | 2>(1);
   const [mes, setMes] = useState('');
   const [observacoes, setObservacoes] = useState('');
@@ -92,11 +92,22 @@ function NovoBackupScreen() {
     selection.mode === 'consulta'
       ? (totais.data?.totalBytes ?? 0)
       : selection.mode === 'ids'
-        ? selection.ids.reduce<number>((s, id) => s + (bytesPorId.current.get(Number(id)) ?? 0), 0)
+        ? selection.ids.reduce<number>((s, id) => s + (bytesPorId.get(Number(id)) ?? 0), 0)
         : 0;
 
   // A new selection makes the last size / selection alert stale.
-  useEffect(() => setAlerta(null), [selection]);
+  const mudarSeleccao = useCallback((s: Selection) => {
+    setSelection(s);
+    setAlerta(null);
+  }, []);
+  // Stable: DataBlock calls it from an effect that depends on it.
+  const guardarBytes = useCallback((rows: Candidato[]) => {
+    setBytesPorId((m) => {
+      const n = new Map(m);
+      for (const r of rows) n.set(Number(r.ID), Number(r.TAMANHO_BYTES) || 0);
+      return n;
+    });
+  }, []);
 
   const documentos = () => {
     if (!mes) return setErroMes(pt.backups.mesObrigatorio);
@@ -135,8 +146,8 @@ function NovoBackupScreen() {
       );
       toast.success(pt.backups.criado(novo.NOME));
       void qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).startsWith('/backups') });
-      bytesPorId.current.clear();
-      setSelection({ mode: 'none' });
+      setBytesPorId(new Map());
+      mudarSeleccao({ mode: 'none' });
       setMes('');
       setObservacoes('');
       setMidiaId('');
@@ -257,8 +268,8 @@ function NovoBackupScreen() {
             selection="multi"
             emptyText="A consulta não obteve documentos."
             handleRef={grid}
-            onSelectionChange={setSelection}
-            onRowsLoaded={(rows) => rows.forEach((r) => bytesPorId.current.set(Number(r.ID), Number(r.TAMANHO_BYTES) || 0))}
+            onSelectionChange={mudarSeleccao}
+            onRowsLoaded={guardarBytes}
             columns={[
               { col: 'ID', header: 'Id', width: 88, align: 'end', mono: true },
               { col: 'MODELO_ID', header: 'Modelo', width: 96, mono: true },

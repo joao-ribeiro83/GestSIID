@@ -12,6 +12,9 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Each package lints with `-c ../../eslint.config.js`, which makes `files` relative to the
+    // package folder, not this file; anchor it here or the hooks plugin never loads.
+    basePath: import.meta.dirname,
     files: ['apps/web/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
     rules: {

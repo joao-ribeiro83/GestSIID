@@ -10,7 +10,13 @@ test.use({ storageState: 'e2e/.auth/adm.json' });
 const block = (page: Page) => page.getByRole('region', { name: 'Permissões', exact: true });
 const grid = (page: Page) => page.getByRole('grid', { name: 'Permissões' });
 const footer = (page: Page) => block(page).locator('[aria-live="polite"]').first();
-const total = async (page: Page) => Number(/(\d+)/.exec((await footer(page).textContent()) ?? '')?.[1] ?? '0');
+const total = async (page: Page) => {
+  // While the grid loads, the footer already reads "0 registos": wait for the data.
+  const table = block(page).locator('table[role="grid"]'); // CSS: still found while a dialog is open
+  await expect(table).toBeVisible();
+  await expect(table).not.toHaveAttribute('aria-busy', 'true');
+  return Number(/(\d+)/.exec((await footer(page).textContent()) ?? '')?.[1] ?? '0');
+};
 
 const rand = (n: number) => Math.floor(Math.random() * n);
 const pad = (n: number) => String(n).padStart(2, '0');
