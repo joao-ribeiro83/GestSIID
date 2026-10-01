@@ -159,6 +159,8 @@ export interface DataBlockProps<Row extends GridRow = GridRow> {
    * POST-RECORD called ASK_COMMIT), after `beforeCurrentRowChange`. */
   askOnRowLeave?: boolean;
   onSelectionChange?: (s: Selection) => void;
+  /** Every page the server returns (Novo backup keeps an id → bytes map for the running total). */
+  onRowsLoaded?: (rows: Row[]) => void;
   handleRef?: Ref<DataBlockHandle>;
   /** Panel editing only: extra content under the fields (`null` row = a new, unsaved one). */
   panelExtra?: (row: Row | null) => ReactNode;
@@ -250,11 +252,16 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
   };
   const list = useQuery({
     queryKey: [endpoint, masterKeys ?? null, fetched],
-    queryFn: () => apiFetch<PagedResult<Row>>(`${endpoint}?${toQueryString(fetched)}`),
+    // An endpoint may carry its own fixed query (`/backups?f[MEDIA_ONLINE]=N`).
+    queryFn: () => apiFetch<PagedResult<Row>>(`${endpoint}${endpoint.includes('?') ? '&' : '?'}${toQueryString(fetched)}`),
     placeholderData: keepPreviousData,
     enabled,
     refetchOnWindowFocus: !isDirty,
   });
+  const onRowsLoaded = props.onRowsLoaded;
+  useEffect(() => {
+    if (list.data) onRowsLoaded?.(list.data.rows);
+  }, [list.data, onRowsLoaded]);
   const total = list.data?.total ?? 0;
   const capped = list.data?.totalCapped ?? false;
 

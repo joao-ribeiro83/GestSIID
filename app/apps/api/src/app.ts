@@ -28,6 +28,8 @@ import { oracleImageStore } from './lib/imageRoutes.ts';
 import type { DbPool } from './db/oracle.ts';
 import type { AuthRepo } from './features/auth/repo.ts';
 import { registerAuthRoutes } from './features/auth/routes.ts';
+import { oracleBackupsRepo } from './features/backups/oracle.ts';
+import { registerBackupsRoutes } from './features/backups/routes.ts';
 import { registerDevRoutes } from './features/dev/routes.ts';
 import { oracleDocumentosRepo } from './features/documentos/repo.ts';
 import { registerDocumentosRoutes, type FileServer } from './features/documentos/routes.ts';
@@ -48,6 +50,7 @@ import { registerTiposMidiaRoutes } from './features/tipos-midia/routes.ts';
 import { registerUnidadesMedidaRoutes } from './features/unidades-medida/routes.ts';
 import { registerUtilizadoresRoutes } from './features/utilizadores/routes.ts';
 import { registerVariaveisRoutes } from './features/variaveis/routes.ts';
+import { createGetVariavel } from './lib/variaveis.ts';
 import { registerAuthGuard } from './http/auth-guard.ts';
 import { registerErrorHandler } from './http/errors.ts';
 import { LoginThrottle } from './http/login-throttle.ts';
@@ -185,6 +188,10 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
           repo: oracleModelosRepo(pool, callTimeoutMs),
           imageStore: oracleImageStore(pool, SECCAO_IMAGEM, callTimeoutMs),
           maxBytes,
+        });
+        registerBackupsRoutes(sub, {
+          repo: oracleBackupsRepo(pool, callTimeoutMs),
+          getVariavel: createGetVariavel({ pool, ambiente: deps.ambiente, callTimeoutMs }),
         });
         if (deps.fileServer) {
           const repo = oracleDocumentosRepo(pool, callTimeoutMs);

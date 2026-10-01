@@ -21,7 +21,7 @@ the owner the SQL, do not run it. Full rule: `../analysis/TEST_STRATEGY.md` (top
 | `packages/shared/src/listQuery.ts` | QBE query-string parser, `pagedResult` envelope `{ rows, total, totalCapped, page, size }`. |
 | `apps/api/src/lib/crud.ts` | `crudRoutes`, `oracleStore`, `CrudStore`, `CrudHooks`, `auditHooks`, `SqlExpr`/`SYSDATE`, `SqlCall`, `sessionCtx`. |
 | `apps/api/src/lib/listQuery.ts` | `buildListQuery` (allow-listed WHERE/ORDER BY, binds only), `selectList`, `dateSelect`, rid encode/decode. |
-| `apps/api/src/lib/variaveis.ts` | `createGetVariavel` — reads `SVR_VARIAVEIS_SIID` (`PASSWORD`, `BACKUP`, `ONLINE`), 60 s cache. Not wired in `app.ts` yet. |
+| `apps/api/src/lib/variaveis.ts` | `createGetVariavel` — reads `SVR_VARIAVEIS_SIID` (`PASSWORD`, `BACKUP`, `ONLINE`), 60 s cache. Wired in `app.ts` for Backups (`BACKUP`, `ONLINE`). |
 | `apps/api/src/db/oracle.ts` | `withConnection`, `query`, `queryOne`, `execute`, `withTransaction`, `callPlsql`, `lockRow`, `buildPoolAttrs`. |
 | `apps/api/src/db/errors.ts` | `AppError`, `mapOracleError` (ORA-00001/01400/02292/… → Portuguese message + HTTP code). |
 | `apps/api/src/http/` | session, CSRF, auth guard (`requireRole`), login throttle, security headers, SPA fallback. |
