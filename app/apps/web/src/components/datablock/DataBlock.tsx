@@ -919,8 +919,9 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
         props.className,
       )}
     >
-      <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border px-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2">{custom}</div>
+      {/* Wraps on narrow screens instead of shrinking the custom buttons under the others. */}
+      <div className="flex min-h-10 shrink-0 flex-wrap items-center gap-2 border-b border-border px-2 py-1">
+        <div className="flex flex-1 flex-wrap items-center gap-2">{custom}</div>
         {hasFilters && (
           <>
             <DropdownMenu>
