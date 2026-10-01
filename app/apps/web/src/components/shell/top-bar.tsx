@@ -52,9 +52,10 @@ export function TopBar({
       <span className="text-sm font-semibold">GestSIID</span>
       <EnvironmentBadge />
       <DropdownMenu>
-        <DropdownMenuTrigger className="ml-auto flex items-center gap-2 rounded-md px-2 py-1 text-right hover:bg-sidebar-accent">
-          <span className="flex flex-col leading-tight">
-            <span className="text-sm">
+        <DropdownMenuTrigger className="ml-auto flex min-w-0 items-center gap-2 rounded-md px-2 py-1 text-right hover:bg-sidebar-accent">
+          <span className="flex min-w-0 flex-col leading-tight">
+            {/* Phones: one line with an ellipsis, so the name never spills over the breadcrumb. */}
+            <span className="block max-w-[45vw] truncate text-sm sm:max-w-none">
               {session.nome} ({session.username})
             </span>
             <span className="text-xs text-muted-foreground">{ROLE_LABEL[session.role]}</span>
