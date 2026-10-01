@@ -1078,15 +1078,15 @@ describe('seccoes imagem (Step 6.2, BR-MOD-06)', () => {
 
   it('PUT, GET and DELETE the image of one section by MODELO_ID / TIPOSEC_ID / ALINEA', async () => {
     const app = appWith();
-    expect((await app.inject({ url: url('M1', 'CAB', 1) })).statusCode).toBe(404);
+    expect((await app.inject({ url: url('M1', 'CAB', 1) })).statusCode).toBe(204);
     const up = await app.inject({ method: 'PUT', url: url('M1', 'CAB', 1), ...upload(PNG) });
     expect(up.statusCode).toBe(204);
     const r = await app.inject({ url: url('M1', 'CAB', 1) });
     expect(r.headers['content-type']).toBe('image/png');
     expect(r.rawPayload.equals(PNG)).toBe(true);
-    expect((await app.inject({ url: url('M1', 'CAB', 2) })).statusCode).toBe(404); // other alínea, no image
+    expect((await app.inject({ url: url('M1', 'CAB', 2) })).statusCode).toBe(204); // other alínea, no image
     expect((await app.inject({ method: 'DELETE', url: url('M1', 'CAB', 1) })).statusCode).toBe(204);
-    expect((await app.inject({ url: url('M1', 'CAB', 1) })).statusCode).toBe(404);
+    expect((await app.inject({ url: url('M1', 'CAB', 1) })).statusCode).toBe(204);
   });
 
   it('is 404 for a section that does not exist, 400 for a bad ALINEA, 403 for a USER', async () => {

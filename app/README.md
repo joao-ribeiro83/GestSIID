@@ -33,13 +33,21 @@ to `../.env` and fill in `DB_USER`, `DB_PASSWORD`, `DB_CONNECT_STRING`, `DB_SCHE
 `AMBIENTE_ID` (ARCHITECTURE.md §2). Without `DB_CONNECT_STRING` set, `pnpm -r test` still
 passes in full — it just skips the contract-test suites.
 
+## Local Oracle copy (for QA that writes)
+
+`local-db/clone-test-schema.mjs` copies what the app uses from the TEST schema (SELECT only)
+into a local `gvenzl/oracle-free` container; the header comment has the commands. Big tables are
+sampled. Run the app on it with `ENV_FILE=../.env.localdb docker compose --env-file ../.env.localdb up`
+and use `local-db/sql.mjs` for local-only SQL (test users, resets).
+
 ## Docker
 
 ```
 docker compose build
-docker compose up
+docker compose --env-file ../.env up
 ```
 
-`docker-compose.yml` reads `../.env`. The Dockerfile's Oracle Instant Client URL/sha256 are
+`docker-compose.yml` reads `../.env`. Pass it with `--env-file` too: the host port mapping uses
+`${PORT}`, and Compose takes that from `--env-file`, not from `env_file`. The Dockerfile's Oracle Instant Client URL/sha256 are
 placeholders (see the `ponytail:` comment in `Dockerfile`) and must be pinned to a real
 Instant Client 19 Basic build before the image can actually build.

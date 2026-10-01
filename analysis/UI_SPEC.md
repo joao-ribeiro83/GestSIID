@@ -853,6 +853,8 @@ Grid lines: horizontal only (`--border`), plus a vertical line after the gutter/
 
 ### 3.11 Master-detail
 
+> **Amended 2026-10-01 (owner, DECISIONS D-34).** Modelos, Documentos, Reports and Domínios do not stack the detail: the master fills the page; a `›` button at the start of each saved row (aria-label `Abrir …`) opens the row's own page `<list>/<key>` with the detail tables, and `Voltar` in the page header (or the browser's Back) returns to the list with its filters, sort, page and selection unchanged. Breadcrumb `Grupo › Item › <key>`. The stacked and side-by-side layouts below remain for any other master-detail screen; the 55/45 splitter is not built.
+
 - The detail block gets `master.keys` from the master's current row. `null` → the detail shows the `Seleccione um registo.` empty state, and its `Novo` is disabled.
 - A new, unsaved master row → detail `Novo` disabled with tooltip `Guarde o registo principal antes de adicionar detalhes.`.
 - Changing the master's current row while the detail is dirty → #46.

@@ -1,4 +1,4 @@
-import { menu, type MenuNode } from '@/menu';
+import { matchLeaf, menu, type MenuNode } from '@/menu';
 
 export type BreadcrumbEntry = { label: string; to?: string };
 
@@ -14,7 +14,9 @@ export function findMenuTrail(pathname: string): BreadcrumbEntry[] | null {
       const entry: BreadcrumbEntry = { label: node.label, to: node.kind === 'item' ? node.to : undefined };
       const nextTrail = [...trail, entry];
       if (node.kind === 'item') {
-        if (node.to === pathname) return nextTrail;
+        const m = matchLeaf(node.to, pathname);
+        // A row's detail page (D-34): "Configuração › Modelos › D1.A5", the item linking back.
+        if (m) return m.key === undefined ? nextTrail : [...nextTrail, { label: m.key }];
       } else {
         const found = walk(node.children, nextTrail);
         if (found) return found;

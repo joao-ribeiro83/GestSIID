@@ -30,7 +30,7 @@ test('uploads a section image and downloads it back byte-identical, then removes
   expect(Buffer.compare(await down.body(), PNG)).toBe(0);
 
   expect((await request.delete(URL, { headers })).status()).toBe(204);
-  expect((await request.get(URL)).status()).toBe(404);
+  expect((await request.get(URL)).status()).toBe(204);
 });
 
 test('refuses a file that is not an image (415)', async ({ request }) => {

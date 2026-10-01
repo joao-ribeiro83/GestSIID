@@ -276,7 +276,7 @@ The app has no file system access: no `DOCS_ROOT`, no share mounts, no path buil
 - `PUT | GET | DELETE /api/modelos/:modeloId/seccoes/:tiposecId/:alinea/imagem` → `DOC_SECCOES_DOCUMENTO.IMAGEM`.
 - `PUT | GET | DELETE /api/perfis-departamento/:id/assinatura` → `DOC_PERFIS_DEPARTAMENTO.ASSINATURA` (replaces the T-only image-picker bean, whose target item belonged to another form, D-01).
 - `PUT`: multipart field `ficheiro`, limits `{ fileSize: UPLOAD_MAX_MB × 1024 × 1024, files: 1, fields: 0 }`, `toBuffer()`. First bytes must be JPEG `FFD8FF`, PNG `89504E47`, GIF `47494638` or BMP `424D` (BR-MOD-06), else `415`. Too large → `413`. `lockRow` + bound UPDATE, audit.
-- `GET`: `404` when null. `Content-Type` from the first bytes; bytes that match no signature (Forms accepted any file) → `application/octet-stream` + `Content-Disposition: attachment`.
+- `GET`: `204` when null (not `404`: the SPA previews with a plain `<img>`, and the browser logs every 404 as a console error; QA 2026-10-01). `Content-Type` from the first bytes; bytes that match no signature (Forms accepted any file) → `application/octet-stream` + `Content-Disposition: attachment`.
 - `DELETE`: `SET <column> = NULL` (BR-MOD-06 "remove image").
 - Section lists show `TIPO_IMAGEM` from `DBMS_LOB.SUBSTR(IMAGEM, 4, 1)`, decoded in SQL like the form did.
 - Accepted risk (Step 10.1 list): images are stored byte-exact, not re-encoded (SECURITY_FINDINGS §3 item 14), because the report engine reads the bytes. Mitigations: signature allow-list, `nosniff`, attachment for unknown bytes.

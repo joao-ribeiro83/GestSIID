@@ -91,10 +91,7 @@ const columns: ColumnView<GridRow>[] = [
 function EquipaGestaoScreen() {
   const { session } = Route.useRouteContext();
   return (
-    <main id="conteudo" className="flex h-dvh flex-col gap-3 bg-background p-4 text-foreground">
-      <header>
-        <h1 className="text-lg font-semibold">Equipa de Gestão (OD68)</h1>
-      </header>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       <DataBlock
         className="min-h-0 flex-1"
         heading="Equipa de Gestão"
@@ -120,6 +117,6 @@ function EquipaGestaoScreen() {
           )
         }
       />
-    </main>
+    </div>
   );
 }

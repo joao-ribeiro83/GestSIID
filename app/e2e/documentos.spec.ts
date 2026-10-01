@@ -21,6 +21,14 @@ async function lote(page: Page, n: number) {
 
 const tick = (page: Page, id: number) => row(page, id).getByRole('checkbox', { name: 'Seleccionar registo' }).click();
 
+/** D-34: a row's tabs live on its own page, opened by the row button; Voltar returns. */
+async function abrir(page: Page, id: number) {
+  await row(page, id).getByRole('button', { name: 'Abrir detalhe do documento' }).click();
+  await expect(page).toHaveURL(new RegExp(`/gestao/documentos/${id}(\\?|$)`));
+  await expect(page.getByRole('heading', { name: `Documento ${id}` })).toBeVisible();
+}
+const voltar = (page: Page) => page.getByRole('button', { name: 'Voltar' }).click();
+
 test.describe('ADM', () => {
   test.use({ storageState: 'e2e/.auth/adm.json' });
 
@@ -60,7 +68,7 @@ test.describe('ADM', () => {
 
     // Selection cleared; the new request is in 35's queue (Detalhes tab).
     await expect(row(page, 35).getByRole('checkbox')).not.toBeChecked();
-    await row(page, 35).getByRole('gridcell', { name: '35', exact: true }).click();
+    await abrir(page, 35);
     await page.getByRole('tab', { name: 'Detalhes' }).click();
     const fila = page.getByRole('table', { name: 'Detalhes' });
     await expect(fila.locator('tr').filter({ hasText: 'IMPRESSAO' }).filter({ hasText: 'ESPERA' }).first()).toBeVisible();
@@ -77,7 +85,7 @@ test.describe('ADM', () => {
     await expect(page.getByText('Anular: 1 documento(s) processado(s).')).toBeVisible();
 
     await expect(row(page, 37)).toHaveAttribute('data-tone', 'anulado');
-    await row(page, 37).getByRole('gridcell', { name: '37', exact: true }).click();
+    await abrir(page, 37);
     await page.getByRole('tab', { name: 'Detalhes' }).click();
     await expect(page.getByRole('table', { name: 'Detalhes' })).toContainText('ANULADO');
   });
@@ -110,10 +118,39 @@ test.describe('ADM', () => {
     await expect(row(page, 43)).toBeVisible();
   });
 
+  // Regression: PR #13 review — opening a document dropped ?grupo=, so the hidden list lost its
+  // group filter (and with it its page, sort and selection).
+  test('with a group shown, opening a document and Voltar keep the group and the ticked rows', async ({ page }) => {
+    const filtro = grid(page).getByLabel('Filtro Id');
+    await filtro.fill('41');
+    await filtro.press('Enter');
+    await row(page, 41).getByRole('gridcell', { name: '41', exact: true }).click({ button: 'right' });
+    await page.getByRole('menu').getByRole('menuitem', { name: 'Mostrar Grupo' }).click();
+    await page.getByRole('button', { name: 'Limpar filtros' }).click();
+    await expect(row(page, 42)).toBeVisible();
+    await tick(page, 43);
+
+    await abrir(page, 42);
+    await expect(page).toHaveURL(/grupo=41/);
+    await page.getByRole('tab', { name: 'Parâmetros' }).click();
+    await voltar(page);
+    await expect(page.getByText('Grupo do documento 41')).toBeVisible();
+    await expect(grid(page).locator('tbody tr')).toHaveCount(3);
+    await expect(row(page, 43).getByRole('checkbox')).toBeChecked();
+  });
+
+  test('a detail link with a key that matches no document says so, without tabs', async ({ page }) => {
+    await page.goto('/gestao/documentos/999999');
+    await expect(page.getByRole('alert')).toHaveText('Registo não encontrado.');
+    await expect(page.getByRole('tab')).toHaveCount(0);
+    await page.goto('/gestao/documentos/abc');
+    await expect(page.getByRole('alert')).toHaveText('Registo não encontrado.');
+  });
+
   test('Comentários: Guardar adds the comment (BR-DOC-30), the ✎ marker appears, blank text cannot be saved', async ({ page }) => {
     await lote(page, 10);
     await expect(row(page, 38).getByRole('button', { name: 'Comentários' })).toHaveCount(0);
-    await row(page, 38).getByRole('gridcell', { name: '38', exact: true }).click();
+    await abrir(page, 38);
     await page.getByRole('tab', { name: 'Comentários' }).click();
 
     const texto = page.getByRole('textbox', { name: 'Comentário' });
@@ -128,14 +165,18 @@ test.describe('ADM', () => {
     await expect(texto).toHaveValue('');
     const tabela = page.getByRole('table', { name: 'Comentários' });
     await expect(tabela.getByRole('row').filter({ hasText: 'Morada confirmada por telefone' })).toHaveCount(1);
-    await expect(row(page, 38).getByRole('button', { name: 'Comentários' })).toBeVisible();
+    // Back on the list (its Lote filter kept), the ✎ marker opens the Comentários tab.
+    await voltar(page);
+    await expect(grid(page).locator('tbody tr')).toHaveCount(4);
+    await row(page, 38).getByRole('button', { name: 'Comentários' }).click();
+    await expect(page.getByRole('tab', { name: 'Comentários' })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('Anexos: Spool Id / Modelo / Estado / Data do pedido; double-click opens the document group', async ({ page }) => {
     const filtro = grid(page).getByLabel('Filtro Id');
     await filtro.fill('41');
     await filtro.press('Enter');
-    await row(page, 41).getByRole('gridcell', { name: '41', exact: true }).click();
+    await abrir(page, 41);
     await page.getByRole('tab', { name: 'Anexos' }).click();
     const tabela = page.getByRole('table', { name: 'Anexos' });
     await expect(tabela.getByRole('columnheader')).toHaveText(['Spool Id', 'Modelo', 'Estado', 'Data do pedido']);
@@ -172,7 +213,7 @@ test.describe('USER', () => {
   test('Comentários is read-only for USER: the grid, no Comentário box, no Guardar (D-08)', async ({ page }) => {
     await page.goto('/gestao/documentos');
     await expect(grid(page).locator('tbody tr').first()).toBeVisible({ timeout: 20_000 });
-    await grid(page).locator('tbody tr').first().locator('td').nth(3).click();
+    await grid(page).locator('tbody tr').first().getByRole('button', { name: 'Abrir detalhe do documento' }).click();
     await page.getByRole('tab', { name: 'Comentários' }).click();
     await expect(page.getByRole('tabpanel', { name: 'Comentários' })).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'Comentário' })).toHaveCount(0);

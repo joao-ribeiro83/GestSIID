@@ -5,7 +5,8 @@ import { defineResource } from '../resource.ts';
  * `ID` comes from `ID_IMPRESSORA_SEQ.NEXTVAL` in the form's PRE-INSERT — never client-writable
  * (`apps/api/src/features/impressoras/routes.ts` sets it via a hook, like `auditHooks`).
  * `GSPAPERSIZE_RF` (DB default `'A4'`) has no field or label in the form — left out of this
- * resource; the column keeps its DB default on insert.
+ * resource; the column keeps its DB default on insert. ENDERECO, VALIDO and GSDEVICE_RF are
+ * Required in the form (forms-xml summary); the screen pre-fills VALIDO 'S' and GSDEVICE_RF 'PXLCOLOR'.
  */
 export const impressoras = defineResource({
   name: 'impressoras',
@@ -23,6 +24,7 @@ export const impressoras = defineResource({
     ENDERECO: {
       type: 'text',
       label: 'Endereço',
+      required: true,
       filter: ['eq', 'like', 'null', 'notnull'],
       sort: true,
       edit: true,
@@ -40,6 +42,7 @@ export const impressoras = defineResource({
     VALIDO: {
       type: 'code',
       label: 'Válida',
+      required: true,
       filter: ['eq', 'in', 'null', 'notnull'],
       sort: true,
       edit: true,
@@ -49,6 +52,7 @@ export const impressoras = defineResource({
     GSDEVICE_RF: {
       type: 'code',
       label: 'Dispositivo',
+      required: true,
       filter: ['eq', 'in', 'null', 'notnull'],
       sort: true,
       edit: true,

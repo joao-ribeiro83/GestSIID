@@ -23,3 +23,6 @@ app/test-results/
 app/e2e/.auth/
 # gstack local security reports
 .gstack/
+
+# app/local-db run output
+app/local-db/clone-report.json

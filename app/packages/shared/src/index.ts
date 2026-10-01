@@ -1,3 +1,4 @@
+import './zod-pt.ts';
 export * from './listQuery.ts';
 export * from './pt.ts';
 export * from './role.ts';

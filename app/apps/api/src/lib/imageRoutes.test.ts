@@ -117,7 +117,7 @@ describe('imageRoutes', () => {
     const r = await put(app, file(big));
     expect(r.statusCode).toBe(413);
     expect(r.json()).toMatchObject({ code: 'FICHEIRO_GRANDE' });
-    expect((await app.inject({ url: URL })).statusCode).toBe(404);
+    expect((await app.inject({ url: URL })).statusCode).toBe(204);
   });
 
   it('PUT refuses a request that is not multipart (415)', async () => {
@@ -144,9 +144,9 @@ describe('imageRoutes', () => {
     expect(r.statusCode).toBe(404);
   });
 
-  it('GET is 404 when there is no image; bytes of no known type are sent as an attachment', async () => {
+  it('GET is 204 when there is no image; bytes of no known type are sent as an attachment', async () => {
     const { app, store } = await appWith('ADM');
-    expect((await app.inject({ url: URL })).statusCode).toBe(404);
+    expect((await app.inject({ url: URL })).statusCode).toBe(204);
     await store.set({ id: 7 }, Buffer.from('legacy bytes'), { user: { username: 'J', role: 'ADM' } });
     const r = await app.inject({ url: URL });
     expect(r.headers['content-type']).toBe('application/octet-stream');
@@ -158,7 +158,7 @@ describe('imageRoutes', () => {
     const { app } = await appWith('ADM');
     await put(app, file(PNG));
     expect((await app.inject({ method: 'DELETE', url: URL })).statusCode).toBe(204);
-    expect((await app.inject({ url: URL })).statusCode).toBe(404);
+    expect((await app.inject({ url: URL })).statusCode).toBe(204);
     expect((await app.inject({ method: 'DELETE', url: '/api/coisas/8/foto' })).statusCode).toBe(404);
   });
 
@@ -210,13 +210,13 @@ describe('oracleImageStore', () => {
       'SELECT 1 FROM DOC_PERFIS_DEPARTAMENTO WHERE ID = :id FOR UPDATE NOWAIT',
     );
     expect(calls[1]?.sql).toBe(
-      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = :__img, ACTUALIZADO_POR = :__user, ' +
+      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = :img_data, ACTUALIZADO_POR = :img_user, ' +
         'DATA_ACTUALIZACAO = SYSDATE WHERE ID = :id',
     );
     expect(calls[1]?.binds).toEqual({
       id: 7,
-      __img: { val: PNG, type: oracledb.DB_TYPE_BLOB },
-      __user: 'JOAO',
+      img_data: { val: PNG, type: oracledb.DB_TYPE_BLOB },
+      img_user: 'JOAO',
     });
     expect(calls.at(-1)?.sql).toBe('COMMIT');
   });
@@ -246,10 +246,10 @@ describe('oracleImageStore', () => {
     const { pool, calls } = fakePool([{ rows: [{ 1: 1 }] }, { rowsAffected: 1 }]);
     expect(await oracleImageStore(pool, cfg, 1000).clear({ id: 7 }, ctx)).toBe(true);
     expect(calls[1]?.sql).toBe(
-      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = NULL, ACTUALIZADO_POR = :__user, ' +
+      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = NULL, ACTUALIZADO_POR = :img_user, ' +
         'DATA_ACTUALIZACAO = SYSDATE WHERE ID = :id',
     );
-    expect(calls[1]?.binds).toEqual({ id: 7, __user: 'JOAO' });
+    expect(calls[1]?.binds).toEqual({ id: 7, img_user: 'JOAO' });
   });
 
   it('get fetches the BLOB as a Buffer; no row or NULL is null', async () => {
@@ -266,7 +266,7 @@ describe('oracleImageStore', () => {
     const { pool, calls } = fakePool([{ rows: [{ 1: 1 }] }, { rowsAffected: 1 }]);
     await oracleImageStore(pool, { ...cfg, audit: null }, 1000).set({ id: 7 }, PNG, ctx);
     expect(calls[1]?.sql).toBe(
-      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = :__img WHERE ID = :id',
+      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = :img_data WHERE ID = :id',
     );
     expect(() => oracleImageStore(pool, { ...cfg, column: 'A; DROP TABLE X' }, 1000)).toThrow();
   });

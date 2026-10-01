@@ -67,7 +67,9 @@ export class ConfigError extends Error {
 
 /** Pure parse: throws {@link ConfigError} with every invalid/missing variable listed. */
 export function parseConfig(env: Record<string, string | undefined>): Config {
-  const result = envSchema.safeParse(env);
+  // English zod messages ("expected number, received NaN"): the operator reads these, and the
+  // shared Portuguese fallback (packages/shared/src/zod-pt.ts) would hide the detail.
+  const result = envSchema.safeParse(env, { error: z.locales.en().localeError });
   if (!result.success) {
     throw new ConfigError(result.error.issues);
   }

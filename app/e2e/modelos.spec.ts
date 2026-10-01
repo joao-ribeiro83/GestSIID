@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 // Configuração › Modelos (Step 6.3): FD_CONFIGURACAO_MODELOS against the dev server's in-memory
 // stores, never Oracle (CLAUDE.md HARD RULE). A model only comes from "Clonar", so "create model"
 // is a clone of MOD2 under a new reference, unique per run (the dev stores outlive a run).
+// D-34: the list fills the page; a row's open button shows its tabs on /configuracao/modelos/<id>.
 
 const PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
@@ -19,12 +20,23 @@ const dialog = (page: Page, name: string) => page.getByRole('dialog', { name, ex
 /** A master toolbar button (the grid has a sort button with the same name, "Código Barras"). */
 const accao = (page: Page, name: string) => master(page).getByRole('button', { name, exact: true }).first();
 
-/** Filters the master by Id and makes that model the current row. */
-async function abrirModelo(page: Page, id: string) {
+/** Filters the master by Id. */
+async function filtrar(page: Page, id: string) {
   const filtro = masterGrid(page).getByLabel('Filtro Id');
   await filtro.fill(id);
   await filtro.press('Enter');
-  await masterGrid(page).locator('tbody tr').filter({ hasText: id }).locator('td').nth(1).click();
+  return masterGrid(page).locator('tbody tr').filter({ hasText: id });
+}
+
+/** Makes that model the master's current row (td 0 is the gutter, td 1 the open button). */
+async function seleccionarModelo(page: Page, id: string) {
+  await (await filtrar(page, id)).locator('td').nth(2).click();
+}
+
+/** Opens that model's tabs on its own page. */
+async function abrirModelo(page: Page, id: string) {
+  await (await filtrar(page, id)).getByRole('button', { name: 'Abrir secções, parâmetros e atributos' }).click();
+  await expect(page).toHaveURL(new RegExp(`/configuracao/modelos/${id}$`));
   await expect(page.getByRole('heading', { name: `Modelo ${id}` })).toBeVisible();
 }
 
@@ -39,7 +51,7 @@ test('create a model (Clonar) → add a section with an image → save → reope
   const id = `E2E${Date.now().toString(36).slice(-6).toUpperCase()}`;
 
   // Clonar Modelo: the new reference, then #38.
-  await abrirModelo(page, 'MOD2');
+  await seleccionarModelo(page, 'MOD2');
   await accao(page, 'Clonar').click();
   const clonar = dialog(page, 'Clonar Modelo');
   await clonar.getByLabel('Modelo').fill(id);
@@ -80,9 +92,9 @@ test('create a model (Clonar) → add a section with an image → save → reope
   await imagem(page).getByRole('button', { name: 'Guardar imagem na BD' }).click();
   await expect(imagem(page).getByRole('img', { name: 'Assinatura' })).toBeVisible();
 
-  // Reopen: a fresh page shows the model, its new section and the stored image.
+  // Reopen: a fresh load of the model's own page (a bookmarked link) shows its section and image.
   await page.reload();
-  await abrirModelo(page, id);
+  await expect(page.getByRole('heading', { name: `Modelo ${id}` })).toBeVisible();
   const anexo = seccoesGrid(page).locator('tbody tr').filter({ hasText: 'ANEXO' });
   await expect(anexo).toContainText('Anexo com imagem');
   await expect(anexo).toContainText('Imagem'); // Tipo conteúdo shown by its label
@@ -96,7 +108,7 @@ test('create a model (Clonar) → add a section with an image → save → reope
 });
 
 test('Clonar with a reference that exists shows #37 in the dialog', async ({ page }) => {
-  await abrirModelo(page, 'MOD2');
+  await seleccionarModelo(page, 'MOD2');
   await accao(page, 'Clonar').click();
   const clonar = dialog(page, 'Clonar Modelo');
   await clonar.getByLabel('Modelo').fill('MOD1');
@@ -106,7 +118,7 @@ test('Clonar with a reference that exists shows #37 in the dialog', async ({ pag
 });
 
 test('Alterar Modelo saves its fields; Código Barras shows the stored barcode', async ({ page }) => {
-  await abrirModelo(page, 'MOD2');
+  await seleccionarModelo(page, 'MOD2');
   await accao(page, 'Alterar Modelo').click();
   const alterar = dialog(page, 'Alterar Modelo');
   await expect(alterar.getByLabel('Modelo')).toHaveText('MOD2');
@@ -115,7 +127,7 @@ test('Alterar Modelo saves its fields; Código Barras shows the stored barcode',
   await expect(alterar).toBeHidden();
   await expect(masterGrid(page).locator('tbody tr').filter({ hasText: 'MOD2' })).toContainText('3');
 
-  await abrirModelo(page, 'MOD1');
+  await seleccionarModelo(page, 'MOD1');
   await accao(page, 'Código Barras').click();
   const codigo = dialog(page, 'Código Barras');
   await expect(codigo.getByLabel('Largura (cm)')).toHaveValue('4');
@@ -123,7 +135,7 @@ test('Alterar Modelo saves its fields; Código Barras shows the stored barcode',
   await codigo.getByRole('button', { name: 'Cancelar' }).click();
 });
 
-test('unsaved rows ask "Deseja gravar…" where ASK_COMMIT did: section row, tab, master row', async ({
+test('unsaved rows ask "Deseja gravar…" where ASK_COMMIT did: section row, tab, leaving the page', async ({
   page,
 }) => {
   await abrirModelo(page, 'MOD1');
@@ -147,12 +159,12 @@ test('unsaved rows ask "Deseja gravar…" where ASK_COMMIT did: section row, tab
   await pergunta.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByRole('tab', { name: 'Secções' })).toHaveAttribute('aria-selected', 'true');
 
-  // Another model: POST-RECORD of the master. Não discards and moves. "Todos" = clear filters.
-  await accao(page, 'Todos').click();
-  await masterGrid(page).locator('tbody tr').filter({ hasText: 'MOD2' }).locator('td').nth(1).click();
+  // Voltar to the list (another model next): Não discards and leaves.
+  await page.getByRole('button', { name: 'Voltar' }).click();
   await expect(pergunta).toBeVisible();
   await pergunta.getByRole('button', { name: 'Não' }).click();
-  await expect(page.getByRole('heading', { name: 'Modelo MOD2' })).toBeVisible();
+  await expect(page).toHaveURL(/\/configuracao\/modelos$/);
+  await abrirModelo(page, 'MOD2');
   await expect(seccoes(page).getByRole('region', { name: 'Alterações por guardar' })).toBeHidden();
 });
 

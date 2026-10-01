@@ -35,7 +35,7 @@ function BackupsOnlineScreen() {
   };
 
   return (
-    <main id="conteudo" className="flex flex-col gap-3 bg-background p-4 text-foreground">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex justify-end">
         <Button size="sm" variant="outline" onClick={refetch}>
           <RefreshCw /> {pt.db.actualizar}
@@ -82,6 +82,6 @@ function BackupsOnlineScreen() {
           { col: 'DRIVE_ONLINE', header: 'Drive', width: 96 },
         ]}
       />
-    </main>
+    </div>
   );
 }

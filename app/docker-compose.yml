@@ -5,7 +5,9 @@ services:
   api:
     build: .
     image: gestsiid-api:local
-    env_file: ../.env
+    # Run with `docker compose --env-file ../.env up`: ${PORT} below is read from the --env-file
+    # (Compose does not interpolate from env_file). ENV_FILE picks another environment's file.
+    env_file: ${ENV_FILE:-../.env}
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     read_only: true

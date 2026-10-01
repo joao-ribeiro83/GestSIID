@@ -177,9 +177,9 @@ describe('lockRow', () => {
     const [sql, binds] = (conn.execute as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(sql).toContain('FOR UPDATE NOWAIT');
     expect(sql).toContain('ID = :id');
-    expect(sql).toContain('NOME = :__orig_0 OR (NOME IS NULL AND :__orig_0 IS NULL)');
-    expect(sql).toContain('DESCRICAO = :__orig_1 OR (DESCRICAO IS NULL AND :__orig_1 IS NULL)');
-    expect(binds).toEqual({ id: 5, __orig_0: 'X', __orig_1: null });
+    expect(sql).toContain('NOME = :orig0 OR (NOME IS NULL AND :orig0 IS NULL)');
+    expect(sql).toContain('DESCRICAO = :orig1 OR (DESCRICAO IS NULL AND :orig1 IS NULL)');
+    expect(binds).toEqual({ id: 5, orig0: 'X', orig1: null });
   });
 
   it('throws 409 REGISTO_ALTERADO when the row is gone or already changed', async () => {
