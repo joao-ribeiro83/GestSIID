@@ -46,7 +46,7 @@ function ImpressorasScreen() {
         columns={columns}
         role={session.role}
         edit="inline"
-        defaults={() => ({ VALIDO: 'S' })}
+        defaults={() => ({ VALIDO: 'S', GSDEVICE_RF: 'PXLCOLOR' })}
         toolbar={() => (
           <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
             Escolher impressora

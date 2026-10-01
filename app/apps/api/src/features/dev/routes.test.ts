@@ -67,7 +67,7 @@ describe('dev demo routes (in memory, no Oracle)', () => {
     const post = await app.inject({
       method: 'POST',
       url: '/api/impressoras',
-      payload: { values: { DESCRICAO: 'Nova', VALIDO: 'S', GSDEVICE_RF: 'PXLCOLOR' } },
+      payload: { values: { DESCRICAO: 'Nova', ENDERECO: '10.0.0.1', VALIDO: 'S', GSDEVICE_RF: 'PXLCOLOR' } },
     });
     expect(post.statusCode).toBe(201);
     const created = post.json();

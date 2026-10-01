@@ -83,6 +83,9 @@ test('new row: a value over the column length shows the field error', async ({ p
   const bar = page.getByRole('region', { name: 'Alterações por guardar' });
 
   const firstRow = grid(page).locator('tbody tr').first();
+  await firstRow.locator('td').nth(3).dblclick(); // Endereço is required: fill it so Servidor's error shows
+  await page.keyboard.type('10.0.0.98');
+  await page.keyboard.press('Enter');
   await firstRow.locator('td').nth(4).dblclick(); // Servidor, maxLength 60
   const servidorInput = firstRow.locator('td').nth(4).locator('input');
   // fill() respects the input's native maxlength (it stops at 60); set the DOM value directly,

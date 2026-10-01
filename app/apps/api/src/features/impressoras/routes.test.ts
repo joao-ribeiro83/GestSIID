@@ -45,7 +45,7 @@ describe('impressoras routes', () => {
     const r = await app.inject({
       method: 'POST',
       url: '/api/impressoras',
-      payload: { values: { DESCRICAO: 'Nova', VALIDO: 'S', GSDEVICE_RF: 'PXLCOLOR' } },
+      payload: { values: { DESCRICAO: 'Nova', ENDERECO: '10.0.0.1', VALIDO: 'S', GSDEVICE_RF: 'PXLCOLOR' } },
     });
     expect(r.statusCode).toBe(201);
     expect(r.json()).toMatchObject({ ID: 2, DESCRICAO: 'Nova', CRIADO_POR: 'JOAO' });
