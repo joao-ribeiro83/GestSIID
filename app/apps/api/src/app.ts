@@ -97,7 +97,9 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   const sessions = await registerSession(app, deps.config);
   // CSRF stays on whenever real login is possible, even in the Oracle-less dev server
   // (Step 3.2): only the auto-login dev demo (no authRepo) can skip it.
-  await app.register(multipart); // limits are set per route (lib/imageRoutes.ts)
+  const maxBytes = (deps.config.UPLOAD_MAX_MB ?? 10) * 1024 * 1024;
+  // Global ceiling (one file, no text fields); image routes repeat it per request (lib/imageRoutes.ts).
+  await app.register(multipart, { limits: { fileSize: maxBytes, files: 1, fields: 0, parts: 1 } });
   registerAuthGuard(app, { csrf: deps.authRepo ? true : !deps.devMocks });
 
   registerHealthRoute(app, {
@@ -126,7 +128,6 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
 
   if (deps.db) {
     const { pool, callTimeoutMs } = deps.db;
-    const maxBytes = (deps.config.UPLOAD_MAX_MB ?? 10) * 1024 * 1024;
     await app.register(
       async (sub) => {
         registerImpressorasRoutes(sub, { store: oracleStore(pool, impressoras, callTimeoutMs) });

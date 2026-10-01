@@ -106,8 +106,14 @@ describe('configWarnings', () => {
     expect(warnings[0]).toMatch(/COOKIE_SECURE/);
   });
 
-  it('is quiet with COOKIE_SECURE=true, and in development', () => {
-    expect(configWarnings(parseConfig({ ...VALID_ENV, COOKIE_SECURE: 'true' }))).toEqual([]);
+  it('warns when COOKIE_SECURE=true but the TLS proxy is not trusted (no cookie would be set)', () => {
+    const warnings = configWarnings(parseConfig({ ...VALID_ENV, COOKIE_SECURE: 'true' }));
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toMatch(/TRUST_PROXY/);
+  });
+
+  it('is quiet with COOKIE_SECURE=true behind a trusted proxy, and in development', () => {
+    expect(configWarnings(parseConfig({ ...VALID_ENV, COOKIE_SECURE: 'true', TRUST_PROXY: '10.0.0.1' }))).toEqual([]);
     expect(configWarnings(parseConfig({ ...VALID_ENV, NODE_ENV: 'development' }))).toEqual([]);
   });
 });
