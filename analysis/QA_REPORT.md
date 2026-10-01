@@ -4,8 +4,8 @@ Branch `qa/full-menu-2026-10-01`. Scope: every menu leaf as ADM and as USER (gst
 visual review (gstack `/design-review`) against `analysis/UI_SPEC.md`. Fixes are one commit each, with a
 regression test where behaviour changed.
 
-**Result:** 7 functional issues and 4 design findings, all 11 fixed and verified in the running Docker
-app. Health score **69 → 95**. Design score **B → A-**. AI-slop score **A** (no slop patterns).
+**Result:** 8 functional issues and 5 design findings, all 13 fixed and verified in the running Docker
+app. Health score **69 → 98**. Design score **B → A-**. AI-slop score **A** (no slop patterns).
 
 ## 1. How it was tested
 
@@ -54,10 +54,12 @@ because they need the test DB). E2E 80/80 pass.
 | ISSUE-004 | Medium | Impressoras: Novo + Guardar with nothing typed saved a printer with no Endereço. The form has ENDERECO, VALIDO and GSDEVICE_RF Required. | `required` on the 3 columns. The screen pre-fills `PXLCOLOR` like the form. | `47b68c4`, test `d45d3ff` |
 | ISSUE-003 | Medium | USER typing an ADM URL got the full screen (grid, filters, toolbar), which then fired requests that all failed with 403. | The `_app` layout checks the menu leaf's roles and shows "Não tem permissão para esta operação." The API still decides. | `1d329a4`, test `847ee15` |
 | ISSUE-006 | Medium | Alterar password with empty fields showed zod's English text ("Too small: expected string to have >=1 characters"). | One global zod `customError` in `@gestsiid/shared`. A schema with its own message keeps it. | `eb8d957`, test `0dc5399` |
+| ISSUE-008 | Low | Selecting a Modelos section or a perfil with no image logged a 404 console error. The preview is a plain `<img>`, and the browser logs every 404. | A no-image GET answers `204`, so the `<img>` fails quietly and "Sem imagem" still shows. ARCHITECTURE §6 updated. | `59b9c4c` |
 | ISSUE-007 | Low | Every first form save logged a CSP violation: zod probes eval with `Function('')`, and the CSP correctly blocks it. | `z.config({ jitless: true })` | `9c2f87b`, test `9f04895` |
 
-Two existing tests were changed, because they pinned the bug: the bind names in 4 unit test files (ISSUE-005),
-and a printer insert without Endereço in 2 unit test files and 1 e2e spec (ISSUE-004).
+Some existing tests were changed, because they pinned the old behaviour: the bind names in 4 unit test
+files (ISSUE-005), a printer insert without Endereço in 2 unit test files and 1 e2e spec (ISSUE-004), and
+the no-image `404` in 4 unit/contract test files and 1 e2e spec (ISSUE-008).
 
 ## 3. Design findings (all fixed)
 
@@ -68,6 +70,7 @@ specified, dark theme correct, and no horizontal scroll at any width.
 | ID | Impact | What was wrong | Fix | Commit |
 |---|---|---|---|---|
 | FINDING-001 | High | 15 screens rendered their own `<main id="conteudo" class="h-dvh p-4">` and `<h1>` inside the shell's `<main>`. This caused 4 problems: the title showed twice (some with other text than the menu, e.g. "Definição de variáveis do SIID"), the body sat 16 px right of the header, two `main` landmarks shared one id, and the full-height block started below the header, so its counter and pager were off screen behind a second scroll. | Screens are now a flex column in the shell's `<main>`, which fills the remaining height (UI_SPEC §2.1). | `3b06401` |
+| FINDING-005 | Medium | Documentos: "Procurar por parâmetros" and "Actualizar" had their own row under the ADM actions, and USER got an empty action row. UI_SPEC §2.1/§4.2 puts them in the page header. | The shell has a slot right of the h1 (`PageActions`); the buttons are 32 px page-level buttons. | `c755dc5` |
 | FINDING-004 | Medium | On a phone, the DataBlock toolbar overlapped: "Escolher impressora" sat under "?" and "Limpar filtros". | The toolbar row wraps. The desktop height stays 40 px. | `c0f7c84` |
 | FINDING-003 | Polish | On a phone, the user name in the top bar wrapped onto the breadcrumb. | One line with an ellipsis below `sm` | `08be9d5` |
 | FINDING-002 | Polish | The home tab title read "GestSIID · GestSIID · GADOR_TESTES". | `pageTitle()` drops the repeat | `e646317`, test `e60e20f` |
@@ -79,9 +82,7 @@ and `.gstack/design-reports/after/`.
 
 | Item | Why it is not fixed |
 |---|---|
-| Modelos: the model list shows about 5 rows, and the details need page scroll. UI_SPEC §3.11 asks for a draggable 55/45 splitter. | Structural (new resizable layout). Next design pass. |
-| Documentos: "Procurar por parâmetros" and "Actualizar" sit on their own row. UI_SPEC §2.1 puts them in the page header. | Polish. Needs a page-header slot in the shell. |
-| Selecting a Modelos section with no image logs a 404 in the console. The screen correctly shows "Sem imagem". | Low. A 204 for "no image" would need a change in the API and in `ImageUpload`. |
+| **Question:** Modelos and Documentos use a fixed-height list and a page that scrolls. UI_SPEC §3.11 asks for a draggable 55/45 splitter. | The code does this on purpose ("three stacked grids and an image pane do not fit one laptop screen"). A splitter would squeeze 2 nested grids into 45 %. Choose: keep the scroll (and update the spec), or build the splitter. |
 | **Question:** Domínios `TAMANHO_MAXIMO` is Required in FD_DOMINIOS_SIID, but optional in the new app. | Is this on purpose? The two string fields beside it are conditional on purpose. |
 | **Question:** Reports: a new report cannot be edited until its parameter count matches N.º Parâmetros, and it cannot be deleted while its 3 fixed parameters exist (409). | Both copy form rules. Confirm that this is intended. |
 | Backup names such as `COSEC_202609_ 01` contain a space. | On purpose: the SQL copies the form's `TO_CHAR(n,'00')` (comment in `features/backups/oracle.ts`). |
