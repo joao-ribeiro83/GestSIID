@@ -1,9 +1,16 @@
 import oracledb from 'oracledb';
+import Fastify, { type FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { impressorasAssociadasDoc, impressorasAssociadasUsr, modelosLov, utilizadoresLov } from '@gestsiid/shared';
 import { buildPoolAttrs, query, type DbPool } from '../../../db/oracle.ts';
+import { registerErrorHandler } from '../../../http/errors.ts';
+import { oracleStore } from '../../../lib/crud.ts';
 import { readOnlyPool } from '../../../test/read-only-db.ts';
+import { registerImpressorasAssociadasRoutes } from '../../impressoras-associadas/routes.ts';
 import { oracleDocumentosRepo } from '../repo.ts';
+import { registerDocumentosRoutes } from '../routes.ts';
 import { oracleOperacoesDb } from './oracle.ts';
+import { registerOperacoesRoutes } from './routes.ts';
 
 /**
  * Contract test against the TEST schema (TEST_STRATEGY.md, CLAUDE.md HARD RULE): reaches Oracle
@@ -126,5 +133,74 @@ describe.skipIf(!env['DB_CONNECT_STRING'])('documentos/operacoes — TEST schema
       { user: USER },
     );
     expect(ids).toEqual([id]);
+  });
+
+  /**
+   * D-08 / A-09 over the real Oracle-backed routes: a USER session gets 403 SEM_PERMISSAO on every
+   * ADM-only route before any SQL runs. Even if a guard were missing, readOnlyPool refuses the write.
+   * Single queue cancel is USER-reachable (A-08) but writes, so it is pinned in routes.test.ts only.
+   */
+  describe('USER session → 403 on ADM-only routes (D-08, A-09)', () => {
+    let app: FastifyInstance;
+
+    beforeAll(async () => {
+      app = Fastify();
+      registerErrorHandler(app);
+      app.decorateRequest('session', null as never);
+      app.addHook('onRequest', async (req) => {
+        (req as { session: unknown }).session = { user: { ...USER, role: 'USER' } };
+      });
+      const repo = oracleDocumentosRepo(pool, T);
+      registerDocumentosRoutes(app, { repo, fileServer: { baseUrl: 'http://127.0.0.1:9/pdf/T', timeoutMs: 1000 } });
+      registerOperacoesRoutes(app, { repo, db: oracleOperacoesDb(pool, T) });
+      registerImpressorasAssociadasRoutes(app, {
+        docStore: oracleStore(pool, impressorasAssociadasDoc, T),
+        usrStore: oracleStore(pool, impressorasAssociadasUsr, T),
+        modelosStore: oracleStore(pool, modelosLov, T),
+        utilizadoresStore: oracleStore(pool, utilizadoresLov, T),
+        ambiente: USER.ambiente,
+      });
+      await app.ready();
+    });
+
+    afterAll(async () => {
+      await app?.close();
+    });
+
+    const expect403 = async (method: 'GET' | 'POST', url: string, payload?: object) => {
+      const r = await app.inject({ method, url, ...(payload ? { payload } : {}) });
+      expect(r.statusCode, `${method} ${url}`).toBe(403);
+      expect(r.json().code, `${method} ${url}`).toBe('SEM_PERMISSAO');
+    };
+
+    it.each([
+      'regerar', 'reimprimir', 'segunda-via', 'copia', 'anular', 'cancelar',
+      'suspender', 'retomar', 'reenviar-edoc', 'reenviar-email', 'rearquivar',
+      'recriar', // not a route: USER still sees 403, never a 404 that tells which actions exist
+    ])('POST /api/documentos/acoes/%s', async (acao) => {
+      await expect403('POST', `/api/documentos/acoes/${acao}`, { ids: [ultimos[0]!] });
+    });
+
+    it('POST /api/documentos/:id/clonar (owner, 2026-09-30)', async () => {
+      await expect403('POST', `/api/documentos/${ultimos[0]}/clonar`, { parametros: [] });
+    });
+
+    it('POST /api/documentos/:id/comentarios', async () => {
+      await expect403('POST', `/api/documentos/${ultimos[0]}/comentarios`, { comentario: 'x' });
+    });
+
+    it('GET /api/documentos/fila/contagem', async () => {
+      await expect403('GET', '/api/documentos/fila/contagem?estado=ESPERA');
+    });
+
+    it('Impressoras Associadas (Configuração, A-09): GET doc / usr', async () => {
+      await expect403('GET', '/api/impressoras-associadas-doc');
+      await expect403('GET', '/api/impressoras-associadas-usr');
+    });
+
+    it('USER still reads Documentos: list and detail are 200', async () => {
+      expect((await app.inject({ url: `/api/documentos?f[ID]=${ultimos[0]}` })).statusCode).toBe(200);
+      expect((await app.inject({ url: `/api/documentos/${ultimos[0]}` })).statusCode).toBe(200);
+    });
   });
 });

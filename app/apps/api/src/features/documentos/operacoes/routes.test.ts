@@ -513,7 +513,8 @@ describe('selection: ids / consulta / errors (BR-DOC-09, D-26)', () => {
 
   it('USER → 403 SEM_PERMISSAO on every action and on the count; no session → 401', async () => {
     const user = appWith({ role: 'USER' });
-    for (const a of ['regerar', 'reimprimir', 'segunda-via', 'copia', 'anular', 'cancelar', 'suspender', 'retomar', 'reenviar-edoc', 'reenviar-email', 'rearquivar']) {
+    // 'recriar' is not an action: USER still gets 403, never a 404 that tells which actions exist.
+    for (const a of ['regerar', 'reimprimir', 'segunda-via', 'copia', 'anular', 'cancelar', 'suspender', 'retomar', 'reenviar-edoc', 'reenviar-email', 'rearquivar', 'recriar']) {
       const r = await user.acao(a, { ids: [1] });
       expect(r.status, a).toBe(403);
       expect(r.body['code']).toBe('SEM_PERMISSAO');

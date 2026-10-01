@@ -46,7 +46,7 @@ const INSERE_ERRO =
 const ANULAR = 'BEGIN PKG_DOCUMENTOS_SVR.ANULAR(:id, :utilizador); END;';
 const DISPONIVEL = 'SELECT DISPONIVEL_RF FROM SVR_DOCUMENTOS WHERE ID = :id';
 
-// ORDENACAO_DOCUMENTOS.CANCELAR; the state list is the non-AFREITAS branch (D-12 `force` drops it).
+// ORDENACAO_DOCUMENTOS.CANCELAR; the state list is the form's normal branch (D-12 `force` drops it).
 const CANCELAR = "UPDATE SVR_QUEUE SET ESTADO = 'CANCELLED' WHERE TIPO_QUEUE_RF = 'EXECUCAO' AND DOCUMENTO_ID = :id";
 const CANCELAR_FILTRO = ` AND ESTADO IN (${CANCELAR_ESTADOS.map((e) => `'${e}'`).join(', ')})`;
 
