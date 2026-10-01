@@ -17,6 +17,7 @@ import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { OBF_BODY, OBF_SPEC } from './obfuscation-shim.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(path.join(here, '../apps/api/package.json'));
@@ -227,17 +228,16 @@ for (const o of objs.filter((x) => x.owner !== S)) {
 
 // ---- 7. Code: types, views, packages/functions/procedures, then triggers; recompile at the end.
 const source = async (o, type) => (await read(`SELECT text FROM all_source WHERE owner = :o AND name = :n AND type = :t ORDER BY line`, { o: o.owner, n: o.name, t: type })).map((r) => r.TEXT).join('');
-// Oracle 23 has no DBMS_OBFUSCATION_TOOLKIT (USER_SECURITY uses it). DBMS_CRYPTO DES-CBC with a
-// zero IV and no padding gives the same bytes, so TEST's password hashes stay valid locally.
-const DES = 'DBMS_CRYPTO.ENCRYPT_DES + DBMS_CRYPTO.CHAIN_CBC + DBMS_CRYPTO.PAD_NONE';
-const desFix = (text) => text
-  .replace(/DBMS_OBFUSCATION_TOOLKIT\.desencrypt\s*\(\s*input\s*=>\s*([\s\S]*?),\s*key\s*=>\s*(\w+),\s*encrypted_data\s*=>\s*(\w+)\s*\)/gi, `$3 := DBMS_CRYPTO.ENCRYPT($1, ${DES}, $2)`)
-  .replace(/DBMS_OBFUSCATION_TOOLKIT\.desdecrypt\s*\(\s*input\s*=>\s*([\s\S]*?),\s*key\s*=>\s*(\w+),\s*decrypted_data\s*=>\s*(\w+)\s*\)/gi, `$3 := DBMS_CRYPTO.DECRYPT($1, ${DES}, $2)`);
-for (const u of owners) await run(`GRANT EXECUTE ON SYS.DBMS_CRYPTO TO ${q(u)}`);
+// Oracle 23 has no DBMS_OBFUSCATION_TOOLKIT: install a DBMS_CRYPTO stand-in (obfuscation-shim.mjs).
+for (const u of owners) {
+  await run(`GRANT EXECUTE ON SYS.DBMS_CRYPTO TO ${q(u)}`);
+  await asOwner(u);
+  await run(`CREATE OR REPLACE ${OBF_SPEC.replace('PACKAGE ', `PACKAGE ${q(u)}.`)}`);
+  await run(`CREATE OR REPLACE ${OBF_BODY.replace('PACKAGE BODY ', `PACKAGE BODY ${q(u)}.`)}`);
+}
 const createCode = async (o, text) => {
   if (!text) return;
   await asOwner(o.owner);
-  text = desFix(text);
   await run(`CREATE OR REPLACE ${text.replace(/^\s*(TYPE|PACKAGE BODY|PACKAGE|FUNCTION|PROCEDURE|TRIGGER)\s+("?[\w$#]+"?\.)?/i, (_, kw) => `${kw} ${q(o.owner)}.`)}`);
 };
 for (let pass = 0; pass < 2; pass++) for (const o of of('TYPE')) await createCode(o, await source(o, 'TYPE')); // types may use each other
