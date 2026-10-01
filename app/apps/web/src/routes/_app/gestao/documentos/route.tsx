@@ -16,6 +16,7 @@ import {
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { ContextMenuItem, ContextMenuSeparator } from '@/components/ui/context-menu';
+import { PageActions } from '@/components/shell/page-actions';
 import { cn } from '@/lib/utils';
 import { Accoes } from './-acoes';
 import type { DocRow } from './-common';
@@ -153,8 +154,8 @@ function DocumentosScreen() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       {/* The shell already shows the page title (h1). */}
-      <div className="flex flex-wrap items-center gap-2">
-        {adm && (
+      {adm && (
+        <div className="flex flex-wrap items-center gap-2">
           <Accoes
             selection={selection}
             onDone={() => {
@@ -162,16 +163,16 @@ function DocumentosScreen() {
               actualizar();
             }}
           />
-        )}
-        <div className="ml-auto flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setProcurar(true)}>
-            <Search /> Procurar por parâmetros
-          </Button>
-          <Button size="sm" variant="outline" onClick={actualizar}>
-            <RefreshCw /> {pt.db.actualizar}
-          </Button>
         </div>
-      </div>
+      )}
+      <PageActions>
+        <Button variant="outline" onClick={() => setProcurar(true)}>
+          <Search /> Procurar por parâmetros
+        </Button>
+        <Button variant="outline" onClick={actualizar}>
+          <RefreshCw /> {pt.db.actualizar}
+        </Button>
+      </PageActions>
 
       <DataBlock<DocRow>
         className="h-[30rem] shrink-0"

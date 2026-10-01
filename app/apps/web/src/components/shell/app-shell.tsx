@@ -8,6 +8,7 @@ import { useMenuRecolhido } from '@/lib/preferences';
 import { TopBar } from '@/components/shell/top-bar';
 import { Sidebar } from '@/components/shell/sidebar';
 import { Breadcrumb } from '@/components/shell/breadcrumb';
+import { PageActionsSlot } from '@/components/shell/page-actions';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 
 /** §2.1 `<h1> · GestSIID · <ambiente>`; home's h1 is "GestSIID" itself, so it is not repeated. */
@@ -53,6 +54,7 @@ export function AppShell({ session, children }: { session: Session; children: Re
   }
 
   const h1Ref = useRef<HTMLHeadingElement>(null);
+  const [actionsSlot, setActionsSlot] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     h1Ref.current?.focus();
   }, [pathname]);
@@ -101,12 +103,15 @@ export function AppShell({ session, children }: { session: Session; children: Re
         <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
           <div className="flex flex-col gap-1 border-b border-border px-4 py-2">
             <Breadcrumb trail={trail} />
-            <h1 ref={h1Ref} tabIndex={-1} className="text-lg font-semibold outline-none">
-              {title}
-            </h1>
+            <div className="flex min-h-8 flex-wrap items-center gap-2">
+              <h1 ref={h1Ref} tabIndex={-1} className="mr-auto text-lg font-semibold outline-none">
+                {title}
+              </h1>
+              <div ref={setActionsSlot} className="flex flex-wrap items-center gap-2" />
+            </div>
           </div>
           <main id="conteudo" className="flex min-h-0 flex-1 flex-col px-4 py-3">
-            {children}
+            <PageActionsSlot.Provider value={actionsSlot}>{children}</PageActionsSlot.Provider>
           </main>
         </div>
       </div>
