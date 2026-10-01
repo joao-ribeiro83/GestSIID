@@ -15,6 +15,9 @@ export function findMenuTrail(pathname: string): BreadcrumbEntry[] | null {
       const nextTrail = [...trail, entry];
       if (node.kind === 'item') {
         if (node.to === pathname) return nextTrail;
+        // A row's detail page (D-34): "Configuração › Modelos › D1.A5", the item linking back.
+        if (pathname.startsWith(`${node.to}/`))
+          return [...nextTrail, { label: decodeURIComponent(pathname.slice(node.to.length + 1)) }];
       } else {
         const found = walk(node.children, nextTrail);
         if (found) return found;

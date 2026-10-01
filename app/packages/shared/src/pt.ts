@@ -41,6 +41,8 @@ export const pt = {
       capped
         ? 'Todos os registos da consulta estão seleccionados (mais de 10 000).'
         : `Todos os ${total} registos da consulta estão seleccionados.`,
+    /** D-34: the row button that opens the row's detail page. */
+    abrir: 'Abrir',
     seleccionarTodos: 'Seleccionar todos',
     seleccionarRegisto: 'Seleccionar registo',
     limparSeleccao: 'Limpar selecção',

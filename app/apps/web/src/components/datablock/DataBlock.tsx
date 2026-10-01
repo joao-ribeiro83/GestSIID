@@ -22,6 +22,7 @@ import {
 import {
   Archive,
   Ban,
+  ChevronRight,
   CircleAlert,
   CircleHelp,
   Circle,
@@ -176,6 +177,10 @@ export interface DataBlockProps<Row extends GridRow = GridRow> {
   rowTone?: (row: Row) => RowTone | null;
   /** Items of the row context menu (right click, Shift+F10, Menu key); the row becomes current first. */
   rowMenu?: (row: Row) => ReactNode;
+  /** A button at the start of every saved row that opens its detail page (D-34: the secondary
+   * tables live on the row's own page). `rowOpenLabel` is its accessible name and tooltip. */
+  onRowOpen?: (row: Row) => void;
+  rowOpenLabel?: string;
   /** Read-only blocks (`edit: 'none'`): Enter or double-click on a row. */
   onRowActivate?: (row: Row, how: 'enter' | 'dblclick') => void;
   emptyText?: string;
@@ -716,7 +721,9 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
   };
 
   // ── render ───────────────────────────────────────────────────────────────────────────────
-  const leadCount = selectionMode === 'multi' ? 2 : 1;
+  const openCol = !!props.onRowOpen;
+  const leadCount = 1 + (selectionMode === 'multi' ? 1 : 0) + (openCol ? 1 : 0);
+  const openLabel = props.rowOpenLabel ?? pt.db.abrir;
   const colWidth = (c: ColumnView<Row>) => c.width ?? DEFAULT_WIDTH[resource.columns[c.col]!.type];
   const offset = (query.page - 1) * query.size;
   const counter = filtersPending
@@ -727,7 +734,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
       (selection.mode === 'ids' ? ` · ${pt.db.seleccionados(selection.ids.length)}` : '');
 
   const headerCheckbox = (
-    <th scope="col" className="w-8 border-b border-r border-border">
+    <th scope="col" className={cn('w-8 border-b border-border', !openCol && 'border-r')}>
       <input
         type="checkbox"
         aria-label={pt.db.seleccionarTodos}
@@ -746,6 +753,11 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
         <span className="sr-only">Estado</span>
       </th>
       {selectionMode === 'multi' && headerCheckbox}
+      {openCol && (
+        <th scope="col" className="w-8 border-b border-r border-border">
+          <span className="sr-only">{openLabel}</span>
+        </th>
+      )}
     </>
   );
 
@@ -826,7 +838,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
             <Gutter entry={entry} tone={tone} />
           </td>
           {selectionMode === 'multi' && (
-            <td className="w-8 border-r border-border text-center">
+            <td className={cn('w-8 border-border text-center', !openCol && 'border-r')}>
               <input
                 type="checkbox"
                 aria-label={pt.db.seleccionarRegisto}
@@ -840,6 +852,23 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
                 }}
                 className="size-3.5 accent-primary"
               />
+            </td>
+          )}
+          {openCol && (
+            <td className="w-8 border-r border-border text-center">
+              <button
+                type="button"
+                aria-label={openLabel}
+                title={openLabel}
+                disabled={row._rid.startsWith('tmp:')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  props.onRowOpen!(row);
+                }}
+                className="inline-flex size-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-primary focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-40"
+              >
+                <ChevronRight className="size-4" aria-hidden />
+              </button>
             </td>
           )}
           {tr.getAllCells().map((cell, ci) => {
@@ -996,6 +1025,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
           <colgroup>
             <col style={{ width: 24 }} />
             {selectionMode === 'multi' && <col style={{ width: 32 }} />}
+            {openCol && <col style={{ width: 32 }} />}
             {cols.map((c) => (
               <col key={c.col} style={{ width: colWidth(c) }} />
             ))}
