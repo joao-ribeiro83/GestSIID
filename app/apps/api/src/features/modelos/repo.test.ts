@@ -359,9 +359,9 @@ describe('SECCAO_IMAGEM (DOC_SECCOES_DOCUMENTO.IMAGEM, Step 6.2)', () => {
     const where = 'WHERE MODELO_ID = :MODELO_ID AND TIPOSEC_ID = :TIPOSEC_ID AND ALINEA = :ALINEA';
     expect(db.calls[0]?.sql).toBe(`SELECT 1 FROM DOC_SECCOES_DOCUMENTO ${where} FOR UPDATE NOWAIT`);
     expect(db.calls[1]?.sql).toBe(
-      `UPDATE DOC_SECCOES_DOCUMENTO SET IMAGEM = :__img, ACTUALIZADO_POR = :__user, DATA_ACTUALIZACAO = SYSDATE ${where}`,
+      `UPDATE DOC_SECCOES_DOCUMENTO SET IMAGEM = :img_data, ACTUALIZADO_POR = :img_user, DATA_ACTUALIZACAO = SYSDATE ${where}`,
     );
-    expect(db.calls[1]?.binds).toMatchObject({ ...key, __user: USER.username });
+    expect(db.calls[1]?.binds).toMatchObject({ ...key, img_user: USER.username });
     expect(db.state.commits).toBe(1);
     for (const c of db.calls) noLiterals(c.sql);
   });

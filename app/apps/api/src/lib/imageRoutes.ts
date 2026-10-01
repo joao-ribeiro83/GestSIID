@@ -146,12 +146,12 @@ export function oracleImageStore(
         }
         const sets = [
           `${column} = ${value}`,
-          ...(audit ? [`${audit.by} = :__user`, `${audit.at} = SYSDATE`] : []),
+          ...(audit ? [`${audit.by} = :img_user`, `${audit.at} = SYSDATE`] : []),
         ];
         await conn.execute(`UPDATE ${table} SET ${sets.join(', ')} WHERE ${keyWhere}`, {
           ...key,
           ...extra,
-          ...(audit ? { __user: ctx.user.username } : {}),
+          ...(audit ? { img_user: ctx.user.username } : {}),
         } as oracledb.BindParameters);
         return true;
       });
@@ -173,7 +173,7 @@ export function oracleImageStore(
         return row?.IMG ?? null;
       }),
     set: (key, data, ctx) =>
-      write(key, ':__img', { __img: { val: data, type: oracledb.DB_TYPE_BLOB } }, ctx),
+      write(key, ':img_data', { img_data: { val: data, type: oracledb.DB_TYPE_BLOB } }, ctx),
     clear: (key, ctx) => write(key, 'NULL', {}, ctx),
   };
 }

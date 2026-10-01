@@ -210,13 +210,13 @@ describe('oracleImageStore', () => {
       'SELECT 1 FROM DOC_PERFIS_DEPARTAMENTO WHERE ID = :id FOR UPDATE NOWAIT',
     );
     expect(calls[1]?.sql).toBe(
-      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = :__img, ACTUALIZADO_POR = :__user, ' +
+      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = :img_data, ACTUALIZADO_POR = :img_user, ' +
         'DATA_ACTUALIZACAO = SYSDATE WHERE ID = :id',
     );
     expect(calls[1]?.binds).toEqual({
       id: 7,
-      __img: { val: PNG, type: oracledb.DB_TYPE_BLOB },
-      __user: 'JOAO',
+      img_data: { val: PNG, type: oracledb.DB_TYPE_BLOB },
+      img_user: 'JOAO',
     });
     expect(calls.at(-1)?.sql).toBe('COMMIT');
   });
@@ -246,10 +246,10 @@ describe('oracleImageStore', () => {
     const { pool, calls } = fakePool([{ rows: [{ 1: 1 }] }, { rowsAffected: 1 }]);
     expect(await oracleImageStore(pool, cfg, 1000).clear({ id: 7 }, ctx)).toBe(true);
     expect(calls[1]?.sql).toBe(
-      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = NULL, ACTUALIZADO_POR = :__user, ' +
+      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = NULL, ACTUALIZADO_POR = :img_user, ' +
         'DATA_ACTUALIZACAO = SYSDATE WHERE ID = :id',
     );
-    expect(calls[1]?.binds).toEqual({ id: 7, __user: 'JOAO' });
+    expect(calls[1]?.binds).toEqual({ id: 7, img_user: 'JOAO' });
   });
 
   it('get fetches the BLOB as a Buffer; no row or NULL is null', async () => {
@@ -266,7 +266,7 @@ describe('oracleImageStore', () => {
     const { pool, calls } = fakePool([{ rows: [{ 1: 1 }] }, { rowsAffected: 1 }]);
     await oracleImageStore(pool, { ...cfg, audit: null }, 1000).set({ id: 7 }, PNG, ctx);
     expect(calls[1]?.sql).toBe(
-      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = :__img WHERE ID = :id',
+      'UPDATE DOC_PERFIS_DEPARTAMENTO SET ASSINATURA = :img_data WHERE ID = :id',
     );
     expect(() => oracleImageStore(pool, { ...cfg, column: 'A; DROP TABLE X' }, 1000)).toThrow();
   });

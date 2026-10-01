@@ -161,7 +161,7 @@ export async function lockRow(
   orig: Record<string, unknown>,
 ): Promise<void> {
   const origEntries = Object.entries(orig);
-  const origBindName = (i: number) => `__orig_${i}`;
+  const origBindName = (i: number) => `orig${i}`;
   const origConditions = origEntries.map(
     ([column], i) =>
       `(${column} = :${origBindName(i)} OR (${column} IS NULL AND :${origBindName(i)} IS NULL))`,

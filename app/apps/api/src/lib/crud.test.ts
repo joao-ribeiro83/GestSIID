@@ -291,9 +291,9 @@ describe('oracleStore — SQL', () => {
       ctx,
     );
     expect(calls[0]?.sql).toContain(
-      'FROM CFG_IMPRESSORAS WHERE ROWID = :rid AND (NOME = :__orig_0',
+      'FROM CFG_IMPRESSORAS WHERE ROWID = :rid AND (NOME = :orig0',
     );
-    expect(calls[0]?.sql).toContain('TO_CHAR(DATA_INICIO,\'YYYY-MM-DD"T"HH24:MI:SS\') = :__orig_1');
+    expect(calls[0]?.sql).toContain('TO_CHAR(DATA_INICIO,\'YYYY-MM-DD"T"HH24:MI:SS\') = :orig1');
     expect(calls[0]?.sql).toContain('FOR UPDATE NOWAIT');
     expect(calls[0]?.binds).toMatchObject({ rid: 'AAAR3sAAEAAAACXAA+/' });
     expect(calls[1]?.sql).toBe(
