@@ -37,9 +37,10 @@ passes in full — it just skips the contract-test suites.
 
 ```
 docker compose build
-docker compose up
+docker compose --env-file ../.env up
 ```
 
-`docker-compose.yml` reads `../.env`. The Dockerfile's Oracle Instant Client URL/sha256 are
+`docker-compose.yml` reads `../.env`. Pass it with `--env-file` too: the host port mapping uses
+`${PORT}`, and Compose takes that from `--env-file`, not from `env_file`. The Dockerfile's Oracle Instant Client URL/sha256 are
 placeholders (see the `ponytail:` comment in `Dockerfile`) and must be pinned to a real
 Instant Client 19 Basic build before the image can actually build.
