@@ -82,7 +82,7 @@ and `.gstack/design-reports/after/`.
 
 | Item | Why it is not fixed |
 |---|---|
-| **Question:** Modelos and Documentos use a fixed-height list and a page that scrolls. UI_SPEC §3.11 asks for a draggable 55/45 splitter. | The code does this on purpose ("three stacked grids and an image pane do not fit one laptop screen"). A splitter would squeeze 2 nested grids into 45 %. Choose: keep the scroll (and update the spec), or build the splitter. |
+| ~~Question:~~ Modelos and Documentos use a fixed-height list and a page that scrolls. UI_SPEC §3.11 asks for a draggable 55/45 splitter. | **Answered (D-34): neither.** The owner's proposal is built: on Modelos, Documentos, Reports and Domínios the list fills the page, and a `›` button on each row opens the row's own page with its secondary tables. "Voltar" returns to the list unchanged. Checked in Docker on the Oracle copy (all 4, 0 console errors) and in 81/81 e2e tests. |
 | ~~Question:~~ Domínios `TAMANHO_MAXIMO` is Required in FD_DOMINIOS_SIID, but optional in the new app. | **Answered (D-32): required.** Done; regression test `features/dominios/routes.regression-1.test.ts`. |
 | ~~Question:~~ Reports: a new report cannot be edited until its parameter count matches N.º Parâmetros, and it cannot be deleted while its 3 fixed parameters exist (409). | **Answered (D-33): keep both Forms rules.** No change. |
 | Backup names such as `COSEC_202609_ 01` contain a space. | On purpose: the SQL copies the form's `TO_CHAR(n,'00')` (comment in `features/backups/oracle.ts`). |

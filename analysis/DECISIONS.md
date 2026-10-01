@@ -392,6 +392,20 @@ Entries marked **Settled by DB** were answered from `analysis/db/` (dump of `SII
 **Date:** 2026-10-01
 **Consequences:** No code change (`features/reports/routes.ts`: `withParamCountCheck`, `withDeleteGuard`). To delete a report, delete its parameters first.
 
+## D-34 — Where the secondary tables open (QA 2026-10-01, question c)
+
+**Question:** UI_SPEC §3.11 stacks the detail under the master with a 55/45 splitter; Modelos and Documentos instead had a fixed-height list and a scrolling page. Splitter, scroll, or something else?
+**Options considered:** (a) keep the scroll; (b) the 55/45 splitter; (c, owner's proposal) the main table fills the page and each row has a button that opens its secondary tables, either in a window or on another page with "Voltar".
+**Decision:** (c), on its own page with "Voltar", for every screen with secondary tables: Modelos, Documentos, Reports, Domínios.
+**Date:** 2026-10-01
+**Consequences:**
+- Routes `<list>/$key`: `/configuracao/modelos/$modeloId`, `/gestao/documentos/$documentoId` (`?tab=`), `/configuracao/reports/$reportId`, `/administracao/dominios/$dominioId`. A detail page is a link that can be bookmarked or shared.
+- `DataBlock` `onRowOpen` / `rowOpenLabel`: a `›` button at the start of every saved row (none on an unsaved one). Documentos also opens on Enter / double-click and from the context menu (on the matching tab).
+- The list route is the detail's parent and stays mounted (hidden): Voltar (page header) and the browser's Back return to the list with its filters, sort, page and selection unchanged. Unsaved edits still ask #46 when the page is left.
+- Breadcrumb `Grupo › Item › <key>` (the item links back), h1 `Item · <key>`; the page's h2 names the row (e.g. `Modelo D1.A5 · Títulos de Cessão…`).
+- Documentos "Mostrar Grupo" lives in the list URL (`?grupo=`), so the detail page can set it too.
+- The model dialogs (Alterar Modelo, Código Barras, Clonar) and the Documentos batch actions stay on the list (they act on its current row / selection).
+
 ---
 
 # Amendments from Step 1.1 (2026-09-15)
