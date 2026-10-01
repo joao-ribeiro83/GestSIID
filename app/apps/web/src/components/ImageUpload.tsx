@@ -27,7 +27,7 @@ const erro = (e: unknown) => (e instanceof ApiError ? e.message : 'Falha na oper
 
 /**
  * Preview + upload (with progress) + remove for one `imageRoutes` image (ARCHITECTURE.md §6). The
- * preview is a plain `<img>` on the GET route (404 = no image); `?v=` defeats the browser cache
+ * preview is a plain `<img>` on the GET route (204 = no image); `?v=` defeats the browser cache
  * after a write. The server decides what is an image (415) and how big it may be (413): its
  * message is shown.
  */

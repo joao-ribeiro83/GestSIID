@@ -236,13 +236,13 @@ describe('perfis-departamento assinatura', () => {
   it('PUT, GET and DELETE the signature of a perfil by ID', async () => {
     const app = await appWith('ADM');
     const url = '/api/perfis-departamento/1/assinatura';
-    expect((await app.inject({ url })).statusCode).toBe(404);
+    expect((await app.inject({ url })).statusCode).toBe(204);
     expect((await app.inject({ method: 'PUT', url, ...png() })).statusCode).toBe(204);
     const r = await app.inject({ url });
     expect(r.headers['content-type']).toBe('image/png');
     expect(r.rawPayload.equals(PNG)).toBe(true);
     expect((await app.inject({ method: 'DELETE', url })).statusCode).toBe(204);
-    expect((await app.inject({ url })).statusCode).toBe(404);
+    expect((await app.inject({ url })).statusCode).toBe(204);
   });
 
   it('is 404 for a perfil that does not exist, 400 for a bad ID, 403 for a USER', async () => {

@@ -117,7 +117,7 @@ describe('imageRoutes', () => {
     const r = await put(app, file(big));
     expect(r.statusCode).toBe(413);
     expect(r.json()).toMatchObject({ code: 'FICHEIRO_GRANDE' });
-    expect((await app.inject({ url: URL })).statusCode).toBe(404);
+    expect((await app.inject({ url: URL })).statusCode).toBe(204);
   });
 
   it('PUT refuses a request that is not multipart (415)', async () => {
@@ -144,9 +144,9 @@ describe('imageRoutes', () => {
     expect(r.statusCode).toBe(404);
   });
 
-  it('GET is 404 when there is no image; bytes of no known type are sent as an attachment', async () => {
+  it('GET is 204 when there is no image; bytes of no known type are sent as an attachment', async () => {
     const { app, store } = await appWith('ADM');
-    expect((await app.inject({ url: URL })).statusCode).toBe(404);
+    expect((await app.inject({ url: URL })).statusCode).toBe(204);
     await store.set({ id: 7 }, Buffer.from('legacy bytes'), { user: { username: 'J', role: 'ADM' } });
     const r = await app.inject({ url: URL });
     expect(r.headers['content-type']).toBe('application/octet-stream');
@@ -158,7 +158,7 @@ describe('imageRoutes', () => {
     const { app } = await appWith('ADM');
     await put(app, file(PNG));
     expect((await app.inject({ method: 'DELETE', url: URL })).statusCode).toBe(204);
-    expect((await app.inject({ url: URL })).statusCode).toBe(404);
+    expect((await app.inject({ url: URL })).statusCode).toBe(204);
     expect((await app.inject({ method: 'DELETE', url: '/api/coisas/8/foto' })).statusCode).toBe(404);
   });
 

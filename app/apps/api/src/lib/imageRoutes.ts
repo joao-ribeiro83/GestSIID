@@ -61,7 +61,9 @@ export function imageRoutes(app: FastifyInstance, opts: ImageRoutesOptions): voi
   app.get(path, async (request, reply) => {
     const ctx = sessionCtx(request, roles);
     const data = await store.get(keyOf(request.params), ctx);
-    if (!data) throw new AppError(404, 'NAO_ENCONTRADO', NO_IMAGE);
+    // No image: 204, not 404 — the SPA previews with a plain <img>, and a 404 is logged as a console
+    // error on every row without one; the <img> fails quietly on 204 and the screen shows its empty text.
+    if (!data) return reply.code(204).send();
     const mime = sniffImage(data);
     reply.header('Cache-Control', 'private, no-store').header('X-Content-Type-Options', 'nosniff');
     if (!mime) reply.header('Content-Disposition', 'attachment');

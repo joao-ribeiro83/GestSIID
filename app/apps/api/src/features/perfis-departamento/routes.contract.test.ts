@@ -101,12 +101,12 @@ describe.skipIf(!env['DB_CONNECT_STRING'])('perfis-departamento — TEST schema 
     if (s.CODIGO !== null) expect(['GCOM', 'GCON']).toContain(s.FUNCAODEP_ID);
   });
 
-  it('GET assinatura reads the BLOB as bytes of a known image type, or is 404 when empty', async () => {
+  it('GET assinatura reads the BLOB as bytes of a known image type, or is 204 when empty', async () => {
     const rows = (await app.inject({ url: '/api/perfis-departamento?size=100' })).json().rows as { ID: number }[];
     let comImagem = 0;
     for (const { ID } of rows) {
       const r = await app.inject({ url: `/api/perfis-departamento/${ID}/assinatura` });
-      expect([200, 404]).toContain(r.statusCode);
+      expect([200, 204]).toContain(r.statusCode);
       if (r.statusCode === 200) {
         comImagem++;
         expect(r.rawPayload.length).toBeGreaterThan(0);
