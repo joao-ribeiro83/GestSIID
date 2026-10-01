@@ -376,6 +376,22 @@ Entries marked **Settled by DB** were answered from `analysis/db/` (dump of `SII
 - `NLS_LANG` / client charset: node-oracledb returns JS strings in UTF-16 regardless; set nothing unless Step 2.1 tests show wrong accented characters.
 - SECURITY_FINDINGS §3 item 17 (Thin mode) does not apply; keep the Instant Client version patched.
 
+## D-32 — Domínios `TAMANHO_MAXIMO` (QA 2026-10-01, question a)
+
+**Question:** FD_DOMINIOS_SIID marks "Tamanho" Required; the new app made it optional. Required or optional?
+**Options considered:** (a) required, like Forms; (b) optional.
+**Decision:** (a) required.
+**Date:** 2026-10-01
+**Consequences:** `required: true` in `resources/dominios.ts`. All 37 TEST domains already have a value, so no existing row is blocked.
+
+## D-33 — Reports edit and delete limits (QA 2026-10-01, question b)
+
+**Question:** Keep the two Forms rules on Configuração › Reports: N.º Parâmetros must equal the number of parameter rows (KEY-COMMIT), and a report with parameters cannot be deleted (ON-CHECK-DELETE-MASTER)?
+**Options considered:** (a) keep both, like Forms; (b) change them.
+**Decision:** (a) keep both.
+**Date:** 2026-10-01
+**Consequences:** No code change (`features/reports/routes.ts`: `withParamCountCheck`, `withDeleteGuard`). To delete a report, delete its parameters first.
+
 ---
 
 # Amendments from Step 1.1 (2026-09-15)

@@ -51,7 +51,7 @@ export const dominios = defineResource({
     },
     TIPO_STRING_RF: { type: 'code', label: 'Tipo String', edit: true, maxLength: 1 },
     FORMATACAO_STRING_RF: { type: 'code', label: 'Formatação String', edit: true, maxLength: 1 },
-    TAMANHO_MAXIMO: { type: 'number', label: 'Tamanho', edit: true },
+    TAMANHO_MAXIMO: { type: 'number', label: 'Tamanho', required: true, edit: true }, // Required in FD_DOMINIOS_SIID (owner, 2026-10-01)
     PRECISAO: { type: 'number', label: 'Precisão', edit: true },
     VALOR_MINIMO: { type: 'text', label: 'Mínimo', edit: true, maxLength: 40 },
     VALOR_MAXIMO: { type: 'text', label: 'Máximo', edit: true, maxLength: 40 },

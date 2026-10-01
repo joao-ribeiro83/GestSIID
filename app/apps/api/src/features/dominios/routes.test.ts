@@ -86,6 +86,7 @@ describe('dominios routes (master)', () => {
       TIPO_INFORMACAO_RF: 'STRING',
       TIPO_DOMINIO_RF: 'L',
       DOMINIO_SISTEMA_BN: 'N',
+      TAMANHO_MAXIMO: 30,
     });
     expect(r.statusCode).toBe(201);
     expect(r.json()).toMatchObject({

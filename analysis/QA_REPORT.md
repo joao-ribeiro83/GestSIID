@@ -83,8 +83,8 @@ and `.gstack/design-reports/after/`.
 | Item | Why it is not fixed |
 |---|---|
 | **Question:** Modelos and Documentos use a fixed-height list and a page that scrolls. UI_SPEC §3.11 asks for a draggable 55/45 splitter. | The code does this on purpose ("three stacked grids and an image pane do not fit one laptop screen"). A splitter would squeeze 2 nested grids into 45 %. Choose: keep the scroll (and update the spec), or build the splitter. |
-| **Question:** Domínios `TAMANHO_MAXIMO` is Required in FD_DOMINIOS_SIID, but optional in the new app. | Is this on purpose? The two string fields beside it are conditional on purpose. |
-| **Question:** Reports: a new report cannot be edited until its parameter count matches N.º Parâmetros, and it cannot be deleted while its 3 fixed parameters exist (409). | Both copy form rules. Confirm that this is intended. |
+| ~~Question:~~ Domínios `TAMANHO_MAXIMO` is Required in FD_DOMINIOS_SIID, but optional in the new app. | **Answered (D-32): required.** Done; regression test `features/dominios/routes.regression-1.test.ts`. |
+| ~~Question:~~ Reports: a new report cannot be edited until its parameter count matches N.º Parâmetros, and it cannot be deleted while its 3 fixed parameters exist (409). | **Answered (D-33): keep both Forms rules.** No change. |
 | Backup names such as `COSEC_202609_ 01` contain a space. | On purpose: the SQL copies the form's `TO_CHAR(n,'00')` (comment in `features/backups/oracle.ts`). |
 | "Mostrar Documento" opens a window, but the PDF itself was not checked. | The PDF comes from the external FileServerSIID, so it is outside the local copy. |
 | Contract tests still skip. | `.env` has no `GESTSIID_TEST_USER`. The owner must give an account; never create one. |
