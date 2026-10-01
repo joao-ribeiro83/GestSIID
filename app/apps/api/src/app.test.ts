@@ -106,6 +106,37 @@ describe('buildApp', () => {
   });
 });
 
+// Regression: ISSUE-002 — Reports routes were registered only in the dev server, so the real
+// app answered 404 on /configuracao/reports while every e2e spec (dev server) passed.
+// Found by /qa on 2026-10-01. Report: analysis/QA_REPORT.md
+describe('buildApp — Oracle app registers every screen route the dev server has', () => {
+  const routesOf = async (d: Parameters<typeof buildApp>[0]) => {
+    const seen = new Set<string>();
+    const app = await buildApp({ ...d, distDir: null });
+    // printRoutes lists every registered path; onRoute would miss routes added before the hook.
+    for (const line of app.printRoutes({ commonPrefix: false }).split('\n')) {
+      const m = /(\/api\/\S+) \(([^)]+)\)/.exec(line.replace(/^[\s│├└─]+/, ''));
+      if (m) for (const method of m[2].split(', ')) if (method !== 'HEAD') seen.add(`${method} ${m[1]}`);
+    }
+    await app.close();
+    return seen;
+  };
+
+  it('has no dev-server route missing from the Oracle app (except the dev-only demo routes)', async () => {
+    distDir = await makeFixtureDist();
+    const pool = { getConnection: async () => Promise.reject(new Error('no db in this test')) };
+    const real = await routesOf(deps({
+      authRepo: { login: async () => null } as never,
+      db: { pool: pool as never, callTimeoutMs: 1000 },
+      fileServer: { baseUrl: 'http://fs', timeoutMs: 1000 },
+    }));
+    const dev = await routesOf(deps({ devMocks: true }));
+    const missing = [...dev].filter((r) => !/\/api\/(dev|demo-)/.test(r) && !real.has(r));
+    expect(missing).toEqual([]);
+    expect(real.has('GET /api/reports')).toBe(true);
+  });
+});
+
 describe('buildApp — TRUST_PROXY', () => {
   it('trusts only the listed proxy, so a client-written X-Forwarded-For entry is ignored', async () => {
     distDir = await makeFixtureDist();
