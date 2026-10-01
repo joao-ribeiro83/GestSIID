@@ -6,6 +6,9 @@ import { z } from 'zod';
  * bodies such as /auth/regeneracao-password — falls back to the app's Portuguese texts.
  */
 z.config({
+  // No eval: the CSP forbids it, and zod's `Function('')` probe logged a CSP violation in the
+  // console on every first object parse (the SPA's DataBlock save, the dialogs).
+  jitless: true,
   customError: (iss) => {
     if (iss.input == null || (iss.code === 'too_small' && iss.origin === 'string' && Number(iss.minimum) <= 1))
       return 'Campo obrigatório.';
