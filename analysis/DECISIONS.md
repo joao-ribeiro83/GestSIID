@@ -104,6 +104,7 @@ and the recommended option was recorded.
 - USER menu: Documentos only. No Gador, Configuração (which holds Impressoras Associadas and Alterar password, A-09), Administração, Backups, Auditoria.
 - USER in Documentos: filters, sort by spool, select all, parameter search, comments (read-only), parameters, queue, logs, reduced details (no `ATRIBUTO5..8`, `ATRIBUTO10..25`, `ATRIB_ARQ_1..20`, `ARQ_ID`, `EDOC_ID`, `REGISTO_ARQUIVO`, `REGISTO_EDOC`, `DATA_ARQUIVO`), PDF view, clone. No toolbar actions (regerar, reimprimir, 2ª via, cópia, anular, cancelar, suspender, retomar, reenviar EDoc, reenviar e-mail, rearquivar, lote) and no comment insert.
 - Clone and single-request cancel exist in the USER form's code, but their buttons are not named in the USER dump. Step 7.5 checks this in running Forms; if USER cannot reach them there, they are ADM only.
+- **Amended 2026-09-30 (owner):** Clonar is ADM only (`GENERICO.CLONAR` is `Enabled="false" Visible="false"` in the USER form). Single queue cancel stays ADM + USER. See ARCHITECTURE.md §5, DOCUMENT_STATES.md §4.
 - Every ADM-only route has `requireRole('ADM')` in the API and returns 403 for USER; the USER API response for document details omits the extended columns (not just hidden in the UI). Closes SEC-004.
 - Identity comes only from the session (never a `P_USERNAME`-style parameter); `CRIADO_POR`, `P_USUARIO`, `P_USER` get the session username.
 
