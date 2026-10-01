@@ -10,6 +10,11 @@ import { Sidebar } from '@/components/shell/sidebar';
 import { Breadcrumb } from '@/components/shell/breadcrumb';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 
+/** §2.1 `<h1> · GestSIID · <ambiente>`; home's h1 is "GestSIID" itself, so it is not repeated. */
+export function pageTitle(title: string, ambiente?: string): string {
+  return [title === 'GestSIID' ? null : title, 'GestSIID', ambiente].filter(Boolean).join(' · ');
+}
+
 /** §2.1 breakpoints: below 1280 the rail auto-collapses (unless expanded this session); below 1024 it's an off-canvas Sheet. */
 export function AppShell({ session, children }: { session: Session; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -53,7 +58,7 @@ export function AppShell({ session, children }: { session: Session; children: Re
   }, [pathname]);
 
   useEffect(() => {
-    document.title = health?.ambiente ? `${title} · GestSIID · ${health.ambiente}` : `${title} · GestSIID`;
+    document.title = pageTitle(title, health?.ambiente);
   }, [title, health?.ambiente]);
 
   return (
