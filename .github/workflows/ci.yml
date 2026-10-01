@@ -1,7 +1,8 @@
 # CI gates, exact order per analysis/TEST_STRATEGY.md §5 / ARCHITECTURE.md §8.
 # GitLab equivalent: same 8 stages in a .gitlab-ci.yml, with DB_CONNECT_STRING as a
-# masked CI/CD variable gating the "contract" and "e2e" stages the same way the
-# `if: secrets... != ''` guards below do.
+# CI/CD variable gating the "contract" and "e2e" stages. Here it is a repo *variable*
+# (vars.DB_CONNECT_STRING): a job-level `if:` cannot read `secrets`, and the connect
+# string is an address, not a credential. DB_USER / DB_PASSWORD stay secrets.
 name: CI
 
 on:
@@ -32,6 +33,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -49,6 +52,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -62,12 +67,12 @@ jobs:
   contract-tests:
     runs-on: ubuntu-latest
     needs: lint-typecheck-test
-    if: ${{ vars.DB_CONNECT_STRING != '' || secrets.DB_CONNECT_STRING != '' }}
+    if: ${{ vars.DB_CONNECT_STRING != '' }}
     defaults:
       run:
         working-directory: app
     env:
-      DB_CONNECT_STRING: ${{ secrets.DB_CONNECT_STRING }}
+      DB_CONNECT_STRING: ${{ vars.DB_CONNECT_STRING }}
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_SCHEMA: ${{ vars.DB_SCHEMA }}
@@ -75,6 +80,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -106,10 +113,12 @@ jobs:
       run:
         working-directory: app
     env:
-      DB_CONNECT_STRING: ${{ secrets.DB_CONNECT_STRING }}
+      DB_CONNECT_STRING: ${{ vars.DB_CONNECT_STRING }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22
