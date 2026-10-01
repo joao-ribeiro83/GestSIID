@@ -20,6 +20,13 @@ describe('registerSecurityHeaders', () => {
     );
     expect(res.headers['x-content-type-options']).toBe('nosniff');
     expect(res.headers['referrer-policy']).toBe('same-origin');
+    expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
+    expect(res.headers['cross-origin-opener-policy']).toBe('same-origin');
+    expect(res.headers['cross-origin-resource-policy']).toBe('same-origin');
+    expect(res.headers['origin-agent-cluster']).toBe('?1');
+    expect(res.headers['x-permitted-cross-domain-policies']).toBe('none');
+    expect(res.headers['x-dns-prefetch-control']).toBe('off');
+    expect(res.headers['x-powered-by']).toBeUndefined();
   });
 
   it('omits Strict-Transport-Security when COOKIE_SECURE is false', async () => {

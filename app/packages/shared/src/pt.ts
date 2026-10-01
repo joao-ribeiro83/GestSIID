@@ -118,6 +118,23 @@ export const pt = {
   /** FD_GESTAO_SIID batch operations (BUSINESS_RULES.md §3 #7–#25, Step 7.2). The `Não foram …`
    * texts are the OUT alert headers; the API returns them as the `motivo` of each skipped id, so
    * the SPA groups the ids under the same header the form showed. */
+  /** FD_NOVO_BACKUP (BUSINESS_RULES.md §3 #49, #50; BR-BKP-04). An empty selection is
+   * `naoExistemDocumentosSeleccionados` (#30, D-26). */
+  backups: {
+    tipoMidiaObrigatorio: "O campo 'Tipo Mídia' é de preenchimento Obrigatorio.",
+    tamanhoMidia: 'O tamanho do Mídia não suporta todos os documentos que seleccionou.',
+    tipoMidiaInexistente: 'Tipo de mídia inexistente.',
+    // New texts (UI_SPEC §6, `bkp.*`).
+    mesObrigatorio: "O campo 'Mês' é de preenchimento Obrigatorio.",
+    geradoAoCriar: 'Gerado ao criar o backup.',
+    confirmar: (mes: string, n: number, tamanho: string) => `Criar o backup de ${mes} com ${n} documentos (${tamanho})?`,
+    criado: (nome: string) => `Backup ${nome} criado.`,
+    actualizados: 'Backups actualizados.',
+    colocarOnline: 'Colocar online',
+    colocarOffline: 'Colocar offline',
+    semSeleccao: 'Não existem backups seleccionados.',
+  },
+
   documentos: {
     desejaImprimir: 'Deseja imprimir os documentos selecionados?',
     desejaRegerar: 'Deseja regerar os documentos selecionados?',

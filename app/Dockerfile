@@ -29,7 +29,8 @@ RUN curl -fsSL "$INSTANT_CLIENT_URL" -o /tmp/instantclient.zip \
   && unzip -q /tmp/instantclient.zip -d /opt/oracle \
   && rm /tmp/instantclient.zip \
   && echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf \
-  && ldconfig
+  && ldconfig \
+  && apt-get purge -y --auto-remove curl unzip
 
 ENV UV_THREADPOOL_SIZE=8
 ENV NODE_ENV=production
@@ -38,8 +39,9 @@ WORKDIR /app
 # pnpm deploy flattens the deployed package to the target root (/out/dist/server.js, not
 # /out/apps/api/dist/server.js) — copy it back under apps/api so it lands next to
 # apps/web/dist, matching the ../../web/dist path server.ts computes from its own location.
-COPY --from=build --chown=node:node /out ./apps/api
-COPY --from=build --chown=node:node /app/apps/web/dist ./apps/web/dist
+# Owned by root, read-only for the node user: the process cannot rewrite its own code.
+COPY --from=build /out ./apps/api
+COPY --from=build /app/apps/web/dist ./apps/web/dist
 
 USER node
 

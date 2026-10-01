@@ -9,6 +9,9 @@ services:
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
     tmpfs:
       - /tmp
     init: true
@@ -30,6 +33,9 @@ services:
 #    ports:
 #      - "${TRAINING_PORT:-3001}:${TRAINING_PORT:-3001}"
 #    read_only: true
+#    cap_drop: [ALL]
+#    security_opt:
+#      - no-new-privileges:true
 #    tmpfs:
 #      - /tmp
 #    init: true

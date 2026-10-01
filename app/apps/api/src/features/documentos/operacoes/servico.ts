@@ -139,10 +139,17 @@ export async function imprimir(
   );
 }
 
-/** BR-DOC-15: no precondition; the outcome is read back after each package call (D-17). */
-export async function anular(db: OperacoesDb, user: SessionUser, ids: number[]): Promise<Resultado> {
+/**
+ * BR-DOC-15: no precondition; the outcome is read back after each package call (D-17). Each call
+ * commits (A-01), so the caller passes `r` to still know what was done when a later call throws.
+ */
+export async function anular(
+  db: OperacoesDb,
+  user: SessionUser,
+  ids: number[],
+  r: Resultado = { ok: [], skipped: [] },
+): Promise<Resultado> {
   if (ids.length === 0) throw semSeleccao();
-  const r: Resultado = { ok: [], skipped: [] };
   for (const id of ids) {
     const estado = await db.anular(user, id);
     if (estado === 'ANU') r.ok.push(id);

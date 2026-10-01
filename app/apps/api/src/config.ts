@@ -81,6 +81,12 @@ export function configWarnings(config: Config): string[] {
     warnings.push(
       'COOKIE_SECURE=false: the session cookie and CSRF token travel in clear text. Put TLS in front (D-09) and set COOKIE_SECURE=true before go-live.',
     );
+  // Node listens on plain HTTP; without TRUST_PROXY it never sees X-Forwarded-Proto: https,
+  // so @fastify/session drops the Secure cookie and every login looks like it fails.
+  if (config.COOKIE_SECURE && config.TRUST_PROXY === false)
+    warnings.push(
+      'COOKIE_SECURE=true but TRUST_PROXY=false: the TLS proxy is not trusted, so no session cookie is set. Set TRUST_PROXY to the proxy address.',
+    );
   return warnings;
 }
 

@@ -1,3 +1,4 @@
+import { Writable } from 'node:stream';
 import Fastify from 'fastify';
 import { DOCUMENTO_DETALHE, pt } from '@gestsiid/shared';
 import { describe, expect, it } from 'vitest';
@@ -296,6 +297,37 @@ describe('POST /api/documentos/acoes/anular (BR-DOC-15, D-17)', () => {
   it('impressoraId or force on anular → 400', async () => {
     expect((await appWith().acao('anular', { ids: [1], impressoraId: '7' })).status).toBe(400);
     expect((await appWith().acao('anular', { ids: [1], force: true })).status).toBe(400);
+  });
+
+  it('a failure midway still writes the audit line, with the documents already annulled (each ANULAR commits, A-01)', async () => {
+    const s = seed();
+    const logs: Record<string, unknown>[] = [];
+    const stream = new Writable({
+      write(chunk, _enc, cb) {
+        for (const line of String(chunk).split('\n').filter(Boolean)) logs.push(JSON.parse(line));
+        cb();
+      },
+    });
+    const app = Fastify({ logger: { stream } });
+    registerErrorHandler(app);
+    app.decorateRequest('session', null as never);
+    app.addHook('onRequest', async (req) => {
+      (req as { session: unknown }).session = { user: { username: 'JOAO', nome: 'João', role: 'ADM', ambiente: 'T' } };
+    });
+    const db = memoryOperacoesDb(s);
+    const falha = Object.assign(new Error('ORA-03113: end-of-file on communication channel'), { code: 'ORA-03113' });
+    registerOperacoesRoutes(app, {
+      db: { ...db, anular: async (u, id) => (id === 2 ? Promise.reject(falha) : db.anular(u, id)) },
+      repo: memoryDocumentosRepo(s),
+    });
+
+    const r = await app.inject({ method: 'POST', url: '/api/documentos/acoes/anular', payload: { ids: [1, 2, 3] } });
+    expect(r.statusCode).toBe(500);
+    expect(s.documentos.find((d) => d['ID'] === 1)?.['DISPONIBILIDADE']).toBe('ANU');
+    expect(s.documentos.find((d) => d['ID'] === 3)?.['DISPONIBILIDADE']).not.toBe('ANU');
+    expect(logs.filter((l) => l['audit'] === true && l['event'] === 'documentos.anular')).toEqual([
+      expect.objectContaining({ details: { ok: [1], skipped: [], erro: 'ORA-03113' } }),
+    ]);
   });
 });
 

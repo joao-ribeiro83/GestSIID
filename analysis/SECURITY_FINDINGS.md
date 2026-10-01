@@ -145,3 +145,54 @@ Confirmed by reading the actual package bodies from the DB (`analysis/db/package
 - All `CFG_UTILIZADORES` passwords (recoverable — treat as compromised)
 - WebUtil jar-signing keystore used by `sign_webutil.bat`
 - After rotation: purge the four `Copy of compile_*.bat`, `dev/sqlnet.log`, `bck/`, `_v2`/`_old` modules, and re-deploy `.fmx` built without hard-coded `LOGON`.
+
+## 4. Verification of the Node.js rewrite (`app/`), 2026-10-01
+
+Three passes over `app/`: gstack `/cso`, `/security-review` (branch diff incl. uncommitted Backups), and an independent `code-modernization:security-auditor`. No Oracle access. Paths are relative to `app/apps/api/src/` unless they start with `app/`. Legend: ✅ met · ⚠️ partly met / accepted risk · ❌ not met.
+
+### 4.1 Hardening checklist
+
+| Check | | Proof (code → test) |
+|---|---|---|
+| Helmet-style headers | ✅ | `http/security-headers.ts` (CSP, nosniff, Referrer-Policy, X-Frame-Options, COOP, CORP, Origin-Agent-Cluster, X-Permitted-Cross-Domain-Policies, X-DNS-Prefetch-Control; HSTS when `COOKIE_SECURE`) → `http/security-headers.test.ts`. Gaps added 2026-10-01. |
+| CSRF for cookie sessions | ✅ | `http/auth-guard.ts:40-47` (every non-GET with a session needs `x-csrf-token`), `http/csrf.ts` (constant-time) → `features/auth/routes.test.ts:205,235`, `http/csrf.test.ts`. Login cannot be forged cross-site: JSON only, no CORS plugin. |
+| Login rate limit | ✅ | `http/login-throttle.ts` (5/min/IP, 10 fails/h per IP+user → 15 min lock), counted before the DB call (`features/auth/routes.ts`); `TRUST_PROXY=true` refused (`config.ts`) → `http/login-throttle.test.ts`, `features/auth/routes.test.ts:122,132,139`. |
+| Session rotation on login | ✅ | `features/auth/routes.ts:86` `session.regenerate()` → `features/auth/routes.test.ts:177` (old cookie gets 401). Sessions of an edited/deleted user are destroyed (`features/utilizadores/routes.ts`). |
+| Secure cookie flags behind TLS | ✅ | `http/session.ts:36-41` (httpOnly, SameSite=Lax, `secure: COOKIE_SECURE`), 30 min idle / 8 h absolute (`http/session-store.ts`) → `http/session.test.ts:41,54`, `http/session-store.test.ts`. Boot warnings for `COOKIE_SECURE=false` and for `COOKIE_SECURE=true` without `TRUST_PROXY` (no cookie would be set) → `config.test.ts`. |
+| Multipart limits | ✅ | Global `app.ts:103-105` (`fileSize` = `UPLOAD_MAX_MB`, 1 file, 0 fields, 1 part, added 2026-10-01) + per route `lib/imageRoutes.ts:77`, magic-byte allow-list → `lib/imageRoutes.test.ts:103,114,123`. |
+| No stack traces in responses | ✅ | `http/errors.ts` (unknown error → `500 {code:'ERRO',message:'Erro'}`, details only in the log); ORA text mapped by `db/errors.ts` → `http/errors.test.ts:63`. ORA-20000..20999 first line is shown on purpose (package messages for users). |
+| Dependency audit | ✅ | `pnpm audit --json` 2026-10-01: 0 info/low/moderate/high/critical (487 packages). CI gate `.github/workflows/ci.yml` job `audit` (`--prod --audit-level=high`). |
+| Docker: non-root | ✅ | `app/Dockerfile:46` `USER node`; app files root-owned, not writable by the process (2026-10-01); compose `read_only`, `cap_drop: [ALL]`, `no-new-privileges` (`app/docker-compose.yml`). Checked on a local build: `id -u` = 1000, `touch` in `/app/apps/api` denied, Thick client 19.32 loads with `--read-only --cap-drop ALL`. |
+| Docker: no secrets | ✅ | `app/.dockerignore` (`**/.env*`, `test-results`, `e2e`); secrets only at runtime (`env_file`). Checked: `docker history --no-trunc` has 0 secret-like lines, `Config.Env` holds only PATH/NODE/YARN/UV_THREADPOOL_SIZE/NODE_ENV, no `.env`/`.npmrc`/`*.key` in the image. `curl`/`unzip` purged after the Instant Client step. |
+
+### 4.2 §3 requirements
+
+| # | | Proof / reason |
+|---|---|---|
+| 1 Argon2id, forced reset | ⚠️ | Not done by owner decision D-07a: login and Utilizadores still use `USER_SECURITY.ENCRYPT` (`features/auth/repo.ts`, `features/utilizadores/routes.ts`). SEC-005 stays open (reversible DES, hardcoded key). Needs a DB column (DDL) → owner. No password-length policy either. |
+| 2 Session store, cookie, timeouts, rotation, CSRF | ✅ | See 4.1. |
+| 3 Rate limit, lockout, generic error, DATA_INICIO/DATA_FIM | ✅ | 4.1 + `features/auth/repo.ts:31` (`ATIVO`) → `features/auth/routes.test.ts:96-113` (one 401 for every case). Password policy / breached check: ❌ (see 1). No per-account cap across IPs (spraying from several hosts): accepted, alert on `login.fail` volume. |
+| 4 SSO | ❌ | Not in scope (D-07). |
+| 5 Server-side RBAC | ✅ | `http/auth-guard.ts` `requireRole`, `lib/crud.ts` `sessionCtx` on every route → USER 403 contract tests (`features/documentos/routes.contract.test.ts`, Step 7.4). Row-level document access: ⚠️ none, same as Forms (BR-AUTH-10); any USER can open any document id. |
+| 6 Sensitive actions | ⚠️ | Toolbar actions ADM only; Regerar needs the shared regeneration password (D-07d, ADM only, current value required, throttled, audited). SEC-008 reduced, not closed. |
+| 7 Identity from session only | ✅ | `request.currentUser` from the session (`http/auth-guard.ts`); `auditHooks` fill `CRIADO_POR`/`ACTUALIZADO_POR` (`lib/crud.ts`). |
+| 8 Secrets via env, fail fast | ✅ | `config.ts` (zod, exit 1) → `config.test.ts`; `.env` git-ignored. Dev server has a demo secret and demo users (`dev-server.ts`, `features/auth/dev-repo.ts`), never used by `server.ts`. |
+| 9 Least-privilege DB account | ⚠️ | Not provable from code; DBA task before go-live. App runs no DDL. |
+| 10 Secret scanner in CI | ✅ | `.github/workflows/ci.yml` job `gitleaks`. |
+| 11 Binds only, allow-listed ORDER BY | ✅ | `lib/listQuery.ts:142,173`; identifiers checked by `defineResource` / `IDENTIFIER_RE`. All three passes found no request data in SQL text. |
+| 12 Explicit transactions | ✅ | `db/oracle.ts:122` `withTransaction`; `oracledb.autoCommit = false` (`server.ts`). |
+| 13 Documents through the API | ⚠️ | PDF proxy after a session check (`features/documentos/routes.ts:77-106`). Upstream FileServerSIID is still plain HTTP and open on the LAN (SEC-010): needs HTTPS or a firewall rule (infra). |
+| 14 Uploads | ✅ | Magic bytes, size cap, BLOB storage, no paths, no shell-outs. Not re-encoded (report engine needs the original bytes). |
+| 15 No client-side DB access | ✅ | SPA calls only `/api`. |
+| 16 Audit log | ✅ | `http/audit.ts` (actor from session, IP, route, request id) for login ok/fail, logout, writes, Documentos actions (incl. partial failures). No before/after JSON. |
+| 17 Platform hygiene | ⚠️ | Node 22 slim, non-root, read-only FS, headers, HSTS with TLS, healthcheck, `pnpm audit` in CI: ✅. Thick mode, not Thin (D-31, NJS-116). Base image not pinned by digest. HTTPS not yet in front (D-09). |
+
+### 4.3 Open items (none fixable in code without an owner decision)
+
+| Sev | Item | Who |
+|---|---|---|
+| High | SEC-005 carried forward: reversible passwords (D-07a). Fix needs an Argon2id column (DDL). | Owner / DBA |
+| Medium | No TLS yet; `COOKIE_SECURE` default false, port 3000 published on all interfaces (D-09). Before go-live: TLS proxy, `COOKIE_SECURE=true`, `TRUST_PROXY=<proxy>`, publish on `127.0.0.1` only. | Ops |
+| Medium | No row-level document access (BR-AUTH-10, Forms parity). | Owner |
+| Medium | FileServerSIID plain HTTP, reachable from the LAN (SEC-010). | Ops |
+| Low | ORA-20xxx text shown to users; `/api/health` shows `ambiente` without login; base image not pinned by digest. | Dev |

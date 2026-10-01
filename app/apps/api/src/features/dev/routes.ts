@@ -52,6 +52,8 @@ import { registerReportsCrudRoutes } from '../reports/routes.ts';
 import { registerTiposMidiaRoutes } from '../tipos-midia/routes.ts';
 import { registerUnidadesMedidaRoutes } from '../unidades-medida/routes.ts';
 import { registerUtilizadoresRoutes } from '../utilizadores/routes.ts';
+import { memoryBackupsRepo } from '../backups/memoria.ts';
+import { registerBackupsRoutes } from '../backups/routes.ts';
 import { registerVariaveisRoutes } from '../variaveis/routes.ts';
 import { documentosSeed } from './documentosSeed.ts';
 import { memoryImageStore } from './memoryImageStore.ts';
@@ -621,6 +623,21 @@ export async function registerDevRoutes(
   });
   // Step 7.2: the toolbar actions write into the same seed the list reads.
   registerOperacoesRoutes(app, { repo: docsRepo, db: memoryOperacoesDb(docsSeed) });
+  // Step 8.1: Backups over their own copy of the documents (the Documentos e2e data stays as is);
+  // a printed document (N_IMPRESSOES > 0) is printed on its DATA_PEDIDO.
+  registerBackupsRoutes(app, {
+    repo: memoryBackupsRepo({
+      documentos: documentosSeed().documentos.map((d) => ({
+        ...d,
+        DATA_IMPRESSAO: Number(d['N_IMPRESSOES']) > 0 ? d['DATA_PEDIDO'] : null,
+        BACKUP_ID: null,
+      })),
+      tiposMidia: seedTiposMidia(),
+      backups: [],
+      fila: [],
+    }),
+    getVariavel: async (nome) => ({ BACKUP: '\\\\SRV-SIID\\BACKUPS\\', ONLINE: 'E:\\', PASSWORD: null })[nome],
+  });
 
   const m = seedModelos();
   const modelosStores: ModelosStores = {

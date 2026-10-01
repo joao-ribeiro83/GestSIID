@@ -80,45 +80,55 @@ export function registerOperacoesRoutes(app: FastifyInstance, opts: { db: Operac
     const todaFila = b.todaFila === true;
     if (todaFila && (b.ids || b.consulta)) throw invalido('todaFila não admite ids nem consulta.');
     const alvo = todaFila ? 'todos' : await resolver(request, b);
-    let r: Resultado;
-    switch (acao as Acao) {
-      case 'regerar':
-        r = await servico.regerar(db, user, alvo as number[], hasRegeneracaoReauth(request));
-        break;
-      case 'reimprimir':
-      case 'segunda-via':
-      case 'copia':
-        r = await servico.imprimir(db, user, alvo as number[], IMPRESSAO[acao]!, b.impressoraId ?? null);
-        break;
-      case 'anular':
-        r = await servico.anular(db, user, alvo as number[]);
-        break;
-      case 'cancelar':
-        r = await servico.cancelar(db, user, alvo as number[], b.force === true);
-        break;
-      case 'suspender':
-        r = await servico.suspender(db, user, alvo);
-        break;
-      case 'retomar':
-        r = await servico.retomar(db, user, alvo);
-        break;
-      case 'reenviar-edoc':
-        r = await servico.reenviarEdoc(db, user, alvo as number[]);
-        break;
-      case 'reenviar-email':
-        r = await servico.reenviarEmail(db, user, alvo as number[]);
-        break;
-      case 'rearquivar':
-        r = await servico.rearquivar(db, user, alvo as number[]);
-        break;
-    }
-    audit(request, `documentos.${acao}`, {
+    const detalhes = (r: Resultado) => ({
       ok: r.ok,
       skipped: r.skipped.map((s) => s.id),
       ...(b.force !== undefined ? { force: b.force } : {}),
       ...(todaFila ? { todaFila } : {}),
       ...(r.pedidos !== undefined ? { pedidos: r.pedidos } : {}),
     });
+    // A failure is audited too. Only anular can fail after some documents changed (each ANULAR
+    // commits, A-01), so only it fills `parcial`; the other actions write in one transaction.
+    const parcial: Resultado = { ok: [], skipped: [] };
+    let r: Resultado;
+    try {
+      switch (acao as Acao) {
+        case 'regerar':
+          r = await servico.regerar(db, user, alvo as number[], hasRegeneracaoReauth(request));
+          break;
+        case 'reimprimir':
+        case 'segunda-via':
+        case 'copia':
+          r = await servico.imprimir(db, user, alvo as number[], IMPRESSAO[acao]!, b.impressoraId ?? null);
+          break;
+        case 'anular':
+          r = await servico.anular(db, user, alvo as number[], parcial);
+          break;
+        case 'cancelar':
+          r = await servico.cancelar(db, user, alvo as number[], b.force === true);
+          break;
+        case 'suspender':
+          r = await servico.suspender(db, user, alvo);
+          break;
+        case 'retomar':
+          r = await servico.retomar(db, user, alvo);
+          break;
+        case 'reenviar-edoc':
+          r = await servico.reenviarEdoc(db, user, alvo as number[]);
+          break;
+        case 'reenviar-email':
+          r = await servico.reenviarEmail(db, user, alvo as number[]);
+          break;
+        case 'rearquivar':
+          r = await servico.rearquivar(db, user, alvo as number[]);
+          break;
+      }
+    } catch (e) {
+      const erro = (e as { code?: unknown }).code;
+      audit(request, `documentos.${acao}`, { ...detalhes(parcial), erro: typeof erro === 'string' ? erro : 'ERRO' });
+      throw e;
+    }
+    audit(request, `documentos.${acao}`, detalhes(r));
     return r;
   });
 

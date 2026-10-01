@@ -42,14 +42,15 @@ not proven, why, and what closes it. The hard rule applies to all of them: no Or
 - **BR-DOC-21:** the Suspender dialog reads `fila/contagem` (`-acoes.tsx`), but no e2e test checks that it shows the count.
 - **Why:** not done in this pass. Both can be done: they need an e2e test on the dev server, not Oracle.
 
-## G-5 — A batch that fails midway writes no app audit row
+## G-5 — A batch that fails midway writes no app audit row — **closed 2026-10-01**
 
-- **What:** `operacoes/routes.ts` calls `audit()` only after the service returns. `anular` commits
-  per document (A-01). If document N fails, documents 1..N-1 are changed, and the app audit log has
-  no record of them. This came from the architecture review on 2026-09-30.
-- **Not in scope here:** this is audit behaviour, not a USER restriction. `ERR_ERROS_SIID`
-  lines (BR-DOC-36) are not affected.
-- **Close it:** put the audit call in `try/finally` with the ids done so far and the error.
+- **Was:** `operacoes/routes.ts` called `audit()` only after the service returned. `anular` commits
+  per document (A-01). If document N failed, documents 1..N-1 were changed with no audit record.
+- **Fix:** a failed action now writes its `documentos.<acao>` audit line too, with `erro` (the error
+  code) and the documents already done (`servico.anular` fills the caller's result as it goes). The
+  other actions write in one transaction, so their `ok` on failure is empty.
+- **Test:** `operacoes/routes.test.ts › a failure midway still writes the audit line, with the
+  documents already annulled`.
 
 ## G-6 — Step 7.5: USER reachability in running Forms
 

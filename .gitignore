@@ -21,3 +21,5 @@ analysis/**/*.local.md
 app/test-results/
 # global-setup.ts's saved session cookie (dev-server-only, but still a session secret)
 app/e2e/.auth/
+# gstack local security reports
+.gstack/
