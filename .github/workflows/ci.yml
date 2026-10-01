@@ -60,6 +60,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: app/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      # packages/shared resolves to dist/ outside the `development` condition (app/CLAUDE.md).
+      - run: pnpm --filter @gestsiid/shared build
       - run: pnpm -r lint
       - run: pnpm -r typecheck
       - run: pnpm -r test
@@ -88,6 +90,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: app/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      # packages/shared resolves to dist/ outside the `development` condition (app/CLAUDE.md).
+      - run: pnpm --filter @gestsiid/shared build
       # Same `pnpm -r test` command; contract specs self-skip via describe.skipIf unless
       # DB_CONNECT_STRING is set (analysis/TEST_STRATEGY.md §1), so no separate test filter.
       - run: pnpm -r test
@@ -125,6 +129,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: app/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      # packages/shared resolves to dist/ outside the `development` condition (app/CLAUDE.md).
+      - run: pnpm --filter @gestsiid/shared build
       - run: pnpm exec playwright install --with-deps chromium
       # Login-page-renders / static-asset specs run unconditionally; any spec needing the
       # TEST schema self-skips without DB_CONNECT_STRING (analysis/TEST_STRATEGY.md §5 gate 8).
