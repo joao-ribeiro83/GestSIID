@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ChevronDown, FileText, Settings2, Users, Wrench, type LucideIcon } from 'lucide-react';
 import type { Role } from '@gestsiid/shared';
@@ -49,11 +49,30 @@ function MenuNodeView({
     );
   }
 
+  return <MenuGroupView node={node} pathname={pathname} depth={depth} forceOpenId={forceOpenId} />;
+}
+
+function MenuGroupView({
+  node,
+  pathname,
+  depth,
+  forceOpenId,
+}: {
+  node: Exclude<MenuNode, { kind: 'item' }>;
+  pathname: string;
+  depth: number;
+  forceOpenId: string | null;
+}) {
   const active = containsPath(node, pathname);
   const [open, setOpen] = useState(active);
-  useEffect(() => {
+  // Open the group when the route enters it or the collapsed rail asks for it (adjusting state
+  // during render, not in an effect: https://react.dev/learn/you-might-not-need-an-effect).
+  const trigger = `${active}|${forceOpenId}`;
+  const [lastTrigger, setLastTrigger] = useState(trigger);
+  if (trigger !== lastTrigger) {
+    setLastTrigger(trigger);
     if (active || node.id === forceOpenId) setOpen(true);
-  }, [active, forceOpenId, node.id]);
+  }
   const Icon = depth === 0 ? GROUP_ICONS[node.id] : undefined;
 
   return (
