@@ -62,6 +62,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # packages/shared resolves to dist/ outside the `development` condition (app/CLAUDE.md).
       - run: pnpm --filter @gestsiid/shared build
+      # vite build writes apps/web/src/routeTree.gen.ts (git-ignored), which typecheck needs.
+      - run: pnpm --filter @gestsiid/web build
       - run: pnpm -r lint
       - run: pnpm -r typecheck
       - run: pnpm -r test
