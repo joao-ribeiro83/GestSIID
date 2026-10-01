@@ -33,6 +33,13 @@ to `../.env` and fill in `DB_USER`, `DB_PASSWORD`, `DB_CONNECT_STRING`, `DB_SCHE
 `AMBIENTE_ID` (ARCHITECTURE.md §2). Without `DB_CONNECT_STRING` set, `pnpm -r test` still
 passes in full — it just skips the contract-test suites.
 
+## Local Oracle copy (for QA that writes)
+
+`local-db/clone-test-schema.mjs` copies what the app uses from the TEST schema (SELECT only)
+into a local `gvenzl/oracle-free` container; the header comment has the commands. Big tables are
+sampled. Run the app on it with `ENV_FILE=../.env.localdb docker compose --env-file ../.env.localdb up`
+and use `local-db/sql.mjs` for local-only SQL (test users, resets).
+
 ## Docker
 
 ```
