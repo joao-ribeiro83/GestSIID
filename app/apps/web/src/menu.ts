@@ -39,6 +39,17 @@ export const menu: readonly MenuNode[] = [
   { kind: 'group', id: 'auditoria', label: 'Auditoria', children: [] }, // D-06: no items, never rendered
 ];
 
+/** The menu leaf a path belongs to (itself or a sub-route), or undefined outside the menu. */
+export function menuItemFor(pathname: string): MenuItem | undefined {
+  const find = (nodes: readonly MenuNode[]): MenuItem | undefined => {
+    for (const n of nodes) {
+      const hit = n.kind === 'item' ? (pathname === n.to || pathname.startsWith(`${n.to}/`) ? n : undefined) : find(n.children);
+      if (hit) return hit;
+    }
+  };
+  return find(menu);
+}
+
 /** Removes items the role may not see, then groups left empty. */
 export function menuFor(role: Role): MenuNode[] {
   const prune = (n: MenuNode): MenuNode | null => {
