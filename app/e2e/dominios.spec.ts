@@ -73,7 +73,8 @@ test('creates a domain value and deletes it', async ({ page }) => {
   await row(page, 'NIVEL_ACESSO').locator('td').nth(1).click();
   await expect(detailFooter(page)).toHaveText('0 registos');
 
-  await detail(page).getByRole('button', { name: 'Novo' }).click();
+  // Once loaded, the empty grid has its own "Novo" next to the toolbar's; use that one.
+  await detailGrid(page).getByRole('button', { name: 'Novo' }).click();
   const first = detailGrid(page).locator('tbody tr').first();
   await first.locator('td').nth(1).dblclick(); // Chave
   await page.keyboard.type('ALTO');

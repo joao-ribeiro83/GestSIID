@@ -11,6 +11,10 @@ const block = (page: Page) =>
 const footer = (page: Page) => block(page).locator('[aria-live="polite"]');
 
 async function total(page: Page): Promise<number> {
+  // While the grid loads, the footer already reads "0 registos": wait for the data.
+  const table = block(page).locator('table[role="grid"]'); // CSS: still found while a dialog is open
+  await expect(table).toBeVisible();
+  await expect(table).not.toHaveAttribute('aria-busy', 'true');
   const text = (await footer(page).textContent()) ?? '';
   return Number(/(\d+)/.exec(text)?.[1] ?? '0');
 }
