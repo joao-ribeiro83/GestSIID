@@ -59,10 +59,7 @@ function ReportsScreen() {
   const detail = useDetailBlock(current, { REPORT_ID: 'ID' });
 
   return (
-    <main id="conteudo" className="flex h-dvh flex-col gap-3 bg-background p-4 text-foreground">
-      <header>
-        <h1 className="text-lg font-semibold">Reports</h1>
-      </header>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       <DataBlock
         className="min-h-0 flex-[45]"
         heading="Reports"
@@ -85,6 +82,6 @@ function ReportsScreen() {
         defaults={() => ({ OBRIGATORIO: 'N', CHECK_UNIQUE: 'N', VALIDO: 'S' })}
         {...detail.detailProps}
       />
-    </main>
+    </div>
   );
 }

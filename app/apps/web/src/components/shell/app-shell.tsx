@@ -100,7 +100,7 @@ export function AppShell({ session, children }: { session: Session; children: Re
               {title}
             </h1>
           </div>
-          <main id="conteudo" className="flex-1 px-4 py-3">
+          <main id="conteudo" className="flex min-h-0 flex-1 flex-col px-4 py-3">
             {children}
           </main>
         </div>

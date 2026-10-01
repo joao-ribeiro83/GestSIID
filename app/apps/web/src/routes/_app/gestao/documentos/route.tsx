@@ -151,7 +151,7 @@ function DocumentosScreen() {
 
   // A list and a tabbed detail do not fit one laptop screen: the page scrolls, the grid keeps a height.
   return (
-    <main id="conteudo" className="flex flex-col gap-3 bg-background p-4 text-foreground">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       {/* The shell already shows the page title (h1). */}
       <div className="flex flex-wrap items-center gap-2">
         {adm && (
@@ -287,6 +287,6 @@ function DocumentosScreen() {
           actualizar();
         }}
       />
-    </main>
+    </div>
   );
 }

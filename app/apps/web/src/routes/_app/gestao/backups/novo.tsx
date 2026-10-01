@@ -165,7 +165,7 @@ function NovoBackupScreen() {
   };
 
   return (
-    <main id="conteudo" className="flex flex-col gap-4 bg-background p-4 text-foreground">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <Stepper step={step} />
 
       {step === 1 && (
@@ -308,6 +308,6 @@ function NovoBackupScreen() {
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 }

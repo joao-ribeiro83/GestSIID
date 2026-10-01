@@ -29,10 +29,7 @@ const columns: ColumnView<GridRow>[] = [
 function TiposMidiaScreen() {
   const { session } = Route.useRouteContext();
   return (
-    <main id="conteudo" className="flex h-dvh flex-col gap-3 bg-background p-4 text-foreground">
-      <header>
-        <h1 className="text-lg font-semibold">Tipos de mídia</h1>
-      </header>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       <DataBlock
         className="min-h-0 flex-1"
         heading="Tipos de mídia"
@@ -42,6 +39,6 @@ function TiposMidiaScreen() {
         edit="inline"
         defaults={() => ({ UNIDADE_MEDIDA_ID: 'GB' })} // item initial value in the form
       />
-    </main>
+    </div>
   );
 }

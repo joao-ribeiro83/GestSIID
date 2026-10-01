@@ -86,10 +86,7 @@ function ModelosScreen() {
   // Three stacked grids and an image pane do not fit one laptop screen: the page scrolls and each
   // grid keeps a fixed height.
   return (
-    <main id="conteudo" className="flex flex-col gap-3 bg-background p-4 text-foreground">
-      <header>
-        <h1 className="text-lg font-semibold">Modelos</h1>
-      </header>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
 
       <DataBlock
         className="h-72 shrink-0"
@@ -176,6 +173,6 @@ function ModelosScreen() {
           )}
         </DialogContent>
       </Dialog>
-    </main>
+    </div>
   );
 }
