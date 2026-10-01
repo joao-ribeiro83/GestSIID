@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useChildMatches, useNavigate } from '@tanstack/react-router';
 import { dominios, DOMINIOS_DOMINIOS } from '@gestsiid/shared';
 import { DataBlock, type ColumnView } from '@/components/datablock/DataBlock';
 import type { GridRow } from '@/components/datablock/dirty';
@@ -55,7 +55,7 @@ const masterColumns: ColumnView<GridRow>[] = [
 function DominiosScreen() {
   const { session } = Route.useRouteContext();
   const navigate = useNavigate();
-  const detalhe = useLocation().pathname !== '/administracao/dominios';
+  const detalhe = useChildMatches().length > 0; // a row's detail page is open (D-34)
 
   return (
     <>
@@ -75,6 +75,7 @@ function DominiosScreen() {
             DOMINIO_SISTEMA_BN: 'N',
           })}
           rowOpenLabel="Abrir valores do domínio"
+          inactive={detalhe}
           onRowOpen={(r) => void navigate({ to: '/administracao/dominios/$dominioId', params: { dominioId: String(r['ID']) } })}
         />
       </div>

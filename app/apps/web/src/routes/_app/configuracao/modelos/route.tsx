@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { createFileRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useChildMatches, useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { modelos, MODELOS_DOMINIOS, pt } from '@gestsiid/shared';
@@ -44,7 +44,7 @@ function ModelosScreen() {
   const { session } = Route.useRouteContext();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const detalhe = useLocation().pathname !== '/configuracao/modelos';
+  const detalhe = useChildMatches().length > 0; // a row's detail page is open (D-34)
   const master = useRef<DataBlockHandle>(null);
   const [current, setCurrent] = useState<GridRow | null>(null);
   const [dlg, setDlg] = useState<Dlg | null>(null);
@@ -77,6 +77,7 @@ function ModelosScreen() {
           onCurrentRowChange={setCurrent}
           askOnRowLeave
           rowOpenLabel="Abrir secções, parâmetros e atributos"
+          inactive={detalhe}
           onRowOpen={(r) => void navigate({ to: '/configuracao/modelos/$modeloId', params: { modeloId: String(r['ID']) } })}
           toolbar={({ refetch }) => (
             <>

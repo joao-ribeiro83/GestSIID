@@ -3,8 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { reportParametros, REPORTS_DOMINIOS } from '@gestsiid/shared';
 import { DataBlock, type ColumnView } from '@/components/datablock/DataBlock';
 import type { GridRow } from '@/components/datablock/dirty';
-import { useRow } from '@/components/datablock/useRow';
-import { Voltar } from '@/components/shell/page-actions';
+import { DetailPage } from '@/components/datablock/DetailPage';
 
 /**
  * A report's parameters (D-34): the `SVR_PARAMETROS_REPORT` detail of Configuração › Reports, on
@@ -35,35 +34,28 @@ const detailColumns: ColumnView<GridRow>[] = [
   { col: 'DATA_ACTUALIZACAO', hidden: true },
 ];
 
+const describe = (r: GridRow) => `${String(r['NOME'] ?? '')} · N.º Parâmetros ${String(r['N_PARAMETROS'] ?? '—')}`;
+
 function ParametrosScreen() {
   const { session } = Route.useRouteContext();
   const { reportId } = Route.useParams();
-  const report = useRow('/reports', 'ID', reportId).data;
   const master = useMemo(() => ({ keys: { REPORT_ID: Number(reportId) } }), [reportId]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <Voltar to="/configuracao/reports" />
-      <h2 className="text-sm font-semibold">
-        Report <span className="font-mono">{reportId}</span>
-        {report && (
-          <span className="font-normal text-muted-foreground">
-            {' · '}
-            {String(report['NOME'] ?? '')} · N.º Parâmetros {String(report['N_PARAMETROS'] ?? '—')}
-          </span>
-        )}
-      </h2>
-      <DataBlock
-        className="min-h-0 flex-1"
-        heading="Parâmetros"
-        resource={reportParametros}
-        columns={detailColumns}
-        role={session.role}
-        edit="inline"
-        master={master}
-        endpoint={`/reports/${reportId}/parametros`}
-        defaults={() => ({ OBRIGATORIO: 'N', CHECK_UNIQUE: 'N', VALIDO: 'S' })}
-      />
-    </div>
+    <DetailPage list="/configuracao/reports" endpoint="/reports" id={reportId} label="Report" describe={describe}>
+      {() => (
+        <DataBlock
+          className="min-h-0 flex-1"
+          heading="Parâmetros"
+          resource={reportParametros}
+          columns={detailColumns}
+          role={session.role}
+          edit="inline"
+          master={master}
+          endpoint={`/reports/${reportId}/parametros`}
+          defaults={() => ({ OBRIGATORIO: 'N', CHECK_UNIQUE: 'N', VALIDO: 'S' })}
+        />
+      )}
+    </DetailPage>
   );
 }

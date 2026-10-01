@@ -39,11 +39,28 @@ export const menu: readonly MenuNode[] = [
   { kind: 'group', id: 'auditoria', label: 'Auditoria', children: [] }, // D-06: no items, never rendered
 ];
 
-/** The menu leaf a path belongs to (itself or a sub-route), or undefined outside the menu. */
+/**
+ * How a path relates to a menu leaf: the leaf itself (`{}`), one of its rows' detail pages (D-34,
+ * `{ key }`, decoded), or neither (`null`). A trailing slash is ignored; a malformed escape is kept
+ * as typed instead of throwing. The one rule both the breadcrumb and the role guard use.
+ */
+export function matchLeaf(to: string, pathname: string): { key?: string } | null {
+  const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  if (path === to) return {};
+  if (!path.startsWith(`${to}/`)) return null;
+  const raw = path.slice(to.length + 1);
+  try {
+    return { key: decodeURIComponent(raw) };
+  } catch {
+    return { key: raw };
+  }
+}
+
+/** The menu leaf a path belongs to (itself or a row's detail page), or undefined outside the menu. */
 export function menuItemFor(pathname: string): MenuItem | undefined {
   const find = (nodes: readonly MenuNode[]): MenuItem | undefined => {
     for (const n of nodes) {
-      const hit = n.kind === 'item' ? (pathname === n.to || pathname.startsWith(`${n.to}/`) ? n : undefined) : find(n.children);
+      const hit = n.kind === 'item' ? (matchLeaf(n.to, pathname) ? n : undefined) : find(n.children);
       if (hit) return hit;
     }
   };

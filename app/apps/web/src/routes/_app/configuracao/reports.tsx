@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useChildMatches, useNavigate } from '@tanstack/react-router';
 import { reports } from '@gestsiid/shared';
 import { DataBlock, type ColumnView } from '@/components/datablock/DataBlock';
 import type { GridRow } from '@/components/datablock/dirty';
@@ -35,7 +35,7 @@ const masterColumns: ColumnView<GridRow>[] = [
 function ReportsScreen() {
   const { session } = Route.useRouteContext();
   const navigate = useNavigate();
-  const detalhe = useLocation().pathname !== '/configuracao/reports';
+  const detalhe = useChildMatches().length > 0; // a row's detail page is open (D-34)
 
   return (
     <>
@@ -49,6 +49,7 @@ function ReportsScreen() {
           edit="panel"
           defaults={() => ({ N_PARAMETROS: 3, VALIDO: 'S' })}
           rowOpenLabel="Abrir parâmetros"
+          inactive={detalhe}
           onRowOpen={(r) => void navigate({ to: '/configuracao/reports/$reportId', params: { reportId: String(r['ID']) } })}
         />
       </div>

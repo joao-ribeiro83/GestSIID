@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { createFileRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useChildMatches, useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { MessageSquare, RefreshCw, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -33,8 +33,10 @@ import type { TabId } from './-tabs';
  * detail page can set it too.
  */
 export const Route = createFileRoute('/_app/gestao/documentos')({
-  validateSearch: (s: Record<string, unknown>): { grupo?: string } =>
-    typeof s['grupo'] === 'string' && /^\d+$/.test(s['grupo']) ? { grupo: s['grupo'] } : {},
+  validateSearch: (s: Record<string, unknown>): { grupo?: number } => {
+    const g = Number(s['grupo']);
+    return Number.isInteger(g) && g > 0 ? { grupo: g } : {};
+  },
   component: DocumentosScreen,
 });
 
@@ -56,7 +58,7 @@ function DocumentosScreen() {
   const adm = session.role === 'ADM';
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const detalhe = useLocation().pathname !== '/gestao/documentos';
+  const detalhe = useChildMatches().length > 0; // a row's detail page is open (D-34)
   const grid = useRef<DataBlockHandle>(null);
   const [preset, setPreset] = useState<string>('todos');
   const [params, setParams] = useState<ExtraQuery>({});
@@ -65,11 +67,11 @@ function DocumentosScreen() {
   const [procurar, setProcurar] = useState(false);
   const [clonar, setClonar] = useState<number | null>(null);
 
-  const extra: ExtraQuery = { ...params, grupo };
+  const extra: ExtraQuery = { ...params, grupo: grupo === undefined ? undefined : String(grupo) };
   const actualizar = () => void qc.invalidateQueries({ queryKey: ['/documentos'] });
-  const mostrarGrupo = (id: number) => void navigate({ to: '/gestao/documentos', search: { grupo: String(id) } });
+  const mostrarGrupo = (id: number) => void navigate({ to: '/gestao/documentos', search: { grupo: id } });
   const abrir = (id: number, tab: TabId = 'info') =>
-    void navigate({ to: '/gestao/documentos/$documentoId', params: { documentoId: String(id) }, search: { tab } });
+    void navigate({ to: '/gestao/documentos/$documentoId', params: { documentoId: String(id) }, search: { tab, grupo } });
 
   const columns: ColumnView<DocRow>[] = [
     {
@@ -176,6 +178,7 @@ function DocumentosScreen() {
           rowTone={(r) => (r.COR === 'ANULADO' ? 'anulado' : r.COR === 'OFFLINE' ? 'offline' : null)}
           rowMenu={menu}
           rowOpenLabel="Abrir detalhe do documento"
+          inactive={detalhe}
           onRowOpen={(r) => abrir(Number(r.ID))}
           onRowActivate={(r) => abrir(Number(r.ID))}
           toolbar={() => (

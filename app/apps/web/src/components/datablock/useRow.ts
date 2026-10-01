@@ -10,7 +10,12 @@ export function useRow<Row extends GridRow = GridRow>(endpoint: string, col: str
   return useQuery({
     queryKey: [endpoint, 'row', col, value],
     queryFn: async () => {
-      const r = await apiFetch<{ rows: Row[] }>(`${endpoint}?f[${col}]=${encodeURIComponent(value)}&size=1`);
+      // Quiet: a mistyped key (400) is shown by the page as "Registo não encontrado.", not a toast.
+      const r = await apiFetch<{ rows: Row[] }>(
+        `${endpoint}?f[${col}]=${encodeURIComponent(value)}&size=1`,
+        undefined,
+        { quiet: true },
+      );
       return r.rows[0] ?? null;
     },
   });

@@ -43,6 +43,8 @@ export const pt = {
         : `Todos os ${total} registos da consulta estão seleccionados.`,
     /** D-34: the row button that opens the row's detail page. */
     abrir: 'Abrir',
+    /** D-34: a detail page whose key matches no row (a stale or mistyped link). */
+    registoNaoEncontrado: 'Registo não encontrado.',
     seleccionarTodos: 'Seleccionar todos',
     seleccionarRegisto: 'Seleccionar registo',
     limparSeleccao: 'Limpar selecção',

@@ -118,6 +118,35 @@ test.describe('ADM', () => {
     await expect(row(page, 43)).toBeVisible();
   });
 
+  // Regression: PR #13 review — opening a document dropped ?grupo=, so the hidden list lost its
+  // group filter (and with it its page, sort and selection).
+  test('with a group shown, opening a document and Voltar keep the group and the ticked rows', async ({ page }) => {
+    const filtro = grid(page).getByLabel('Filtro Id');
+    await filtro.fill('41');
+    await filtro.press('Enter');
+    await row(page, 41).getByRole('gridcell', { name: '41', exact: true }).click({ button: 'right' });
+    await page.getByRole('menu').getByRole('menuitem', { name: 'Mostrar Grupo' }).click();
+    await page.getByRole('button', { name: 'Limpar filtros' }).click();
+    await expect(row(page, 42)).toBeVisible();
+    await tick(page, 43);
+
+    await abrir(page, 42);
+    await expect(page).toHaveURL(/grupo=41/);
+    await page.getByRole('tab', { name: 'Parâmetros' }).click();
+    await voltar(page);
+    await expect(page.getByText('Grupo do documento 41')).toBeVisible();
+    await expect(grid(page).locator('tbody tr')).toHaveCount(3);
+    await expect(row(page, 43).getByRole('checkbox')).toBeChecked();
+  });
+
+  test('a detail link with a key that matches no document says so, without tabs', async ({ page }) => {
+    await page.goto('/gestao/documentos/999999');
+    await expect(page.getByRole('alert')).toHaveText('Registo não encontrado.');
+    await expect(page.getByRole('tab')).toHaveCount(0);
+    await page.goto('/gestao/documentos/abc');
+    await expect(page.getByRole('alert')).toHaveText('Registo não encontrado.');
+  });
+
   test('Comentários: Guardar adds the comment (BR-DOC-30), the ✎ marker appears, blank text cannot be saved', async ({ page }) => {
     await lote(page, 10);
     await expect(row(page, 38).getByRole('button', { name: 'Comentários' })).toHaveCount(0);

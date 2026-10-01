@@ -3,8 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { dominiosValores } from '@gestsiid/shared';
 import { DataBlock, type ColumnView } from '@/components/datablock/DataBlock';
 import type { GridRow } from '@/components/datablock/dirty';
-import { useRow } from '@/components/datablock/useRow';
-import { Voltar } from '@/components/shell/page-actions';
+import { DetailPage } from '@/components/datablock/DetailPage';
 
 /** A domain's values (D-34): the `CFG_VALORES_DOMINIO` detail of Administração › Domínios. */
 export const Route = createFileRoute('/_app/administracao/dominios/$dominioId')({
@@ -31,27 +30,29 @@ const today = () => `${new Date().toISOString().slice(0, 10)}T00:00:00`;
 function ValoresScreen() {
   const { session } = Route.useRouteContext();
   const { dominioId } = Route.useParams();
-  const dominio = useRow('/dominios', 'ID', dominioId).data;
   const master = useMemo(() => ({ keys: { DOMINIO_ID: dominioId } }), [dominioId]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <Voltar to="/administracao/dominios" />
-      <h2 className="text-sm font-semibold">
-        Domínio <span className="font-mono">{dominioId}</span>
-        {dominio && <span className="font-normal text-muted-foreground"> · {String(dominio['DESCRICAO'] ?? '')}</span>}
-      </h2>
-      <DataBlock
-        className="min-h-0 flex-1"
-        heading="Valores do domínio"
-        resource={dominiosValores}
-        columns={detailColumns}
-        role={session.role}
-        edit="inline"
-        master={master}
-        endpoint={`/dominios/${encodeURIComponent(dominioId)}/lista`}
-        defaults={() => ({ DATA_INICIO: today(), PRIORIDADE: 0 })}
-      />
-    </div>
+    <DetailPage
+      list="/administracao/dominios"
+      endpoint="/dominios"
+      id={dominioId}
+      label="Domínio"
+      describe={(d) => String(d['DESCRICAO'] ?? '')}
+    >
+      {() => (
+        <DataBlock
+          className="min-h-0 flex-1"
+          heading="Valores do domínio"
+          resource={dominiosValores}
+          columns={detailColumns}
+          role={session.role}
+          edit="inline"
+          master={master}
+          endpoint={`/dominios/${encodeURIComponent(dominioId)}/lista`}
+          defaults={() => ({ DATA_INICIO: today(), PRIORIDADE: 0 })}
+        />
+      )}
+    </DetailPage>
   );
 }

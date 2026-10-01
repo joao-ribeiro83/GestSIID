@@ -181,6 +181,8 @@ export interface DataBlockProps<Row extends GridRow = GridRow> {
    * tables live on the row's own page). `rowOpenLabel` is its accessible name and tooltip. */
   onRowOpen?: (row: Row) => void;
   rowOpenLabel?: string;
+  /** The block is hidden (its row's detail page is open): no fetches until it shows again. */
+  inactive?: boolean;
   /** Read-only blocks (`edit: 'none'`): Enter or double-click on a row. */
   onRowActivate?: (row: Row, how: 'enter' | 'dblclick') => void;
   emptyText?: string;
@@ -260,7 +262,9 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     // An endpoint may carry its own fixed query (`/backups?f[MEDIA_ONLINE]=N`).
     queryFn: () => apiFetch<PagedResult<Row>>(`${endpoint}${endpoint.includes('?') ? '&' : '?'}${toQueryString(fetched)}`),
     placeholderData: keepPreviousData,
-    enabled,
+    // A list hidden under its row's detail page (D-34) keeps its rows but does not refetch; a
+    // change made meanwhile is fetched when it shows again.
+    enabled: enabled && !props.inactive,
     refetchOnWindowFocus: !isDirty,
   });
   const onRowsLoaded = props.onRowsLoaded;
