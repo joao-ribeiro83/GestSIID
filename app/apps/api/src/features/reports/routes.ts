@@ -59,9 +59,13 @@ function withNomeLock(store: CrudStore): CrudStore {
 }
 
 /** WHEN-CREATE-RECORD: a brand new report gets its 3 fixed parameters, in the same transaction
- * on Oracle (`oracleReportsRepo`). */
+ * on Oracle (`oracleReportsRepo`). `N_PARAMETROS` is the seeded count, whatever the client sent
+ * (else `withParamCountCheck` would refuse every later edit). */
 function withFixedParamSeed(store: CrudStore, repo: ReportsRepo): CrudStore {
-  return { ...store, insert: (values, _parent, ctx) => repo.criar(values, ctx) };
+  return {
+    ...store,
+    insert: (values, _parent, ctx) => repo.criar({ ...values, N_PARAMETROS: FIXED_PARAMS.length }, ctx),
+  };
 }
 
 /** KEY-COMMIT: once a report has parameter rows, `N_PARAMETROS` must equal their count. */
@@ -117,8 +121,10 @@ export function registerReportsCrudRoutes(
     autoParametros,
   );
 
+  const repo = deps.repo ?? memoryReportsRepo(deps.store, autoParametros, reportParametrosHooks);
+
   crudRoutes(app, reports, {
-    store: withFixedParamSeed(reportsStore, deps.repo ?? memoryReportsRepo(deps.store, autoParametros, reportParametrosHooks)),
+    store: withFixedParamSeed(reportsStore, repo),
     hooks: reportsHooks,
   });
   crudRoutes(app, reportParametros, {

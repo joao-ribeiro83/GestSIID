@@ -97,6 +97,13 @@ describe('reports routes (master)', () => {
     ]);
   });
 
+  it('POST forces N_PARAMETROS to the 3 seeded parameters, so the report stays editable', async () => {
+    const app = appWith([], []);
+    await app.ready();
+    const created = (await post(app, '/api/reports', { NOME: 'Novo', VALIDO: 'S', N_PARAMETROS: 5 })).json();
+    expect(created.N_PARAMETROS).toBe(3);
+  });
+
   it('a second report seeds its own 1/2/3 without clashing with the first report\'s', async () => {
     const app = appWith([], []);
     await app.ready();
