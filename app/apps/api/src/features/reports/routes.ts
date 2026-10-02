@@ -8,23 +8,13 @@ import {
   type CrudHooks,
   type CrudStore,
 } from '../../lib/crud.ts';
+import { FIXED_PARAMS, memoryReportsRepo, type ReportsRepo } from './repo.ts';
 
 const CANNOT_DELETE_WITH_DETAILS =
   'Impossível apagar registo mestre se existirem registos de detalhe correspondentes.';
 
 const N_PARAM_ERRADO =
   'O número de parâmetros inseridos tem que ser igual ao número de parâmetros na informação do relatório.';
-
-/**
- * The 3 parameters every report starts with (FD_CONFIGURACAO_REPORTS WHEN-NEW-BLOCK-INSTANCE):
- * seeded on the report's creation (`withFixedParamSeed`) and name-locked afterwards
- * (`withNomeLock`, alerts `ALERTA_1PARAM..3PARAM`).
- */
-const FIXED_PARAMS = [
-  { N_PARAMETRO: 1, NOME: '_USER', TIPO_PARAMETRO_RF: '2', OBRIGATORIO: 'S', ORDINAL: '1º' },
-  { N_PARAMETRO: 2, NOME: 'P_USUARIO', TIPO_PARAMETRO_RF: '1', OBRIGATORIO: 'S', ORDINAL: '2º' },
-  { N_PARAMETRO: 3, NOME: 'P_DATAACTUAL', TIPO_PARAMETRO_RF: '1', OBRIGATORIO: 'N', ORDINAL: '3º' },
-] as const;
 
 /** `id_template_report_seq.nextVal` (FD_CONFIGURACAO_REPORTS WHEN-CREATE-RECORD). */
 export const reportsHooks: CrudHooks = {
@@ -68,32 +58,10 @@ function withNomeLock(store: CrudStore): CrudStore {
   };
 }
 
-/** WHEN-CREATE-RECORD: a brand new report gets its 3 fixed parameters right away. */
-function withFixedParamSeed(store: CrudStore, autoParametros: CrudStore): CrudStore {
-  return {
-    ...store,
-    insert: async (values, parent, ctx) => {
-      const row = await store.insert(values, parent, ctx);
-      const reportId = row['ID'] as number;
-      for (const p of FIXED_PARAMS) {
-        await autoParametros.insert(
-          reportParametrosHooks.beforeInsert!(
-            {
-              NOME: p.NOME,
-              TIPO_PARAMETRO_RF: p.TIPO_PARAMETRO_RF,
-              OBRIGATORIO: p.OBRIGATORIO,
-              CHECK_UNIQUE: 'N',
-              VALIDO: 'S',
-            },
-            ctx,
-          ),
-          { REPORT_ID: reportId },
-          ctx,
-        );
-      }
-      return row;
-    },
-  };
+/** WHEN-CREATE-RECORD: a brand new report gets its 3 fixed parameters, in the same transaction
+ * on Oracle (`oracleReportsRepo`). */
+function withFixedParamSeed(store: CrudStore, repo: ReportsRepo): CrudStore {
+  return { ...store, insert: (values, _parent, ctx) => repo.criar(values, ctx) };
 }
 
 /** KEY-COMMIT: once a report has parameter rows, `N_PARAMETROS` must equal their count. */
@@ -140,7 +108,8 @@ function withDeleteGuard(store: CrudStore, autoParametros: CrudStore): CrudStore
 
 export function registerReportsCrudRoutes(
   app: FastifyInstance,
-  deps: { store: CrudStore; parametrosStore: CrudStore },
+  /** `repo`: Oracle passes `oracleReportsRepo` (one transaction); default seeds through the stores. */
+  deps: { store: CrudStore; parametrosStore: CrudStore; repo?: ReportsRepo },
 ): void {
   const autoParametros = withAutoParametro(deps.parametrosStore);
   const reportsStore = withParamCountCheck(
@@ -149,7 +118,7 @@ export function registerReportsCrudRoutes(
   );
 
   crudRoutes(app, reports, {
-    store: withFixedParamSeed(reportsStore, autoParametros),
+    store: withFixedParamSeed(reportsStore, deps.repo ?? memoryReportsRepo(deps.store, autoParametros, reportParametrosHooks)),
     hooks: reportsHooks,
   });
   crudRoutes(app, reportParametros, {

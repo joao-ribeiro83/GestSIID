@@ -48,6 +48,7 @@ import { oraclePerfisRepo } from './features/perfis-departamento/repo.ts';
 import { registerPerfisDepartamentoRoutes } from './features/perfis-departamento/routes.ts';
 import { oraclePermissoesRepo } from './features/permissoes/repo.ts';
 import { registerPermissoesRoutes } from './features/permissoes/routes.ts';
+import { oracleReportsRepo } from './features/reports/repo.ts';
 import { registerReportsCrudRoutes } from './features/reports/routes.ts';
 import { registerTiposMidiaRoutes } from './features/tipos-midia/routes.ts';
 import { registerUnidadesMedidaRoutes } from './features/unidades-medida/routes.ts';
@@ -192,9 +193,11 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
           imageStore: oracleImageStore(pool, SECCAO_IMAGEM, callTimeoutMs),
           maxBytes,
         });
+        const reportsStore = oracleStore(pool, reports, callTimeoutMs);
         registerReportsCrudRoutes(sub, {
-          store: oracleStore(pool, reports, callTimeoutMs),
+          store: reportsStore,
           parametrosStore: oracleStore(pool, reportParametros, callTimeoutMs),
+          repo: oracleReportsRepo(pool, callTimeoutMs, reportsStore),
         });
         registerBackupsRoutes(sub, {
           repo: oracleBackupsRepo(pool, callTimeoutMs),
