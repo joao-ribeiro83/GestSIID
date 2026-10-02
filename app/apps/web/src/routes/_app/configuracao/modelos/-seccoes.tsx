@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { modelosCondicoes, modelosSeccoes, MODELOS_DOMINIOS, pt } from '@gestsiid/shared';
 import { apiFetch } from '@/api/client';
 import { DataBlock, type ColumnView, type DataBlockHandle } from '@/components/datablock/DataBlock';
-import type { GridRow } from '@/components/datablock/dirty';
+import { isNewRow, type GridRow } from '@/components/datablock/dirty';
 import { useDetailBlock } from '@/components/datablock/useDetailBlock';
 import { ImageUpload } from '@/components/ImageUpload';
 import { useConfirm } from '@/components/shell/confirm-dialog-provider';
@@ -47,7 +47,7 @@ function usePreSelected(lista: string, chave?: { MODELO_ID: string; TIPOSEC_ID: 
   }).data;
 }
 
-const isNew = (row: GridRow | null) => !!row?._rid.startsWith('tmp:');
+const isNew = (row: GridRow | null) => !!row && isNewRow(row);
 
 export function Seccoes({ keys, role, guardRef }: TabProps) {
   const qc = useQueryClient();
