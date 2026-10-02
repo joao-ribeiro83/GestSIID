@@ -33,6 +33,7 @@ import {
   RefreshCw,
   SearchX,
   Trash2,
+  type LucideIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -60,6 +61,7 @@ import { CellEditor, useDominio, type CommitMove } from './CellEditor';
 import { DirtyBar } from './DirtyBar';
 import {
   dirtyReducer,
+  isNewRow,
   lockOrig,
   planSave,
   runSave,
@@ -196,6 +198,7 @@ const DEFAULT_WIDTH = { text: 160, code: 112, number: 88, date: 104 } as const;
 
 const features = tableFeatures({ rowSortingFeature, rowPaginationFeature, rowSelectionFeature });
 const helper = createColumnHelper<typeof features, GridRow>();
+
 
 export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<Row>) {
   const { resource, heading, selection: selectionMode = 'none', edit = 'none' } = props;
@@ -524,7 +527,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     [selection],
   );
   const isSelected = (row: Row) =>
-    selection.mode === 'consulta' ? !row._rid.startsWith('tmp:') : selectedIds.has(idOf(row));
+    selection.mode === 'consulta' ? !isNewRow(row) : selectedIds.has(idOf(row));
 
   const onSelectionChange = props.onSelectionChange;
   useEffect(() => onSelectionChange?.(selection), [selection, onSelectionChange]);
@@ -538,7 +541,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     const ids = new Set(selectedIds);
     for (let i = from; i <= to; i++) {
       const r = rows[i];
-      if (!r || r._rid.startsWith('tmp:')) continue;
+      if (!r || isNewRow(r)) continue;
       if (target) ids.add(idOf(r));
       else ids.delete(idOf(r));
     }
@@ -583,7 +586,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
     enableMultiSort: true,
     maxMultiSortColCount: 3,
     rowCount: total,
-    enableRowSelection: (r) => !r.original._rid.startsWith('tmp:'),
+    enableRowSelection: (r) => !isNewRow(r.original),
     state: {
       sorting: effectiveSort.map((s) => ({ id: s.column, desc: s.direction === 'desc' })),
       pagination: { pageIndex: query.page - 1, pageSize: query.size },
@@ -848,7 +851,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
                 aria-label={pt.db.seleccionarRegisto}
                 checked={tr.getIsSelected()}
                 aria-disabled={selection.mode === 'consulta' || undefined}
-                disabled={row._rid.startsWith('tmp:')}
+                disabled={isNewRow(row)}
                 onChange={() => {}}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -864,7 +867,7 @@ export function DataBlock<Row extends GridRow = GridRow>(props: DataBlockProps<R
                 type="button"
                 aria-label={openLabel}
                 title={openLabel}
-                disabled={row._rid.startsWith('tmp:')}
+                disabled={isNewRow(row)}
                 onClick={(e) => {
                   e.stopPropagation();
                   props.onRowOpen!(row);
@@ -1205,36 +1208,37 @@ function RowView(props: {
   );
 }
 
+/** Icon, label and icon classes of a row's gutter; unsaved-change state wins over the tone. */
+function gutterIcon(
+  entry: OverlayEntry | undefined,
+  tone: RowTone | null,
+): [LucideIcon, string, string] | null {
+  if (!entry) {
+    if (tone === 'anulado') return [Ban, 'Anulado', 'text-text-anulado'];
+    if (tone === 'offline') return [Archive, 'Offline', 'text-text-offline'];
+    return null;
+  }
+  const e = pt.db.estado;
+  switch (entry.status) {
+    case 'saving':
+      return [Loader2, e.aGuardar, 'size-3 animate-spin motion-reduce:animate-none'];
+    case 'error':
+      return [CircleAlert, e.erro, 'text-icon-danger'];
+    case 'conflict':
+      return [RefreshCw, e.conflito, 'text-icon-danger'];
+    case 'locked':
+      return [Lock, e.conflito, 'text-icon-danger'];
+  }
+  if (entry.state === 'new') return [Plus, e.novo, 'text-status-success-fg'];
+  if (entry.state === 'deleted') return [Minus, e.apagado, 'text-icon-danger'];
+  return [Circle, e.alterado, 'size-2 fill-icon-pending text-icon-pending'];
+}
+
 /** Row state icon (§3.8), with a tooltip and screen-reader text. */
 function Gutter({ entry, tone }: { entry: OverlayEntry | undefined; tone: RowTone | null }) {
-  if (!entry && tone) {
-    const [Icon, label, cls] =
-      tone === 'anulado'
-        ? [Ban, 'Anulado', 'text-text-anulado']
-        : [Archive, 'Offline', 'text-text-offline'];
-    return (
-      <span title={label} className="inline-flex items-center justify-center">
-        <Icon className={cn('size-3.5', cls)} aria-hidden />
-        <span className="sr-only">{label}</span>
-      </span>
-    );
-  }
-  if (!entry) return null;
-  const e = pt.db.estado;
-  const [Icon, label, cls] =
-    entry.status === 'saving'
-      ? [Loader2, e.aGuardar, 'size-3 animate-spin motion-reduce:animate-none']
-      : entry.status === 'error'
-        ? [CircleAlert, e.erro, 'text-icon-danger']
-        : entry.status === 'conflict'
-          ? [RefreshCw, e.conflito, 'text-icon-danger']
-          : entry.status === 'locked'
-            ? [Lock, e.conflito, 'text-icon-danger']
-            : entry.state === 'new'
-              ? [Plus, e.novo, 'text-status-success-fg']
-              : entry.state === 'deleted'
-                ? [Minus, e.apagado, 'text-icon-danger']
-                : [Circle, e.alterado, 'size-2 fill-icon-pending text-icon-pending'];
+  const icon = gutterIcon(entry, tone);
+  if (!icon) return null;
+  const [Icon, label, cls] = icon;
   return (
     <span title={label} className="inline-flex items-center justify-center">
       <Icon className={cn('size-3.5', cls)} aria-hidden />

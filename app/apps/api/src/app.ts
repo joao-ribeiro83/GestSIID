@@ -49,7 +49,7 @@ import { registerPerfisDepartamentoRoutes } from './features/perfis-departamento
 import { oraclePermissoesRepo } from './features/permissoes/repo.ts';
 import { registerPermissoesRoutes } from './features/permissoes/routes.ts';
 import { oracleReportsRepo } from './features/reports/repo.ts';
-import { registerReportsCrudRoutes } from './features/reports/routes.ts';
+import { registerReportsCrudRoutes, reportParametrosHooks } from './features/reports/routes.ts';
 import { registerTiposMidiaRoutes } from './features/tipos-midia/routes.ts';
 import { registerUnidadesMedidaRoutes } from './features/unidades-medida/routes.ts';
 import { registerUtilizadoresRoutes } from './features/utilizadores/routes.ts';
@@ -197,7 +197,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
         registerReportsCrudRoutes(sub, {
           store: reportsStore,
           parametrosStore: oracleStore(pool, reportParametros, callTimeoutMs),
-          repo: oracleReportsRepo(pool, callTimeoutMs, reportsStore),
+          repo: oracleReportsRepo(pool, callTimeoutMs, reportsStore, reportParametrosHooks),
         });
         registerBackupsRoutes(sub, {
           repo: oracleBackupsRepo(pool, callTimeoutMs),

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 import type { DataBlockHandle } from './DataBlock';
-import type { GridRow } from './dirty';
+import { isNewRow, type GridRow } from './dirty';
 
 /**
  * Master-detail wiring (UI_SPEC §3.11). Give it the master's current row and how the detail's
@@ -14,7 +14,7 @@ import type { GridRow } from './dirty';
  */
 export function useDetailBlock(masterRow: GridRow | null, keyMap: Record<string, string>) {
   const handleRef = useRef<DataBlockHandle>(null);
-  const isNewMaster = !!masterRow?._rid.startsWith('tmp:');
+  const isNewMaster = !!masterRow && isNewRow(masterRow);
 
   const signature =
     masterRow && !isNewMaster

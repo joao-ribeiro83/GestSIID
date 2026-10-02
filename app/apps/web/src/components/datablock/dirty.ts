@@ -8,6 +8,11 @@ import { valuesSchema, type Resource } from '@gestsiid/shared';
 
 export type GridRow = { _rid: string } & Record<string, unknown>;
 
+/** A row inserted here and not saved yet (`tmp:<uuid>` rid): not selectable, nothing to open. */
+export function isNewRow(row: GridRow): boolean {
+  return row._rid.startsWith('tmp:');
+}
+
 export type RowStatus = 'saving' | 'error' | 'conflict' | 'locked';
 
 export interface RowError {
