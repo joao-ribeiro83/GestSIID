@@ -14,7 +14,7 @@ Claude, tests and scripts are **NOT permitted to change the Oracle database** (o
 
 **GestSIID** — an Oracle Forms 12c application (Portuguese-language) for printer fleet and document management. Forms cover: printers (`IMPRESSORAS`), print domains (`DOMINIOS`), users/managers (`UTILIZADORES`, `GESTORES`), permissions (`PERMISSOES`), document templates (`CONFIGURACAO_MODELOS`), report config (`CONFIGURACAO_REPORTS`), media types (`TIPOS_MIDIA`), measurement units (`UNIDADES_MEDIDA`), department profiles (`PERFIS_DEPARTAMENTO`), online backups (`BACKUPS_ONLINE`), and login (`FD_LOGIN_SIID`).
 
-There is no README, no VCS history, and no build/test tooling beyond Oracle Forms itself — this guidance is derived entirely from the file layout and the `.bat`/`.err` files present.
+The repo has two halves: the **legacy Forms source** (`dev/`, `prod/`, `testes/`; read-only reference, built with Oracle Forms) and the **Node.js/React rewrite** in `app/` (the live work; see `app/CLAUDE.md`).
 
 ## Repo layout
 
@@ -22,6 +22,8 @@ There is no README, no VCS history, and no build/test tooling beyond Oracle Form
 - `dev/T/` — test/staging **source**, same structure. Contains extra WIP/backup variants sitting next to the active files: `FD_GESTAO_SIID_v2.fmb` and `FD_CONFIGURACAO_MODELOS_old.fmb`. Treat these as drafts, not the live version, unless told otherwise.
 - `prod/` — deployed production runtime binaries (`.fmx`/`.mmx`) only, no source.
 - `testes/` — deployed test runtime binaries only, plus `lib/ojdbc7.jar` (Oracle JDBC driver) and Java bean archives (`ShowDOC.jar`, `Combined-dist.jar`).
+- `app/` — the rewrite: pnpm workspace (`apps/api` Fastify, `apps/web` React, `packages/shared`). Dev setup in `app/README.md`, deploy in `app/DEPLOY.md`.
+- `docs/` — `RUNBOOK.md` (on-call: health, DB down, pool exhaustion), `MANUAL_UTILIZADOR.md` (Portuguese user manual, screenshots in `docs/img/`).
 - `webutil_106/` — vendor Oracle WebUtil 1.0.6 (client-side bridge for OLE/file transfer from the browser-hosted Forms applet). Third-party, do not modify.
 - `GetImageFileName.jar` (root) — custom Java pluggable bean consumed by the forms. No source in this repo; binary only.
 
@@ -57,6 +59,8 @@ Compilation runs through Oracle Forms' `frmcmp.exe` (the `.bat` files hardcode `
 
 **Credentials warning:** `compile_producao.bat` and `compile_testes.bat` embed a plaintext Oracle username/password on the `userid=` line. Don't echo these into chat, commits, or any future VCS history — they're live DB credentials sitting in plain files today.
 
-## No automated tests
+## Tests
 
-There's no test framework in this repo. "Testing" a change means compiling it clean (no `FRM-*` errors in the `.err` log) and, where possible, running the form in Forms Runtime against the test schema (`dev/T` / `testes/`) before it's promoted to `dev/P` / `prod/`.
+The rewrite has tests (run in `app/`: `pnpm -r build`, `pnpm -r typecheck`, `pnpm -r test`; see `app/README.md`). Real-API work needs **Oracle Instant Client 19** (Thick mode); the 12.1 client in `I:\Middleware\Oracle_Home` fails with `DPI-1050`. Never add a test that writes to Oracle (hard rule above).
+
+The legacy Forms code has no test framework. "Testing" a Forms change means compiling it clean (no `FRM-*` errors in the `.err` log) and, where possible, running the form in Forms Runtime against the test schema (`dev/T` / `testes/`) before it's promoted to `dev/P` / `prod/`.
